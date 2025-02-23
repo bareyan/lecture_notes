@@ -1,0 +1,257 @@
+```latex
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{graphicx}
+\usepackage{verbatim}
+\usepackage{float}
+\usepackage{listings}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Example}
+
+\begin{document}
+\sloppy
+
+\section{Intérieur, Adhérence, Frontière}
+
+\subsection{Intérieur}
+
+\begin{definition}
+Soit $A \subseteq E$.
+\begin{enumerate}
+    \item Un point $x_0 \in E$ est \textbf{intérieur} à $A$ s'il existe $\delta > 0$ tel que $B(x_0, \delta) \subseteq A$.
+    \item \textbf{Int$(A)$} (l'intérieur de $A$) : ensemble de tous les points intérieurs de $A$.
+\end{enumerate}
+Autre notation : $\overset{\circ}{A}$.
+\end{definition}
+
+\begin{proposition}
+Int$(A)$ est le plus grand ouvert inclus dans $A$. De manière équivalente, Int$(A)$ est la réunion de tous les ouverts inclus dans $A$.
+\end{proposition}
+
+\begin{proof}
+\begin{enumerate}
+    \item \textbf{Int$(A) \subseteq A$ : évident}. Par définition, tous les points de Int$(A)$ sont dans $A$.
+    \item \textbf{Int$(A)$ est ouvert}. Soit $x_0 \in \text{Int}(A)$. Il existe $\delta_0 > 0$ tel que $B(x_0, \delta_0) \subseteq A$. Pour montrer que Int$(A)$ est ouvert, il faut montrer que pour tout $x \in \text{Int}(A)$, il existe $\delta > 0$ tel que $B(x, \delta) \subseteq \text{Int}(A)$.
+
+    Soit $x \in \text{Int}(A)$. Puisque $x \in \text{Int}(A)$, il existe $\delta_0 > 0$ tel que $B(x, \delta_0) \subseteq A$.
+    Pour montrer que $x$ est un point intérieur de $\text{Int}(A)$, nous devons trouver un $\delta > 0$ tel que $B(x, \delta) \subseteq \text{Int}(A)$.
+    Choisissons $\delta = \delta_0/2$. Considérons $y \in B(x, \delta)$. Alors $d(y, x) < \delta_0/2$.
+    Pour montrer que $y \in \text{Int}(A)$, nous devons trouver $\delta' > 0$ tel que $B(y, \delta') \subseteq A$.
+    Prenons $\delta' = \delta_0/2$. Si $z \in B(y, \delta')$, alors $d(z, y) < \delta_0/2$.
+    Par l'inégalité triangulaire, $d(z, x) \leq d(z, y) + d(y, x) < \delta_0/2 + \delta_0/2 = \delta_0$.
+    Donc $z \in B(x, \delta_0) \subseteq A$. Ainsi, $B(y, \delta') \subseteq A$, ce qui signifie que $y \in \text{Int}(A)$.
+    Par conséquent, $B(x, \delta) \subseteq \text{Int}(A)$. Donc Int$(A)$ est ouvert.
+
+    \item Si $U$ est ouvert et $U \subseteq A$ alors $U \subseteq \text{Int}(A)$ ?
+
+    Soit $U$ un ouvert tel que $U \subseteq A$. Pour tout $x_0 \in U$, puisque $U$ est ouvert, il existe $\delta > 0$ tel que $B(x_0, \delta) \subseteq U$. Comme $U \subseteq A$, on a $B(x_0, \delta) \subseteq A$. Par définition, cela signifie que $x_0$ est un point intérieur de $A$, donc $x_0 \in \text{Int}(A)$. Par conséquent, $U \subseteq \text{Int}(A)$.
+
+
+\end{enumerate}
+\end{proof}
+
+
+\subsection{Adhérence}
+
+\begin{definition}
+Soit $A \subseteq E$, $x_0 \in E$. $x_0$ est \textbf{adhérent} à $A$ si $\forall \delta > 0$, $B(x_0, \delta) \cap A \neq \emptyset$. (Équivalent à $d(x_0, A) = 0$).
+
+\textbf{Adh$(A)$} (adhérence ou fermeture de $A$) = ensemble des points adhérents à $A$.
+
+Notée aussi $\overline{A}$.
+\end{definition}
+
+$d(x_0, A) = \inf_{x \in A} d(x_0, x)$.
+
+$d(x_0, A) = 0 \iff x_0 \in \text{Adh}(A)$.
+
+$\forall \delta > 0$, $\exists x \in A$ t.q. $d(x_0, x) < \delta$.
+$\forall \delta > 0$, $\exists x \in A$ t.q. $d(x_0, x) \leq \delta$.
+$\forall \delta > 0$, donc $d(x_0, A) = 0$.
+
+\begin{proposition}
+Adh$(A)$ est le plus petit fermé qui contient $A$ (l'intersection de tous les fermés qui contiennent $A$).
+\end{proposition}
+
+\begin{proof}
+\begin{enumerate}
+    \item $A \subseteq \text{Adh}(A)$ : clair. Si $x \in A$, alors pour tout $\delta > 0$, $B(x, \delta) \cap A \neq \emptyset$ car $x \in B(x, \delta) \cap A$. Donc $x \in \text{Adh}(A)$.
+    \item Adh$(A)$ est fermé. Il faut montrer que $E \setminus \text{Adh}(A)$ est ouvert.
+
+    $x_0 \in \text{Adh}(A) \iff \forall \delta > 0$, $B(x_0, \delta) \cap A \neq \emptyset$.
+    $x_0 \notin \text{Adh}(A) \iff \exists \delta_0 > 0$ t.q. $B(x_0, \delta_0) \cap A = \emptyset$.
+    $\iff \exists \delta_0 > 0$ t.q. $B(x_0, \delta_0) \subseteq E \setminus A$.
+    $\implies x_0 \in \text{Int}(E \setminus A)$.
+
+    Donc $E \setminus \text{Adh}(A) \subseteq \text{Int}(E \setminus A)$.
+
+    Réciproquement, si $x_0 \in \text{Int}(E \setminus A)$, alors il existe $\delta_0 > 0$ tel que $B(x_0, \delta_0) \subseteq E \setminus A$. Donc $B(x_0, \delta_0) \cap A = \emptyset$. Ainsi $x_0 \notin \text{Adh}(A)$, et donc $x_0 \in E \setminus \text{Adh}(A)$.
+
+    $E \setminus \text{Adh}(A) = \text{Int}(E \setminus A)$.
+
+    Comme $\text{Int}(E \setminus A)$ est ouvert, son complémentaire $E \setminus \text{Int}(E \setminus A) = \text{Adh}(A)$ est fermé.
+
+    Adh$(A) = E \setminus \text{Int}(E \setminus A)$.
+\end{enumerate}
+\end{proof}
+
+
+\subsection{Frontière}
+
+\begin{definition}
+Soit $A \subseteq E$, la \textbf{frontière} de $A$ (ou bord de $A$) notée Fr$(A)$ ou $\partial A$, c'est $\text{Adh}(A) \cap \text{Adh}(E \setminus A)$.
+
+$x_0 \in \text{Fr}(A) \iff d(x_0, A) = 0$ et $d(x_0, E \setminus A) = 0$.
+
+$\forall \delta > 0$, $B(x_0, \delta)$ intersecte $A$ et aussi $E \setminus A$.
+\end{definition}
+
+\begin{example}
+\textbf{Exemples dans $\mathbb{R}$}
+Int$(\mathbb{Q}) = \emptyset$.
+Int$(\mathbb{R} \setminus \mathbb{Q}) = \emptyset$.
+
+Adh$(\mathbb{Q}) = \mathbb{R}$.
+Adh$(\mathbb{R} \setminus \mathbb{Q}) = \mathbb{R}$.
+
+Fr$(\mathbb{Q}) = \mathbb{R}$.
+Fr$(\mathbb{R} \setminus \mathbb{Q}) = \mathbb{R}$.
+\end{example}
+
+Parfois $B_f(x_0, r)$ notée $\overline{B}(x_0, r)$.
+
+\begin{example}
+$E = \{a, b, c\}$.
+On pose $d(a, a) = d(b, b) = d(c, c) = 0$.
+$d(a, b) = d(b, a) = d(b, c) = d(c, b) = 1$.
+$d(a, c) = d(c, a) = 2$.
+
+$B(a, 2) = \{a, b\} = \text{Adh}(B(a, 2))$. No it should be $B(a,2) = \{y \in E : d(a,y) < 2\} = \{a, b\}$.  Adh$(B(a, 2)) = \text{Adh}(\{a,b\})$. Points adherent to $\{a,b\}$ are points $x$ such that for any $\delta>0$, $B(x,\delta) \cap \{a,b\} \ne \emptyset$.
+For $a$, $B(a, \delta) \cap \{a,b\} \ne \emptyset$ for any $\delta > 0$. Same for $b$. For $c$, $B(c, 1) = \{c\}$, $B(c, 1) \cap \{a,b\} = \emptyset$. So $\text{Adh}(\{a,b\}) = \{a,b\}$.
+$B_f(a, 2) = \{y \in E : d(a,y) \leq 2\} = \{a, b, c\} = E$.
+\end{example}
+
+
+\begin{proposition}
+\begin{enumerate}
+    \item Int$(A) \subseteq A \subseteq \text{Adh}(A)$.
+    \item $E = \text{Int}(A) \cup \text{Fr}(A) \cup \text{Int}(E \setminus A)$ (union disjointe).
+    \item $E \setminus \text{Int}(A) = \text{Adh}(E \setminus A)$.
+    \item $E \setminus \text{Adh}(A) = \text{Int}(E \setminus A)$.
+    \item Fr$(A) = \text{Adh}(A) \setminus \text{Int}(A)$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proposition}
+\begin{enumerate}
+    \item $A$ ouvert $\iff A = \text{Int}(A)$.
+    \item $A$ fermé $\iff A = \text{Adh}(A)$.
+    \item $x \in \text{Adh}(A) \iff d(x, A) = 0$.
+    \item $x \in \text{Int}(A) \iff d(x, E \setminus A) > 0$.
+\end{enumerate}
+\end{proposition}
+
+\section{Ensembles Denses}
+
+\begin{definition}
+Soit $A \subseteq B \subseteq E$. On dit que $A$ est \textbf{dense} dans $B$ si $B \subseteq \text{Adh}(A)$.
+\end{definition}
+
+Soit $x_0 \in B$, $\forall \epsilon > 0$, $\exists x \in A$ t.q. $d(x_0, x) < \epsilon$.
+
+\begin{example}
+$\mathbb{Q}^2 = \{(x, y) : x, y \in \mathbb{Q}\}$ dense dans $\mathbb{R}^2$.
+\end{example}
+
+
+\section{Suites dans un Espace Métrique}
+
+\begin{definition}
+Soit $E$ un ensemble. Une \textbf{suite} dans $E$ (notée $(u_n)_{n \in \mathbb{N}}$) c'est une fonction $u : \mathbb{N} \to E$ où $n \mapsto u(n)$.
+On note $u_n$ le $n$-ième terme de la suite $(u_n)_{n \in \mathbb{N}}$.
+
+Si $E = \mathbb{R}^d$.
+$X_n = (x_{1,n}, \dots, x_{d,n})$ où $(x_{i,n})_{n \in \mathbb{N}}$ suites dans $\mathbb{R}$.
+\end{definition}
+
+\begin{definition}
+Soit $(X_n)_{n \in \mathbb{N}}$ une suite dans $E$ et $x \in E$. On dit que $\lim_{n \to \infty} X_n = x$ si :
+$(\forall \epsilon > 0), (\exists N \in \mathbb{N})$ t.q. si $n \geq N \implies d(X_n, x) < \epsilon$.
+\end{definition}
+
+\textbf{Suite bornée} : $(X_n)_{n \in \mathbb{N}}$ est \textbf{bornée} si $\{X_n : n \in \mathbb{N}\} \subseteq E$ est un ensemble borné.
+
+\begin{remark}
+Dans $\mathbb{R}^d$ muni de $d_2$.
+$X_n = (x_{1, n}, \dots, x_{d, n})$.
+$X = (x_1, \dots, x_d)$.
+$\lim_{n \to \infty} X_n = X \iff \lim_{n \to \infty} x_{i, n} = x_i$, $1 \leq i \leq d$.
+\end{remark}
+
+\begin{proposition}
+La limite d'une suite convergente est unique.
+\end{proposition}
+
+\begin{proof}
+Soit $X_n \xrightarrow[n \to \infty]{} x$ et $X_n \xrightarrow[n \to \infty]{} x'$.
+$d(x, x') \leq d(x, X_n) + d(X_n, x')$.
+$\xrightarrow[n \to \infty]{} 0$.
+
+$\implies d(x, x') = 0 \implies x = x'$.
+\end{proof}
+
+\begin{proposition}[Lien avec l'adhérence]
+\begin{enumerate}
+    \item $x \in \text{Adh}(A)$ ssi il existe une suite $(X_n)$ d'éléments de $A$ t.q. $\lim_{n \to \infty} X_n = x$.
+    \item $A$ est fermé ssi pour toute suite $(X_n)$ d'éléments de $A$ qui converge vers $x \in E$, on a $x \in A$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+\begin{enumerate}
+    \item "$\implies$" : Soit $x \in \text{Adh}(A)$.
+
+    Avec $(X_n)$, $X_n \in A$ et $\lim_{n \to \infty} X_n = x$.
+
+    J'ai $\forall \epsilon > 0$, $\exists x_\epsilon \in A$ t.q. $d(x, x_\epsilon) < \epsilon$.
+    donc $\inf_{y \in A} d(x, y) = 0 = d(x, A)$.
+    $d(x, A) = 0 \implies x \in \text{Adh}(A)$.
+
+    "$\implies$" soit $x \in \text{Adh}(A)$.
+    $\implies d(x, A) = 0$.
+    $\implies \forall \epsilon > 0$, $\exists x_\epsilon \in A$ t.q. $d(x, x_\epsilon) < \epsilon$.
+    Prendre $\epsilon = 1/n$. Je pose $u_n = x_{1/n}$.
+    $u_n \in A$. $d(x, u_n) \leq 1/n$. Donc $\lim_{n \to \infty} u_n = x$.
+
+    \item "$\implies$" soit $A$ fermé donc $A = \text{Adh}(A)$.
+
+    Soit $(X_n)$ suite dans $A$ qui converge vers $x$.
+    $x \in \text{Adh}(A) = A$.
+    $x \in \text{Adh}(A) \implies x \in A$.
+
+    "$\Longleftarrow$" Réciproquement.
+    Si toute suite dans $A$ qui converge vers $x$, $x \in A$ (donc $A$ fermé).
+    $A \subseteq \text{Adh}(A)$, j'ai $A = \text{Adh}(A)$ (donc $A$ fermé).
+    Suites de Cauchy.
+\end{enumerate}
+\end{proof}
+
+
+\subsection{Suites de Cauchy}
+\begin{definition}
+Une suite $(X_n)$ est de \textbf{Cauchy} si :
+$\forall \epsilon > 0$, $\exists N \in \mathbb{N}$ tel que $d(X_p, X_n) < \epsilon$ pour tous $n, p \geq N$.
+\end{definition}
+
+
+\end{document}
+```

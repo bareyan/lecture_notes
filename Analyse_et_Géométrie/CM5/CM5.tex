@@ -1,0 +1,183 @@
+```latex
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{verbatim}
+\usepackage{amsthm}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Example}
+
+\begin{document}
+\sloppy
+
+\section{Compacité}
+
+\subsection{Définitions clés}
+
+\begin{definition}[Recouvrement ouvert]
+Soit $F \subset E$. Un recouvrement ouvert de $F$ est une collection $(U_i)_{i \in I}$ où $U_i$ sont des ouverts de $E$ et $F \subset \bigcup_{i \in I} U_i$.
+\end{definition}
+
+\begin{definition}[Ensemble compact]
+$K \subset E$ est compact si de tout recouvrement ouvert $(U_i)_{i \in I}$ de $K$, on peut extraire un sous-recouvrement fini, c'est-à-dire qu'il existe un sous-ensemble fini $J \subset I$ tel que $K \subset \bigcup_{i \in J} U_i$.
+\end{definition}
+
+\begin{theorem}[Caractérisation séquentielle de la compacité]
+$K \subset E$ est compact si et seulement si toute suite d'éléments de $K$ admet une sous-suite qui converge vers un élément de $K$.
+\end{theorem}
+
+\subsection{Exemples et contre-exemples}
+
+\begin{example}
+$F = \mathbb{R}^2$ n'est pas compact. Considérons le recouvrement ouvert $U_x = B(x, 1/2)$ pour $x \in \mathbb{R}^2$. Alors $\mathbb{R}^2 = \bigcup_{x \in \mathbb{R}^2} U_x$. Cependant, on ne peut pas extraire un sous-recouvrement fini.
+\end{example}
+
+\begin{example}
+Soit $F = \{(x, y) \in \mathbb{R}^2 \mid x > 0, 0 \leq -\frac{1}{x} \leq y \leq \frac{1}{x} \}$. $F$ n'est pas compact. Considérons la suite $u_n = (n, 0) \in F$. Toute sous-suite de $(u_n)$ est non bornée, donc sans sous-suite convergente dans $F$.
+\end{example}
+
+\section{Propriétés des ensembles compacts}
+
+\begin{proposition}
+Tout compact $K \subset E$ est borné et fermé.
+\end{proposition}
+
+\begin{proposition}
+Si $K$ est compact et $F$ est fermé, alors $K \cap F$ est compact.
+\end{proposition}
+
+\begin{proposition}
+Si $K$ est compact, toute suite de Cauchy dans $K$ converge dans $K$.
+\end{proposition}
+
+\subsection{Preuves des propriétés}
+
+\begin{proof}[Preuve qu'un compact est borné]
+Soit $K$ compact. Pour $x \in K$, considérons $U_x = B(x, 1)$. Alors $(U_x)_{x \in K}$ est un recouvrement ouvert de $K$. Puisque $K$ est compact, il existe un sous-recouvrement fini $U_{x_1}, \dots, U_{x_n}$ tel que $K \subset \bigcup_{i=1}^n U_{x_i}$. Soit $R = \max_{1 \leq i \leq n} \|x_i\| + 1$. Alors pour tout $x \in K$, il existe $i$ tel que $x \in U_{x_i} = B(x_i, 1)$, donc $d(x, x_i) < 1$. Par l'inégalité triangulaire, $\|x\| \leq \|x - x_i\| + \|x_i\| < 1 + \|x_i\| \leq R$. Ainsi, $K \subset B(0, R)$, et $K$ est borné.
+\end{proof}
+
+\begin{proof}[Preuve qu'un compact est fermé]
+Soit $K$ compact et montrons que $K$ est fermé. Montrons que $E \setminus K$ est ouvert. Soit $x \notin K$. Pour tout $y \in K$, il existe $r_y > 0$ tel que $B(x, r_y) \cap B(y, r_y) = \emptyset$. Considérons le recouvrement ouvert de $K$ donné par $(B(y, r_y))_{y \in K}$. Il existe un sous-recouvrement fini $B(y_1, r_{y_1}), \dots, B(y_n, r_{y_n})$ tel que $K \subset \bigcup_{i=1}^n B(y_i, r_{y_i})$. Soit $r = \min_{1 \leq i \leq n} r_{y_i} > 0$. Considérons $B(x, r)$. Pour tout $z \in B(x, r)$, et pour tout $i$, $B(z, r) \cap B(y_i, r_{y_i}) = \emptyset$. Donc $B(x, r) \cap K = \emptyset$, et $B(x, r) \subset E \setminus K$. Ainsi $E \setminus K$ est ouvert, et $K$ est fermé.
+\end{proof}
+
+\begin{proof}[Preuve que K compact et F fermé $\implies$ K $\cap$ F compact]
+Soit $K$ compact et $F$ fermé. Considérons un recouvrement ouvert $(U_i)_{i \in I}$ de $K \cap F$. Alors $(U_i)_{i \in I} \cup (E \setminus F)$ est un recouvrement ouvert de $K$. Puisque $K$ est compact, il existe un sous-recouvrement fini $U_{i_1}, \dots, U_{i_n}, E \setminus F$ tel que $K \subset U_{i_1} \cup \dots \cup U_{i_n} \cup (E \setminus F)$. Alors $K \cap F \subset (U_{i_1} \cup \dots \cup U_{i_n} \cup (E \setminus F)) \cap F = (U_{i_1} \cap F) \cup \dots \cup (U_{i_n} \cap F) \cup ((E \setminus F) \cap F) = (U_{i_1} \cap F) \cup \dots \cup (U_{i_n} \cap F) \subset U_{i_1} \cup \dots \cup U_{i_n}$. Ainsi, $K \cap F$ est compact.
+\end{proof}
+
+\begin{proof}[Preuve que si K est compact, toute suite de Cauchy dans K converge dans K]
+Soit $(u_n)$ une suite de Cauchy dans $K$ compact. Puisque $K$ est compact, il existe une sous-suite $(u_{\phi(n)})$ qui converge vers une limite $l \in K$. Puisque $(u_n)$ est de Cauchy et qu'une sous-suite converge vers $l$, la suite $(u_n)$ converge vers $l$. Donc toute suite de Cauchy dans $K$ converge dans $K$.
+\end{proof}
+
+\begin{proof}[Preuve par contradiction qu'un compact est borné]
+Supposons que $K$ n'est pas borné. On fixe $a \in E$. Pour tout $n \in \mathbb{N}$, comme $K$ n'est pas borné, il existe $x_n \in K$ tel que $d(a, x_n) > n$. La suite $(x_n)$ n'est pas bornée (car $d(a, x_n) \to +\infty$), donc $(x_n)$ ne possède pas de sous-suite convergente. Ceci contredit le fait que $K$ est compact (par caractérisation séquentielle). Donc $K$ est borné.
+\end{proof}
+
+\section{Compacts de $\mathbb{R}^n$}
+
+\subsection{Théorème de Borel-Lebesgue}
+
+\begin{theorem}[Théorème de Borel-Lebesgue]
+Dans $\mathbb{R}^n$ avec la distance usuelle, $K \subset \mathbb{R}^n$ est compact si et seulement si $K$ est fermé et borné.
+\end{theorem}
+
+\subsection{Compacité des boules fermées}
+
+\begin{proposition}
+Dans $\mathbb{R}^n$ avec la distance usuelle, les boules fermées $B_f(x_0, r)$ sont compactes.
+\end{proposition}
+
+\subsection{Preuve de la compacité des boules fermées}
+
+\begin{proof}
+Pour $n=1$, montrons que $[a, b]$ est compact. Soit $(U_i)_{i \in I}$ un recouvrement ouvert de $[a, b]$. Soit $\mathcal{U} = (U_i)_{i \in I}$.
+Soit $E = \{x \in [a, b] \mid [a, x] \text{ est recouvert par un nombre fini de } U_i \}$.
+$E$ est non vide car $a \in E$. Montrons que $E$ est borné.
+Soit $c = \sup E$. Supposons que $c < b$. Puisque $c \in [a, b]$, il existe $U_{i_0} \in \mathcal{U}$ tel que $c \in U_{i_0}$. Comme $U_{i_0}$ est ouvert, il existe $\delta > 0$ tel que $]c - \delta, c + \delta[ \subset U_{i_0}$.
+Puisque $c = \sup E$, il existe $x \in E$ tel que $c - \delta < x \leq c$. Par définition de $E$, $[a, x]$ est recouvert par un nombre fini de $U_i$.
+Donc $[a, x] \cup [x, c + \delta/2] = [a, c + \delta/2]$ est recouvert par un nombre fini de $U_i$ (en ajoutant $U_{i_0}$). Donc $c + \delta/2 \in E$, ce qui contredit $c = \sup E$. Donc $c = b$.
+Montrons que $b \in E$. On choisit $U_{i_1}$ tel que $b \in U_{i_1}$ et $\delta > 0$ tel que $]b - \delta, b + \delta[ \subset U_{i_1}$. On choisit $x \in ]b - \delta, b] \cap E$. Alors $[a, x]$ est recouvert par un nombre fini de $U_i$. Donc $[a, x] \cup [x, b] = [a, b]$ est recouvert par un nombre fini de $U_i$ (en ajoutant $U_{i_1}$). Donc $[a, b]$ est compact.
+\end{proof}
+
+\section{Limites et continuité}
+
+\subsection{Définition des limites dans les espaces métriques}
+
+\begin{definition}[Limite]
+Soient $(E_1, d_1)$ et $(E_2, d_2)$ deux espaces métriques, $x_0 \in E_1$, $l \in E_2$ et $F : E_1 \to E_2$ une application. On dit que $\lim_{x \to x_0} F(x) = l$ si pour tout $\epsilon > 0$, il existe $\delta > 0$ tel que pour tout $x \in E_1$ tel que $d_1(x, x_0) < \delta$, on a $d_2(F(x), l) < \epsilon$.
+\end{definition}
+
+\subsection{Définition de la continuité}
+
+\begin{definition}[Continuité en un point]
+On dit que $F$ est continue en $x_0$ si $\lim_{x \to x_0} F(x) = F(x_0)$.
+\end{definition}
+
+\begin{definition}[Continuité sur un ensemble]
+On dit que $F$ est continue (sur $E_1$) si $F$ est continue en tout point $x_0 \in E_1$.
+\end{definition}
+
+\begin{proposition}
+$F$ est continue sur $E_1$ si et seulement si elle est continue en tout point de $E_1$.
+\end{proposition}
+
+\section{Propriétés équivalentes de la continuité}
+
+\begin{proposition}[Propriétés équivalentes de la continuité]
+Soient $(E_1, d_1)$ et $(E_2, d_2)$ deux espaces métriques et $F : E_1 \to E_2$ une application. Les propriétés suivantes sont équivalentes :
+\begin{enumerate}
+    \item $F$ est continue.
+    \item Pour tout ouvert $U \subset E_2$, $F^{-1}(U)$ est ouvert dans $E_1$.
+    \item Pour tout fermé $F \subset E_2$, $F^{-1}(F)$ est fermé dans $E_1$.
+    \item Pour toute suite $(x_n)_{n \in \mathbb{N}}$ de $E_1$ avec $\lim_{n \to \infty} x_n = x \in E_1$, on a $\lim_{n \to \infty} F(x_n) = F(x)$.
+\end{enumerate}
+\end{proposition}
+
+\subsection{Preuves des équivalences}
+
+\begin{proof}
+\begin{enumerate}
+    \item $(1) \implies (2)$ : Soit $U \subset E_2$ ouvert et $x_0 \in F^{-1}(U)$. Alors $y_0 = F(x_0) \in U$. Comme $U$ est ouvert, il existe $\epsilon > 0$ tel que $B(y_0, \epsilon) \subset U$. Comme $F$ est continue en $x_0$, il existe $\delta > 0$ tel que si $d_1(x, x_0) < \delta$, alors $d_2(F(x), y_0) < \epsilon$. Donc si $x \in B(x_0, \delta)$, alors $F(x) \in B(y_0, \epsilon) \subset U$, donc $x \in F^{-1}(U)$. Ainsi $B(x_0, \delta) \subset F^{-1}(U)$, et $F^{-1}(U)$ est ouvert.
+
+    \item $(2) \implies (3)$ : Par passage aux complémentaires.
+
+    \item $(3) \implies (4)$ : Soit $(x_n)$ une suite dans $E_1$ avec $\lim_{n \to \infty} x_n = x \in E_1$. Supposons que $(F(x_n))$ ne converge pas vers $F(x)$. Alors il existe $\epsilon_0 > 0$ tel que pour tout $n \in \mathbb{N}$, il existe $p(n) > n$ avec $d_2(F(x_{p(n)}), F(x)) \geq \epsilon_0$. Soit $y_n = x_{p(n)}$ et $U = E_2 \setminus B(F(x), \epsilon_0)$. $U$ est fermé, $F(y_n) \in U$, donc $y_n \in F^{-1}(U)$, qui est fermé par propriété (3). Comme $(y_n)$ est une sous-suite de $(x_n)$ qui converge vers $x$, on a $\lim_{n \to \infty} y_n = x$. Puisque $F^{-1}(U)$ est fermé, on a $x \in F^{-1}(U)$. Donc $F(x) \in U = E_2 \setminus B(F(x), \epsilon_0)$, ce qui signifie $d_2(F(x), F(x)) \geq \epsilon_0$, ce qui est faux.
+
+    \item $(4) \implies (1)$ : Supposons que $F$ n'est pas continue en $x_0 \in E_1$. Alors il existe $\epsilon_0 > 0$ tel que pour tout $\delta > 0$, il existe $x_\delta \in E_1$ avec $d_1(x_\delta, x_0) < \delta$ et $d_2(F(x_\delta), F(x_0)) \geq \epsilon_0$. En prenant $\delta = 1/n$, on obtient une suite $(x_n)_{n \geq 1}$ telle que $\lim_{n \to \infty} x_n = x_0$ et $d_2(F(x_n), F(x_0)) \geq \epsilon_0$ pour tout $n$. Ceci contredit (4).
+\end{enumerate}
+\end{proof}
+
+\subsection{Exemple de fonction continue}
+
+\begin{example}
+Considérons $F : \mathbb{R}^2 \to \mathbb{R}$, $F(x, y) = x \sin(y) - e^x$. Les fonctions coordonnées $x$ et $y$, et les fonctions $\sin(y)$ et $e^x$ sont continues. Par composition et opérations algébriques, $F(x, y) = x \sin(y) - e^x$ est continue.
+\end{example}
+
+\section{Fonctions de plusieurs variables}
+
+\subsection{Cadre $\mathbb{R}^n \to \mathbb{R}^p$}
+
+Considérons des fonctions de $\mathbb{R}^n$ à valeurs dans $\mathbb{R}^p$. Le cadre est $\mathbb{R}^n$ pour la variable et $\mathbb{R}^p$ pour la valeur.
+
+Soit $D \subset \mathbb{R}^n$ le domaine de définition. On considère des applications $F : D \to \mathbb{R}^p$.
+
+\subsection{Continuité et composantes}
+
+\begin{proposition}
+$F : D \to \mathbb{R}^p$ est continue si et seulement si chaque composante $F_i : D \to \mathbb{R}$ est continue, où $F(x_1, \dots, x_n) = (F_1(x_1, \dots, x_n), \dots, F_p(x_1, \dots, x_n))$.
+\end{proposition}
+
+\subsection{Fonctions coordonnées}
+
+Les fonctions coordonnées $(x_i)$ sont continues. Ce sont les $F_i$ pour $F(x) = x$ (l'identité).
+
+\end{document}
+```

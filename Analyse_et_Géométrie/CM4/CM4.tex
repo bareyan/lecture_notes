@@ -1,0 +1,136 @@
+```latex
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{verbatim}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Example}
+
+\begin{document}
+\sloppy
+
+\section{Suites de Cauchy et Complétude}
+
+\begin{definition}[Suite de Cauchy]
+Une suite $(x_n)_{n \in \mathbb{N}}$ dans un espace métrique $E$ est dite suite de Cauchy si pour tout $\varepsilon > 0$, il existe $N \in \mathbb{N}$ tel que pour tous $n, p \geq N$, on a $d(x_p, x_n) \leq \varepsilon$.
+\end{definition}
+
+\begin{proposition}
+Toute suite convergente est une suite de Cauchy.
+\end{proposition}
+\begin{proof}
+Supposons que $\lim_{n \to \infty} x_n = x$. Pour $\varepsilon > 0$, on peut trouver $N \in \mathbb{N}$ tel que $d(x, x_n) \leq \varepsilon/2$ pour tout $n \geq N$. Alors pour tous $n, p \geq N$, on a
+\begin{align*}
+d(x_n, x_p) &\leq d(x_n, x) + d(x, x_p) \\
+&\leq \varepsilon/2 + \varepsilon/2 = \varepsilon.
+\end{align*}
+Ainsi $(x_n)_{n \in \mathbb{N}}$ est une suite de Cauchy.
+\end{proof}
+
+\begin{proposition}
+Toute suite de Cauchy est bornée.
+\end{proposition}
+\begin{proof}
+Soit $(x_n)_{n \in \mathbb{N}}$ une suite de Cauchy. Par définition (en prenant $\varepsilon = 1$), il existe $N$ tel que $d(x_n, x_p) \leq 1$ pour $n, p \geq N$. En particulier $d(x_n, x_N) \leq 1$ pour $n \geq N$. On a donc pour tout $n \in \mathbb{N}$,
+$$d(x_n, x_N) \leq \max( \{d(x_1, x_N), \dots, d(x_{N-1}, x_N)\} \cup \{1\}) =: r_0.$$
+Ainsi $x_n \in B(x_N, r_0)$ pour tout $n \in \mathbb{N}$.
+\end{proof}
+
+\begin{definition}[Espace complet]
+Un espace métrique $(E, d)$ est dit complet si toute suite de Cauchy dans $E$ est convergente.
+\end{definition}
+
+\begin{theorem}
+$\mathbb{R}^d$ muni de la distance canonique est complet.
+\end{theorem}
+
+\section{Intérieur et Adhérence}
+
+\begin{definition}[Intérieur]
+Soit $A \subset E$. Un point $x \in E$ est intérieur à $A$ s'il existe $\delta > 0$ tel que $B(x, \delta) \subset A$. L'ensemble des points intérieurs à $A$ se note $\mathrm{Int}(A)$ et s'appelle l'intérieur de $A$.
+\end{definition}
+
+\begin{proposition}
+$\mathrm{Int}(A)$ est le plus grand ouvert inclus dans $A$, ou de manière équivalente la réunion de tous les ouverts inclus dans $A$.
+\end{proposition}
+
+\begin{definition}[Adhérence]
+Soit $A \subset E$. Un point $x \in E$ est adhérent à $A$ si $B(x, r) \cap A \neq \emptyset$ pour tout $r > 0$. L'ensemble des points adhérents à $A$ se note $\mathrm{Adh}(A)$ et s'appelle l'adhérence ou la fermeture de $A$.
+\end{definition}
+
+\begin{proposition}
+$\mathrm{Adh}(A)$ est le plus petit fermé contenant $A$, ou de manière équivalente l'intersection de tous les fermés contenant $A$.
+\end{proposition}
+
+\begin{proposition}
+$x \in \mathrm{Adh}(A)$ si et seulement s'il existe une suite $(x_n)_{n \in \mathbb{N}}$ d'éléments de $A$ telle que $x = \lim_{n \to \infty} x_n$.
+\end{proposition}
+
+\begin{example}
+Soit $A = \{(x,y) \in \mathbb{R}^2 : 2x+3y < 4\}$. Déterminer $\mathrm{Int}(A)$ et $\mathrm{Adh}(A)$.
+\begin{itemize}
+    \item $\mathrm{Int}(A) = A = \{(x,y) \in \mathbb{R}^2 : 2x+3y < 4\}$. $A$ est ouvert.
+    \item $\mathrm{Adh}(A) = C = \{(x,y) \in \mathbb{R}^2 : 2x+3y \leq 4\}$. $C$ est fermé et contient $A$.
+\end{itemize}
+\end{example}
+
+\begin{example}
+Soit $A = \{(x,y) \in \mathbb{R}^2 : x > 0, y = \sin(1/x)\}$. Déterminer $\mathrm{Adh}(A)$ et $\mathrm{Int}(A)$.
+\begin{itemize}
+    \item $\mathrm{Int}(A) = \emptyset$. Car $\mathrm{Int}(A)$ est un ouvert inclus dans $A$. Or $A$ ne contient aucune boule ouverte.
+    \item $\mathrm{Adh}(A) = A \cup \{(0,y) : y \in [-1, 1]\}$.
+\end{itemize}
+\end{example}
+
+\section{Exercices Résolus}
+
+\begin{example}
+Soit $A = \{(x,y) \in \mathbb{R}^2 : |x| < 1, |y| < 1\}$. Déterminer $\mathrm{Int}(A)$ et $\mathrm{Adh}(A)$.
+\end{example}
+
+\begin{solution}
+\begin{enumerate}
+    \item On dessine $A$, c'est un carré ouvert.
+    \item On pense que $\mathrm{Int}(A) = B = A = \{(x,y) \in \mathbb{R}^2 : |x| < 1, |y| < 1\}$ et $\mathrm{Adh}(A) = C = \{(x,y) \in \mathbb{R}^2 : |x| \leq 1, |y| \leq 1\}$.
+    \item Montrons que $B = \mathrm{Int}(A)$.
+    \begin{itemize}
+        \item $B$ est ouvert et $B \subset A$. Vrai par définition de $B$.
+        \item Soit $X \in A \setminus B = \emptyset$. Donc il n'y a pas de points de $A$ qui ne sont pas dans $B$. Ainsi $B = \mathrm{Int}(A)$.
+    \end{itemize}
+    \item Montrons que $C = \mathrm{Adh}(A)$.
+    \begin{itemize}
+        \item $C$ est fermé et $A \subset C$. Vrai par définition de $C$.
+        \item Montrons que $C \subset \mathrm{Adh}(A)$. Pour chaque $X \in C$, on cherche une suite $(X_n)$ avec $X_n \in A$ et $\lim X_n = X$. Soit $X = (x, y) \in C$, i.e., $|x| \leq 1, |y| \leq 1$. On prend $X_n = (x - 1/n, y - 1/n)$ (si $x = 1$, on prend $x - 1/n$, similarly for $y$). Plus précisément, soit $X_n = (x_n, y_n)$ avec $x_n = x - \frac{1}{n} \text{sign}(x)$ si $x \neq 0$ et $x_n = -1/n$ si $x = 0$, et $y_n = y - \frac{1}{n} \text{sign}(y)$ si $y \neq 0$ et $y_n = -1/n$ si $y = 0$. Alors $X_n \in A$ et $\lim X_n = X$.
+    \end{itemize}
+\end{enumerate}
+\end{solution}
+
+\begin{example}
+Soit $A = \{(x,y) \in \mathbb{R}^2 : x > 0, y = \sin(1/x)\}$. Déterminer $\mathrm{Adh}(A)$ et $\mathrm{Int}(A)$.
+\end{example}
+
+\begin{solution}
+\begin{enumerate}
+    \item On dessine $A$. C'est le graphe de $\sin(1/x)$ pour $x > 0$.
+    \item On pense que $\mathrm{Int}(A) = \emptyset$ et $\mathrm{Adh}(A) = A \cup \{(0,y) : y \in [-1, 1]\}$. Soit $C = A \cup \{(0,y) : y \in [-1, 1]\}$.
+    \item Montrons que $\mathrm{Int}(A) = \emptyset$. Si $\mathrm{Int}(A) \neq \emptyset$, alors $\mathrm{Int}(A)$ est un ouvert non vide inclus dans $A$. Donc $\mathrm{Int}(A)$ contient une boule $B(X_0, r) \subset A$. Mais $A$ est le graphe d'une fonction, il n'y a pas de boule dans $A$. Donc $\mathrm{Int}(A) = \emptyset$.
+    \item Montrons que $\mathrm{Adh}(A) = C = A \cup \{(0,y) : y \in [-1, 1]\}$.
+    \begin{itemize}
+        \item $C$ est fermé et $A \subset C$. $A$ n'est pas fermé. $C$ est fermé, car si $(X_n) \in C$ et $X_n \to X$, alors $X \in C$. Si $X_n = (x_n, y_n) \in A$, alors $x_n > 0, y_n = \sin(1/x_n)$. Si $X_n \to X = (x, y)$, alors $x_n \to x, y_n \to y$. Si $x > 0$, alors $X \in A \subset C$. Si $x = 0$, on ne peut pas dire que $y = \sin(1/x)$. Mais on sait que $-1 \leq \sin(1/x_n) \leq 1$, donc $-1 \leq y_n \leq 1$, donc $-1 \leq y \leq 1$. Donc si $x = 0$, $X = (0, y)$ avec $y \in [-1, 1]$, donc $X \in C$.
+        \item Montrons que $C \subset \mathrm{Adh}(A)$. Pour $X \in C$, si $X \in A$, alors $X \in \mathrm{Adh}(A)$. Si $X \in C \setminus A = \{(0,y) : y \in [-1, 1]\}$, i.e., $X = (0, y)$ avec $y \in [-1, 1]$. On doit montrer que $X \in \mathrm{Adh}(A)$. On cherche une suite $X_n \in A$ avec $X_n \to X$. On prend $X_n = (\frac{1}{n \pi + \arcsin(y)}, \sin(n \pi + \arcsin(y))) = (\frac{1}{n \pi + \arcsin(y)}, y)$. Alors $X_n \in A$ et $X_n \to (0, y) = X$. Donc $X \in \mathrm{Adh}(A)$.
+    \end{itemize}
+\end{enumerate}
+\end{solution}
+
+\end{document}
+```

@@ -1,0 +1,235 @@
+```latex
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{verbatim}
+\usepackage{listings}
+
+\geometry{a4paper, margin=1in}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Example}
+
+\begin{document}
+\sloppy
+
+\section{Continuité}
+
+\subsection{Définition de la continuité}
+
+\begin{definition}
+Soit $D \subset \mathbb{R}^d$, $f: D \rightarrow \mathbb{R}$ et $x_0 \in D$.
+On dit que $f$ est continue en $x_0$ si
+\[
+\lim_{x \rightarrow x_0} f(x) = f(x_0).
+\]
+Plus précisément, pour tout $\epsilon > 0$, il existe $\alpha > 0$ tel que pour tout $x \in D$ avec $\|x - x_0\| \leq \alpha$, on a $|f(x) - f(x_0)| \leq \epsilon$.
+\end{definition}
+
+\subsection{Opérations sur les fonctions continues}
+Si $f, g: D \rightarrow \mathbb{R}$ sont continues sur $D$, alors:
+\begin{itemize}
+    \item $f + g$ est continue sur $D$.
+    \item $f \cdot g$ est continue sur $D$.
+    \item Si $g(x) \neq 0$ pour tout $x \in D$, alors $\frac{f}{g}$ est continue sur $D$.
+    \item Si $\varphi: I \rightarrow \mathbb{R}$ est continue sur $I \subset \mathbb{R}$ et $f(D) \subset I$, alors $\varphi \circ f$ est continue sur $D$.
+\end{itemize}
+
+\subsection{Continuité et compacité}
+
+\begin{theorem}
+Soit $K \subset \mathbb{R}^d$ un compact et $f: K \rightarrow \mathbb{R}^p$ une application continue.
+Alors $f(K)$ est compact dans $\mathbb{R}^p$.
+\end{theorem}
+
+\begin{proposition}
+Si $f: K \rightarrow \mathbb{R}$ est continue et $K \subset \mathbb{R}^d$ est compact, alors $f$ est bornée et atteint ses bornes.
+\end{proposition}
+
+\subsection{Continuité uniforme}
+\begin{definition}
+Une fonction $f: D \rightarrow \mathbb{R}^p$ est uniformément continue sur $D$ si pour tout $\epsilon > 0$, il existe $\alpha > 0$ tel que pour tout $x, y \in D$ avec $\|x - y\| \leq \alpha$, on a $\|f(x) - f(y)\| \leq \epsilon$.
+\end{definition}
+
+\subsection{Lien avec la compacité}
+
+\begin{theorem}
+Soit $F: \mathbb{R}^n \rightarrow \mathbb{R}^p$ continue et $K \subset \mathbb{R}^n$ compact. Alors $F(K)$ est compact dans $\mathbb{R}^p$.
+\end{theorem}
+
+\begin{remark}
+Alors $F(K)$ compact dans $\mathbb{R}^p$ donc borné et atteint ses bornes.
+\end{remark}
+
+\subsection{Continuité partielle}
+
+\begin{definition}
+Soit $D \subset \mathbb{R}^n$ ouvert et $f: D \rightarrow \mathbb{R}$. On dit que $f$ est partiellement continue en $a = (a_1, \ldots, a_n) \in D$ si les fonctions partielles $f_i(t) = f(a_1, \ldots, a_{i-1}, t, a_{i+1}, \ldots, a_n)$ sont continues en $a_i$ pour tout $1 \leq i \leq n$.
+On dit que $f$ est partiellement continue sur $D$ si $f$ est partiellement continue en tout point de $D$.
+\end{definition}
+
+\paragraph{\textbf{Non continuité et continuité partielle:}}
+Considérons la fonction $f: \mathbb{R}^2 \rightarrow \mathbb{R}$ définie par
+\[
+f(x_1, x_2) = \begin{cases}
+\frac{x_1 x_2}{x_1^2 + x_2^2} & \text{si } (x_1, x_2) \neq (0, 0) \\
+0 & \text{si } (x_1, x_2) = (0, 0)
+\end{cases}
+\]
+\begin{itemize}
+    \item $f$ est continue sur $\mathbb{R}^2 \setminus \{(0, 0)\}$.
+    \item $f$ est partiellement continue en $(0, 0)$. En effet, les fonctions partielles sont
+    \begin{itemize}
+        \item $f(x_1, 0) = \frac{x_1 \cdot 0}{x_1^2 + 0^2} = 0$ si $x_1 \neq 0$ et $f(0, 0) = 0$. Donc $f(x_1, 0) = 0$ pour tout $x_1 \in \mathbb{R}$.
+        \item $f(0, x_2) = \frac{0 \cdot x_2}{0^2 + x_2^2} = 0$ si $x_2 \neq 0$ et $f(0, 0) = 0$. Donc $f(0, x_2) = 0$ pour tout $x_2 \in \mathbb{R}$.
+    \end{itemize}
+    Les fonctions partielles sont constantes nulles, donc continues en $0$.
+    \item $f$ n'est pas continue en $(0, 0)$.
+    En coordonnées polaires $x_1 = r \cos \theta$, $x_2 = r \sin \theta$, pour $(x_1, x_2) \neq (0, 0)$, on a
+    \[
+    f(r \cos \theta, r \sin \theta) = \frac{r \cos \theta \cdot r \sin \theta}{r^2 \cos^2 \theta + r^2 \sin^2 \theta} = \frac{r^2 \cos \theta \sin \theta}{r^2} = \cos \theta \sin \theta.
+    \]
+    Si $\theta$ est constant, alors $\lim_{r \rightarrow 0} f(r \cos \theta, r \sin \theta) = \cos \theta \sin \theta$ dépend de $\theta$. Par exemple:
+    \begin{itemize}
+        \item si $\theta = 0$, $\lim_{r \rightarrow 0} f(r \cos 0, r \sin 0) = 0$.
+        \item si $\theta = \pi/4$, $\lim_{r \rightarrow 0} f(r \cos (\pi/4), r \sin (\pi/4)) = \cos (\pi/4) \sin (\pi/4) = \frac{1}{2}$.
+    \end{itemize}
+    La limite $\lim_{(x_1, x_2) \rightarrow (0, 0)} f(x_1, x_2)$ n'existe pas.
+\end{itemize}
+
+\begin{verbatim}
+```python
+#save_to: discont_ex.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots()
+
+ax.set_aspect('equal')
+
+ax.spines['left'].set_position('zero')
+ax.spines['bottom'].set_position('zero')
+ax.spines['right'].set_color('none')
+ax.spines['top'].set_color('none')
+
+ax.xaxis.set_ticks_position('bottom')
+ax.yaxis.set_ticks_position('left')
+
+x = np.linspace(-1, 1, 400)
+y = x**2
+ax.plot(x, y, 'r', linewidth=2)
+
+circle = patches.Circle((0, 0), radius=0.1, facecolor='white', edgecolor='black', linewidth=1.5, zorder=3)
+ax.add_patch(circle)
+
+
+ax.set_xlabel('$x_1$', loc='right')
+ax.set_ylabel('$x_2$', loc='top')
+ax.set_xticks([1])
+ax.set_yticks([1])
+ax.set_xlim([-0.5, 1.5])
+ax.set_ylim([-0.5, 1.5])
+ax.text(1.05, 0, '$x_1$')
+ax.text(0, 1.05, '$x_2$')
+ax.text(0.5, 0.5, '$f=1$')
+ax.text(0.5, -0.1, '$f=0$')
+
+
+plt.savefig('discont_ex.png')
+```
+\end{verbatim}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.5\textwidth]{discont_ex.png}
+\caption{Discontinuité en $(0,0)$}
+\label{fig:discont_ex}
+\end{figure}
+
+
+\begin{remark}
+La continuité implique la continuité partielle. La réciproque est fausse.
+\end{remark}
+
+\section{Dérivation des fonctions de plusieurs variables}
+
+\subsection{Dérivabilité selon une direction}
+
+\begin{definition}
+Soit $D \subset \mathbb{R}^n$ un ouvert, $f: D \rightarrow \mathbb{R}$ et $x_0 \in D$, $u \in \mathbb{R}^n$. On dit que $f$ est dérivable au point $x_0$ dans la direction $u$ si la fonction $g(t) = f(x_0 + tu)$ est dérivable en $t = 0$.
+\end{definition}
+
+\subsection{Dérivées partielles}
+
+\begin{definition}
+On dit que $f$ admet des dérivées partielles en $x_0$ si $f$ est dérivable en $x_0$ dans les directions de la base canonique $e_1, \ldots, e_n$. On pose
+\[
+\frac{\partial f}{\partial x_i}(x_0) = \frac{d}{dt} f(x_0 + te_i) \Big|_{t=0}.
+\]
+\end{definition}
+
+\paragraph{\textbf{Notation:}}
+\[
+\frac{\partial f}{\partial x_i}(x_0) = \partial_i f(x_0) = D_i f(x_0).
+\]
+
+\subsection{Différentiabilité}
+
+\begin{definition}
+Soit $D \subset \mathbb{R}^n$ un ouvert et $f: D \rightarrow \mathbb{R}$. On dit que $f$ est différentiable en $x_0 \in D$ s'il existe une application linéaire $L: \mathbb{R}^n \rightarrow \mathbb{R}$ telle que
+\[
+f(x_0 + h) = f(x_0) + L(h) + \|h\| \epsilon(h)
+\]
+avec $\lim_{h \rightarrow 0} \epsilon(h) = 0$.
+On note $L = df(x_0) = Df(x_0)$.
+\end{definition}
+
+\begin{remark}
+L'application linéaire $L$ est unique.
+\end{remark}
+
+\paragraph{\textbf{Gradient:}} L'application linéaire $L$ est de la forme $L(h) = \nabla f(x_0) \cdot h$ où $\nabla f(x_0)$ est le gradient de $f$ en $x_0$.
+
+\begin{lemma}
+Si $f$ est différentiable en $x_0$, alors $f$ est continue en $x_0$ et $f$ est dérivable dans toutes les directions en $x_0$ et
+\[
+\nabla f(x_0) = \begin{pmatrix}
+\frac{\partial f}{\partial x_1}(x_0) \\
+\vdots \\
+\frac{\partial f}{\partial x_n}(x_0)
+\end{pmatrix}.
+\]
+\end{lemma}
+
+\subsection{Plan tangent}
+Soit $S = \{(x, y, z) \in \mathbb{R}^3 : F(x, y, z) = 0\}$ une surface dans $\mathbb{R}^3$ et $x_0 \in S$.
+Le plan tangent à $S$ en $x_0$ est donné par l'équation
+\[
+\nabla F(x_0) \cdot (x - x_0) = 0
+\]
+si $\nabla F(x_0) \neq 0$.
+
+\subsection{Fonctions de classe $C^1$}
+\begin{definition}
+On dit que $f$ est de classe $C^1$ sur $D$ si $f$ est différentiable en tout point de $D$ et les fonctions $x \mapsto \frac{\partial f}{\partial x_i}(x)$ sont continues sur $D$ pour tout $1 \leq i \leq n$.
+\end{definition}
+
+\begin{theorem}
+Si $f$ est de classe $C^1$ sur $D$, alors $f$ est différentiable sur $D$.
+\end{theorem}
+
+\begin{remark}
+La réciproque est fausse. Une fonction peut être différentiable sans être $C^1$.
+\end{remark}
+
+\end{document}
+```

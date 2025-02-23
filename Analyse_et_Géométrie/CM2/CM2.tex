@@ -1,0 +1,373 @@
+```latex
+\documentclass{article}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{listings}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Example}
+
+\usepackage[margin=1in]{geometry}
+
+\begin{document}
+\sloppy
+
+\section{Espaces métriques}
+
+\begin{definition}
+Soit $E$ un ensemble. Une application $d : E \times E \to \mathbb{R}^+$ est appelée distance sur $E$ si :
+\begin{enumerate}
+    \item $d(x, y) \geq 0$ (positivité)
+    \item $d(x, y) = d(y, x)$ (symétrie)
+    \item $d(x, y) \leq d(x, z) + d(z, y)$ (inégalité triangulaire)
+    \item $d(x, y) = 0 \Leftrightarrow x = y$ (axiome de séparation)
+\end{enumerate}
+$(E, d)$ est appelé espace métrique.
+\end{definition}
+
+\begin{proposition}
+[Inégalité triangulaire]
+Dans un espace métrique $(E, d)$, on a aussi l'inégalité suivante:
+\[
+|d(x, y) - d(x, z)| \leq d(y, z)
+\]
+\end{proposition}
+
+\subsection{Exemples}
+
+\begin{example}
+\begin{enumerate}
+    \item $E = \mathbb{R}$. On définit $d(x, y) = |x - y|$. \\
+    Boule $B(x_0, r) = \{x \in \mathbb{R} : d(x, x_0) < r \} = ]x_0 - r, x_0 + r[$.
+
+    \item $E = \mathbb{R}^d$, $d = 2, 3, \dots$. On a différentes normes :
+    \begin{itemize}
+        \item Norme euclidienne: $||x||_2 = (\sum_{i=1}^d x_i^2)^{1/2}$
+        \item Norme $1$: $||x||_1 = \sum_{i=1}^d |x_i|$
+        \item Norme $\infty$: $||x||_\infty = \max_{1 \leq i \leq d} |x_i|$
+    \end{itemize}
+    Pour $E = \mathbb{R}^d$, on définit la distance $d_2(x, y) = ||y - x||_2 = ||\overrightarrow{xy}||_2$. De même, on peut définir $d_1(x, y) = ||y - x||_1$ et $d_\infty(x, y) = ||y - x||_\infty$.
+
+    Boule $B_2(0, r)$ pour $d_2$ dans $\mathbb{R}^2$:
+
+    \begin{verbatim}
+    ```python
+#save_to: boule_d2.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+r=1
+fig, ax = plt.subplots()
+circle = patches.Circle((0, 0), r, edgecolor='black', facecolor='lightgray', fill=True, linewidth=1)
+ax.add_patch(circle)
+ax.axhline(0, color='black',linewidth=0.5)
+ax.axvline(0, color='black',linewidth=0.5)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xlim([-1.5*r, 1.5*r])
+ax.set_ylim([-1.5*r, 1.5*r])
+ax.set_xticks([-r, 0, r])
+ax.set_yticks([-r, 0, r])
+ax.set_xlabel('$x$')
+ax.set_ylabel('$y$')
+ax.set_title('$B_2(0, r)$')
+plt.savefig('boule_d2.png')
+    ```
+    \end{verbatim}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\textwidth]{boule_d2.png}
+        \caption{Boule $B_2(0, r)$ dans $\mathbb{R}^2$}
+        \label{fig:boule_d2}
+    \end{figure}
+
+    Boule $B_\infty(0, r)$ pour $d_\infty$ dans $\mathbb{R}^2$:
+
+    \begin{verbatim}
+    ```python
+#save_to: boule_d_infini.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+r=1
+fig, ax = plt.subplots()
+square = patches.Rectangle((-r, -r), 2*r, 2*r, edgecolor='black', facecolor='lightgray', fill=True, linewidth=1)
+ax.add_patch(square)
+ax.axhline(0, color='black',linewidth=0.5)
+ax.axvline(0, color='black',linewidth=0.5)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xlim([-1.5*r, 1.5*r])
+ax.set_ylim([-1.5*r, 1.5*r])
+ax.set_xticks([-r, 0, r])
+ax.set_yticks([-r, 0, r])
+ax.set_xlabel('$x$')
+ax.set_ylabel('$y$')
+ax.set_title('$B_\infty(0, r)$')
+plt.savefig('boule_d_infini.png')
+    ```
+    \end{verbatim}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\textwidth]{boule_d_infini.png}
+        \caption{Boule $B_\infty(0, r)$ dans $\mathbb{R}^2$}
+        \label{fig:boule_d_infini}
+    \end{figure}
+
+        Boule $B_1(0, r)$ pour $d_1$ dans $\mathbb{R}^2$:
+
+    \begin{verbatim}
+    ```python
+#save_to: boule_d1.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+r=1
+fig, ax = plt.subplots()
+diamond = patches.Polygon([[r, 0], [0, r], [-r, 0], [0, -r]], closed=True, edgecolor='black', facecolor='lightgray', fill=True, linewidth=1)
+ax.add_patch(diamond)
+ax.axhline(0, color='black',linewidth=0.5)
+ax.axvline(0, color='black',linewidth=0.5)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xlim([-1.5*r, 1.5*r])
+ax.set_ylim([-1.5*r, 1.5*r])
+ax.set_xticks([-r, 0, r])
+ax.set_yticks([-r, 0, r])
+ax.set_xlabel('$x$')
+ax.set_ylabel('$y$')
+ax.set_title('$B_1(0, r)$')
+plt.savefig('boule_d1.png')
+    ```
+    \end{verbatim}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\textwidth]{boule_d1.png}
+        \caption{Boule $B_1(0, r)$ dans $\mathbb{R}^2$}
+        \label{fig:boule_d1}
+    \end{figure}
+
+    \begin{remark}
+    \textbf{Important:} notion de proximité, pas la forme.
+    \end{remark}
+
+    Dans $\mathbb{R}^n$, on a les relations entre les distances:
+    \begin{align*}
+        d_\infty(x, y) &\leq d_1(x, y) \leq n d_\infty(x, y) \\
+        d_\infty(x, y) &\leq d_2(x, y) \leq \sqrt{n} d_\infty(x, y)
+    \end{align*}
+\end{enumerate}
+\end{example}
+
+\section{Parties bornées}
+
+\begin{definition}
+Soit $(E, d)$ un espace métrique et $A \subset E$. $A$ est dite \textbf{bornée} si
+\[
+\exists R > 0 \text{ et } \exists x_0 \in E \text{ tel que } A \subset B(x_0, R).
+\]
+\end{definition}
+
+\begin{lemma}
+Les propriétés suivantes sont équivalentes:
+\begin{enumerate}
+    \item $A$ est bornée.
+    \item $\forall x_0 \in E, \exists r > 0$ tel que $A \subset B(x_0, r)$.
+    \item $\exists r > 0$ tel que $\forall x, y \in A$, on a $d(x, y) < r$.
+\end{enumerate}
+\end{lemma}
+
+\begin{solution}
+[Démonstration:]
+\textbf{1) $\Rightarrow$ 2) $\Rightarrow$ 3) $\Rightarrow$ 1)}
+
+\textbf{Preuve que 1) $\Rightarrow$ 2)}
+
+Hyp: $\exists x_1 \in E, \exists r_1 > 0$ tel que $A \subset B(x_1, r_1)$.
+
+Soit $x_0 \in E$. But: trouver $r$ tel que $A \subset B(x_0, r)$.
+
+Si $x \in A$, alors $x \in B(x_1, r_1)$, on a $d(x, x_1) < r_1$.
+
+On veut $d(x_0, x) < r$.
+
+\begin{align*}
+    d(x_0, x) &\leq d(x_0, x_1) + d(x_1, x) \\
+              &\leq d(x_0, x_1) + r_1 \\
+              &< r \text{ si } r > d(x_0, x_1) + r_1
+\end{align*}
+Il suffit de prendre $r = d(x_0, x_1) + r_1$.
+
+\textbf{2) $\Rightarrow$ 3)}
+
+On fixe $x_0 \in E$. D'après 2), $\exists r_0 > 0$ tel que $A \subset B(x_0, r_0)$.
+Alors $\forall x, y \in A$,
+\begin{align*}
+    d(x, y) &\leq d(x, x_0) + d(x_0, y) \\
+              &< r_0 + r_0 = 2r_0
+\end{align*}
+On prend $r = 2r_0$.
+
+\textbf{3) $\Rightarrow$ 1)}
+
+On fixe $x_0 \in E$ (n'importe lequel). D'après 3), $\exists r > 0$ tel que $\forall x, y \in A$, $d(x, y) < r$.
+Alors $\forall x \in A$, $d(x_0, x) \leq d(x_0, y) + d(y, x) < d(x_0, y) + r$.
+On fixe $y \in A$. Alors $d(x_0, y) < \infty$ est fixe. On prend $R = d(x_0, y) + r$.
+Alors $\forall x \in A$, $d(x_0, x) < R$, donc $A \subset B(x_0, R)$.
+\end{solution}
+
+\begin{proposition}
+[Propriétés élémentaires]
+\begin{enumerate}
+    \item Toute partie finie est bornée.
+    \item Si $A$ bornée et $B \subset A$ alors $B$ bornée.
+    \item L'union d'un nb fini de bornées est bornée.
+\end{enumerate}
+\end{proposition}
+
+\begin{solution}
+[Démonstration:]
+\textbf{1) Tout partie finie est bornée}
+
+Soit $A = \{a_1, \dots, a_n\}$ une partie finie de $E$. On fixe $x_0 \in E$.
+Pour chaque $a_i$, $d(x_0, a_i) < \infty$. Soit $r_i = d(x_0, a_i) + 1$. Alors $a_i \in B(x_0, r_i)$.
+On prend $R = \max_{1 \leq i \leq n} r_i$. Alors $a_i \in B(x_0, R)$ pour tout $i$.
+Donc $A \subset B(x_0, R)$.
+
+\textbf{2) Si $A$ bornée et $B \subset A$ alors $B$ bornée}
+
+Si $A$ est bornée, $\exists x_0, R$ tq $A \subset B(x_0, R)$. Comme $B \subset A$, on a $B \subset B(x_0, R)$. Donc $B$ est bornée.
+
+\textbf{3) L'union d'un nb fini de bornées est bornée (Partie)}
+
+Soient $A_1, \dots, A_n$ sont bornées. Je fixe $x_0 \in E$.
+$A_i$ bornée ($1 \leq i \leq n$) donc $\exists r_i > 0$ tel que $A_i \subset B(x_0, r_i)$.
+Soit $r = \max_{1 \leq i \leq n} r_i$.
+Si $x \in \bigcup_{i=1}^n A_i$, alors $x \in A_i$ pour un $i$. Donc $x \in B(x_0, r_i) \subset B(x_0, r)$.
+Donc $\bigcup_{i=1}^n A_i \subset B(x_0, r)$.
+\end{solution}
+
+\section{Fonctions bornées}
+
+\begin{definition}
+Soit $B$ un ensemble. Une fonction $F: B \to E$ est \textbf{bornée} si
+\[
+F(B) = \{F(b) : b \in B\} \subset E
+\]
+est bornée.
+\end{definition}
+
+\section{Distances entre ensembles}
+
+\begin{definition}
+Soit $A, B$ deux parties de $E$. On pose
+\[
+d(A, B) = \inf_{\substack{x \in A \\ y \in B}} d(x, y).
+\]
+\end{definition}
+
+\begin{remark}
+$\forall x \in A, y \in B$, $d(A, B) \leq d(x, y)$.
+$\forall \epsilon > 0$, $\exists x \in A, y \in B$ tq $d(x, y) \leq d(A, B) + \epsilon$.
+\end{remark}
+
+\begin{proposition}
+[Notation Proposition]
+\[
+d(x, A) = \inf_{y \in A} d(x, y) = d(\{x\}, A).
+\]
+\end{proposition}
+
+\section{Topologie des espaces métriques}
+
+\textbf{Concepts importants:} distance $\to$ boules $B(x_0, r)$ $\to$ ensembles ouverts.
+
+\begin{definition}
+Soit $(E, d)$ espace métrique.
+\begin{enumerate}
+    \item $U \subset E$ est \textbf{ouvert} si
+    \[
+    \forall x_0 \in U, \exists r > 0 \text{ tel que } B(x_0, r) \subset U.
+    \]
+    \item $F \subset E$ est \textbf{fermé} si $E \setminus F$ est ouvert.
+\end{enumerate}
+\end{definition}
+
+\begin{remark}
+Dans $\mathbb{R}$ les intervalles ouverts sont des ouverts.
+\end{remark}
+
+\textbf{Comment montrer que l'ensemble est ouvert ou fermé.} Dans le poly.
+
+\begin{itemize}
+    \item $\emptyset$ est ouvert (par définition).
+    \item $E$ est ouvert.
+    \item $E$ est fermé, $\emptyset$ est fermé (comme complémentaires d'ouverts).
+\end{itemize}
+
+\section{Lemmes et théorèmes}
+
+\begin{lemma}
+$1) B(x_0, r)$ est ouvert.
+
+$2) B_f(x_0, r)$ est fermé.
+\end{lemma}
+
+\begin{solution}
+[Démo dans le poly]
+\end{solution}
+
+\begin{example}
+$E = \mathbb{R}$, $d(x, y) = |y - x|$.
+$A = ]0, 1[$ ouvert dans $\mathbb{R}$.
+$A = ]0, 1[$ pas fermé dans $A$.
+$R \setminus A = ]-\infty, 0] \cup [1, \infty[$ fermé dans $\mathbb{R}$.
+
+Je regarde $A$ comme partie de $(A, d)$.
+$A$ est fermé dans $A$.
+\end{example}
+
+\begin{theorem}
+\begin{enumerate}
+    \item Soit $U_i, i \in I$ une collection d'ouverts. Alors $\bigcup_{i \in I} U_i$ est ouvert (l'union quelconque d'ouverts est un ouvert).
+    \item Si $U_1, \dots, U_n$ sont ouverts, alors $\bigcap_{i=1}^n U_i$ est ouvert (l'intersection d'une famille finie d'ouverts est ouvert).
+    \item Si $F_i, i \in I$ sont fermés, alors $\bigcap_{i \in I} F_i$ est fermé (l'intersection quelconque de fermés est fermé).
+    \item $F_1, \dots, F_n$ fermés, alors $\bigcup_{i=1}^n F_i$ est fermé.
+\end{enumerate}
+\end{theorem}
+
+\begin{example}
+[Examples et remarques]
+$U_i = ]-\frac{1}{i}, \frac{1}{i}[$, $i \geq 0$.
+$\bigcap_{i \in \mathbb{N}} U_i = \{0\}$ pas ouvert dans $\mathbb{R}$.
+
+$F_i = [0, 1 - \frac{1}{i}]$ fermé dans $\mathbb{R}$.
+$\bigcup_{i \in \mathbb{N}} F_i = [0, 1[$ pas fermé dans $\mathbb{R}$.
+\end{example}
+
+\begin{solution}
+[Dem:]
+\textbf{1) Soit $x \in \bigcup_{i \in I} U_i = U$}. Il existe un $i$ noté $i_0$ tel que $x \in U_{i_0}$.
+$U_{i_0}$ est ouvert donc $\exists r > 0$ tel que $B(x, r) \subset U_{i_0} \subset \bigcup_{i \in I} U_i = U$. Donc $U$ est ouvert.
+
+\textbf{2) Soit $x \in \bigcap_{i=1}^n U_i = U$}. $x \in U_i$ pour $1 \leq i \leq n$. $U_i$ ouvert donc $\exists r_i > 0$ tel que $B(x, r_i) \subset U_i$.
+Soit $r = \min_{1 \leq i \leq n} r_i > 0$.
+$B(x, r) \subset B(x, r_i) \subset U_i$ $1 \leq i \leq n$.
+Donc $B(x, r) \subset \bigcap_{i=1}^n U_i = U$.
+Donc $B(x, r) \subset U$.
+\end{solution}
+
+\end{document}
+```

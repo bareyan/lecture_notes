@@ -1,0 +1,499 @@
+```latex
+\begin{document}
+\sloppy
+
+\section{Analyse}
+
+\section{Introduction aux espaces vectoriels $\mathbb{R}^d$ et $\mathbb{C}^d$}
+
+\subsection{Définitions et propriétés fondamentales}
+
+Nous allons définir les espaces vectoriels $\mathbb{R}^d$ et $\mathbb{C}^d$.
+
+\begin{definition}
+L'espace $\mathbb{R}^d$, pour $d \geq 1$, est défini comme l'ensemble des $d$-uplets de nombres réels :
+\[
+\mathbb{R}^d := \{X = (x_1, \ldots, x_d) : x_i \in \mathbb{R}\}
+\]
+où $x_1, \ldots, x_d$ sont les coordonnées cartésiennes du point $X$.
+\end{definition}
+
+Pour $d=2$, on note parfois les points de $\mathbb{R}^2$ par $(x, y)$, et pour $d=3$, par $(x, y, z)$.
+
+\begin{definition}
+L'espace $\mathbb{C}^d$, pour $d \geq 1$, est défini de manière analogue comme l'ensemble des $d$-uplets de nombres complexes :
+\[
+\mathbb{C}^d := \{X = (x_1, \ldots, x_d) : x_i \in \mathbb{C}\}
+\]
+où $x_1, \ldots, x_d$ sont des nombres complexes.
+\end{definition}
+
+Tout nombre complexe $z \in \mathbb{C}$ peut être écrit sous la forme $z = a + bi$, où $a = Re(z)$ est la partie réelle de $z$ et $b = Im(z)$ est la partie imaginaire de $z$. On peut écrire pour $X \in \mathbb{C}^d$,
+\[
+X = Re(X) + i Im(X)
+\]
+où $Re(X) = (Re(x_1), \ldots, Re(x_d)) \in \mathbb{R}^d$ et $Im(X) = (Im(x_1), \ldots, Im(x_d)) \in \mathbb{R}^d$.
+
+$\mathbb{R}^d$ et $\mathbb{C}^d$ sont des espaces vectoriels. L'addition vectorielle et la multiplication par un scalaire sont définies de la manière suivante dans $\mathbb{R}^d$ (et de même dans $\mathbb{C}^d$) :
+Pour $X = (x_1, \ldots, x_d) \in \mathbb{R}^d$, $Y = (y_1, \ldots, y_d) \in \mathbb{R}^d$ et $\lambda \in \mathbb{R}$,
+\begin{itemize}
+    \item \textbf{Addition vectorielle} : $X + Y = (x_1 + y_1, \ldots, x_d + y_d)$
+    \item \textbf{Multiplication par un scalaire} : $\lambda X = (\lambda x_1, \ldots, \lambda x_d)$
+    \item \textbf{Vecteur nul} : $\overrightarrow{0} = (0, \ldots, 0)$
+\end{itemize}
+Pour $\mathbb{C}^d$, le corps des scalaires est $\mathbb{C}$.
+
+\subsection{Coordonnées polaires et sphériques}
+
+Dans $\mathbb{R}^2$, on peut utiliser les coordonnées polaires $(r, \theta) \in \mathbb{R}^+ \times [0, 2\pi[$ définies par :
+\begin{align*}
+    x &= r \cos \theta \\
+    y &= r \sin \theta
+\end{align*}
+avec $r = \sqrt{x^2 + y^2}$.
+
+Dans $\mathbb{R}^3$, on peut utiliser les coordonnées sphériques $(r, \theta, \varphi) \in \mathbb{R}^+ \times [-\pi/2, \pi/2] \times [0, 2\pi[$ définies par :
+\begin{align*}
+    x &= r \sin \theta \cos \varphi \\
+    y &= r \sin \theta \sin \varphi \\
+    z &= r \cos \theta
+\end{align*}
+avec $r = \sqrt{x^2 + y^2 + z^2}$.
+
+\subsection{Représentation graphique de $\mathbb{R}^3$}
+
+On peut représenter un point $X = (x, y, z)$ de $\mathbb{R}^3$ à l'aide des coordonnées sphériques.
+Dans la figure ci-dessous, $\theta$ est l'angle entre l'axe $z$ et le vecteur $OX$, et $\varphi$ est l'angle entre l'axe $x$ et la projection de $OX$ sur le plan $(xOy)$.
+
+\begin{verbatim}
+```python
+#save_to: R3_coordinates.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig = plt.figure(figsize=(6,6))
+ax = fig.add_subplot(111, projection='3d')
+
+# Axes
+ax.quiver(0, 0, 0, 1, 0, 0, color='k', arrow_length_ratio=0.05, linestyle='--')
+ax.quiver(0, 0, 0, 0, 1, 0, color='k', arrow_length_ratio=0.05, linestyle='--')
+ax.quiver(0, 0, 0, 0, 0, 1, color='k', arrow_length_ratio=0.05, linestyle='--')
+ax.text(1.1, 0, 0, 'x')
+ax.text(0, 1.1, 0, 'y')
+ax.text(0, 0, 1.1, 'z')
+
+# Point X
+x, y, z = 0.8, 0.5, 0.6
+ax.scatter(x, y, z, color='red', s=50)
+ax.text(x*1.1, y*1.1, z*1.1, 'X')
+
+# Vector OX
+ax.quiver(0, 0, 0, x, y, z, color='blue', arrow_length_ratio=0.1)
+
+# Projection on xy plane
+ax.plot([0, x], [0, y], [0, 0], linestyle='--', color='gray')
+ax.scatter(x, y, 0, color='gray', s=30)
+
+# Angles
+r = np.sqrt(x**2 + y**2 + z**2)
+theta = np.arccos(z/r)
+phi = np.arctan2(y, x)
+
+# Arc for theta
+arc_theta_radius = 0.5
+arc_theta_start = np.arctan2(np.sqrt(x**2+y**2), z)
+arc_theta = patches.Arc((0,0,0), arc_theta_radius, arc_theta_radius, 0, 0, np.degrees(theta))
+ax.add_patch(arc_theta)
+from mpl_toolkits.mplot3d import art3d
+art3d.pathpatch_2d_to_3d(arc_theta, z=0, zdir="y")
+ax.text(arc_theta_radius*0.6, -0.1, arc_theta_radius*0.6, r'$\theta$')
+
+
+# Arc for phi
+arc_phi_radius = 0.4
+arc_phi_start = 0
+arc_phi_end = np.degrees(phi)
+arc_phi = patches.Arc((0,0,0), arc_phi_radius, arc_phi_radius, 0, 0, arc_phi_end)
+ax.add_patch(arc_phi)
+art3d.pathpatch_2d_to_3d(arc_phi, z=0, zdir="z")
+ax.text(arc_phi_radius*0.7, arc_phi_radius*0.7, 0, r'$\varphi$')
+
+
+ax.set_xlabel("x")
+ax.set_ylabel("y")
+ax.set_zlabel("z")
+ax.set_xlim([-0.2, 1.2])
+ax.set_ylim([-0.2, 1.2])
+ax.set_zlim([-0.2, 1.2])
+ax.view_init(elev=20, azim=-135)
+plt.savefig('R3_coordinates.png')
+```
+\end{verbatim}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{R3_coordinates.png}
+    \caption{Représentation des coordonnées sphériques dans $\mathbb{R}^3$}
+    \label{fig:R3_coordinates}
+\end{figure}
+
+
+\subsection{Produit scalaire dans $\mathbb{R}^d$}
+
+\begin{definition}
+Le produit scalaire de deux vecteurs $X = (x_1, \ldots, x_d) \in \mathbb{R}^d$ et $Y = (y_1, \ldots, y_d) \in \mathbb{R}^d$ est défini par :
+\[
+X \cdot Y = \sum_{i=1}^d x_i y_i
+\]
+\end{definition}
+
+\subsection{Propriétés du produit scalaire dans $\mathbb{R}^d$}
+
+Le produit scalaire dans $\mathbb{R}^d$ possède les propriétés suivantes :
+
+\begin{enumerate}
+    \item \textbf{Bilinéarité} :
+    Pour tous vecteurs $X, Y, Z \in \mathbb{R}^d$ et scalaire $\lambda \in \mathbb{R}$,
+    \begin{align*}
+        (X + Y) \cdot Z &= X \cdot Z + Y \cdot Z \\
+        Z \cdot (X + Y) &= Z \cdot X + Z \cdot Y \\
+        (\lambda X) \cdot Y &= X \cdot (\lambda Y) = \lambda (X \cdot Y)
+    \end{align*}
+    \item \textbf{Symétrie} :
+    Pour tous vecteurs $X, Y \in \mathbb{R}^d$,
+    \[
+    X \cdot Y = Y \cdot X
+    \]
+    \item \textbf{Positivité et caractère défini} :
+    Pour tout vecteur $X \in \mathbb{R}^d$,
+    \[
+    X \cdot X \geq 0 \quad \text{et} \quad (X \cdot X = 0 \iff X = \overrightarrow{0})
+    \]
+\end{enumerate}
+
+\begin{proposition}[Inégalité de Cauchy-Schwarz]
+Pour tous vecteurs $X, Y \in \mathbb{R}^d$, on a l'inégalité de Cauchy-Schwarz :
+\[
+|X \cdot Y| \leq \sqrt{(X \cdot X)} \sqrt{(Y \cdot Y)}
+\]
+\end{proposition}
+
+\begin{proof}
+Fixons $X, Y \in \mathbb{R}^d$ et considérons la fonction polynomiale $P : \mathbb{R} \to \mathbb{R}$ définie par
+\[
+P(t) = (X + tY) \cdot (X + tY)
+\]
+En développant, on obtient
+\[
+P(t) = t^2 (Y \cdot Y) + 2t (X \cdot Y) + (X \cdot X)
+\]
+Comme $P(t) = ||X + tY||^2 \geq 0$ pour tout $t \in \mathbb{R}$, le polynôme $P(t)$ de degré 2 est toujours positif ou nul. Son discriminant $\Delta$ est donc négatif ou nul :
+\[
+\Delta = (2(X \cdot Y))^2 - 4 (Y \cdot Y) (X \cdot X) = 4 (X \cdot Y)^2 - 4 (X \cdot X) (Y \cdot Y) \leq 0
+\]
+D'où $(X \cdot Y)^2 \leq (X \cdot X) (Y \cdot Y)$, et en prenant la racine carrée, on obtient l'inégalité de Cauchy-Schwarz.
+\end{proof}
+
+
+\section{Normes}
+
+\subsection{Norme associée au produit scalaire dans $\mathbb{R}^d$}
+
+\begin{definition}
+La norme euclidienne associée au produit scalaire dans $\mathbb{R}^d$ est définie par :
+\[
+\|X\| = \sqrt{X \cdot X} = \sqrt{\sum_{i=1}^d x_i^2}
+\]
+pour $X = (x_1, \ldots, x_d) \in \mathbb{R}^d$.
+\end{definition}
+Cette norme représente la longueur du vecteur $X$. Elle est parfois notée $\|X\|_2$.
+
+\subsection{Propriétés des normes}
+
+Les normes possèdent les propriétés suivantes :
+
+\begin{enumerate}
+    \item \textbf{Homogénéité} : Pour tout vecteur $X \in \mathbb{R}^d$ et scalaire $\lambda \in \mathbb{R}$,
+    \[
+    \|\lambda X\| = |\lambda| \|X\|
+    \]
+    \item \textbf{Inégalité triangulaire} : Pour tous vecteurs $X, Y \in \mathbb{R}^d$,
+    \[
+    \|X + Y\| \leq \|X\| + \|Y\|
+    \]
+    \item \textbf{Positivité et caractère défini} : Pour tout vecteur $X \in \mathbb{R}^d$,
+    \[
+    \|X\| \geq 0 \quad \text{et} \quad (\|X\| = 0 \iff X = \overrightarrow{0})
+    \]
+\end{enumerate}
+
+\subsection{Définition générale d'une norme}
+
+\begin{definition}
+Une norme sur $\mathbb{R}^d$ est une application $N : \mathbb{R}^d \to \mathbb{R}^+$ satisfaisant les propriétés suivantes pour tous $X, Y \in \mathbb{R}^d$ et $\lambda \in \mathbb{R}$ :
+\begin{enumerate}
+    \item $N(\lambda X) = |\lambda| N(X)$
+    \item $N(X + Y) \leq N(X) + N(Y)$
+    \item $N(X) \geq 0$ et $(N(X) = 0 \iff X = \overrightarrow{0})$
+\end{enumerate}
+\end{definition}
+
+\subsection{Exemples de normes sur $\mathbb{R}^d$}
+
+Outre la norme euclidienne $\|X\| = \|X\|_2$, on peut définir d'autres normes sur $\mathbb{R}^d$ :
+
+\begin{enumerate}
+    \item \textbf{Norme 1} : $\|X\|_1 = \sum_{i=1}^d |x_i|$
+    \item \textbf{Norme infini} : $\|X\|_\infty = \max_{1 \leq i \leq d} |x_i|$
+\end{enumerate}
+
+
+\section{Espace $\mathbb{C}^d$}
+
+\subsection{Définition et produit scalaire hermitien}
+
+Nous rappelons la définition de l'espace vectoriel $\mathbb{C}^d$ sur $\mathbb{C}$ :
+\[
+\mathbb{C}^d = \{X = (x_1, \ldots, x_d) : x_i \in \mathbb{C}\}
+\]
+
+\begin{definition}
+Le produit scalaire hermitien de deux vecteurs $X = (x_1, \ldots, x_d) \in \mathbb{C}^d$ et $Y = (y_1, \ldots, y_d) \in \mathbb{C}^d$ est défini par :
+\[
+(X|Y) = \sum_{i=1}^d x_i \overline{y_i}
+\]
+\end{definition}
+Notez la conjugaison complexe sur les composantes de $Y$. Certains auteurs utilisent la conjugaison sur les composantes de $X$.
+
+\subsection{Propriétés du produit scalaire hermitien dans $\mathbb{C}^d$}
+
+Le produit scalaire hermitien dans $\mathbb{C}^d$ possède les propriétés suivantes :
+
+\begin{enumerate}
+    \item \textbf{Sesquilinéarité} :
+    Pour tous vecteurs $X, Y, Z \in \mathbb{C}^d$ et scalaires $\lambda, \mu \in \mathbb{C}$,
+    \begin{align*}
+        (X + Y|Z) &= (X|Z) + (Y|Z) \\
+        (\lambda X|Z) &= \lambda (X|Z) \\
+        (Z|X + Y) &= (Z|X) + (Z|Y) \\
+        (Z|\lambda Y) &= \overline{\lambda} (Z|Y)
+    \end{align*}
+    On dit que le produit scalaire est linéaire par rapport au premier argument (à gauche) et antilinéaire par rapport au deuxième argument (à droite). Certains auteurs choisissent la convention inverse.
+
+    \item \textbf{Hermiticité (ou symétrie hermitienne)} :
+    Pour tous vecteurs $X, Y \in \mathbb{C}^d$,
+    \[
+    (X|Y) = \overline{(Y|X)}
+    \]
+
+    \item \textbf{Positivité et caractère défini} :
+    Pour tout vecteur $X \in \mathbb{C}^d$,
+    \[
+    (X|X) = \sum_{i=1}^d |x_i|^2 \geq 0 \quad \text{et} \quad ((X|X) = 0 \iff X = \overrightarrow{0})
+    \]
+\end{enumerate}
+
+
+\section{Norme Hilbertienne dans $\mathbb{C}^d$}
+
+\begin{definition}
+La norme Hilbertienne (ou norme euclidienne) associée au produit scalaire hermitien dans $\mathbb{C}^d$ est définie par :
+\[
+\|X\| = \sqrt{(X|X)} = \sqrt{\sum_{i=1}^d |x_i|^2}
+\]
+pour $X = (x_1, \ldots, x_d) \in \mathbb{C}^d$.
+\end{definition}
+On a $\|X\|^2 = \sum_{i=1}^d |x_i|^2 = \|Re(X)\|^2 + \|Im(X)\|^2$.
+
+\begin{lemma}
+Pour tout $X \in \mathbb{C}^d$, on a :
+\[
+\|X\| = \sup_{\|Y\| \leq 1} |(X|Y)|
+\]
+\end{lemma}
+
+\begin{proof}
+Par l'inégalité de Cauchy-Schwarz appliquée au produit scalaire hermitien (qui est aussi valable dans $\mathbb{C}^d$), on a
+\[
+|(X|Y)| \leq \sqrt{(X|X)} \sqrt{(Y|Y)} = \|X\| \|Y\|
+\]
+Si $\|Y\| \leq 1$, alors $|(X|Y)| \leq \|X\|$. Donc $\sup_{\|Y\| \leq 1} |(X|Y)| \leq \|X\|$.
+
+Inversement, considérons $X \neq \overrightarrow{0}$ (si $X = \overrightarrow{0}$, l'égalité est triviale). Posons $Y = \frac{X}{\|X\|}$. Alors $\|Y\| = 1$ et
+\[
+(X|Y) = \left(X \Big| \frac{X}{\|X\|} \right) = \frac{1}{\|X\|} (X|X) = \frac{\|X\|^2}{\|X\|} = \|X\|
+\]
+Donc, il existe $Y$ avec $\|Y\| \leq 1$ tel que $|(X|Y)| = \|X\|$. D'où $\sup_{\|Y\| \leq 1} |(X|Y)| \geq \|X\|$.
+
+En conclusion, on a bien l'égalité $\|X\| = \sup_{\|Y\| \leq 1} |(X|Y)|$.
+\end{proof}
+
+\subsection{Autres normes sur $\mathbb{C}^d$}
+
+De même que pour $\mathbb{R}^d$, on peut définir les normes $\|\cdot\|_1$ et $\|\cdot\|_\infty$ sur $\mathbb{C}^d$ :
+\begin{itemize}
+    \item Norme 1 : $\|X\|_1 = \sum_{i=1}^d |x_i|$
+    \item Norme infini : $\|X\|_\infty = \max_{1 \leq i \leq d} |x_i|$
+\end{itemize}
+
+
+\section{Distances}
+
+\subsection{Distance induite par une norme}
+
+\begin{definition}
+Soit $\|\cdot\|$ une norme sur $\mathbb{R}^d$ (ou $\mathbb{C}^d$). La distance induite par cette norme entre deux points $X, Y$ est définie par :
+\[
+d(X, Y) = \|Y - X\|
+\]
+\end{definition}
+
+\subsection{Propriétés d'une distance}
+
+Une distance $d : E \times E \to \mathbb{R}^+$ sur un ensemble $E$ doit satisfaire les propriétés suivantes :
+
+\begin{definition}
+Une application $d: E \times E \to \mathbb{R}^+$ est une distance sur $E$ si elle satisfait pour tous $x, y, z \in E$:
+\begin{enumerate}
+    \item \textbf{Positivité} : $d(x, y) \geq 0$
+    \item \textbf{Symétrie} : $d(x, y) = d(y, x)$
+    \item \textbf{Inégalité triangulaire} : $d(x, y) \leq d(x, z) + d(z, y)$
+    \item \textbf{Séparation} : $d(x, y) = 0 \iff x = y$
+\end{enumerate}
+\end{definition}
+
+\subsection{Exemples de distances}
+
+\begin{enumerate}
+    \item \textbf{Distance euclidienne} (ou distance $d_2$) : induite par la norme euclidienne $\|\cdot\|_2$.
+    \[
+    d_2(X, Y) = \|X - Y\|_2 = \sqrt{\sum_{i=1}^d (x_i - y_i)^2}
+    \]
+    \item \textbf{Distance $d_1$} : induite par la norme $\|\cdot\|_1$.
+    \[
+    d_1(X, Y) = \|X - Y\|_1 = \sum_{i=1}^d |x_i - y_i|
+    \]
+    \item \textbf{Distance $d_\infty$} : induite par la norme $\|\cdot\|_\infty$.
+    \[
+    d_\infty(X, Y) = \|X - Y\|_\infty = \max_{1 \leq i \leq d} |x_i - y_i|
+    \]
+    \item \textbf{Distance logarithmique} sur $\mathbb{R}^+ = ]0, +\infty[$ :
+    \[
+    d_{log}(a, b) = |\ln(b/a)| = |\ln(b) - \ln(a)|
+    \]
+    En base 10 : $d_{log_{10}}(x, y) = |\log_{10}(y/x)|$.
+
+    \item \textbf{Distance SNCF} sur un ensemble de points. Si on considère trois points $0, X, Y$ non alignés :
+
+\begin{verbatim}
+```python
+#save_to: SNCF_distance.png
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots()
+
+points = {'O': (0, 0), 'X': (2, 0), 'Y': (2, 2)}
+
+# Draw points
+for name, coord in points.items():
+    ax.plot(*coord, 'o', markersize=8, label=name)
+    ax.annotate(name, coord, textcoords="offset points", xytext=(0,5), ha='center')
+
+# Connect O-X and O-Y
+ax.plot([points['O'][0], points['X'][0]], [points['O'][1], points['X'][1]], 'k-')
+ax.plot([points['O'][0], points['Y'][0]], [points['O'][1], points['Y'][1]], 'k-')
+
+ax.set_xlim([-1, 4])
+ax.set_ylim([-1, 3])
+ax.set_aspect('equal', adjustable='box')
+ax.axis('off')
+plt.savefig('SNCF_distance.png')
+```
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.3\textwidth]{SNCF_distance.png}
+    \caption{Distance SNCF}
+    \label{fig:sncf_distance}
+\end{figure}
+    La distance SNCF entre $X$ et $Y$ est définie par
+    \[
+    d_{SNCF}(X, Y) = d(0, X) + d(0, Y)
+    \]
+
+    \item \textbf{Distance usuelle dans $\mathbb{R}^2$} :
+    \[
+    \delta(X, Y) =
+    \begin{cases}
+        d(X, Y) & \text{si } 0, X, Y \text{ alignés} \\
+        d(0, X) + d(0, Y) & \text{sinon}
+    \end{cases}
+    \]
+\end{enumerate}
+
+
+\section{Espaces métriques}
+
+\begin{definition}
+Un espace métrique est un couple $(E, d)$ où $E$ est un ensemble et $d : E \times E \to \mathbb{R}^+$ est une distance sur $E$.
+\end{definition}
+
+\subsection{Inégalité triangulaire inverse}
+Dans un espace métrique $(E, d)$, on a l'inégalité triangulaire inverse :
+Pour tous $x, y, z \in E$,
+\[
+|d(x, z) - d(y, z)| \leq d(x, y)
+\]
+
+\subsection{Distance induite sur un sous-ensemble}
+Si $(E, d)$ est un espace métrique et $U \subset E$ est un sous-ensemble de $E$, la restriction de $d$ à $U \times U$ fait de $(U, d)$ un espace métrique.
+
+\section{Boules dans les espaces métriques}
+
+Soit $(E, d)$ un espace métrique, $x_0 \in E$ et $r \geq 0$.
+
+\begin{definition}
+\begin{enumerate}
+    \item La \textbf{boule ouverte} de centre $x_0$ et de rayon $r$ est l'ensemble
+    \[
+    B(x_0, r) = \{x \in E : d(x_0, x) < r\}
+    \]
+    \item La \textbf{boule fermée} de centre $x_0$ et de rayon $r$ est l'ensemble
+    \[
+    B_f(x_0, r) = \{x \in E : d(x_0, x) \leq r\}
+    \]
+    \item La \textbf{sphère} de centre $x_0$ et de rayon $r$ est l'ensemble
+    \[
+    S(x_0, r) = \{x \in E : d(x_0, x) = r\}
+    \]
+\end{enumerate}
+\end{definition}
+
+\subsection{Propriétés des boules}
+
+\begin{lemma}
+\begin{enumerate}
+    \item $B(x_0, 0) = \emptyset$ et $B_f(x_0, 0) = \{x_0\}$
+    \item Pour $0 \leq r_1 < r_2$, on a $B(x_0, r_1) \subset B_f(x_0, r_1) \subset B(x_0, r_2)$
+    \item Si $d(x_0, x_1) + r_1 \leq r$, alors $B(x_1, r_1) \subset B(x_0, r)$
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+\begin{enumerate}
+    \item Les propriétés (1) et (2) sont évidentes d'après la définition des boules.
+
+    \item Pour montrer (3), supposons $x \in B(x_1, r_1)$. Alors $d(x_1, x) < r_1$.
+    Par l'inégalité triangulaire, on a
+    \[
+    d(x_0, x) \leq d(x_0, x_1) + d(x_1, x) < d(x_0, x_1) + r_1 \leq r
+    \]
+    Donc $d(x_0, x) < r$, ce qui signifie que $x \in B(x_0, r)$. D'où $B(x_1, r_1) \subset B(x_0, r)$.
+\end{enumerate}
+\end{proof}
+
+
+\end{document}
+```
