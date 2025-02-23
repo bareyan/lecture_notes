@@ -1,0 +1,253 @@
+```latex
+\documentclass{article}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{listings}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Example}
+
+\usepackage[margin=1in]{geometry}
+
+\begin{document}
+\sloppy
+
+\section{Analyse de la convergence}
+
+On va essayer de construire des polynômes qui passent par un ensemble (nuage) de points donnés.
+
+Si ces points sont les valeurs d'une fonction, on aimerait :
+\begin{itemize}
+    \item avoir un polynôme construit et d'autant plus proche de la fonction que le nombre de points est grand.
+\end{itemize}
+
+C'est-à-dire, est-ce que la suite des "meilleurs" polynômes tend vers la fonction lorsque le nombre de points tend vers l'infini?
+
+\textbf{Question :} Comment quantifier cette convergence? C'est-à-dire à quelle vitesse (ordre) cette convergence a lieu.
+
+\subsection{Approches}
+
+\begin{itemize}
+    \item \textbf{Approche 1 :} Approximation linéaire
+    \begin{itemize}
+        \item Moindre carré de degré 1
+    \end{itemize}
+    \item \textbf{Approche 2 :} Polynôme d'ordre 1
+    \begin{itemize}
+        \item Interpolation polynomiale (Lagrange)
+    \end{itemize}
+    \item \textbf{Approche 3 :} Autres approches
+    \begin{itemize}
+        \item Splines, ondelettes, etc.
+    \end{itemize}
+\end{itemize}
+
+
+\subsection{Valeur approchée par itération}
+
+\subsubsection{Définition de convergence}
+\begin{definition}
+Soit $(x_n)_{n \in \mathbb{N}} \subset \mathbb{R}^d$ une suite qui converge vers $x^* \in \mathbb{R}^d$, pour une norme $\|\cdot\|$ de $\mathbb{R}^d$.
+\end{definition}
+
+\subsubsection{Vitesse (ordre) de convergence}
+
+\begin{itemize}
+    \item \textbf{Convergence linéaire (ordre 1)}: Si $K_1 = \lim\limits_{n \to +\infty} \dfrac{\|x_{n+1}-x^*\|}{\|x_n-x^*\|}$ existe et $K_1 \in [0, 1[$, on dit que la suite converge \textbf{linéairement} vers $x^*$, ou que la convergence est d'ordre 1.
+\end{itemize}
+
+\begin{itemize}
+    \item \textbf{Convergence quadratique (ordre 2)}: Si $K_1 = 0$, $K_2 = \lim\limits_{n \to +\infty} \dfrac{\|x_{n+1}-x^*\|}{\|x_n-x^*\|^2}$ existe et non nul, on dit que la suite converge \textbf{quadratiquement} vers $x^*$, ou que la convergence est d'ordre 2.
+\end{itemize}
+
+\begin{itemize}
+    \item \textbf{Convergence d'ordre q}: Si $K_q = \lim\limits_{n \to +\infty} \dfrac{\|x_{n+1}-x^*\|}{\|x_n-x^*\|^q}$ existe et $\neq 0$, la convergence est d'ordre $q$.
+\end{itemize}
+
+\begin{remark}
+La constante $K_1$ est appelée constante asymptotique d'erreur pour la convergence linéaire.
+\end{remark}
+
+\subsubsection{Exemples}
+
+\begin{example}
+Soit $x_n = (0.2)^n$.
+On a $\lim\limits_{n \to +\infty} x_n = 0$. La convergence est vers $x^* = 0$.
+
+\begin{align*}
+\lim\limits_{n \to +\infty} \dfrac{\|x_{n+1}-x^*\|}{\|x_n-x^*\|} &= \lim\limits_{n \to +\infty} \dfrac{(0.2)^{n+1}}{(0.2)^n} = 0.2 \in [0, 1[
+\end{align*}
+D'où, $x_n$ converge à l'ordre 1.
+Sa constante asymptotique est $K_1 = 0.2$.
+\end{example}
+
+\begin{example}
+Soit $y_n = (0.2)^{2^n}$.
+\begin{align*}
+y_{n+1} &= (0.2)^{2^{n+1}} = (0.2)^{2^n \cdot 2} = ((0.2)^{2^n})^2 = (y_n)^2
+\end{align*}
+\begin{align*}
+\lim\limits_{n \to +\infty} \dfrac{\|y_{n+1}-x^*\|}{\|y_n-x^*\|^2} &= \lim\limits_{n \to +\infty} \dfrac{y_{n+1}}{(y_n)^2} = \lim\limits_{n \to +\infty} \dfrac{(y_n)^2}{(y_n)^2} = 1
+\end{align*}
+D'où, convergence d'ordre 2, de constante $K_2 = 1$.
+\end{example}
+
+\subsubsection{Définition formelle de la convergence d'ordre q}
+
+\begin{definition}
+On dit que $x_n$ converge vers $x^*$ à l'ordre $q$ s'il existe un entier $N \in \mathbb{N}$ et des constantes $A, B \in \mathbb{R}$ telles que pour tout $n > N$,
+$$ 0 < A \leq \dfrac{\|x_{n+1}-x^*\|}{\|x_n-x^*\|^q} \leq B < +\infty $$
+\end{definition}
+
+\begin{remark}
+La convergence est au moins d'ordre $q$ si seulement on a
+$$ \limsup\limits_{n \to +\infty} \dfrac{\|x_{n+1}-x^*\|}{\|x_n-x^*\|^q} < +\infty $$
+\end{remark}
+
+\subsection{Interprétation pratique de la vitesse de convergence}
+
+\subsubsection{Nombre de chiffres significatifs}
+\begin{remark}
+Si $|x_n - x^*| = 4 \cdot 10^{-8} = 0.\underbrace{00000004}_{\text{8 digits}}$,
+on dit que $x_n$ et $x^*$ ont 8 chiffres exacts après la virgule.
+\end{remark}
+
+\begin{align*}
+\log_{10} |x_n - x^*| &= \log_{10} (4 \cdot 10^{-8}) = \log_{10} 4 - 8 \approx -8
+\end{align*}
+On pose $d_n = -\log_{10} |x_n - x^*|$. $d_n$ mesure approximativement le nombre de chiffres décimaux exacts entre $x_n$ et $x^*$.
+
+\begin{align*}
+\lim\limits_{n \to +\infty} \dfrac{\|x_{n+1}-x^*\|}{\|x_n-x^*\|^q} = K_q \Rightarrow \|x_{n+1}-x^*\| \approx K_q \|x_n-x^*\|^q
+\end{align*}
+\begin{align*}
+\log_{10} \|x_{n+1}-x^*\| &\approx \log_{10} (K_q \|x_n-x^*\|^q) \\
+&= \log_{10} K_q + q \log_{10} \|x_n-x^*\|
+\end{align*}
+\begin{align*}
+-d_{n+1} &\approx \log_{10} K_q + q (-d_n) \\
+d_{n+1} &\approx q d_n - \log_{10} K_q
+\end{align*}
+Si $q=1$, $d_{n+1} \approx d_n - \log_{10} K_1$. À chaque itération, on gagne environ $-\log_{10} K_1$ chiffres significatifs.
+
+Si $q > 1$, $d_{n+1} \approx q d_n$. Le nombre de chiffres significatifs est approximativement multiplié par $q$ à chaque itération.
+
+\subsection{Nombre d'itérations pour gagner un chiffre en convergence linéaire}
+
+\begin{proposition}
+Si $x_n$ converge à l'ordre 1 vers $x^*$ avec une constante asymptotique $K_1$. Alors, le nombre d'itérations nécessaires pour gagner un chiffre significatif est approximativement $-\dfrac{1}{\log_{10}(K_1)}$.
+\end{proposition}
+
+\begin{proof}
+Soit $m$ le nombre d'itérations pour gagner 1 chiffre significatif.
+Pour une convergence linéaire, $d_{n+1} \approx d_n - \log_{10} K_1$. En partant de $d_n$, après $m$ itérations, on aura:
+$$ d_{n+m} \approx d_n -m \log_{10} K_1 $$
+On souhaite gagner 1 chiffre significatif, donc $d_{n+m} \approx d_n + 1$.
+$$ d_n + 1 = d_n - m \log_{10} K_1 \Leftrightarrow 1 = - m \log_{10} K_1 \Leftrightarrow m = - \dfrac{1}{\log_{10} K_1} $$
+\end{proof}
+
+
+\subsection{Linéarisation pour estimation graphique de q}
+\begin{align*}
+\dfrac{\|x_{n+1}-x^*\|}{\|x_n-x^*\|^q} &\approx K_q \\
+\log_{10} \|x_{n+1}-x^*\| &\approx \log_{10} (K_q \|x_n-x^*\|^q) \\
+\log_{10} \|x_{n+1}-x^*\| &\approx \underbrace{q \log_{10} \|x_n-x^*\|}_{x} + \underbrace{\log_{10} K_q}_{b}
+\end{align*}
+C'est de la forme $y = qx + b$, où $y = \log_{10} \|x_{n+1}-x^*\|$, $x = \log_{10} \|x_n-x^*\|$, $q$ est la pente et $b = \log_{10} K_q$ est l'ordonnée à l'origine.
+
+\subsection{Procédure pour déterminer q graphiquement}
+\begin{enumerate}
+    \item Calculer les erreurs $\|x_n - x^*\|$ et $\|x_{n+1} - x^*\|$ pour les itérations disponibles.
+    \item Calculer les logarithmes (base 10) de ces erreurs: $\log_{10} \|x_n-x^*\|$ et $\log_{10} \|x_{n+1}-x^*\|$.
+    \item Tracer le nuage de points $(\log_{10} \|x_n-x^*\|, \log_{10} \|x_{n+1}-x^*\|)$.
+    \item Estimer graphiquement ou par régression linéaire la pente $q$ de la droite qui approxime au mieux ce nuage de points. Cette pente $q$ est une estimation de l'ordre de convergence.
+\end{enumerate}
+
+\begin{verbatim}
+```python
+#save_to: convergence_plot.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+# Exemple de code Python pour illustrer la méthode graphique
+xn = np.array([0.5**(i) for i in range(1, 11)]) # Example sequence xn converging to 0
+x_star = 0 # Limit x*
+errors_n = np.abs(xn - x_star)
+errors_n_plus_1 = np.abs(xn[1:] - x_star)
+
+log_errors_n = np.log10(errors_n[:-1])
+log_errors_n_plus_1 = np.log10(errors_n_plus_1)
+
+
+# Plot
+plt.figure(figsize=(8, 6))
+plt.scatter(log_errors_n, log_errors_n_plus_1, label="Nuage de points $(\log_{10} \|x_n - x^*\|, \log_{10} \|x_{n+1} - x^*\|)$")
+
+# Linear Regression (for slope approximation)
+ab = np.polyfit(log_errors_n, log_errors_n_plus_1, 1) # Fit a line (degree 1 polynomial)
+y_fit = ab[0] * log_errors_n + ab[1]
+plt.plot(log_errors_n, y_fit, color='red', linestyle='--', label=f'Droite de régression linéaire:\n$y = {ab[0]:.2f}x + {ab[1]:.2f}$ (pente $q \approx {ab[0]:.2f}$)')
+
+
+plt.xlabel("$\log_{10} \|x_n - x^*\|$", fontsize=12)
+plt.ylabel("$\log_{10} \|x_{n+1} - x^*\|$", fontsize=12)
+plt.title("Estimation graphique de l'ordre de convergence $q$", fontsize=14)
+plt.legend()
+plt.grid(True)
+plt.savefig('convergence_plot.png')
+```
+\end{verbatim}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\linewidth]{convergence_plot.png}
+    \caption{Estimation graphique de l'ordre de convergence $q$}
+    \label{fig:convergence_order_estimation}
+\end{figure}
+
+
+\section{Python code pour l'estimation de la convergence (exemple)}
+
+\begin{lstlisting}[language=Python, caption=Code Python pour l'estimation de la convergence, label=lst:convergence_code]
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+# Exemple de suite xn (remplacez avec votre suite)
+xn = np.array([0.7**(i) for i in range(1, 20)])
+x_star = 0 # Valeur limite de la suite
+
+errors_n = np.abs(xn - x_star) # Erreur absolue |xn - x*|
+log_errors_n = np.log10(errors_n) # Logarithme base 10 des erreurs
+
+ex = log_errors_n[:-1] # $\log_{10} \|x_n - x^*\|$
+ey = log_errors_n[1:]  # $\log_{10} \|x_{n+1} - x^*\|$
+
+plt.figure(figsize=(8, 6))
+plt.scatter(ex, ey, label="Nuage de points")
+
+ab = np.polyfit(ex, ey, 1) # Regression lineaire (y = ax + b)
+y_fit = ab[0]*ex + ab[1]
+plt.plot(ex, y_fit, color='red', linestyle='--', label=f"Droite de régression: $y = {ab[0]:.2f}x + {ab[1]:.2f}$")
+
+
+plt.xlabel("$\log_{10} \|x_n - x^*\|$", fontsize=12)
+plt.ylabel("$\log_{10} \|x_{n+1} - x^*\|$", fontsize=12)
+plt.title("Estimation graphique de l'ordre de convergence $q$", fontsize=14)
+plt.legend()
+plt.grid(True)
+plt.show() # Affiche le graphique (pour execution hors LaTeX)
+\end{lstlisting}
+
+\end{document}
+```

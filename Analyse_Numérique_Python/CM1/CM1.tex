@@ -1,0 +1,333 @@
+```latex
+\documentclass{article}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{listings}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Example}
+
+\usepackage[margin=1in]{geometry}
+
+\begin{document}
+\sloppy
+
+\section{Modélisation de Populations : Modèles Discrets et Continus}
+
+\section{Introduction}
+
+La modélisation de populations est l'étude mathématique des populations biologiques, visant à comprendre et à prédire leur évolution au fil du temps. Ces modèles sont essentiels en écologie, en biologie de la conservation et dans la gestion des ressources naturelles. Nous allons explorer différents modèles, en distinguant les modèles discrets et continus, pour décrire la dynamique des populations.
+
+\section{Modèles Discrets}
+
+Les modèles discrets considèrent que les changements de population se produisent à intervalles de temps distincts.
+
+\subsection{Equation Générale des Modèles Discrets}
+
+Considérons $N(t)$ comme la population d'individus à l'instant $t$. L'équation générale d'un modèle discret est donnée par la variation de la population entre deux instants discrets $t$ et $t + \Delta t$:
+\[
+N(t + \Delta t) - N(t) = \text{nombre de naissances} - \text{nombre de décès} + \text{nombre d'immigrations} - \text{nombre d'émigrations}
+\]
+En termes de taux, nous pouvons écrire:
+\[
+N(t + \Delta t) - N(t) = n - m + i - e
+\]
+où:
+\begin{itemize}
+    \item $n$ représente le nombre de naissances pendant l'intervalle $\Delta t$.
+    \item $m$ représente le nombre de décès pendant l'intervalle $\Delta t$.
+    \item $i$ représente le nombre d'immigrations pendant l'intervalle $\Delta t$.
+    \item $e$ représente le nombre d'émigrations pendant l'intervalle $\Delta t$.
+\end{itemize}
+
+\subsection{Modèle de Croissance Géométrique}
+
+Le modèle de croissance géométrique est un modèle discret simple qui décrit la croissance d'une population dans des conditions idéales, où les ressources sont illimitées.
+
+\subsubsection{Hypothèses}
+
+\begin{itemize}
+    \item \textbf{Solde migratoire nul}: On suppose que le nombre d'immigrations est égal au nombre d'émigrations, donc $i - e = 0$.
+    \item \textbf{Croissance proportionnelle à la taille de la population}: Le nombre de naissances est proportionnel à la taille de la population, avec un taux de natalité $\lambda$, et le nombre de décès est proportionnel à la taille de la population, avec un taux de mortalité $\mu$. Ainsi, pendant l'intervalle $\Delta t$:
+    \begin{itemize}
+        \item Nombre de naissances: $n = \lambda \Delta t N(t)$
+        \item Nombre de décès: $m = \mu \Delta t N(t)$
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Équation et Solution}
+
+En posant $N_n = N(t_n)$ où $t_n = n \Delta t$, l'équation du modèle devient:
+\[
+N_{n+1} - N_n = \lambda \Delta t N_n - \mu \Delta t N_n
+\]
+Soit en posant $z = \lambda - \mu$, le taux de croissance:
+\[
+N_{n+1} - N_n = z \Delta t N_n
+\]
+\[
+N_{n+1} = N_n + z \Delta t N_n = (1 + z \Delta t) N_n
+\]
+En définissant le taux de croissance par unité de temps $c = z \Delta t$, on a:
+\[
+N_{n+1} = (1 + c) N_n
+\]
+La solution de cette équation de récurrence, avec condition initiale $N_0$ (taille initiale de la population), est:
+\[
+N_n = (1 + c)^n N_0 = (1 + z \Delta t)^n N_0
+\]
+
+\subsubsection{Visualisation}
+
+\begin{verbatim}
+```python
+#save_to: geometric_model_visualization.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+delta_t = 1
+n_values = np.arange(0, 10)
+N0 = 10
+
+fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+
+# Cas 1: z > 0 (natalité > mortalité)
+z_pos = 0.1
+c_pos = z_pos * delta_t
+N_pos = N0 * (1 + c_pos)**n_values
+axes[0].plot(n_values, N_pos, marker='o', linestyle='-')
+axes[0].set_title('$z > 0$ \n natalité supérieure \n à mortalité')
+axes[0].set_xlabel('n')
+axes[0].set_ylabel('$N_n$')
+axes[0].axhline(N0, color='r', linestyle='--', label='$N_0$')
+axes[0].legend()
+
+
+# Cas 2: z = 0 (natalité = mortalité)
+z_eq = 0
+c_eq = z_eq * delta_t
+N_eq = N0 * (1 + c_eq)**n_values
+axes[1].plot(n_values, N_eq, marker='o', linestyle='-')
+axes[1].set_title('$z = 0$ \n natalité \n égale à \n mortalité')
+axes[1].set_xlabel('n')
+axes[1].set_ylabel('$N_n$')
+axes[1].axhline(N0, color='r', linestyle='--', label='$N_0$')
+axes[1].legend()
+
+# Cas 3: z < 0 (natalité < mortalité)
+z_neg = -0.1
+c_neg = z_neg * delta_t
+N_neg = N0 * (1 + c_neg)**n_values
+axes[2].plot(n_values, N_neg, marker='o', linestyle='-')
+axes[2].set_title('$z < 0$ \n natalité \n inférieure \n à la \n mortalité')
+axes[2].set_xlabel('n')
+axes[2].set_ylabel('$N_n$')
+axes[2].axhline(N0, color='r', linestyle='--', label='$N_0$')
+axes[2].legend()
+
+
+plt.tight_layout()
+plt.savefig('geometric_model_visualization.png')
+```
+\end{verbatim}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{geometric_model_visualization.png}
+    \caption{Visualisation du modèle de croissance géométrique pour différents taux de croissance $z$.}
+    \label{fig:geometric_model_visualization}
+\end{figure}
+
+
+\subsubsection{Propriétés du Modèle Géométrique}
+
+\begin{itemize}
+    \item \textbf{Tendance à l'infini pour $z > 0$}: Lorsque $z = \lambda - \mu > 0$, la population croît exponentiellement et tend vers l'infini lorsque $n \to \infty$. La solution $N(t) = N_0 e^{zt}$ est une approximation continue pour de petits $\Delta t$.
+    \item \textbf{Croissance indéfinie pour $z > 0$}: Si $z > 0$, la population croît indéfiniment.
+    \item \textbf{Extinction pour $z < 0$}: Si $z < 0$, la population décroît exponentiellement et tend vers l'extinction.
+    \item \textbf{Population constante pour $z = 0$}: Si $z = 0$, la population reste constante au fil du temps, $N_n = N_0$ pour tout $n$.
+\end{itemize}
+
+\subsubsection{Inconvénients du Modèle Géométrique}
+
+\begin{itemize}
+    \item \textbf{Croissance infinie irréaliste}: Une croissance infinie n'est pas réaliste dans le monde réel car les ressources sont limitées.
+    \item \textbf{Approximation de partie entière}: Pour être rigoureux, on devrait écrire $E(\lambda \Delta t N_n)$ et $E(\mu \Delta t N_n)$ pour tenir compte du fait que le nombre d'individus doit être un entier, où $E(x)$ désigne la partie entière de $x$.
+\end{itemize}
+
+\subsection{Modèle de croissance logistique discret}
+Le modèle de croissance logistique discret sera traité dans un exercice ultérieur.
+
+\section{Modèles Continus}
+
+Les modèles continus considèrent que les changements de population se produisent de manière continue dans le temps.
+
+\subsection{Motivation pour les Modèles Continus}
+
+\begin{remark}
+L'utilisation de modèles continus est motivée par le fait que l'observation des populations sur des intervalles de temps très courts ($\Delta t$ proche de 0) fournit beaucoup plus d'informations sur la dynamique de la population.
+\end{remark}
+
+
+\subsection{Modèle de Malthus}
+
+Le modèle de Malthus est le modèle continu le plus simple de croissance de population. Il est obtenu en passant à la limite du modèle géométrique lorsque $\Delta t \to 0$.
+
+\subsubsection{Hypothèses}
+
+\begin{itemize}
+    \item \textbf{Solde migratoire nul}: Comme pour le modèle géométrique, on suppose un solde migratoire nul.
+    \item \textbf{Vitesses de natalité et de mortalité proportionnelles à la population}: On suppose que la vitesse de natalité et la vitesse de mortalité sont proportionnelles à la taille de la population à l'instant $t$.
+    \begin{itemize}
+        \item Vitesse de natalité: $n(t) = \lambda N(t)$
+        \item Vitesse de mortalité: $m(t) = \mu N(t)$
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Équation et Solution}
+\begin{proposition}
+En reprenant l'équation de variation et en considérant les vitesses instantanées, l'équation différentielle du modèle de Malthus est:
+\[
+N'(t) = \lim_{\Delta t \to 0} \frac{N(t + \Delta t) - N(t)}{\Delta t} = n(t) - m(t) = \lambda N(t) - \mu N(t)
+\]
+Soit:
+\[
+N'(t) = (\lambda - \mu) N(t)
+\]
+En posant $z = \lambda - \mu$, on obtient:
+\[
+N'(t) = z N(t)
+\]
+Avec la condition initiale $N(0) = N_0$, la solution de cette équation différentielle est:
+\[
+N(t) = N_0 e^{zt} = N_0 e^{(\lambda - \mu)t}
+\]
+\end{proposition}
+
+
+\subsubsection{Propriétés du Modèle de Malthus}
+\begin{itemize}
+    \item Similaire au modèle géométrique en termes de comportement qualitatif, mais décrit la croissance de manière continue.
+    \item \textbf{Croissance exponentielle pour $z > 0$}: Si $z = \lambda - \mu > 0$, la population croît exponentiellement.
+    \item \textbf{Population constante pour $z = 0$}: Si $z = \lambda - \mu = 0$, la population reste constante.
+    \item \textbf{Décroissance exponentielle pour $z < 0$}: Si $z = \lambda - \mu < 0$, la population décroît exponentiellement vers zéro.
+\end{itemize}
+
+\subsubsection{Inconvénients du Modèle de Malthus}
+
+\begin{itemize}
+    \item \textbf{Croissance exponentielle irréaliste}: Comme le modèle géométrique, le modèle de Malthus prédit une croissance exponentielle infinie, ce qui n'est pas réaliste à long terme en raison de la limitation des ressources.
+    \item \textbf{Ne prend pas en compte la limitation des ressources et l'interaction avec l'environnement}.
+\end{itemize}
+
+\subsection{Modèle de Verhulst (ou Logistique)}
+
+Le modèle de Verhulst est une amélioration du modèle de Malthus qui prend en compte la limitation des ressources.
+
+\subsubsection{Idée Centrale}
+\begin{definition}
+Limiter la croissance de la population à un seuil maximal $K$, appelé \textit{capacité biotique} ou \textit{capacité de charge} du milieu.
+\end{definition}
+
+\subsubsection{Hypothèses}
+
+\begin{itemize}
+    \item \textbf{Solde migratoire nul}.
+    \item \textbf{Taux de natalité fonction affine décroissante de la population}: Le taux de natalité diminue à mesure que la population approche de la capacité biotique $K$. On le modélise par une fonction affine décroissante: $\lambda = \lambda_0 (1 - \frac{N(t)}{K})$, où $\lambda_0$ est le taux de natalité maximal (lorsque $N(t)$ est très petit).
+    \item \textbf{Taux de mortalité fonction affine croissante de la population}: Le taux de mortalité augmente à mesure que la population approche de $K$. On le modélise par une fonction affine croissante: $\mu = \mu_0 (1 + \frac{N(t)}{K})$, où $\mu_0$ est le taux de mortalité minimal (lorsque $N(t)$ est très petit). Pour simplifier, on prend souvent $\mu$ constant. Dans les notes, il est considéré comme une fonction affine croissante $\mu = -\mu_1 (1 - \frac{N(t)}{K})$, ce qui implique que $\mu$ diminue quand $N(t)$ augmente, ce qui n'est pas biologiquement réaliste. On corrigera par $\mu = \mu_0 + \mu_1 \frac{N(t)}{K} = \mu_0 (1 + \frac{N(t)}{K})$ ou simplement $\mu$ constant.
+\end{itemize}
+En utilisant la version simplifiée avec $\mu$ constant et en posant $\lambda = \lambda_0 (1 - \frac{N(t)}{K})$, et $z_0 = \lambda_0 - \mu$, le taux de croissance intrinsèque maximal, on obtient:
+\[
+z = \lambda - \mu = \lambda_0 (1 - \frac{N(t)}{K}) - \mu = (\lambda_0 - \mu) - \frac{\lambda_0}{K} N(t) = z_0 - \frac{\lambda_0}{K} N(t)
+\]
+On approche souvent $\lambda_0 \approx z_0$, et on pose simplement $z \approx z_0 (1 - \frac{N(t)}{K})$.
+
+\subsubsection{Équation et Solution}
+\begin{proposition}
+L'équation différentielle du modèle de Verhulst est alors:
+\[
+N'(t) = z N(t) = z_0 \left(1 - \frac{N(t)}{K}\right) N(t)
+\]
+Avec condition initiale $N(0) = N_0$. La solution de cette équation différentielle est donnée par:
+\[
+N(t) = \frac{K}{1 + \left(\frac{K}{N_0} - 1\right) e^{-z_0 t}}
+\]
+\end{proposition}
+
+\subsubsection{Visualisation}
+
+\begin{verbatim}
+```python
+#save_to: verhulst_model_visualization.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+def verhulst_solution(t, N0, K, z0):
+    return K / (1 + (K / N0 - 1) * np.exp(-z0 * t))
+
+t_values = np.linspace(0, 10, 100)
+K = 50
+N0_values = [10, 60] # N0 < K and N0 > K
+z0_values = [0.5] # Example z0 value
+
+fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+
+# Cas 1: N0 < K
+N0 = N0_values[0]
+z0 = z0_values[0]
+N_t_below_K = verhulst_solution(t_values, N0, K, z0)
+axes[0].plot(t_values, N_t_below_K, label='$N_0 < K$')
+axes[0].axhline(K, color='r', linestyle='--', label='$K$')
+axes[0].axhline(N0, color='g', linestyle='--', label='$N_0$')
+axes[0].set_title('$N_0 < K$, $z_0 > 0$')
+axes[0].set_xlabel('t')
+axes[0].set_ylabel('N(t)')
+axes[0].legend()
+
+
+# Cas 2: N0 > K
+N0 = N0_values[1]
+z0 = z0_values[0]
+N_t_above_K = verhulst_solution(t_values, N0, K, z0)
+axes[1].plot(t_values, N_t_above_K, label='$N_0 > K$')
+axes[1].axhline(K, color='r', linestyle='--', label='$K$')
+axes[1].axhline(N0, color='g', linestyle='--', label='$N_0$')
+axes[1].set_title('$N_0 > K$, $z_0 > 0$')
+axes[1].set_xlabel('t')
+axes[1].set_ylabel('N(t)')
+axes[1].legend()
+
+
+plt.tight_layout()
+plt.savefig('verhulst_model_visualization.png')
+```
+\end{verbatim}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{verhulst_model_visualization.png}
+    \caption{Visualisation du modèle de Verhulst pour différentes conditions initiales $N_0$ par rapport à la capacité biotique $K$.}
+    \label{fig:verhulst_model_visualization}
+\end{figure}
+
+
+\section{Conclusion}
+
+Nous avons exploré les modèles discrets (géométrique) et continus (Malthus et Verhulst) pour la modélisation de populations. Le modèle géométrique et le modèle de Malthus, bien que simples, présentent des limitations importantes, notamment la prédiction d'une croissance infinie. Le modèle de Verhulst améliore ces modèles en introduisant la notion de capacité biotique, offrant une description plus réaliste de la dynamique des populations en tenant compte de la limitation des ressources.
+
+\section*{RQ: Exercice}
+Exercice à définir ultérieurement.
+
+\end{document}
+```

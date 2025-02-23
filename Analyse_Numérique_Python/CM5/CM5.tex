@@ -1,0 +1,239 @@
+```latex
+\documentclass{article}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{listings}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Example}
+
+\usepackage[margin=1in]{geometry}
+
+\begin{document}
+\sloppy
+
+\section{Introduction à l'interpolation polynomiale}
+
+L'interpolation polynomiale est une technique fondamentale en analyse numérique qui consiste à trouver un polynôme qui passe par un ensemble donné de points. Plus précisément, étant donnés $n+1$ points $(x_0, y_0), (x_1, y_1), \dots, (x_n, y_n)$ où les $x_i$ sont distincts, l'interpolation polynomiale cherche à construire un polynôme $P(x)$ de degré au plus $n$ tel que $P(x_i) = y_i$ pour $i = 0, 1, \dots, n$. Ce polynôme $P(x)$ est appelé le polynôme d'interpolation.
+
+L'interpolation polynomiale a de nombreuses applications dans divers domaines tels que l'approximation de fonctions, l'intégration numérique, la résolution d'équations différentielles et le traitement de données expérimentales.  Différentes méthodes existent pour construire ce polynôme d'interpolation, chacune ayant ses avantages et ses inconvénients en termes de complexité, de stabilité et de facilité d'implémentation. Nous allons explorer ici les méthodes de Lagrange et de Newton.
+
+\section{Interpolation de Lagrange}
+
+\subsection{Formule de Lagrange}
+
+La formule d'interpolation de Lagrange est une manière explicite d'écrire le polynôme d'interpolation. Elle repose sur l'utilisation des polynômes de base de Lagrange.
+
+\begin{definition}[Polynômes de base de Lagrange]
+Soient $x_0, x_1, \dots, x_n$ des points distincts. Le polynôme nodal $\omega_{n+1}(x)$ est défini par :
+\[
+\omega_{n+1}(x) = \prod_{i=0}^{n} (x - x_i)
+\]
+et les polynômes de base de Lagrange $l_i(x)$ associés aux points $x_0, x_1, \dots, x_n$ sont définis par :
+\[
+l_i(x) = \prod_{\substack{j=0 \\ j \neq i}}^{n} \frac{x - x_j}{x_i - x_j} = \frac{\omega_{n+1}(x)}{(x-x_i)\omega'_{n+1}(x_i)}
+\]
+pour $i = 0, 1, \dots, n$.
+\end{definition}
+
+On remarque que les polynômes de base de Lagrange vérifient la propriété suivante :
+\[
+l_i(x_j) = \delta_{ij} = \begin{cases} 1 & \text{si } i = j \\ 0 & \text{si } i \neq j \end{cases}
+\]
+
+\begin{proposition}[Formule d'interpolation de Lagrange]
+Le polynôme d'interpolation de Lagrange $P(x)$ de degré au plus $n$ qui interpole les points $(x_0, y_0), (x_1, y_1), \dots, (x_n, y_n)$ est donné par :
+\[
+P(x) = \sum_{i=0}^{n} y_i l_i(x)
+\]
+\end{proposition}
+
+\begin{proof}
+Pour vérifier que $P(x)$ est bien le polynôme d'interpolation, il suffit de montrer que $P(x_j) = y_j$ pour tout $j = 0, 1, \dots, n$.
+\[
+P(x_j) = \sum_{i=0}^{n} y_i l_i(x_j) = \sum_{i=0}^{n} y_i \delta_{ij} = y_j
+\]
+De plus, chaque $l_i(x)$ est un polynôme de degré $n$, donc $P(x)$ est un polynôme de degré au plus $n$.
+\end{proof}
+
+\subsection{Exemple}
+[Insérer un exemple si disponible dans les notes manuscrites, sinon, un exemple simple peut être construit ici.]
+
+\section{Erreur d'interpolation}
+
+\subsection{Formule de l'erreur d'interpolation}
+
+L'erreur d'interpolation mesure la différence entre la fonction $f(x)$ que l'on cherche à interpoler et le polynôme d'interpolation $P(x)$.
+
+\begin{proposition}[Formule de l'erreur d'interpolation]
+Soit $f \in C^{n+1}([a, b])$ et $P(x)$ le polynôme d'interpolation de Lagrange de degré au plus $n$ interpolant $f$ aux points $x_0, x_1, \dots, x_n \in [a, b]$. Alors, pour tout $x \in [a, b]$, il existe un point $\xi_x \in [a, b]$ tel que :
+\[
+f(x) - P(x) = \frac{f^{(n+1)}(\xi_x)}{(n+1)!} \omega_{n+1}(x) = \frac{f^{(n+1)}(\xi_x)}{(n+1)!} \prod_{i=0}^{n} (x - x_i)
+\]
+\end{proposition}
+
+\subsection{Analyse de l'erreur}
+
+La formule de l'erreur montre que l'erreur d'interpolation dépend de deux facteurs principaux :
+
+\begin{itemize}
+    \item La dérivée $(n+1)$-ième de la fonction $f$, $f^{(n+1)}(\xi_x)$. Si la dérivée $(n+1)$-ième de $f$ est petite sur $[a, b]$, alors l'erreur d'interpolation sera petite.
+    \item Le polynôme nodal $\omega_{n+1}(x) = \prod_{i=0}^{n} (x - x_i)$. La distribution des points d'interpolation $x_0, x_1, \dots, x_n$ influence la magnitude de $\omega_{n+1}(x)$. Choisir des points d'interpolation de manière à minimiser $|\omega_{n+1}(x)|$ sur $[a, b]$ peut réduire l'erreur d'interpolation. Par exemple, les points de Chebyshev sont connus pour minimiser la norme infinie de $\omega_{n+1}(x)$ sur $[-1, 1]$.
+\end{itemize}
+
+\subsection{Convergence}
+
+Pour assurer la convergence de l'interpolation polynomiale, c'est-à-dire que $P_n(x) \to f(x)$ lorsque $n \to \infty$, il ne suffit pas d'augmenter le degré du polynôme d'interpolation en utilisant des points équidistants. Le phénomène de Runge montre que pour certaines fonctions, l'interpolation polynomiale avec des points équidistants peut diverger entre les nœuds, même si la fonction est analytique.  Cependant, si on choisit judicieusement les points d'interpolation, comme les points de Chebyshev, et si la fonction $f$ est suffisamment régulière, on peut garantir la convergence de l'interpolation polynomiale.
+
+\section{Interpolation de Newton}
+
+\subsection{Différences divisées}
+
+La méthode de Newton utilise les différences divisées pour construire le polynôme d'interpolation.
+
+\begin{definition}[Différences divisées]
+Les différences divisées d'ordre zéro sont définies par $f[x_i] = f(x_i)$. Les différences divisées d'ordre supérieur sont définies par la formule de récurrence :
+\[
+f[x_i, x_{i+1}, \dots, x_{i+k}] = \frac{f[x_{i+1}, \dots, x_{i+k}] - f[x_i, \dots, x_{i+k-1}]}{x_{i+k} - x_i}
+\]
+\end{definition}
+
+\begin{proposition}[Formule d'interpolation de Newton]
+Le polynôme d'interpolation de Newton de degré au plus $n$ s'écrit :
+\[
+P(x) = f[x_0] + f[x_0, x_1](x - x_0) + f[x_0, x_1, x_2](x - x_0)(x - x_1) + \dots + f[x_0, x_1, \dots, x_n] \prod_{i=0}^{n-1} (x - x_i)
+\]
+que l'on peut écrire sous la forme :
+\[
+P(x) = \sum_{k=0}^{n} f[x_0, x_1, \dots, x_k] \prod_{i=0}^{k-1} (x - x_i)
+\]
+avec $\prod_{i=0}^{-1} (x - x_i) = 1$.
+\end{proposition}
+
+\subsection{Algorithme de calcul des différences divisées}
+
+Les différences divisées peuvent être organisées dans un tableau triangulaire.
+
+\begin{verbatim}
+Python: Calcul des différences divisées
+#save_to: diff_div.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+def DifferencesDivisees(x,y):
+    n = len(x)
+    d = np.zeros([n, n])
+    for i in range(n):
+        d[i, 0] = y[i]
+    for j in range(1, n):
+        for i in range(n - j):
+            d[i, j] = (d[i+1, j-1] - d[i, j-1]) / (x[i+j] - x[i])
+    return d
+
+# Example usage (not plotting, so no savefig needed for this function definition)
+# x_example = np.array([1, 2, 3, 4])
+# y_example = np.array([2, 3, 5, 8])
+# diff_table = DifferencesDivisees(x_example, y_example)
+# print(diff_table)
+
+\end{verbatim}
+\begin{lstlisting}[language=Python, caption=Calcul des différences divisées, label=code:diff_div_python]
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+def DifferencesDivisees(x,y):
+    n = len(x)
+    d = np.zeros([n, n])
+    for i in range(n):
+        d[i, 0] = y[i]
+    for j in range(1, n):
+        for i in range(n - j):
+            d[i, j] = (d[i+1, j-1] - d[i, j-1]) / (x[i+j] - x[i])
+    return d
+\end{lstlisting}
+\begin{remark}
+La fonction \texttt{DifferencesDivisees(x,y)} prend en entrée les abscisses \texttt{x} et les ordonnées \texttt{y} des points d'interpolation et retourne une matrice \texttt{d} contenant les différences divisées. La diagonale supérieure de cette matrice contient les coefficients $f[x_0], f[x_0, x_1], \dots, f[x_0, x_1, \dots, x_n]$ nécessaires pour la formule d'interpolation de Newton.
+\end{remark}
+
+\subsection{Évaluation du polynôme de Newton : Formule de Horner-Newton}
+
+Pour évaluer efficacement le polynôme de Newton, on utilise la formule de Horner-Newton.
+
+\begin{verbatim}
+Python: Évaluation du polynôme de Newton (Horner-Newton)
+#save_to: horner_newton.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+def HornerNewton(a,x,xx):
+    n = len(a)
+    yy = a[n-1]
+    for i in range(n-2, -1, -1):
+        yy = a[i] + (xx - x[i]) * yy
+    return yy
+
+# Example Usage (No plot to save)
+# coefficients = np.array([2, 1, -0.5, 1/6]) # Example coefficients from divided differences
+# x_points = np.array([1, 2, 3, 4]) # Original x points
+# x_eval = 2.5
+# polynomial_value = HornerNewton(coefficients, x_points, x_eval)
+# print(f"Polynomial value at {x_eval}: {polynomial_value}")
+
+\end{verbatim}
+
+\begin{lstlisting}[language=Python, caption=Évaluation du polynôme de Newton (Horner-Newton), label=code:horner_newton_python]
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+def HornerNewton(a,x,xx):
+    n = len(a)
+    yy = a[n-1]
+    for i in range(n-2, -1, -1):
+        yy = a[i] + (xx - x[i]) * yy
+    return yy
+\end{lstlisting}
+
+\begin{remark}
+La fonction \texttt{HornerNewton(a,x,xx)} prend en entrée le vecteur des coefficients des différences divisées \texttt{a} (diagonale de la matrice retournée par \texttt{DifferencesDivisees}), le vecteur des abscisses \texttt{x} des points d'interpolation, et un point \texttt{xx} où l'on souhaite évaluer le polynôme. Elle retourne la valeur du polynôme de Newton évalué en \texttt{xx}. Cette méthode est plus efficace pour évaluer le polynôme que l'évaluation directe de la formule de Newton.
+\end{remark}
+
+
+\section{Comparaison des méthodes et complexité}
+
+\subsection{Complexité}
+
+\begin{itemize}
+    \item \textbf{Interpolation de Lagrange}: Le calcul des polynômes de base de Lagrange $l_i(x)$ et l'évaluation du polynôme d'interpolation de Lagrange nécessitent $\mathcal{O}(n^2)$ opérations pour un point donné $x$. Si l'on souhaite obtenir la forme développée du polynôme, la complexité est plus élevée.
+    \item \textbf{Interpolation de Newton}: Le calcul des différences divisées nécessite $\mathcal{O}(n^2)$ opérations. L'évaluation du polynôme de Newton en utilisant la formule de Horner-Newton nécessite $\mathcal{O}(n)$ opérations par point. C'est une méthode efficace pour évaluer le polynôme une fois les différences divisées calculées.
+\end{itemize}
+
+\subsection{Optimisation et ajout de points}
+
+\begin{itemize}
+    \item \textbf{Formule de Horner pour Newton}: La formule de Horner-Newton est cruciale pour l'efficacité de l'évaluation du polynôme de Newton. Elle réduit la complexité de l'évaluation à $\mathcal{O}(n)$ une fois les coefficients (différences divisées) sont connus.
+    \item \textbf{Ajout d'un nouveau point}:
+    \begin{itemize}
+        \item \textit{Lagrange}: L'ajout d'un nouveau point d'interpolation nécessite de recalculer tous les polynômes de base de Lagrange et de refaire la somme. Cela peut être coûteux.
+        \item \textit{Newton}:  Si on ajoute un nouveau point $(x_{n+1}, y_{n+1})$, on peut facilement étendre le polynôme d'interpolation de Newton en calculant une différence divisée supplémentaire $f[x_0, x_1, \dots, x_{n+1}]$ et en ajoutant un terme à la formule existante. Les différences divisées déjà calculées restent valides. C'est un avantage majeur de la méthode de Newton.
+    \end{itemize}
+\end{itemize}
+
+\section{Conclusion}
+
+L'interpolation polynomiale est un outil puissant pour approximer des fonctions et traiter des données. Les méthodes de Lagrange et Newton offrent différentes approches pour construire et évaluer le polynôme d'interpolation. La méthode de Lagrange donne une formule explicite mais est moins pratique pour les calculs et l'ajout de nouveaux points. La méthode de Newton, basée sur les différences divisées, est efficace pour l'évaluation grâce à la formule de Horner-Newton et permet d'ajouter facilement de nouveaux points d'interpolation. Le choix de la méthode dépend du contexte et des besoins spécifiques de l'application.
+
+\end{document}
+```

@@ -1,0 +1,229 @@
+```latex
+\documentclass{article}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{listings}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Example}
+
+\usepackage[margin=1in]{geometry}
+
+\begin{document}
+\sloppy
+
+\section{Introduction: Notion de Champ de Vecteurs et EDO}
+
+\subsection{Généralités et Définitions}
+
+Nous allons étudier la notion de champ de vecteurs associé à une équation différentielle ordinaire (EDO).
+
+Les modèles continus de la dynamique des populations sont des exemples de problèmes de Cauchy pour les EDOs.
+
+Considérons une EDO du type :
+\begin{equation}
+\label{eq:edo_generale}
+y'(t) = f(t, y(t)), \quad t \in ]t_0, T[,
+\end{equation}
+avec la condition initiale :
+\begin{equation}
+\label{eq:condition_initiale}
+y(t_0) = y_0,
+\end{equation}
+où $y : ]t_0, T[ \rightarrow \mathbb{R}$ et $f : ]t_0, T[ \times \mathbb{R} \rightarrow \mathbb{R}$ est une fonction donnée, et $(t, x) \mapsto f(t, x)$.
+
+\section{Analyse Qualitative des Solutions d'EDO}
+
+Si l'on veut résoudre analytiquement une EDO, c'est-à-dire donner l'expression de $t \mapsto y(t)$, alors c'est terminé. Dans de nombreux cas, il suffit d'étudier la fonction $t \mapsto y(t)$.
+
+Si l'on ne sait pas déterminer la solution analytique, on peut suivre une approche en deux étapes pour comprendre les solutions :
+
+\begin{enumerate}
+    \item S'assurer de l'existence et de l'unicité de la solution, et de sa stabilité vis-à-vis des données du problème.
+    \item Puis analyser les propriétés qualitatives de cette solution par une simple analyse de $f(t, x)$. C'est ici qu'interviennent les champs de vecteurs.
+\end{enumerate}
+
+\section{Champ de Vecteurs: Définitions et Propriétés}
+
+\subsection{Vecteur Tangent à une Courbe Paramétrée}
+
+Considérons une courbe paramétrée $t \mapsto \begin{pmatrix} x(t) \\ y(t) \end{pmatrix} = \begin{pmatrix} t \\ g(t) \end{pmatrix}$. Le vecteur tangent $\vec{v}$ à cette courbe est donné par :
+\begin{align*}
+\vec{v} = \begin{pmatrix} x'(t) \\ y'(t) \end{pmatrix} = \begin{pmatrix} \frac{dx}{dt} \\ \frac{dy}{dt} \end{pmatrix} &= \begin{pmatrix} \frac{dx}{dt} \\ \frac{dy}{dx} \frac{dx}{dt} \end{pmatrix} = \frac{dx}{dt} \begin{pmatrix} 1 \\ \frac{dy}{dx} \end{pmatrix} \\
+&= \frac{1}{\frac{dt}{dx}} \begin{pmatrix} 1 \\ g'(x) \end{pmatrix} = \frac{1}{\dot{x}(t)} \begin{pmatrix} 1 \\ \dot{y}(t) \end{pmatrix} = \begin{pmatrix} 1 \\ \frac{\dot{y}(t)}{\dot{x}(t)} \end{pmatrix} =  \begin{pmatrix} 1 \\ \dot{y}(t) \end{pmatrix}
+\end{align*}
+Si $x(t) = t$, alors $\dot{x}(t) = 1$, et le vecteur tangent devient $\vec{v} = \begin{pmatrix} 1 \\ \dot{y}(t) \end{pmatrix}$.
+
+\subsection{Lien entre Solution d'EDO et Vecteurs Vitesse}
+
+\begin{proposition}
+$y$ est solution de l'EDO $y'(t) = f(t, y(t))$ si et seulement si les vecteurs vitesses de la courbe paramétrée $t \mapsto \begin{pmatrix} x(t) \\ y(t) \end{pmatrix} = \begin{pmatrix} t \\ y(t) \end{pmatrix}$ au point $t$ sont donnés par $u(t) = \begin{pmatrix} 1 \\ f(t, y(t)) \end{pmatrix}$.
+\end{proposition}
+
+\subsection{Définition d'un Champ de Vecteurs}
+
+\begin{definition}
+Soit $V : \mathbb{R}^2 \rightarrow \mathbb{R}^2$ un champ de vecteurs, défini par $(t, y) \mapsto V(t, y)$.
+Si ce champ de vecteurs est associé à l'EDO $y'(t) = f(t, y(t))$, alors $V(t, y) = \begin{pmatrix} 1 \\ f(t, y) \end{pmatrix}$.
+\end{definition}
+
+\section{Visualisation des Champs de Vecteurs (Implémentation Python)}
+
+\subsection{Principe}
+
+Pour dessiner un champ de vecteurs, à chaque point $P = (P_x, P_y)$, on trace le vecteur $V \in V(P) = (V_x, V_y)$. On choisit une constante positive pour représenter les vecteurs trop longs.
+
+\begin{figure}[H]
+    \centering
+    \begin{verbatim}
+    ```python
+#save_to: champ_vecteurs_schema.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots()
+
+# Point P
+Px, Py = 2, 2
+ax.plot(Px, Py, 'o', markersize=5, color='black')
+ax.text(Px + 0.1, Py, 'P', verticalalignment='center')
+
+# Vecteur V
+Vx, Vy = 1, 2
+ax.arrow(Px, Py, Vx, Vy, head_width=0.2, head_length=0.3, fc='blue', ec='blue')
+ax.text(Px + Vx/2 + 0.1, Py + Vy/2, 'V', color='blue', verticalalignment='center')
+
+# Axes
+ax.axhline(0, color='black', linewidth=0.5)
+ax.axvline(0, color='black', linewidth=0.5)
+ax.set_xlabel('x')
+ax.set_ylabel('y')
+ax.set_xlim(0, 5)
+ax.set_ylim(0, 5)
+ax.set_aspect('equal', adjustable='box')
+plt.savefig('champ_vecteurs_schema.png')
+    ```
+    \end{verbatim}
+    \caption{Schéma de principe pour le dessin d'un champ de vecteurs.}
+    \label{fig:champ_vecteurs_schema}
+\end{figure}
+
+\subsection{Utilisation de \texttt{quiver} de Python}
+
+Pour implémenter le dessin de champs de vecteurs en Python, on utilise la fonction \texttt{quiver} de \texttt{matplotlib.pyplot}. Les arguments principaux sont : \texttt{plt.quiver(Px, Py, Vx, Vy, angles='xy', scale)}.
+
+\begin{verbatim}
+    ```python
+#save_to: quiver_example.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Exemple d'utilisation de quiver
+Px = np.array([1, 2, 1, 2])
+Py = np.array([1, 1, 2, 2])
+Vx = np.array([1, 0, 0, -1])
+Vy = np.array([0, 1, -1, 0])
+
+plt.quiver(Px, Py, Vx, Vy, angles='xy', scale_units='xy', scale=1)
+plt.xlim(0, 3)
+plt.ylim(0, 3)
+plt.gca().set_aspect('equal', adjustable='box')
+plt.title('Exemple quiver')
+plt.savefig('quiver_example.png')
+    ```
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{quiver_example.png}
+    \caption{Exemple d'utilisation de quiver}
+    \label{fig:quiver_example}
+\end{figure}
+
+
+\subsection{Contrôle de la Longueur des Vecteurs}
+
+On peut ajouter un paramètre pour contrôler la longueur des vecteurs.  Il est souvent nécessaire de normaliser les vecteurs pour une visualisation claire du champ de vecteurs.
+
+Pour normaliser les vecteurs $(V_x, V_y)$, on calcule d'abord la norme :
+\begin{equation}
+\text{norm} = \sqrt{V_x^2 + V_y^2}
+\end{equation}
+Puis on normalise chaque composante :
+\begin{align*}
+V_x &= V_x / \text{norm} \\
+V_y &= V_y / \text{norm}
+\end{align*}
+
+\section{Application: Recherche Approchée de Solutions (Python)}
+
+\subsection{Objectif}
+
+On cherche une solution approchée de l'EDO $y'(t) = f(t, y(t))$, pour $t \in [t_0, t_0 + T]$ avec $y(t_0) = y_0$, en utilisant Python. Pour cela, il suffit de dessiner en quelques points où aboutit cette solution.
+
+\subsection{Méthode Python}
+
+Définissons un exemple de champ de vecteur avec $f(t, y) = r \cdot y \cdot (1 - y/k)$.
+
+\begin{verbatim}
+    ```python
+#save_to: modele_verhulst.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+def f(t, y):
+    r = 1.0
+    k = 1.0
+    return r * y * (1 - y/k)
+
+# Grille de points
+lx = np.linspace(0, 5, 20) # tmin, tmax, N+1 (Reduced for spacing)
+ly = np.linspace(0, 5, 15) # ymin, ymax, M+1 (Reduced for spacing)
+T, Y = np.meshgrid(lx, ly)
+
+# Construction des vecteurs
+U = 1 + 0 * T
+V = f(T, Y)
+norm = np.sqrt(U**2 + V**2)
+U = U / norm
+V = V / norm
+
+# On place des points
+plt.scatter(T, Y, marker='+', alpha=0.5) # Reduced alpha for clarity
+
+# On place les vecteurs
+plt.quiver(T, Y, U, V, angles='xy', scale_units='xy', scale=5, width=0.005)
+plt.xlabel('t')
+plt.ylabel('y')
+plt.title('Champ de vecteurs - Modèle de Verhulst')
+plt.gca().set_aspect('equal', adjustable='box')
+plt.savefig('modele_verhulst.png')
+    ```
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{modele_verhulst.png}
+    \caption{Champ de vecteurs pour le modèle de Verhulst.}
+    \label{fig:modele_verhulst}
+\end{figure}
+
+
+\section{Exploitation des Champs de Vecteurs pour Comprendre l'Allure des Solutions}
+
+Si l'on connaît les valeurs minimales et maximales de la solution, on peut avoir une idée de l'allure de la solution en observant le champ de vecteurs. Par exemple, si les vecteurs pointent vers le haut dans une certaine région, et vers le bas dans une autre, on peut déduire le comportement qualitatif des solutions dans ces régions.
+
+
+\end{document}
+```

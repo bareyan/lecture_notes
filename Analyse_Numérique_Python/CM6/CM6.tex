@@ -1,0 +1,243 @@
+```latex
+\documentclass{article}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{listings}
+
+\newtheorem{theorem}{Théorème}
+\newtheorem{lemma}{Lemme}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}{Définition}
+\newtheorem{remark}{Remarque}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Exemple}
+
+\usepackage[margin=1in]{geometry}
+
+\begin{document}
+\sloppy
+
+\section{Polynômes de Tchebychev}
+
+\subsection{Définition}
+
+On définit les polynômes de Tchebychev par récurrence :
+\begin{itemize}
+    \item $T_0(x) = 1$
+    \item $T_1(x) = x$
+    \item $T_{n+1}(x) = 2xT_n(x) - T_{n-1}(x), \quad n \geq 1$
+\end{itemize}
+Les premiers polynômes de Tchebychev sont donc :
+\begin{itemize}
+    \item $T_0(x) = 1$
+    \item $T_1(x) = x$
+    \item $T_2(x) = 2xT_1(x) - T_0(x) = 2x^2 - 1$
+    \item $T_3(x) = 2xT_2(x) - T_1(x) = 2x(2x^2 - 1) - x = 4x^3 - 3x$
+\end{itemize}
+
+\subsection{Expression trigonométrique}
+
+On a aussi l'expression trigonométrique suivante pour les polynômes de Tchebychev :
+\[
+T_n(x) = \cos(n \arccos(x)), \quad x \in [-1, 1]
+\]
+On vérifie pour $n=0, 1, 2$ :
+\begin{itemize}
+    \item $T_0(x) = \cos(0 \arccos(x)) = \cos(0) = 1$
+    \item $T_1(x) = \cos(1 \arccos(x)) = \cos(\arccos(x)) = x$
+    \item $T_2(x) = \cos(2 \arccos(x)) = 2\cos^2(\arccos(x)) - 1 = 2x^2 - 1$
+\end{itemize}
+Pour vérifier la relation de récurrence, posons $\theta = \arccos(x)$, donc $x = \cos(\theta)$. Alors
+\begin{align*}
+2xT_n(x) - T_{n-1}(x) &= 2\cos(\theta)\cos(n\theta) - \cos((n-1)\theta) \\
+&= \cos((n+1)\theta) + \cos((n-1)\theta) - \cos((n-1)\theta) \\
+&= \cos((n+1)\theta) \\
+&= T_{n+1}(x)
+\end{align*}
+On a utilisé la formule trigonométrique : $\cos(a)\cos(b) = \frac{1}{2} [\cos(a+b) + \cos(a-b)]$.
+
+\subsection{Propriétés}
+
+\begin{enumerate}
+    \item \textbf{Racines de $T_n(x)$}:
+    $T_n(x) = 0 \Leftrightarrow \cos(n \arccos(x)) = 0$.
+    Posons $x = \cos(\theta)$. Alors $\cos(n\theta) = 0 \Leftrightarrow n\theta = \frac{\pi}{2} + k\pi, k \in \mathbb{Z}$.
+    Donc $\theta = \frac{\pi}{2n} + k\frac{\pi}{n}$.
+    Pour avoir $n$ racines distinctes dans $[-1, 1]$, on prend $k = 0, 1, \dots, n-1$.
+    \[
+    x_k = \cos\left(\frac{\pi}{2n} + k\frac{\pi}{n}\right), \quad k = 0, 1, \dots, n-1
+    \]
+    sont les $n$ racines de $T_n(x)$ dans $[-1, 1]$.
+
+    \item $|T_n(x)| \leq 1$ pour $x \in [-1, 1]$.
+    En effet, pour $x \in [-1, 1]$, $T_n(x) = \cos(n \arccos(x))$, et $|\cos(\cdot)| \leq 1$.
+    De plus, $T_n(\cos(\frac{k\pi}{n})) = \cos(k\pi) = (-1)^k$.
+    Donc $\max_{x \in [-1, 1]} |T_n(x)| = 1$ atteint en $x_k' = \cos(\frac{k\pi}{n})$, $k = 0, \dots, n$.
+
+    \item \textbf{Orthogonalité}:
+    Les polynômes de Tchebychev sont orthogonaux pour le produit scalaire :
+    \[
+    \langle f, g \rangle = \int_{-1}^{1} \frac{f(x)g(x)}{\sqrt{1-x^2}} dx
+    \]
+    En effet, posons $x = \cos(\theta)$, $dx = -\sin(\theta) d\theta$, $\sqrt{1-x^2} = \sin(\theta)$.
+    \[
+    \int_{-1}^{1} \frac{T_n(x)T_m(x)}{\sqrt{1-x^2}} dx = \int_{\pi}^{0} \frac{\cos(n\theta)\cos(m\theta)}{\sin(\theta)} (-\sin(\theta)) d\theta = \int_{0}^{\pi} \cos(n\theta)\cos(m\theta) d\theta
+    \]
+    On sait que $\int_{0}^{\pi} \cos(n\theta)\cos(m\theta) d\theta = 0$ si $n \neq m$, et $\int_{0}^{\pi} \cos^2(n\theta) d\theta = \frac{\pi}{2}$ si $n \neq 0$, et $\int_{0}^{\pi} \cos^2(0) d\theta = \pi$.
+    Donc
+    \[
+    \int_{-1}^{1} \frac{T_n(x)T_m(x)}{\sqrt{1-x^2}} dx =
+    \begin{cases}
+        0 & \text{si } n \neq m \\
+        \pi & \text{si } n = m = 0 \\
+        \frac{\pi}{2} & \text{si } n = m \neq 0
+    \end{cases}
+    \]
+\end{enumerate}
+
+\subsection{Application : Polynôme de meilleure approximation uniforme}
+
+\begin{proposition}
+Soit $P$ un polynôme de degré $n$ avec coefficient dominant égal à $1$, alors
+\[
+\max_{x \in [-1, 1]} |P(x)| \geq \max_{x \in [-1, 1]} \left|\frac{1}{2^{n-1}}T_n(x)\right| = \frac{1}{2^{n-1}}
+\]
+De plus, il y a égalité si et seulement si $P(x) = \frac{1}{2^{n-1}}T_n(x)$.
+On dit que $\frac{1}{2^{n-1}}T_n(x)$ est le polynôme de Tchebychev normalisé.
+\end{proposition}
+
+\begin{corollary}
+Soient $x_0, \dots, x_n$ des points 2 à 2 distincts de $[-1, 1]$.
+On a :
+\[
+\max_{x \in [-1, 1]} \prod_{i=0}^{n} |x - x_i| \geq \max_{x \in [-1, 1]} \prod_{i=1}^{n} |x - x_i^*|
+\]
+avec $x_i^*$ les racines de $T_{n+1}(x)$ translatées et dilatées sur $[-1, 1]$ (racines de Tchebychev).
+\[
+x_k^* = \cos\left(\frac{\pi}{2(n+1)} + \frac{k\pi}{n+1}\right), \quad k = 0, \dots, n
+\]
+sont les racines de $T_{n+1}$.
+
+\end{corollary}
+
+\subsection{Application à l'interpolation polynomiale}
+
+Soient $x_0, \dots, x_n$ $n+1$ points 2 à 2 distincts, $f$ une fonction $n+1$ fois continûment dérivable.
+Soit $P_n(x)$ le polynôme d'interpolation de Lagrange de $f$ aux points $x_i$.
+Alors l'erreur d'interpolation est donnée par :
+\[
+f(x) - P_n(x) = \frac{f^{(n+1)}(\xi_x)}{(n+1)!} \prod_{i=0}^{n} (x - x_i), \quad \xi_x \in [\min(x, x_i), \max(x, x_i)]
+\]
+Donc
+\[
+|f(x) - P_n(x)| \leq \frac{\max_{\xi \in [a, b]} |f^{(n+1)}(\xi)|}{(n+1)!} \max_{x \in [a, b]} \prod_{i=0}^{n} |x - x_i|
+\]
+Pour minimiser l'erreur d'interpolation, il faut minimiser $\max_{x \in [a, b]} \prod_{i=0}^{n} |x - x_i|$.
+D'après le corollaire précédent, les points de Tchebychev minimisent ce terme (à translation et dilatation près pour adapter l'intervalle $[-1, 1]$ à $[a, b]$).
+
+\section{Intégration numérique}
+
+\subsection{Motivation et concept général}
+
+On cherche à approcher numériquement l'intégrale d'une fonction $f$ sur un intervalle $[a, b]$ :
+\[
+I(f) = \int_{a}^{b} f(x) dx
+\]
+On approche $I(f)$ par une somme pondérée de valeurs de $f$ en certains points $x_i \in [a, b]$ :
+\[
+Q_n(f) = \sum_{i=0}^{n} \omega_i f(x_i)
+\]
+où $x_i$ sont les \textbf{nœuds} de quadrature et $\omega_i$ sont les \textbf{poids} de quadrature.
+On cherche à construire des formules de quadrature $Q_n(f)$ qui soient exactes pour les polynômes de degré le plus élevé possible.
+
+\begin{definition}
+On dit qu'une formule de quadrature $Q_n(f) = \sum_{i=0}^{n} \omega_i f(x_i)$ est de degré de précision $r$ si elle est exacte pour tous les polynômes de degré $\leq r$, et n'est pas exacte pour au moins un polynôme de degré $r+1$.
+C'est-à-dire :
+\begin{itemize}
+    \item $\forall P \in \mathbb{P}_r, \quad Q_n(P) = I(P) = \int_{a}^{b} P(x) dx$
+    \item $\exists P \in \mathbb{P}_{r+1}, \quad Q_n(P) \neq I(P) = \int_{a}^{b} P(x) dx$
+\end{itemize}
+\end{definition}
+
+\subsection{Construction des formules de quadrature}
+
+Idée : utiliser l'interpolation polynomiale.
+Soient $x_0, \dots, x_n$ $n+1$ points distincts dans $[a, b]$.
+Soit $P_n(x)$ le polynôme d'interpolation de Lagrange de $f$ aux points $x_i$.
+On approche $I(f)$ par $I(P_n) = \int_{a}^{b} P_n(x) dx$.
+On sait que $P_n(x) = \sum_{i=0}^{n} f(x_i) L_i(x)$ où $L_i(x)$ sont les polynômes de Lagrange :
+\[
+L_i(x) = \prod_{j=0, j\neq i}^{n} \frac{x - x_j}{x_i - x_j}
+\]
+Donc
+\[
+Q_n(f) = I(P_n) = \int_{a}^{b} P_n(x) dx = \int_{a}^{b} \sum_{i=0}^{n} f(x_i) L_i(x) dx = \sum_{i=0}^{n} f(x_i) \int_{a}^{b} L_i(x) dx
+\]
+On pose $\omega_i = \int_{a}^{b} L_i(x) dx$.
+Alors $Q_n(f) = \sum_{i=0}^{n} \omega_i f(x_i)$ est une formule de quadrature.
+
+\begin{proposition}
+La formule de quadrature $Q_n(f)$ construite à partir de l'interpolation de Lagrange aux points $x_0, \dots, x_n$ est de degré de précision au moins $n$.
+\end{proposition}
+\begin{proof}
+Si $P \in \mathbb{P}_n$, alors $P_n(x) = P(x)$ (le polynôme d'interpolation d'un polynôme de degré $\leq n$ est lui-même).
+Donc $Q_n(P) = \int_{a}^{b} P_n(x) dx = \int_{a}^{b} P(x) dx = I(P)$.
+Donc $Q_n$ est exacte pour les polynômes de degré $\leq n$.
+\end{proof}
+
+\subsection{Exemples}
+
+\begin{example}[Formule du point milieu]
+$n = 0$, un seul point $x_0 = \frac{a+b}{2}$ (milieu de l'intervalle).
+$L_0(x) = 1$. $\omega_0 = \int_{a}^{b} L_0(x) dx = \int_{a}^{b} 1 dx = b - a$.
+$Q_0(f) = (b - a) f\left(\frac{a+b}{2}\right)$.
+Degré de précision : 1. Exacte pour les polynômes de degré $\leq 1$.
+Exemple : $\int_{0}^{1} x dx = \frac{1}{2}$. $Q_0(x) = (1-0) \times \frac{0+1}{2} = \frac{1}{2}$. Exact.
+$\int_{0}^{1} x^2 dx = \frac{1}{3}$. $Q_0(x^2) = (1-0) \times \left(\frac{0+1}{2}\right)^2 = \frac{1}{4} \neq \frac{1}{3}$. Non exacte pour degré 2.
+
+\end{example}
+
+\begin{example}[Formule des trapèzes]
+$n = 1$, deux points $x_0 = a$, $x_1 = b$.
+$L_0(x) = \frac{x - x_1}{x_0 - x_1} = \frac{x - b}{a - b}$, $L_1(x) = \frac{x - x_0}{x_1 - x_0} = \frac{x - a}{b - a}$.
+$\omega_0 = \int_{a}^{b} \frac{x - b}{a - b} dx = \frac{1}{a - b} \left[\frac{x^2}{2} - bx\right]_{a}^{b} = \frac{1}{a - b} \left[ \left(\frac{b^2}{2} - b^2\right) - \left(\frac{a^2}{2} - ba\right) \right] = \frac{1}{a - b} \left[ -\frac{b^2}{2} - \frac{a^2}{2} + ba \right] = \frac{b - a}{2}$.
+$\omega_1 = \int_{a}^{b} \frac{x - a}{b - a} dx = \frac{1}{b - a} \left[\frac{x^2}{2} - ax\right]_{a}^{b} = \frac{1}{b - a} \left[ \left(\frac{b^2}{2} - ab\right) - \left(\frac{a^2}{2} - a^2\right) \right] = \frac{1}{b - a} \left[ \frac{b^2}{2} - ab + \frac{a^2}{2} \right] = \frac{b - a}{2}$.
+$Q_1(f) = \frac{b - a}{2} [f(a) + f(b)]$.
+Degré de précision : 1. Exacte pour les polynômes de degré $\leq 1$.
+Exemple : $\int_{0}^{1} x^2 dx = \frac{1}{3}$. $Q_1(x^2) = \frac{1 - 0}{2} [0^2 + 1^2] = \frac{1}{2} \neq \frac{1}{3}$. Non exacte pour degré 2.
+\end{example}
+
+\subsection{Estimation de l'erreur}
+
+Soit $Q_n(f) = \sum_{i=0}^{n} \omega_i f(x_i)$ la formule de quadrature construite par interpolation de Lagrange aux points $x_0, \dots, x_n$.
+On sait que l'erreur d'interpolation est :
+\[
+f(x) - P_n(x) = \frac{f^{(n+1)}(\xi_x)}{(n+1)!} \prod_{i=0}^{n} (x - x_i)
+\]
+Donc l'erreur de quadrature est :
+\begin{align*}
+E_n(f) &= I(f) - Q_n(f) = \int_{a}^{b} f(x) dx - \int_{a}^{b} P_n(x) dx = \int_{a}^{b} [f(x) - P_n(x)] dx \\
+&= \int_{a}^{b} \frac{f^{(n+1)}(\xi_x)}{(n+1)!} \prod_{i=0}^{n} (x - x_i) dx = \frac{f^{(n+1)}(\xi)}{(n+1)!} \int_{a}^{b} \prod_{i=0}^{n} (x - x_i) dx
+\end{align*}
+Si on suppose que $f^{(n+1)}$ est continue, on peut utiliser la formule de la moyenne pour l'intégrale :
+\[
+E_n(f) = \frac{f^{(n+1)}(\xi)}{(n+1)!} \int_{a}^{b} \prod_{i=0}^{n} (x - x_i) dx, \quad \xi \in [a, b]
+\]
+où $\xi$ est une valeur intermédiaire dans $[a, b]$. En pratique, on borne l'erreur :
+\[
+|E_n(f)| \leq \frac{\max_{\xi \in [a, b]} |f^{(n+1)}(\xi)|}{(n+1)!} \int_{a}^{b} \prod_{i=0}^{n} |x - x_i| dx
+\]
+
+\begin{remark}
+Pour la formule du point milieu sur $[-1, 1]$, $x_0 = 0$, $n = 0$.
+$Q_0(f) = 2f(0)$. $\int_{-1}^{1} (x - x_0) dx = \int_{-1}^{1} x dx = 0$.
+Donc la formule d'erreur simple ne s'applique pas directement car $\int_{a}^{b} \prod_{i=0}^{n} (x - x_i) dx = 0$ dans certains cas (comme ici).
+Il faut une formule d'erreur plus précise.
+\end{remark}
+
+\end{document}
+```
