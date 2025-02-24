@@ -1,0 +1,762 @@
+```latex
+\documentclass{article}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{listings}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Example}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{verbatim}
+
+\begin{document}
+\sloppy
+
+\section*{Conception de Bases de Données : Modèle Entité-Association}
+
+\section*{Introduction}
+
+Dans le monde actuel, les bases de données sont omniprésentes et essentielles au fonctionnement de nombreuses applications et systèmes d'information. Elles permettent de stocker, d'organiser et de gérer de grandes quantités de données de manière efficace et structurée. Une conception rigoureuse de ces bases de données est cruciale pour garantir la performance, la fiabilité et la maintenabilité des systèmes qui les utilisent.
+
+Le modèle Entité-Association (E/A) est un outil puissant et largement utilisé pour la conception conceptuelle des bases de données. Il offre une approche intuitive et graphique pour représenter les données et leurs relations, facilitant ainsi la communication entre les concepteurs, les développeurs et les utilisateurs finaux.
+
+Ce manuel a pour objectif de vous guider à travers les concepts fondamentaux du modèle Entité-Association et de vous fournir les connaissances nécessaires pour concevoir vos propres modèles E/A.  À travers ce cours, vous apprendrez les étapes clés de la conception d'une base de données, les composants du modèle E/A, et les principes essentiels pour une conception efficace.  Avec les exemples et illustrations fournis, vous serez en mesure de comprendre et d'appliquer ce modèle dans vos projets de conception de bases de données.
+
+\section{Conception d'une Base de Données}
+
+\subsection{Objectifs de la Conception d'une Base de Données}
+
+La conception d'une base de données répond à un besoin fondamental : celui de développer des applications qui manipulent et exploitent de manière intensive de grandes masses de données.  Ces données doivent être persistantes, c'est-à-dire qu'elles doivent survivre à l'exécution des programmes et être disponibles à tout moment.  Les bases de données sont donc au cœur des systèmes d'information modernes.
+
+On retrouve des bases de données dans de nombreux domaines et applications, par exemple :
+
+\begin{itemize}
+    \item La gestion des stocks et des employés dans une entreprise.
+    \item Les agences de voyages pour la gestion des réservations et des clients.
+    \item Les services hospitaliers pour le suivi des patients et des dossiers médicaux.
+    \item Les systèmes de marketing pour l'analyse des comportements des consommateurs.
+    \item Le traitement des infractions et la gestion des dossiers judiciaires.
+    \item Les cinémas pour la gestion des films et des séances.
+    \item Les agences spatiales pour le stockage et l'analyse des données spatiales.
+    \item La scolarité à l'université pour la gestion des étudiants et des cours.
+    \item Les laboratoires de recherche pour l'organisation et l'analyse des données expérimentales.
+    \item ... et bien d'autres encore.
+\end{itemize}
+
+\subsection{Place de la Conception de BD dans le Cycle de Vie d'un Logiciel}
+
+La conception d'une base de données est une étape cruciale dans le processus de développement d'un logiciel.  Elle fait partie du génie logiciel, mais se distingue du développement de programmes «classique».  Alors que le génie logiciel «classique» se concentre sur le développement des programmes et des algorithmes, la conception de base de données se focalise sur la structure et l'organisation des données.
+
+
+La conception d'une base de données est donc la partie du processus de génie logiciel qui produit le schéma de la base de données.
+
+\subsection{Les Trois Étapes de la Conception}
+
+La conception d'une base de données se déroule généralement en trois étapes principales, comme illustré à la Figure \ref{fig:conception_processus} :
+
+\begin{enumerate}
+    \item \textbf{Modélisation Conceptuelle} : Cette première étape consiste à comprendre et à analyser le domaine d'application et les besoins des utilisateurs. L'objectif est d'identifier les concepts fondamentaux du domaine, leurs propriétés et les relations qui les unissent.  Le résultat de cette étape est un modèle conceptuel, une représentation abstraite des données, indépendante du modèle de données et du Système de Gestion de Base de Données (SGBD) qui sera utilisé. Le modèle Entité-Association est typiquement utilisé à cette étape.
+    \item \textbf{Modélisation Logique} :  Cette étape consiste à traduire le modèle conceptuel en un schéma logique, en utilisant un modèle de données spécifique, comme le modèle relationnel, le modèle orienté-objet ou le modèle semi-structuré.  Le choix du modèle de données est souvent influencé par le SGBD cible. Le schéma logique reste indépendant du SGBD spécifique.
+    \item \textbf{Modélisation Physique} :  La dernière étape consiste à définir la structure de stockage physique des données, en tenant compte des spécificités du SGBD choisi et des performances attendues.  Cela inclut la définition des index, des paramètres de configuration du SGBD, et d'autres optimisations physiques.
+\end{enumerate}
+
+\subsection{Difficultés de la Conception}
+
+La conception d'une base de données est une tâche complexe et souvent difficile.  Plusieurs facteurs contribuent à cette complexité :
+
+\begin{itemize}
+    \item \textbf{Complexité du domaine d'application} :  Le monde réel est complexe et riche en exceptions.  Il est souvent difficile de modéliser fidèlement cette complexité dans un modèle de base de données.
+    \item \textbf{Interaction avec les experts du domaine et les futurs utilisateurs} :  La conception d'une base de données nécessite une collaboration étroite avec les experts du domaine d'application et les futurs utilisateurs du système.  Il est essentiel de bien comprendre leurs besoins et leurs attentes.  Cela implique d'analyser et de comprendre le domaine, les besoins «métier» et d'identifier les données nécessaires aux traitements, tant pour les besoins actuels que futurs.
+    \item \textbf{Abstraction et simplification} :  Coder le «monde réel», avec sa complexité et ses exceptions, à l'aide d'un modèle informatique sans flexibilité oblige à abstraire et à simplifier.  Il faut donc trouver un juste milieu entre la fidélité au réel et la simplicité du modèle.
+    \item \textbf{Gestion de la complexité et du volume d'informations} :  Il faut maîtriser la complexité et le nombre d'informations à représenter, qui peuvent être très importants.
+    \item \textbf{Performances} :  Il est crucial de ne jamais perdre de vue les performances du système.  La base de données doit être conçue de manière à garantir des temps de réponse acceptables, même avec de grandes quantités de données et un nombre important d'utilisateurs.
+\end{itemize}
+
+\begin{figure}[h]
+    \centering
+    \begin{verbatim}
+#save_to: informations_donnees.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots(figsize=(6, 2))
+ax.axis('off')
+
+# Informations box
+rect1 = patches.Rectangle((0.1, 0.2), 0.3, 0.6, linewidth=1, edgecolor='black', facecolor='lightblue')
+ax.add_patch(rect1)
+plt.text(0.25, 0.5, 'INFORMATIONS', ha='center', va='center', fontsize=12)
+
+# Arrow
+ax.arrow(0.4, 0.5, 0.2, 0, head_width=0.05, head_length=0.08, fc='red', ec='red')
+
+# Données box
+rect2 = patches.Rectangle((0.6, 0.2), 0.3, 0.6, linewidth=1, edgecolor='black', facecolor='lightblue')
+ax.add_patch(rect2)
+plt.text(0.75, 0.5, 'DONNÉES', ha='center', va='center', fontsize=12)
+
+
+plt.xlim(0, 1)
+plt.ylim(0, 1)
+plt.savefig('informations_donnees.png')
+
+    \end{verbatim}
+    \includegraphics[width=0.4\textwidth]{informations_donnees.png}
+    \caption{Passage des Informations aux Données}
+    \label{fig:info_donnees}
+\end{figure}
+
+La Figure \ref{fig:info_donnees} illustre le passage des informations du monde réel aux données structurées dans une base de données.  C'est ce passage complexe que la conception de base de données doit faciliter et optimiser.
+
+
+\section{Le Modèle Entité-Association (E/A)}
+
+\subsection{Présentation du Modèle E/A}
+
+Le modèle Entité-Association (E/A) a été introduit par Peter Chen en 1976.  Il propose un ensemble de concepts et de symboles graphiques pour modéliser les données d'une application de manière conceptuelle.  L'objectif est de fournir une représentation claire et intuitive des données, indépendante de toute considération technique liée à l'implémentation.
+
+Le modèle E/A repose sur trois concepts centraux :
+
+\begin{itemize}
+    \item \textbf{Entité} : Représente un objet ou un concept du monde réel qui a une existence propre et qui est pertinent pour l'application.
+    \item \textbf{Attribut} : Décrit une propriété ou une caractéristique d'une entité.
+    \item \textbf{Association} : Représente une relation ou un lien entre deux ou plusieurs entités.
+\end{itemize}
+
+En plus de ces concepts fondamentaux, le modèle E/A inclut également des notions plus avancées comme :
+
+\begin{itemize}
+    \item Les contraintes de cardinalité, qui précisent la nature et le nombre de liens entre les entités.
+    \item Les clés et les entités faibles, qui permettent de gérer l'identification des entités.
+    \item Quelques règles de conception pour garantir la qualité et la cohérence du modèle.
+\end{itemize}
+
+\subsection{Concepts Fondamentaux}
+
+\subsubsection{Entité (ou Type Entité)}
+
+\begin{definition}[Entité]
+    Une \textbf{entité} (ou type entité) représente un ensemble d'objets qui sont centraux dans le domaine de l'application et pour lesquels des informations doivent être stockées.  Une entité correspond à une catégorie d'objets ou de concepts du monde réel que l'on souhaite représenter dans la base de données.
+\end{definition}
+
+Les entités peuvent représenter des objets concrets (comme les acteurs, les films, les clients, les produits, etc.) ou des concepts abstraits (comme les événements, les transactions, les catégories, etc.).
+
+\begin{example}[Exemples d'entités]
+    Dans le domaine du cinéma, on peut identifier les entités suivantes :
+    \begin{itemize}
+        \item \textbf{Acteur} : représente l'ensemble des acteurs de cinéma.
+        \item \textbf{Film} : représente l'ensemble des films.
+        \item \textbf{Tournage} : peut représenter l'ensemble des tournages de films (si l'on souhaite modéliser des informations spécifiques sur les tournages).
+    \end{itemize}
+\end{example}
+
+Graphiquement, une entité est représentée par un rectangle, contenant le nom de l'entité.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.4\textwidth}
+        \begin{verbatim}
+#save_to: entite_acteur_film.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots(figsize=(6, 2))
+ax.axis('off')
+
+# Acteur box
+rect1 = patches.Rectangle((0.1, 0.2), 0.3, 0.6, linewidth=2, edgecolor='green', facecolor='lightgreen')
+ax.add_patch(rect1)
+plt.text(0.25, 0.5, 'Acteur', ha='center', va='center', fontsize=12)
+
+# Film box
+rect2 = patches.Rectangle((0.6, 0.2), 0.3, 0.6, linewidth=2, edgecolor='green', facecolor='lightgreen')
+ax.add_patch(rect2)
+plt.text(0.75, 0.5, 'Film', ha='center', va='center', fontsize=12)
+
+
+plt.xlim(0, 1)
+plt.ylim(0, 1)
+plt.savefig('entite_acteur_film.png')
+
+        \end{verbatim}
+        \includegraphics[width=\textwidth]{entite_acteur_film.png}
+        \caption{Entités Acteur et Film}
+        \label{fig:entite_acteur_film}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.4\textwidth}
+        \begin{verbatim}
+#save_to: entite_tournage.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots(figsize=(3, 2))
+ax.axis('off')
+
+# Tournage box
+rect1 = patches.Rectangle((0.1, 0.2), 0.8, 0.6, linewidth=2, edgecolor='green', facecolor='lightgreen')
+ax.add_patch(rect1)
+plt.text(0.5, 0.5, 'Tournage', ha='center', va='center', fontsize=12)
+
+plt.xlim(0, 1)
+plt.ylim(0, 1)
+plt.savefig('entite_tournage.png')
+
+        \end{verbatim}
+        \includegraphics[width=\textwidth]{entite_tournage.png}
+        \caption{Entité Tournage}
+        \label{fig:entite_tournage}
+    \end{minipage}
+\end{figure}
+
+
+\subsubsection{Attribut}
+
+\begin{definition}[Attribut]
+    Un \textbf{attribut} est une propriété ou une caractéristique descriptive d'une entité.  Il sert à préciser et à qualifier une entité, en décrivant les informations que l'on souhaite stocker pour chaque instance de cette entité.
+\end{definition}
+
+Chaque entité est décrite par un ensemble d'attributs.  Un attribut est spécifié par un nom et un ensemble de valeurs possibles, appelé domaine de valeurs.
+
+\begin{example}[Exemples d'attributs pour l'entité Acteur]
+    Pour l'entité \textbf{Acteur}, on peut définir les attributs suivants :
+    \begin{itemize}
+        \item \textbf{Prénom} :  le prénom de l'acteur (domaine de valeurs : chaîne de caractères).
+        \item \textbf{Nom} :  le nom de famille de l'acteur (domaine de valeurs : chaîne de caractères).
+        \item \textbf{Date de naissance (Ddn)} :  la date de naissance de l'acteur (domaine de valeurs : date).
+    \end{itemize}
+\end{example}
+
+Les attributs peuvent être de différents types :
+
+\begin{itemize}
+    \item \textbf{Attribut simple} :  un attribut dont la valeur est atomique et indivisible (ex : Nom, Prénom).
+    \item \textbf{Attribut complexe} :  un attribut dont la valeur est composée de plusieurs parties (ex : Date de naissance, qui peut être composée du jour, du mois et de l'année).
+\end{itemize}
+
+Dans un diagramme E/A, les attributs sont généralement listés à l'intérieur du rectangle représentant l'entité.
+
+\begin{figure}[H]
+    \centering
+    \begin{verbatim}
+#save_to: entite_acteur_attributs.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots(figsize=(3, 3))
+ax.axis('off')
+
+# Acteur box
+rect1 = patches.Rectangle((0.1, 0.2), 0.8, 0.6, linewidth=2, edgecolor='green', facecolor='lightgreen')
+ax.add_patch(rect1)
+plt.text(0.5, 0.7, 'Acteur', ha='center', va='center', fontsize=12)
+plt.text(0.2, 0.5, '- Prénom', ha='left', va='center', fontsize=10)
+plt.text(0.2, 0.4, '- Nom', ha='left', va='center', fontsize=10)
+plt.text(0.2, 0.3, '- Ddn', ha='left', va='center', fontsize=10)
+
+
+plt.xlim(0, 1)
+plt.ylim(0, 1)
+plt.savefig('entite_acteur_attributs.png')
+
+        \end{verbatim}
+        \includegraphics[width=0.5\textwidth]{entite_acteur_attributs.png}
+        \caption{Attributs de l'entité Acteur}
+        \label{fig:entite_acteur_attributs}
+\end{figure}
+
+
+\subsubsection{Association (ou Type d'Association)}
+
+\begin{definition}[Association]
+    Une \textbf{association} (ou type d'association) représente un lien, une relation ou une interaction entre deux ou plusieurs entités.  Elle permet de modéliser des liens concrets entre les instances de ces entités.
+\end{definition}
+
+Les associations peuvent être binaires (entre deux entités), ternaires (entre trois entités), ou n-aires (entre n entités).  Les associations binaires sont les plus fréquentes.
+
+\begin{example}[Exemple d'association binaire]
+    Dans le domaine du cinéma, on peut définir l'association \textbf{Joue} entre les entités \textbf{Acteur} et \textbf{Film}.  Cette association représente le fait qu'un acteur joue dans un film.
+\end{example}
+
+Graphiquement, une association est représentée par un losange, relié par des traits aux entités qu'elle associe.  Le nom de l'association est écrit à l'intérieur du losange.
+
+\begin{figure}[H]
+    \centering
+    \begin{verbatim}
+#save_to: association_joue.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots(figsize=(6, 2.5))
+ax.axis('off')
+
+# Acteur box
+rect1 = patches.Rectangle((0.1, 0.25), 0.2, 0.5, linewidth=2, edgecolor='green', facecolor='lightgreen')
+ax.add_patch(rect1)
+plt.text(0.2, 0.5, 'Acteur', ha='center', va='center', fontsize=12)
+
+# Film box
+rect2 = patches.Rectangle((0.7, 0.25), 0.2, 0.5, linewidth=2, edgecolor='green', facecolor='lightgreen')
+ax.add_patch(rect2)
+plt.text(0.8, 0.5, 'Film', ha='center', va='center', fontsize=12)
+
+# Association Joue rhombus
+rhombus = patches.RegularPolygon((0.48, 0.5), numVertices=4, radius=0.15, orientation=np.pi/4, linewidth=2, edgecolor='blue', facecolor='lightblue')
+ax.add_patch(rhombus)
+plt.text(0.48, 0.5, 'joue', ha='center', va='center', fontsize=12)
+
+
+# Lines connecting entities to association
+plt.plot([0.3, 0.33], [0.5, 0.5], color='black', linewidth=2)
+plt.plot([0.7, 0.67], [0.5, 0.5], color='black', linewidth=2)
+
+
+plt.xlim(0, 1)
+plt.ylim(0, 1)
+plt.savefig('association_joue.png')
+
+        \end{verbatim}
+        \includegraphics[width=0.6\textwidth]{association_joue.png}
+        \caption{Association Joue entre Acteur et Film}
+        \label{fig:association_joue}
+    \end{figure}
+
+
+Une association est spécifiée par un nom, les entités qu'elle associe et, éventuellement, des \textbf{rôles} et des attributs.
+
+\subsubsection{Rôles}
+
+Dans une association, chaque entité participante joue un rôle spécifique. Le rôle précise la fonction de l'entité dans le contexte de l'association.  Les rôles sont particulièrement utiles pour clarifier le sens des associations, surtout lorsque plusieurs associations existent entre les mêmes entités ou lorsque l'association est réflexive (une entité est associée à elle-même).
+
+Dans l'exemple de l'association \textbf{Joue}, on pourrait préciser les rôles : l'acteur joue le rôle de «Acteur» et le film a comme rôle «Film dans lequel il joue».  Cependant, dans cet exemple simple, les rôles sont implicites et ne sont pas obligatoires.
+
+Dans certains cas, une association peut avoir des attributs propres.  Par exemple, si l'on considère l'association \textbf{Joue} et que l'on souhaite stocker le rôle spécifique joué par un acteur dans un film, on peut ajouter un attribut \textbf{Rôle} à l'association elle-même.
+
+
+\begin{figure}[H]
+    \centering
+    \begin{verbatim}
+#save_to: association_joue_role_attribut.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots(figsize=(6, 3))
+ax.axis('off')
+
+# Acteur box
+rect1 = patches.Rectangle((0.1, 0.25), 0.2, 0.5, linewidth=2, edgecolor='green', facecolor='lightgreen')
+ax.add_patch(rect1)
+plt.text(0.2, 0.5, 'Acteur', ha='center', va='center', fontsize=12)
+
+# Film box
+rect2 = patches.Rectangle((0.7, 0.25), 0.2, 0.5, linewidth=2, edgecolor='green', facecolor='lightgreen')
+ax.add_patch(rect2)
+plt.text(0.8, 0.5, 'Film', ha='center', va='center', fontsize=12)
+
+# Association Joue rhombus
+rhombus = patches.RegularPolygon((0.48, 0.5), numVertices=4, radius=0.2, orientation=np.pi/4, linewidth=2, edgecolor='blue', facecolor='lightblue')
+ax.add_patch(rhombus)
+plt.text(0.48, 0.6, 'Joue', ha='center', va='center', fontsize=12)
+plt.text(0.48, 0.4, 'Rôle', ha='center', va='center', fontsize=10)
+
+
+# Lines connecting entities to association
+plt.plot([0.3, 0.35], [0.5, 0.5], color='black', linewidth=2)
+plt.plot([0.7, 0.65], [0.5, 0.5], color='black', linewidth=2)
+
+
+plt.xlim(0, 1)
+plt.ylim(0, 1)
+plt.savefig('association_joue_role_attribut.png')
+
+        \end{verbatim}
+        \includegraphics[width=0.6\textwidth]{association_joue_role_attribut.png}
+        \caption{Association Joue avec l'attribut Rôle}
+        \label{fig:association_joue_role_attribut}
+    \end{figure}
+
+
+\subsection{Contraintes de Cardinalité}
+
+Les contraintes de cardinalité permettent de préciser la nature et le nombre de liens qui peuvent exister entre les instances des entités participant à une association. Elles apportent une précision importante au modèle E/A et permettent de refléter plus fidèlement les règles de gestion du domaine d'application.
+
+La cardinalité s'exprime en termes de nombre minimal et maximal d'instances d'une entité qui peuvent être liées à une instance d'une autre entité via une association.  On note généralement la cardinalité sous la forme \textbf{(min, max)}, où :
+
+\begin{itemize}
+    \item \textbf{min} :  le nombre minimum d'instances de l'entité cible auxquelles une instance de l'entité source doit être liée.
+    \item \textbf{max} :  le nombre maximum d'instances de l'entité cible auxquelles une instance de l'entité source peut être liée.
+\end{itemize}
+
+Les valeurs possibles pour \textbf{min} sont 0 ou 1 (ou parfois des valeurs plus grandes, mais rarement utilisées dans la modélisation conceptuelle).  Les valeurs possibles pour \textbf{max} sont 1 ou \textbf{m} (pour «plusieurs», «many» en anglais).
+
+\begin{example}[Exemple de contraintes de cardinalité pour l'association Joue]
+    Considérons l'association \textbf{Joue} entre \textbf{Acteur} et \textbf{Film}.  On peut définir les contraintes de cardinalité suivantes :
+
+    \begin{itemize}
+        \item Un acteur peut jouer dans zéro, un ou plusieurs films.  Donc, du côté de l'entité \textbf{Acteur}, la cardinalité est \textbf{(0, m)}.
+        \item Un film peut avoir zéro, un ou plusieurs acteurs qui jouent dedans (par exemple, un film d'animation peut ne pas avoir d'acteurs «réels»).  Donc, du côté de l'entité \textbf{Film}, la cardinalité est également \textbf{(0, m)}.
+    \end{itemize}
+\end{example}
+
+Graphiquement, les contraintes de cardinalité sont indiquées sur les traits reliant l'association aux entités, sous la forme \textbf{(min, max)}.
+
+\begin{figure}[H]
+    \centering
+    \begin{verbatim}
+#save_to: cardinalite_joue.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots(figsize=(6, 2.5))
+ax.axis('off')
+
+# Acteur box
+rect1 = patches.Rectangle((0.1, 0.25), 0.2, 0.5, linewidth=2, edgecolor='green', facecolor='lightgreen')
+ax.add_patch(rect1)
+plt.text(0.2, 0.5, 'Acteur', ha='center', va='center', fontsize=12)
+
+# Film box
+rect2 = patches.Rectangle((0.7, 0.25), 0.2, 0.5, linewidth=2, edgecolor='green', facecolor='lightgreen')
+ax.add_patch(rect2)
+plt.text(0.8, 0.5, 'Film', ha='center', va='center', fontsize=12)
+
+# Association Joue rhombus
+rhombus = patches.RegularPolygon((0.48, 0.5), numVertices=4, radius=0.15, orientation=np.pi/4, linewidth=2, edgecolor='blue', facecolor='lightblue')
+ax.add_patch(rhombus)
+plt.text(0.48, 0.5, 'joue', ha='center', va='center', fontsize=12)
+
+# Cardinality (0,m) on Acteur side
+plt.text(0.33, 0.5, '(0, m)', ha='left', va='center', fontsize=10)
+
+# Cardinality (0,m) on Film side
+plt.text(0.67, 0.5, '(0, m)', ha='right', va='center', fontsize=10)
+
+
+# Lines connecting entities to association
+plt.plot([0.3, 0.33], [0.5, 0.5], color='black', linewidth=2)
+plt.plot([0.7, 0.67], [0.5, 0.5], color='black', linewidth=2)
+
+
+plt.xlim(0, 1)
+plt.ylim(0, 1)
+plt.savefig('cardinalite_joue.png')
+
+        \end{verbatim}
+        \includegraphics[width=0.6\textwidth]{cardinalite_joue.png}
+        \caption{Contraintes de Cardinalité pour l'association Joue}
+        \label{fig:cardinalite_joue}
+    \end{figure}
+
+\subsection{Clés (ou Identifiants) d'une Entité}
+
+\begin{definition}[Clé d'une entité]
+    Une \textbf{clé} (ou identifiant) d'une entité est un attribut (ou un ensemble d'attributs) qui permet d'identifier de manière unique chaque instance de cette entité.  Elle garantit l'unicité des instances au sein d'une entité.
+\end{definition}
+
+Il est essentiel de définir au moins une clé pour chaque entité afin de pouvoir distinguer et manipuler les instances de cette entité.
+
+\begin{example}[Clé pour l'entité Acteur]
+    Pour l'entité \textbf{Acteur}, on pourrait envisager plusieurs attributs comme clés potentielles :
+
+    \begin{itemize}
+        \item \textbf{Nom} :  Le nom de famille seul n'est pas suffisant, car plusieurs acteurs peuvent avoir le même nom.
+        \item \textbf{Prénom} :  Le prénom seul n'est pas suffisant non plus pour la même raison.
+        \item \textbf{Nom et Prénom} :  La combinaison du nom et du prénom pourrait être une cléCandidate possible, mais il pourrait encore y avoir des homonymes.
+        \item \textbf{Numéro d'identification unique (Num\_A)} :  Si l'on attribue un numéro unique à chaque acteur, cet attribut devient une cléCandidate idéale.
+    \end{itemize}
+\end{example}
+
+Dans un diagramme E/A, la clé primaire d'une entité est souvent soulignée ou indiquée d'une manière spécifique (par exemple, en la plaçant en premier dans la liste des attributs).
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \begin{verbatim}
+#save_to: cle_acteur.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots(figsize=(3, 3))
+ax.axis('off')
+
+# Acteur box
+rect1 = patches.Rectangle((0.1, 0.2), 0.8, 0.6, linewidth=2, edgecolor='green', facecolor='lightgreen')
+ax.add_patch(rect1)
+plt.text(0.5, 0.7, 'Acteur', ha='center', va='center', fontsize=12)
+plt.text(0.2, 0.6, '- Num_A', ha='left', va='center', fontsize=10)
+plt.text(0.2, 0.5, '- Prénom', ha='left', va='center', fontsize=10)
+plt.text(0.2, 0.4, '- Nom', ha='left', va='center', fontsize=10)
+plt.text(0.2, 0.3, '- Ddn', ha='left', va='center', fontsize=10)
+
+
+plt.xlim(0, 1)
+plt.ylim(0, 1)
+plt.savefig('cle_acteur.png')
+
+        \end{verbatim}
+        \includegraphics[width=\textwidth]{cle_acteur.png}
+        \caption{Clé de l'entité Acteur (Num\_A)}
+        \label{fig:cle_acteur}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \begin{verbatim}
+#save_to: cle_film.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots(figsize=(3, 3))
+ax.axis('off')
+
+# Film box
+rect1 = patches.Rectangle((0.1, 0.2), 0.8, 0.6, linewidth=2, edgecolor='green', facecolor='lightgreen')
+ax.add_patch(rect1)
+plt.text(0.5, 0.7, 'Film', ha='center', va='center', fontsize=12)
+plt.text(0.2, 0.5, '- Titre', ha='left', va='center', fontsize=10)
+plt.text(0.2, 0.4, '- Année', ha='left', va='center', fontsize=10)
+plt.text(0.2, 0.3, '- MeS', ha='left', va='center', fontsize=10)
+
+
+plt.xlim(0, 1)
+plt.ylim(0, 1)
+plt.savefig('cle_film.png')
+
+        \end{verbatim}
+        \includegraphics[width=\textwidth]{cle_film.png}
+        \caption{Clé de l'entité Film (Titre, Année)}
+        \label{fig:cle_film}
+    \end{minipage}
+\end{figure}
+
+
+\subsection{Entités Faibles (Identification Relative)}
+
+\begin{definition}[Entité Faible]
+    Une \textbf{entité faible} est une entité dont l'existence dépend de l'existence d'une autre entité, appelée entité forte ou entité propriétaire.  Une entité faible ne peut pas être identifiée de manière unique par ses propres attributs, mais elle est identifiée relativement à l'entité forte dont elle dépend.
+\end{definition}
+
+Les entités faibles sont souvent utilisées pour modéliser des informations qui sont des détails ou des compléments d'information relatifs à une autre entité.
+
+\begin{example}[Exemple d'entité faible : Salle de cinéma]
+    Considérons le domaine des cinémas.  Une \textbf{Salle} de cinéma n'a pas d'existence indépendante d'un \textbf{Cinéma}.  Une salle est toujours «dans» un cinéma.  Pour identifier une salle de manière unique, il faut connaître le cinéma auquel elle appartient et son numéro de salle au sein de ce cinéma.  Le numéro de salle est «local» au cinéma.
+
+    Dans ce cas, \textbf{Salle} est une entité faible, et \textbf{Cinéma} est l'entité forte ou propriétaire.  L'identification d'une instance de \textbf{Salle} se fait de manière relative à une instance de \textbf{Cinéma}.  La clé de \textbf{Salle} sera donc composée de la clé de \textbf{Cinéma} (par exemple, un identifiant unique de cinéma) et d'un attribut propre à \textbf{Salle} (par exemple, le numéro de salle).
+\end{example}
+
+Dans un diagramme E/A, une entité faible est souvent représentée par un rectangle avec un contour double. L'association entre l'entité faible et l'entité forte est généralement une association identifiante, souvent de cardinalité (1,1) du côté de l'entité faible.
+
+\begin{figure}[H]
+    \centering
+    \begin{verbatim}
+#save_to: entite_faible_salle_cinema.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots(figsize=(7, 3))
+ax.axis('off')
+
+# Cinema box
+rect1 = patches.Rectangle((0.1, 0.2), 0.2, 0.6, linewidth=2, edgecolor='green', facecolor='lightgreen')
+ax.add_patch(rect1)
+plt.text(0.2, 0.7, 'Cinéma', ha='center', va='center', fontsize=12)
+plt.text(0.15, 0.55, '- Id_C', ha='left', va='center', fontsize=10)
+plt.text(0.15, 0.45, '- Nom_C', ha='left', va='center', fontsize=10)
+plt.text(0.15, 0.35, '- Tel', ha='left', va='center', fontsize=10)
+
+
+# Salle box (double rectangle)
+rect2_outer = patches.Rectangle((0.7, 0.2), 0.2, 0.6, linewidth=2, edgecolor='green', facecolor='lightgreen')
+rect2_inner = patches.Rectangle((0.71, 0.21), 0.18, 0.58, linewidth=2, edgecolor='black', facecolor='white')
+ax.add_patch(rect2_outer)
+ax.add_patch(rect2_inner)
+
+plt.text(0.8, 0.7, 'Salle', ha='center', va='center', fontsize=12)
+plt.text(0.75, 0.55, '- Num_S', ha='left', va='center', fontsize=10)
+plt.text(0.75, 0.45, '- Nb_Pl', ha='left', va='center', fontsize=10)
+
+
+# Association Est-dans rhombus
+rhombus = patches.RegularPolygon((0.48, 0.5), numVertices=4, radius=0.2, orientation=np.pi/4, linewidth=2, edgecolor='blue', facecolor='lightblue')
+ax.add_patch(rhombus)
+plt.text(0.48, 0.5, 'Est-dans', ha='center', va='center', fontsize=12)
+
+
+# Cardinality (1,m) on Cinema side
+plt.text(0.3, 0.5, '(1, m)', ha='left', va='center', fontsize=10)
+
+# Cardinality (1,1) on Salle side
+plt.text(0.65, 0.5, '(1, 1)', ha='right', va='center', fontsize=10)
+
+
+# Lines connecting entities to association
+plt.plot([0.3, 0.33], [0.5, 0.5], color='black', linewidth=2)
+plt.plot([0.7, 0.67], [0.5, 0.5], color='black', linewidth=2)
+plt.text(0.6, 0.3, 'R', ha='center', va='center', fontsize=12)
+
+
+plt.xlim(0, 1)
+plt.ylim(0, 1)
+plt.savefig('entite_faible_salle_cinema.png')
+
+        \end{verbatim}
+        \includegraphics[width=0.7\textwidth]{entite_faible_salle_cinema.png}
+        \caption{Entité Faible Salle et Entité Forte Cinéma}
+        \label{fig:entite_faible_salle_cinema}
+    \end{figure}
+
+
+\subsection{Héritage (Is-a)}
+
+\begin{definition}[Héritage]
+    L'\textbf{héritage} (ou spécialisation/généralisation) est un concept qui permet d'organiser les entités en hiérarchies, en introduisant des relations de type «est-un» (is-a) entre les entités.  L'héritage permet de modéliser des situations où certaines entités sont des cas particuliers ou des sous-types d'entités plus générales.
+\end{definition}
+
+L'héritage est utile pour factoriser les attributs communs à plusieurs entités et pour représenter des hiérarchies de concepts.
+
+\begin{example}[Exemple d'héritage : Film, Documentaire, Animation]
+    Dans le domaine du cinéma, on peut considérer que les entités \textbf{Documentaire} et \textbf{Animation} sont des types particuliers de l'entité plus générale \textbf{Film}.  On peut dire : «un documentaire est un film» et «un film d'animation est un film».  Il y a donc une relation d'héritage entre \textbf{Film} (entité super-classe) et \textbf{Documentaire} et \textbf{Animation} (entités sous-classes).
+
+    Les entités sous-classes héritent des attributs de l'entité super-classe et peuvent avoir des attributs spécifiques supplémentaires.  Par exemple, l'entité \textbf{Film} peut avoir des attributs comme \textbf{Titre}, \textbf{Année}, \textbf{Metteur en scène}, tandis que \textbf{Documentaire} pourrait avoir un attribut spécifique comme \textbf{Sujet}, et \textbf{Animation} un attribut comme \textbf{Technique d'animation}.
+\end{example}
+
+Graphiquement, l'héritage est souvent représenté par un triangle pointant vers l'entité super-classe, avec la mention «is-a» ou un symbole similaire.
+
+\begin{figure}[H]
+    \centering
+    \begin{verbatim}
+#save_to: heritage_film_documentaire_animation.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots(figsize=(7, 3.5))
+ax.axis('off')
+
+# Film box (Superclasse)
+rect_film = patches.Rectangle((0.4, 0.1), 0.2, 0.5, linewidth=2, edgecolor='green', facecolor='lightgreen')
+ax.add_patch(rect_film)
+plt.text(0.5, 0.35, 'Film', ha='center', va='center', fontsize=12)
+
+# Documentaire box (Sous-classe)
+rect_doc = patches.Rectangle((0.05, 0.7), 0.2, 0.5, linewidth=2, edgecolor='green', facecolor='lightgreen')
+ax.add_patch(rect_doc)
+plt.text(0.15, 0.95, 'Documentaire', ha='center', va='center', fontsize=12)
+
+# Animation box (Sous-classe)
+rect_anim = patches.Rectangle((0.75, 0.7), 0.2, 0.5, linewidth=2, edgecolor='green', facecolor='lightgreen')
+ax.add_patch(rect_anim)
+plt.text(0.85, 0.95, 'Animation', ha='center', va='center', fontsize=12)
+
+# Is-a triangle for Documentaire
+triangle_doc = patches.RegularPolygon((0.27, 0.7), numVertices=3, radius=0.1, orientation=np.pi, facecolor='white', edgecolor='black', linewidth=2)
+ax.add_patch(triangle_doc)
+plt.text(0.27, 0.7, 'is-a', ha='center', va='bottom', fontsize=10)
+
+# Is-a triangle for Animation
+triangle_anim = patches.RegularPolygon((0.73, 0.7), numVertices=3, radius=0.1, orientation=np.pi, facecolor='white', edgecolor='black', linewidth=2)
+ax.add_patch(triangle_anim)
+plt.text(0.73, 0.7, 'is-a', ha='center', va='bottom', fontsize=10)
+
+
+# Lines connecting triangles to Film box
+plt.plot([0.27, 0.4], [0.7, 0.6], color='black', linewidth=2)
+plt.plot([0.73, 0.6], [0.7, 0.6], color='black', linewidth=2)
+
+# Cardinality 1-1 for Documentaire side
+plt.text(0.35, 0.65, '1-1', ha='center', va='bottom', fontsize=10)
+# Cardinality 1-1 for Animation side
+plt.text(0.65, 0.65, '1-1', ha='center', va='bottom', fontsize=10)
+
+
+plt.xlim(0, 1)
+plt.ylim(0, 1.3)
+plt.savefig('heritage_film_documentaire_animation.png')
+
+        \end{verbatim}
+        \includegraphics[width=0.7\textwidth]{heritage_film_documentaire_animation.png}
+        \caption{Héritage : Film, Documentaire et Animation}
+        \label{fig:heritage_film_documentaire_animation}
+    \end{figure}
+
+
+\section{Principes de Conception}
+
+Une bonne conception de base de données repose sur le respect de certains principes fondamentaux.  Voici quelques principes clés à suivre lors de la conception d'un modèle E/A :
+
+\subsection{Se Focaliser sur les Besoins de l'Application}
+
+Le principe le plus important est de toujours garder à l'esprit les besoins de l'application et des utilisateurs.  Le modèle de données doit refléter la réalité du domaine d'application, mais il doit surtout être utile pour l'application pour laquelle il est conçu.
+
+\begin{itemize}
+    \item \textbf{Entités et attributs pertinents} :  Les entités et les attributs doivent être choisis en fonction de leur utilité pour l'application.  Il est inutile d'introduire des entités ou des attributs qui ne seront pas utilisés ou qui n'apportent pas de valeur ajoutée. Par exemple, pour une application de gestion de cinémathèque, un attribut «GENRE» pour l'entité \textbf{Acteur} n'est probablement pas pertinent.  De même, pour une application de type Amazon, stocker l'adresse de chaque acteur n'a aucun intérêt.  En revanche, pour un studio de cinéma, stocker l'adresse et le portable de chaque acteur peut être important.
+    \item \textbf{Associations significatives} :  Les associations doivent refléter les relations importantes entre les entités, celles qui sont pertinentes pour l'application.  Il faut s'interroger sur la nécessité de chaque association et sur sa cardinalité.  Par exemple, est-il nécessaire d'avoir deux associations entre l'entité \textbf{Studio} et l'entité \textbf{Film}, l'une indiquant qu'un studio produit un film, et l'autre qu'un studio a participé au tournage ? Cela dépend des besoins de l'application.
+\end{itemize}
+
+\subsection{Faire Simple}
+
+La simplicité est un principe essentiel en conception.  Un modèle simple est plus facile à comprendre, à mettre en œuvre et à maintenir.  Il est important de :
+
+\begin{itemize}
+    \item \textbf{Eviter la complexité inutile} :  Ne pas chercher à modéliser tous les détails et toutes les subtilités du domaine d'application.  Se concentrer sur l'essentiel et simplifier au maximum.
+    \item \textbf{Choisir des notations simples et précises} :  Utiliser les notations du modèle E/A de manière rigoureuse et précise, mais sans les complexifier inutilement.
+\end{itemize}
+
+\subsection{Eviter les Redondances}
+
+La redondance, c'est-à-dire la répétition de la même information sous différentes formes, est à éviter au maximum dans une base de données.  La redondance entraîne des problèmes d'efficacité (gaspillage d'espace de stockage, temps d'accès plus longs) et de qualité des données (risques d'incohérences si les informations redondantes ne sont pas mises à jour de manière synchronisée).
+
+Il faut donc s'efforcer de :
+
+\begin{itemize}
+    \item \textbf{Identifier et éliminer les redondances} :  Analyser attentivement le modèle E/A pour détecter les redondances potentielles et les supprimer.  Cela peut passer par une restructuration du modèle, une décomposition des entités, ou l'introduction de nouvelles entités ou associations.  «Faire la chasse aux» redondances est une activité importante de la conception.
+    \item \textbf{Normalisation} :  Les techniques de normalisation des bases de données, qui seront étudiées plus tard, permettent de réduire au maximum la redondance et d'améliorer la qualité des données.
+\end{itemize}
+
+\subsection{Choisir Judicieusement les Entités, Associations et Attributs}
+
+Le choix des entités, des associations et des attributs est crucial pour la qualité du modèle E/A.  Il faut se poser les bonnes questions et faire les bons compromis.
+
+\begin{itemize}
+    \item \textbf{Attribut versus Entité} :  Dans certains cas, on peut hésiter à modéliser une information comme un attribut ou comme une entité à part entière.  Par exemple, dans l'exemple de l'association \textbf{Joue}, on pourrait considérer que le «Rôle» joué par un acteur dans un film est un simple attribut de l'association, ou bien le modéliser comme une entité \textbf{Rôle} liée à l'association \textbf{Joue}. Le choix dépendra de la complexité de l'information à représenter et des besoins de l'application. Si un acteur peut jouer plusieurs rôles dans un même film et si l'on souhaite décrire des informations spécifiques sur chaque rôle (comme un texte de rôle, un costume, etc.), il sera plus judicieux de modéliser \textbf{Rôle} comme une entité.  Sinon, un simple attribut \textbf{Rôle} dans l'association \textbf{Joue} peut suffire.
+    \item \textbf{Associations pertinentes} :  S'assurer que chaque association modélise une relation significative et pertinente pour l'application.  Eviter les associations inutiles ou ambiguës.
+    \item \textbf{Attributs descriptifs} :  Choisir des attributs qui décrivent de manière précise et complète les entités et les associations, en fonction des besoins de l'application.
+\end{itemize}
+
+
+\section{Conclusion}
+
+Ce manuel a introduit les concepts fondamentaux de la conception de bases de données en utilisant le modèle Entité-Association (E/A).  Nous avons vu que la conception d'une base de données est un processus complexe et itératif, qui nécessite une compréhension approfondie du domaine d'application, une collaboration étroite avec les experts du domaine, et le respect de principes de conception clés comme la simplicité, la pertinence et l'absence de redondance.
+
+Le modèle E/A est un outil puissant et flexible pour la modélisation conceptuelle des données.  Il permet de représenter de manière intuitive les entités, leurs attributs et les relations qui les unissent.  Les diagrammes E/A facilitent la communication et la compréhension du modèle par tous les acteurs du projet (concepteurs, développeurs, utilisateurs finaux).
+
+Bien que le modèle E/A soit largement utilisé et efficace, il existe d'autres approches pour la modélisation conceptuelle, comme le diagramme UML (Unified Modeling Language) ou les modèles sémantiques et les ontologies.  Ces approches peuvent être plus adaptées à certains types d'applications ou de domaines.  La recherche continue dans le domaine de la modélisation des données, comme en témoigne la conférence ER (Entity-Relationship) dédiée à ce sujet.
+
+La conception de bases de données est un métier à part entière, qui requiert des compétences techniques, mais aussi des qualités d'analyse, de communication et de compromis.  Les outils graphiques de modélisation, comme WinDesign, Looping, Visual Paradigm ou Lucidchart, peuvent faciliter la tâche du concepteur, mais ils ne remplacent pas la réflexion et l'expertise humaine.
+
+L'étape de modélisation conceptuelle n'est que la première étape de la conception d'une base de données.  Elle est suivie des étapes de modélisation logique et physique, qui consistent à traduire le modèle conceptuel en un schéma implémentable dans un SGBD spécifique.  Le choix du modèle de données (relationnel, orienté-objet, semi-structuré) et du SGBD (Oracle, MySQL, PostgreSQL, etc.) dépendra des besoins de l'application, des contraintes techniques et des performances attendues.
+
+La conception de bases de données est un domaine en constante évolution, en réponse aux nouveaux besoins des applications et aux progrès des technologies.  Les bases de données NoSQL, les bases de données orientées graphes, les bases de données en mémoire, sont autant d'exemples de nouvelles approches et technologies qui viennent enrichir le paysage des bases de données.  La maîtrise des principes de conception fondamentaux, comme ceux présentés dans ce manuel, reste cependant essentielle pour aborder sereinement les défis de la conception de bases de données, aujourd'hui et demain.
+
+
+\end{document}
+```
