@@ -55,11 +55,12 @@ y = np.array([1, 2, 1.5, 3, 2.5, 4])
 plt.figure(figsize=(8, 6))
 plt.plot(x, y, 'o', label='Points de données')
 
-# Interpolation linéaire par morceaux pour l'exemple
+# Polynomial Interpolation
+poly_coeffs = np.polyfit(x, y, len(x) - 1) # Fit a polynomial of degree N-1
+poly = np.poly1d(poly_coeffs)
 x_interp = np.linspace(0, 5, 100)
-y_interp = np.interp(x_interp, x, y)
-plt.plot(x_interp, y_interp, '-', label='Interpolation linéaire par morceaux')
-
+y_interp = poly(x_interp)
+plt.plot(x_interp, y_interp, '-', label='Interpolation polynomiale (degré N-1)')
 
 plt.xlabel('x')
 plt.ylabel('y')
