@@ -1,0 +1,676 @@
+```latex
+\documentclass{article}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{listings}
+\usepackage{graphviz}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Example}
+
+\usepackage[margin=1in]{geometry}
+
+\begin{document}
+\sloppy
+
+\section{Introduction à l'Ingénierie Logicielle}
+
+\subsection{Définition et Nécessité de l'Ingénierie Logicielle}
+
+L'ingénierie logicielle est essentielle pour construire des systèmes logiciels fiables, robustes et efficaces.  Nous voulons avoir des raisons de faire confiance aux logiciels.
+
+\subsection{Constat Initial : Analogie Rolls-Royce et Ordinateur}
+
+Imaginez si l'industrie automobile avait progressé au même rythme que l'informatique.  Comme le soulignait Robert X. Cringely :
+
+\begin{quote}
+Si l'automobile avait suivi le même cycle de développement que l'ordinateur, une Rolls-Royce coûterait aujourd'hui :
+\begin{itemize}
+    \item \$100,
+    \item Consommerait un million de miles par gallon,
+    \item Et exploserait une fois par an, tuant tous les occupants.
+\end{itemize}
+\end{quote}
+
+Cette analogie frappante met en lumière l'importance cruciale de l'ingénierie dans le développement de systèmes complexes et critiques.
+
+\subsection{Pourquoi l'Ingénierie Logicielle est Cruciale}
+
+L'ingénierie logicielle est indispensable pour plusieurs raisons, notamment :
+
+\begin{itemize}
+    \item \textbf{Problèmes Technologiques :}
+    \begin{itemize}
+        \item Les logiciels sont de plus en plus massifs et complexes.
+        \item Les contraintes de fiabilité et de sécurité sont primordiales.
+        \item Il existe des interactions complexes entre matériel et logiciel.
+    \end{itemize}
+    \item \textbf{Problèmes Sociaux :}
+    \begin{itemize}
+        \item Les demandes des clients sont souvent imprécises et fluctuantes, nécessitant une communication efficace.
+        \item Le développement se fait en grandes équipes, ce qui requiert une coordination rigoureuse.
+        \item Le cycle de vie des logiciels est long et inclut une maintenance conséquente.
+        \item Les contraintes légales et les problèmes d'image sont des enjeux importants.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Risques Liés aux Logiciels Défectueux}
+
+Un logiciel défectueux peut être dangereux et avoir des conséquences graves :
+
+\begin{itemize}
+    \item Pour certains logiciels, des vies sont en jeu, notamment :
+    \begin{itemize}
+        \item Dans les transports,
+        \item La médecine,
+        \item L'industrie,
+        \item Le nucléaire,
+        \item Les missiles...
+    \end{itemize}
+    \item De nombreux autres logiciels ont un fort pouvoir de nuisance :
+    \begin{itemize}
+        \item Dans les communications,
+        \item Dans les transactions bancaires...
+    \end{itemize}
+\end{itemize}
+
+L'évolution des logiciels tend vers des systèmes :
+
+\begin{itemize}
+    \item Avec des composants plus nombreux.
+    \item Présentant un risque d'accumulation de "petits" problèmes.
+\end{itemize}
+
+\subsection{Fiascos Mémorables et Coûts Associés}
+
+De nombreux fiascos mémorables illustrent les conséquences de défauts logiciels :
+
+\begin{itemize}
+    \item \textbf{1962 Mariner 1 (Venus) :} Mauvais calcul d'une trajectoire, crash en vol.
+    \item \textbf{1985 Therac-25 :} Radiothérapie surdosée. 5 morts.
+    \item \textbf{1996 Ariane 5 :} Crash.
+    \item \textbf{1997 .com :} Blocage de tous les noms de domaine.
+    \item \textbf{1999 Mars Climate Orbiter :} Un satellite à 120 millions \$ perdu pour une confusion entre unités.
+    \item \textbf{2004 SNCF :} Système de réservation défaillant.
+    \item \textbf{2004 Réseaux Bouygues et France Telecom :} Inopérants.
+    \item \textbf{2005 Régulateur de vitesse Renault Laguna.}
+    \item \textbf{2010 NPfIT :} Coût de 120 milliards £.
+\end{itemize}
+
+De plus, les logiciels peuvent atteindre une taille considérable et engendrer des coûts importants :
+
+\begin{itemize}
+    \item \textbf{Windows 7 :}
+    \begin{itemize}
+        \item 1200 personnes (rien que pour les programmeurs).
+        \item Coûts de développement : estimés à 5 milliards.
+        \item Revenus : estimés à 20 milliards.
+        \item Engagements légaux sur 15 à 20 ans.
+        \item Un précédent litige sur Windows Server 98 avait coûté 700 millions.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Procédures de Validation : Questions Clés}
+
+Pour garantir la qualité et la fiabilité des logiciels, des procédures de validation rigoureuses sont nécessaires.  Les questions clés à se poser incluent :
+
+\begin{itemize}
+    \item Comment justifier et contrôler le processus de développement ?
+    \item Comment garantir la représentativité des tests ?
+    \item Traiter toutes les combinaisons d'options ?
+    \item Comment tester tous les facteurs extérieurs ?
+    \item Qui peut autoriser la mise en service ? Quelle est sa responsabilité ?
+\end{itemize}
+
+\subsection{Ordres de Grandeur : Taille et Coût des Logiciels}
+
+La taille et le coût des systèmes logiciels peuvent être considérables :
+
+\begin{itemize}
+    \item \textbf{Taille des systèmes logiciels :}
+    \begin{itemize}
+        \item Système d'exploitation : plusieurs millions (ou dizaines de millions) de lignes de code.
+        \item Navette spatiale : plusieurs dizaines (ou centaines) de millions de lignes de code.
+    \itemize}
+    \item \textbf{Coûts de développement :}
+    \begin{itemize}
+        \item Codage : $\sim$ 15-20 \%
+        \item Validation et vérification : $\sim$ 40\%
+        \item Spécification et conception : $\sim$ 40 \%
+    \end{itemize}
+\end{itemize}
+
+\section{Processus de Développement Logiciel}
+
+\subsection{Processus de Développement en V}
+
+Le processus de développement en V est un modèle séquentiel qui met en évidence la relation entre les phases de développement et les phases de test.
+
+\begin{verbatim}
+#save_to: processus_en_v.png
+from graphviz import Digraph
+
+dot = Digraph('V_Model', comment='Processus de Développement en V')
+
+# Nodes - Left side (Development)
+dot.node('Analyse', 'Analyse des besoins')
+dot.node('Specif', 'Spécification')
+dot.node('Arch_Conception', 'Conception architecturale')
+dot.node('Detail_Conception', 'Conception détaillée')
+dot.node('Programmation', 'Programmation')
+
+# Nodes - Right side (Testing)
+dot.node('Tests_Unitaires', 'Tests unitaires')
+dot.node('Tests_Integration', 'Tests d\'intégration')
+dot.node('Tests_Systeme', 'Tests système')
+dot.node('Tests_Acceptance', 'Tests d\'acceptation')
+
+# Edges - Left side of V
+dot.edge('Analyse', 'Specif')
+dot.edge('Specif', 'Arch_Conception')
+dot.edge('Arch_Conception', 'Detail_Conception')
+dot.edge('Detail_Conception', 'Programmation')
+
+# Edges - Right side of V
+dot.edge('Programmation', 'Tests_Unitaires')
+dot.edge('Tests_Unitaires', 'Tests_Integration')
+dot.edge('Tests_Integration', 'Tests_Systeme')
+dot.edge('Tests_Systeme', 'Tests_Acceptance')
+
+# Connect Development to Testing - Bottom of V
+# Conceptually, connect Programmation to Tests_Acceptance to visually form V
+# For better visual, connect Programmation to Tests_Acceptance indirectly through a central point if needed.
+# For simplicity, direct connection for now.
+
+dot.edge('Analyse', 'Tests_Acceptance', label='Validation')
+dot.edge('Specif', 'Tests_Systeme', label='Validation')
+dot.edge('Arch_Conception', 'Tests_Integration', label='Validation')
+dot.edge('Detail_Conception', 'Tests_Unitaires', label='Vérification')
+
+
+dot.render('processus_en_v', format='png', view=False)
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[max width=0.8\textwidth, keepaspectratio]{processus_en_v.png}
+    \caption{Processus de Développement en V}
+    \label{fig:processus_en_v}
+\end{figure}
+
+\noindent Le processus se déroule comme suit :
+
+\begin{enumerate}
+    \item \textbf{Analyse des besoins :} Définir ce que doit faire le système.
+    \item \textbf{Spécification :}  Écrire les spécifications détaillées.
+    \item \textbf{Conception architecturale :} Définir comment le système va être réalisé.
+    \item \textbf{Conception détaillée :}  Conception détaillée des composants.
+    \item \textbf{Programmation :} Implémentation du code.
+    \item \textbf{Tests unitaires :} Tests des unités de code.
+    \item \textbf{Tests d'intégration :} Tests de l'intégration des composants.
+    \item \textbf{Tests système :} Tests du système complet.
+    \item \textbf{Tests d'acceptation :} Tests par le client pour acceptation.
+    \item \textbf{Validation et vérification :}  S'assurer que le système répond aux besoins et est correctement construit.
+\end{enumerate}
+
+\subsection{Phases de Développement et Documents Associés}
+
+Chaque phase du développement logiciel est associée à des documents spécifiques :
+
+\begin{itemize}
+    \item \textbf{Phase d'analyse des besoins :}
+    \begin{itemize}
+        \item Étude du contexte, contraintes de performance, ergonomie, portabilité.
+        \item Produit : Cahier des charges (requirement specification).
+    \end{itemize}
+    \item \textbf{Phase d'analyse des spécifications :}
+    \begin{itemize}
+        \item Définir ce que le système doit faire (et pas comment le faire).
+        \item Produit : Modèle d'analyse (analysis model).
+    \end{itemize}
+    \item \textbf{Phase de conception architecturale :}
+    \begin{itemize}
+        \item Décomposition en "composants".
+        \item Conception de l'intégration et des tests d'intégration.
+        \item Produit : Conception architecturale (architectural design).
+    \end{itemize}
+    \item \textbf{Phase de conception détaillée :}
+    \begin{itemize}
+        \item Choix des algorithmes et structures de données, définition des interfaces, conception des tests.
+        \item Produits : Documents de conception, interfaces de code, fragments de code, pseudo-code, prototypes.
+    \end{itemize}
+    \item \textbf{Phase de codage :}
+    \begin{itemize}
+        \item Implémentation du code.
+        \item Produit : Code.
+    \end{itemize}
+    \item \textbf{Phase de test unitaire :}
+    \begin{itemize}
+        \item Test indépendant de chaque méthode (comportement bas-niveau).
+        \item Produit : Protocoles de validation, documentation.
+    \end{itemize}
+     \item \textbf{Phase de test d'intégration :}
+    \begin{itemize}
+        \item Exécution des scénarios de tests conçus pendant l'analyse (comportement haut-niveau).
+        \item Produit : Protocoles de validation, documentation.
+    \end{itemize}
+     \item \textbf{Phase de test système :}
+    \begin{itemize}
+        \item Test global en conditions réelles, mesure de performances.
+        \item Produit : Protocoles de validation, documentation.
+    \end{itemize}
+     \item \textbf{Phase de déploiement :}
+    \begin{itemize}
+        \item Déploiement chez le client.
+        \item Produit : Test, inspection des documents et des normes qualité.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Activités Transverses}
+
+Chaque phase de développement contient des activités transverses :
+
+\begin{itemize}
+    \item \textbf{Production de documentation :} Manuels d'utilisateur, de référence, d'installation...
+    \item \textbf{Validation / Vérification :} Chaque phase produit et valide le document correspondant.
+\end{itemize}
+
+\subsection{Difficultés Particulières du Développement Logiciel}
+
+Le développement logiciel présente des difficultés spécifiques :
+
+\begin{itemize}
+    \item \textbf{Problèmes dépendants des applications :}
+    \begin{itemize}
+        \item Synchronisation des processus.
+        \item Nature et volume des données, problèmes algorithmiques.
+        \item Interactions matériel/logiciel.
+        \item Contraintes de temps-réel.
+    \end{itemize}
+    \item \textbf{Facilité de modification et imprévisibilité des conséquences :}
+    \begin{itemize}
+        \item Il est facile de modifier un programme, mais beaucoup moins de prédire les conséquences.
+        \item Un changement mineur peut être catastrophique.
+        \item Il est difficile de connaître les probabilités des différentes situations.
+        \item Comment mesurer la qualité ?
+    \end{itemize}
+\end{itemize}
+
+\subsection{Modèles de Développement Alternatifs : Modèle en Spirale}
+
+Le modèle en spirale est une alternative au modèle en V, mettant l'accent sur l'itération et la gestion des risques.
+
+\begin{verbatim}
+#save_to: modele_spirale.png
+from graphviz import Digraph
+import numpy as np
+
+dot = Digraph('Spiral_Model', comment='Modèle de Développement en Spirale')
+
+# Define phases
+phases = ["Planification", "Analyse des Risques", "Ingénierie", "Évaluation Client"]
+num_phases = len(phases)
+angle_step = 360.0 / num_phases
+spiral_factor = 0.3  # Adjust for spiral tightness
+
+# Create nodes and position them in a spiral
+nodes = {}
+for idx, phase in enumerate(phases):
+    angle_deg = idx * angle_step
+    angle_rad = np.deg2rad(angle_deg)
+    radius = 1 + spiral_factor * idx  # Radius increases with each phase
+    x = radius * np.cos(angle_rad)
+    y = radius * np.sin(angle_rad)
+    node_name = phase.replace(" ", "_") # for node name compatibility
+    dot.node(node_name, phase, pos=f"{x},{y}!")
+    nodes[phase] = node_name
+
+# Add edges to connect nodes in spiral order
+phase_sequence = phases
+for i in range(num_phases - 1):
+    dot.edge(nodes[phase_sequence[i]], nodes[phase_sequence[i+1]])
+
+# Close the spiral loop: Evaluation Client to Planification
+dot.edge(nodes["Évaluation Client"], nodes["Planification"])
+
+
+dot.render('modele_spirale', format='png', view=False)
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[max width=0.4\textwidth, keepaspectratio]{modele_spirale.png}
+    \caption{Modèle de Développement en Spirale}
+    \label{fig:modele_spirale}
+\end{figure}
+
+\noindent Caractéristiques du modèle en spirale :
+
+\begin{itemize}
+    \item Intégration et validation progressive.
+    \item Retours utilisateur rapides.
+    \item Diminution des risques.
+    \item Meilleure visibilité.
+    \item Méthode « Agile ».
+    \item Modèle itératif.
+    \item Cycle court de production pour mieux interagir avec le client.
+\end{itemize}
+
+\subsection{Importance de la Maintenance}
+
+La maintenance logicielle est une phase essentielle, souvent complexe et coûteuse, après le déploiement.  Elle comprend plusieurs aspects :
+
+\begin{itemize}
+    \item \textbf{Correction} des bugs critiques.
+    \item \textbf{Adaptation} à de nouveaux OS, matériels, problèmes de performance.
+    \item \textbf{Évolution} : intégration de nouvelles fonctionnalités.
+    \item Pire : éventuellement maintenir plusieurs versions en parallèle !
+\end{itemize}
+
+Les coûts de maintenance peuvent être 2 à 4 fois supérieurs au développement initial.  Un besoin de tests de régression sur les nouvelles versions est crucial, avec des descriptions précises des tests (entrées, sorties, contexte) et un besoin d'automatisation.
+
+\section{Modélisation UML : Cas d'Utilisation et Diagrammes de Séquence}
+
+\subsection{Cas d'Utilisation}
+
+Les cas d'utilisation sont utilisés pour comprendre les besoins du client et rédiger le cahier des charges fonctionnel.
+
+\subsubsection{Objectif et Éléments de Description}
+
+\textbf{Objectif :} Comprendre les besoins du client pour rédiger le cahier des charges fonctionnel.
+
+\textbf{Trois questions clés pour définir un cas d'utilisation :}
+
+\begin{enumerate}
+    \item Définir les \textbf{utilisations principales} du système : à quoi sert-il ?
+    \item Définir l'\textbf{environnement} du système : qui va l'utiliser ou interagir avec lui ?
+    \item Définir les \textbf{limites} du système : où s'arrête sa responsabilité ?
+\end{enumerate}
+
+\textbf{Éléments de description d'un cas d'utilisation :}
+
+\begin{itemize}
+    \item Diagramme de cas d'utilisation.
+    \item Description textuelle des cas d'utilisation.
+    \item Diagrammes de séquence des scénarios d'utilisation.
+\end{itemize}
+
+\subsubsection{Exemple de Cas d'Utilisation : Commander}
+
+Considérons un système de vente en ligne.  Un cas d'utilisation typique est "Commander".
+
+\textbf{Scénario : Commander}
+
+\begin{verbatim}
+
+#save_to: use_case_commander.png
+from graphviz import Digraph
+
+dot = Digraph('UseCaseDiagram', comment='Use Case Diagram')
+
+dot.node('Client', 'Client', shape='circle')
+dot.node('SiteVenteEnLigne', 'Site de vente en ligne', shape='box')
+dot.node('Commander', 'Commander', shape='ellipse')
+
+dot.edge('Client', 'Commander', label='association', arrowhead='none')
+dot.edge('Commander', 'SiteVenteEnLigne', label='cas\nd\'utilisation', arrowhead='none')
+
+dot.render('use_case_commander', format='png', view=False)
+
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[ max width=\textwidth,
+    max height=0.4\textheight,
+    keepaspectratio]{use_case_commander.png}
+    \caption{Diagramme de Cas d'Utilisation : Commander}
+    \label{fig:use_case_commander}
+\end{figure}
+
+\noindent \textbf{Description textuelle du scénario "Commander" :}
+Le client s'authentifie dans le système, puis choisit une adresse et un mode de livraison. Le système indique le montant total de sa commande au client. Le client donne ses informations de paiement. La transaction est effectuée et le système en informe le client par e-mail.
+
+\subsubsection{Acteurs et Scénarios}
+
+\textbf{Acteur :} Entité qui interagit avec le système (personne, chose, logiciel extérieur au système).  Il représente un rôle (plusieurs rôles possibles pour une même entité) et est identifié par un nom de rôle.
+
+\textbf{Cas d'utilisation :} Fonctionnalité visible de l'extérieur, action déclenchée par un acteur, identifiée par une action (verbe à l'infinitif).
+
+\textbf{Scénario principal (cas nominal) :} Description des étapes normales du cas d'utilisation.
+\textbf{Scénarios alternatifs (cas d'erreur, variations) :} Déviations du scénario principal.
+
+\subsection{Relations entre Cas d'Utilisation}
+
+Il existe différents types de relations entre les cas d'utilisation :
+
+\subsubsection{Inclusion ($\ll$includes$\gg$)}
+
+Un cas d'utilisation en inclut un autre. Le scénario du cas d'utilisation inclus est inséré dans le scénario du cas d'utilisation incluant. Utilisé lorsqu'il y a un scénario commun à plusieurs cas d'utilisation.
+
+\subsubsection{Extension ($\ll$extends$\gg$)}
+
+Un cas d'utilisation étend un autre cas d'utilisation. Le cas d'utilisation extension est déclenché conditionnellement durant l'exécution du cas d'utilisation étendu. Le cas d'utilisation extension est optionnel pour le cas d'utilisation étendu.
+
+\subsubsection{Généralisation}
+
+Un cas d'utilisation est une spécialisation d'un cas d'utilisation plus général. Tout ou partie du scénario du cas d'utilisation général est spécifique au cas d'utilisation particulier.
+
+\subsection{Diagrammes de Séquence}
+
+Les diagrammes de séquence représentent graphiquement la chronologie des échanges de messages entre les acteurs et le système.
+
+\subsubsection{Diagramme de Séquence d'Analyse}
+
+\textbf{Objectif :} Représenter les interactions entre l'utilisateur et le système du point de vue de l'utilisateur, au niveau de l'analyse des besoins.
+
+\textbf{Éléments :}
+
+\begin{itemize}
+    \item Acteurs (représentés par des icônes).
+    \item Système (représenté par une colonne).
+    \item Messages informels (noms liés aux cas d'utilisation).
+    \item Mise en avant des données utiles au scénario (arguments).
+\end{itemize}
+
+\subsubsection{Diagramme de Séquence de Conception}
+
+\textbf{Objectif :} Décrire la réalisation des cas d'utilisation sur le système représenté par le diagramme de classes, au niveau de la conception.
+
+\textbf{Éléments :}
+
+\begin{itemize}
+    \item Acteurs.
+    \item Objets (instances des classes).
+    \item Messages (appels d'opérations).
+\end{itemize}
+
+\textbf{Principes de base :}
+
+\begin{itemize}
+    \item « Vie » de chaque entité représentée verticalement.
+    \item Échanges de messages représentés horizontalement.
+\end{itemize}
+
+\subsection{Types de Messages}
+
+\subsubsection{Message Synchrone}
+
+L'émetteur est bloqué en attente du retour du message. Représenté par une flèche pleine.
+
+\subsubsection{Message Asynchrone}
+
+L'émetteur n'est pas bloqué et continue son exécution. Représenté par une flèche ouverte.
+
+\subsubsection{Message Réflexif}
+
+Un objet s'envoie un message à lui-même.
+
+\subsection{Alternatives et Boucles}
+
+\subsubsection{Alternative}
+
+Représentation de conditions à l'envoi d'un message (si... alors... sinon...). Noté avec un bloc \texttt{alt}.
+
+\subsubsection{Boucle}
+
+Représentation de la répétition d'un enchaînement de messages. Noté avec un bloc \texttt{loop}.
+
+\subsection{Référence à un Autre Diagramme}
+
+Possibilité de faire référence à un autre diagramme pour décomposer la complexité. Noté avec \texttt{ref}.
+
+\section{Modélisation UML : Diagrammes de Classes}
+
+\subsection{Classes, Objets, Attributs et Opérations}
+
+\subsubsection{Classes}
+
+Une classe est un regroupement d'objets de même nature (mêmes attributs et mêmes opérations). C'est un modèle ou un plan pour créer des objets.
+
+\subsubsection{Objets}
+
+Un objet est une instance d'une classe.  Il représente une entité concrète ou abstraite du domaine d'application. Décrit par :
+
+\begin{itemize}
+    \item Identité (adresse mémoire).
+    \item État (attributs) : caractéristiques de l'objet, associées à une valeur.
+    \item Comportement (opérations) : services que l'objet peut offrir.
+\end{itemize}
+
+\subsubsection{Attributs}
+
+Un attribut est une caractéristique partagée par tous les objets de la classe.  Il est associé à chaque objet une valeur et possède un type simple (int, bool, string, date, etc.).
+
+\subsubsection{Opérations}
+
+Une opération est un service qui peut être demandé à tout objet de la classe.  Elle représente un comportement commun à tous les objets de la classe.  Il ne faut pas confondre opération et méthode (implantation de l'opération).
+
+\subsection{Associations entre Classes}
+
+Une association représente une relation binaire entre classes.
+
+\subsubsection{Multiplicités}
+
+Les multiplicités contraignent le nombre d'objets liés par une association.
+
+\begin{itemize}
+    \item \textbf{1 :} Exactement un.
+    \item \textbf{0..1 :} Au plus un (zéro ou un).
+    \item \textbf{1..* :} Au moins un (un ou plusieurs).
+    \item \textbf{0..* ou *} : Zéro ou plusieurs.
+    \item \textbf{n..m :} Entre n et m.
+    \end{itemize}
+
+\subsubsection{Rôles}
+
+Les rôles nomment les extrémités d'une association et permettent d'accéder aux objets liés par l'association à partir d'un objet donné.
+
+\subsubsection{Agrégation}
+
+L'agrégation est une association particulière entre classes, de type composant-composite, où une classe prédomine sur l'autre.  C'est une agrégation faible : le composite fait référence à ses composants et la durée de vie du composite et des composants sont indépendantes.
+
+\subsubsection{Composition}
+
+La composition est une forme d'agrégation forte. Le composite \textit{contient} ses composants.  La création ou destruction du composite entraîne la création ou destruction de ses composants. Un objet ne fait partie que d'un seul composite à la fois.
+
+\subsection{Héritage, Interface et Polymorphisme}
+
+\subsubsection{Héritage}
+
+L'héritage permet de construire une classe à partir d'une classe plus générale (super-classe) en partageant ses attributs, opérations et contraintes.  Une sous-classe spécialise ou raffine une super-classe.
+
+\subsubsection{Interface}
+
+Une interface est une liste d'opérations constituant un contrat à respecter par les classes réalisant l'interface.  Ce n'est pas une classe, et elle ne peut pas servir à créer des objets. Toutes les opérations d'une interface sont abstraites.
+
+\subsubsection{Polymorphisme}
+
+Le polymorphisme est la capacité pour une opération d'être définie différemment dans différentes sous-classes, tout en restant une opération spécifique à la sous-classe.  Il nécessite la définition d'une opération abstraite dans la super-classe.
+
+\subsection{Opérations Abstraites}
+
+Une opération abstraite est une opération non définie pour une classe, car il est impossible de la définir pour tous les objets de la classe. L'opération abstraite est définie en italique dans les diagrammes. Une opération abstraite implique que la classe contenant l'opération abstraite est une classe abstraite.
+
+\section{Contraintes et Invariants}
+
+\subsection{Représentation des Contraintes et Invariants}
+
+Le diagramme de classes représente la structure du système, mais ne permet pas de représenter directement les contraintes et invariants.  Les contraintes et invariants sont des propriétés portant sur les éléments du modèle, qui doivent être vérifiées à tout instant.
+
+\subsection{Contraintes sur les Attributs}
+
+Les contraintes sur les attributs spécifient des restrictions sur les valeurs autorisées pour les attributs.  Elles peuvent être représentées sous forme de notes dans le diagramme, de texte accompagnant le diagramme, ou en utilisant l'OCL (Object Constraint Language).
+
+\subsection{Contraintes sur les Associations}
+
+Les contraintes sur les associations spécifient des restrictions sur les relations entre les classes.  Elles peuvent également être représentées de différentes manières, y compris avec l'OCL.
+
+\subsection{Object Constraint Language (OCL)}
+
+L'OCL est un langage de contraintes formel associé à UML, permettant d'exprimer de manière précise les contraintes et invariants liés au diagramme de classes.
+
+\section{Conception et Programmation Structurée}
+
+\subsection{Principes de la Programmation Structurée}
+
+La programmation structurée est un paradigme de programmation visant à améliorer la clarté, la qualité et le temps de développement d'un programme en utilisant des structures de contrôle de flux spécifiques et en évitant l'utilisation excessive d'instructions de branchement inconditionnel (goto).
+
+\subsection{Structures de Contrôle Restreintes}
+
+Pour raisonner sur un programme, il est essentiel d'utiliser des structures de contrôle restreintes :
+
+\begin{itemize}
+    \item \textbf{Abstraction} : Appels de fonctions.
+    \item \textbf{Induction} : Fonctions récursives, itération.
+    \item \textbf{Raisonnement par cas} : Types algébriques, Pattern matching.
+    \end{itemize}
+
+Éviter l'utilisation de \texttt{goto} pour maintenir un flux de contrôle clair et prévisible.
+
+\subsection{Organisation en Couches}
+
+Organiser le logiciel en couches permet de mieux gérer la complexité.  Chaque couche de niveau n accède uniquement aux primitives de la couche n-1, juste en dessous.  Cela favorise l'abstraction et l'indépendance entre les différentes parties du système.
+
+\subsection{Raffinement Successif}
+
+La conception par raffinements successifs consiste à décomposer un problème complexe en sous-problèmes plus simples, et à raffiner progressivement les solutions à chaque niveau.  Chaque raffinement correspond à un choix de conception.
+
+\subsection{Types Abstraits de Données}
+
+Utiliser des types abstraits de données (TAD) permet de manipuler des données sans se soucier de leur représentation concrète.  Un TAD est défini par un ensemble d'opérations.  L'utilisateur d'un TAD n'a pas besoin de connaître l'implémentation interne.
+
+\subsection{Patrons de Conception Architecturaux}
+
+Les patrons de conception architecturaux sont des solutions éprouvées à des problèmes de conception récurrents.  Ils permettent de structurer l'architecture d'un logiciel de manière modulaire et flexible.  Exemples : Cacher la représentation des données (c.f. ADT), les fonctions internes d'un composant. Les interfaces doivent être restreintes et bien définies.
+
+\section{Documentation}
+
+\subsection{Importance des Commentaires et de la Documentation}
+
+Ajouter des commentaires au code source est essentiel pour faciliter la compréhension et la maintenance du code.  Les commentaires aident :
+
+\begin{itemize}
+    \item À comprendre le code source.
+    \item À reprendre le code plus tard.
+    \item À expliquer l'utilisation des classes et méthodes.
+    \item À documenter les améliorations, problèmes à corriger, etc.
+\end{itemize}
+
+Utiliser des outils de documentation comme Javadoc pour générer automatiquement de la documentation à partir des commentaires.
+
+\subsection{Annotations}
+
+Les annotations (commençant par \texttt{@}) permettent d'ajouter des métadonnées au code source.  Exemple : \texttt{@Override} pour forcer la redéfinition d'une méthode. Javadoc utilise des annotations comme \texttt{@param} et \texttt{@return} pour spécifier les paramètres et la valeur de retour des méthodes.
+
+\end{document}
+```

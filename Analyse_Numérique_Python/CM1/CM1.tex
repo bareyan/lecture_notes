@@ -21,12 +21,6 @@
 \begin{document}
 \sloppy
 
-\section{Modélisation de Populations : Modèles Discrets et Continus}
-
-\section{Introduction}
-
-La modélisation de populations est l'étude mathématique des populations biologiques, visant à comprendre et à prédire leur évolution au fil du temps. Ces modèles sont essentiels en écologie, en biologie de la conservation et dans la gestion des ressources naturelles. Nous allons explorer différents modèles, en distinguant les modèles discrets et continus, pour décrire la dynamique des populations.
-
 \section{Modèles Discrets}
 
 Les modèles discrets considèrent que les changements de population se produisent à intervalles de temps distincts.
@@ -89,7 +83,7 @@ N_n = (1 + c)^n N_0 = (1 + z \Delta t)^n N_0
 \subsubsection{Visualisation}
 
 \begin{verbatim}
-```python
+
 #save_to: geometric_model_visualization.png
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
@@ -138,7 +132,6 @@ axes[2].legend()
 
 plt.tight_layout()
 plt.savefig('geometric_model_visualization.png')
-```
 \end{verbatim}
 
 \begin{figure}[h]
@@ -267,7 +260,7 @@ N(t) = \frac{K}{1 + \left(\frac{K}{N_0} - 1\right) e^{-z_0 t}}
 \subsubsection{Visualisation}
 
 \begin{verbatim}
-```python
+
 #save_to: verhulst_model_visualization.png
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
@@ -311,7 +304,6 @@ axes[1].legend()
 
 plt.tight_layout()
 plt.savefig('verhulst_model_visualization.png')
-```
 \end{verbatim}
 
 \begin{figure}[h]
@@ -326,8 +318,6 @@ plt.savefig('verhulst_model_visualization.png')
 
 Nous avons exploré les modèles discrets (géométrique) et continus (Malthus et Verhulst) pour la modélisation de populations. Le modèle géométrique et le modèle de Malthus, bien que simples, présentent des limitations importantes, notamment la prédiction d'une croissance infinie. Le modèle de Verhulst améliore ces modèles en introduisant la notion de capacité biotique, offrant une description plus réaliste de la dynamique des populations en tenant compte de la limitation des ressources.
 
-\section*{RQ: Exercice}
-Exercice à définir ultérieurement.
 
 \end{document}
 ```
