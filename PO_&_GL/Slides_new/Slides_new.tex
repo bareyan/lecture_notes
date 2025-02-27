@@ -1,0 +1,1051 @@
+```latex
+\documentclass{article}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{listings}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Example}
+
+\usepackage[margin=1in]{geometry}
+\begin{document}
+\sloppy
+
+\section{Introduction aux diagrammes de classes UML}
+
+\subsection{Définition et objectif des diagrammes de classes}
+
+\begin{definition}
+Les diagrammes de classes UML (Unified Modeling Language) sont des représentations graphiques de la structure statique d'un système. Ils décrivent les types d'objets présents dans le système, leurs attributs, leurs opérations et les relations qui existent entre eux.
+\end{definition}
+
+\medskip
+
+L'objectif principal d'un diagramme de classes est de modéliser la structure interne d'un logiciel. Ils sont largement utilisés dans les phases de conception et d'analyse du développement logiciel pour visualiser et comprendre l'architecture du système.
+
+\subsection{Rôle dans le processus de développement logiciel}
+
+Dans un processus de développement logiciel en V, les diagrammes de classes jouent un rôle crucial à différents niveaux :
+
+\begin{verbatim}
+
+#save_to: processus_v.png
+from graphviz import Digraph
+
+dot = Digraph('ProcessusV', comment='Processus de développement en V', graph_attr={'rankdir': 'LR', 'nodesep': '0.5', 'ranksep': '0.8'})
+
+# Nœuds du processus
+analyse_besoins = 'AnalyseBesoins'
+specification = 'Specification'
+conception_archi = 'ConceptionArchi'
+conception_detail = 'ConceptionDetail'
+programmation = 'Programmation'
+tests_unitaires = 'TestsUnitaires'
+tests_integration = 'TestsIntegration'
+tests_systeme = 'TestsSysteme'
+tests_acceptation = 'TestsAcceptation'
+
+dot.node(analyse_besoins, label='Analyse\ndes besoins', shape='box', style='rounded,filled', fillcolor='orange')
+dot.node(specification, label='Spécification', shape='box', style='rounded,filled', fillcolor='orange')
+dot.node(conception_archi, label='Conception\narchitecturale', shape='box', style='rounded,filled', fillcolor='coral')
+dot.node(conception_detail, label='Conception\ndétaillée', shape='box', style='rounded,filled', fillcolor='coral')
+dot.node(programmation, label='Programmation', shape='box')
+dot.node(tests_unitaires, label='Tests unitaires', shape='box', style='rounded,filled', fillcolor='lightgreen')
+dot.node(tests_integration, label='Tests d\'intégration', shape='box', style='rounded,filled', fillcolor='lightgreen')
+dot.node(tests_systeme, label='Tests système', shape='box', style='rounded,filled', fillcolor='lightgreen')
+dot.node(tests_acceptation, label='Tests d\'acceptation', shape='box', style='rounded,filled', fillcolor='lightgreen')
+
+# Arêtes du processus
+dot.edge(analyse_besoins, specification)
+dot.edge(specification, conception_archi)
+dot.edge(conception_archi, conception_detail)
+dot.edge(conception_detail, programmation)
+dot.edge(programmation, tests_unitaires)
+dot.edge(tests_unitaires, tests_integration, dir='back')
+dot.edge(tests_integration, tests_systeme, dir='back')
+dot.edge(tests_systeme, tests_acceptation, dir='back')
+dot.edge(analyse_besoins, tests_acceptation, label='Validation', style='dashed', minlen='2')
+dot.edge(specification, tests_systeme, label='Validation', style='dashed', minlen='2')
+dot.edge(conception_archi, tests_integration, label='Validation', style='dashed', minlen='2')
+dot.edge(conception_detail, tests_unitaires, label='Validation', style='dashed', minlen='2')
+dot.edge(specification, analyse_besoins, label='Écriture', style='solid', dir='forward', minlen='2')
+
+
+dot.render('processus_v', format='png', view=False)
+
+\end{verbatim}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[ max width=\textwidth,
+     max height=0.4\textheight,
+     keepaspectratio]{processus_v.png}
+    \caption{Processus de développement en V}
+    \label{fig:processus_v}
+\end{figure}
+
+Au début du processus, pendant la phase d'\textbf{analyse}, les diagrammes de classes permettent de modéliser le domaine du problème et d'identifier les concepts clés. Ils aident à comprendre \textit{"ce que doit faire le système ?"} en représentant les entités du monde réel et leurs relations.
+
+Durant la phase de \textbf{conception}, les diagrammes de classes sont utilisés pour définir l'architecture du logiciel et \textit{"comment va-t-il le réaliser ?"} Ils précisent la structure interne du système, les classes de logiciels, leurs attributs, leurs méthodes et les relations entre ces classes.
+
+Tout au long du cycle de développement, les diagrammes de classes servent de support à la communication entre les différents acteurs (analystes, concepteurs, développeurs) et de référence pour la documentation du système. Ils sont essentiels pour la \textbf{validation et la vérification}, s'assurant que \textit{"fait-il ce qui était demandé et le fait-il correctement ?"} en confrontant le modèle aux besoins initiaux.
+
+\subsection{Diagrammes de classes vs diagrammes d'objets}
+
+\begin{remark}
+Il est important de distinguer les diagrammes de classes des diagrammes d'objets.
+\end{remark}
+
+\begin{itemize}
+    \item \textbf{Diagramme de classes} : Représente le \textbf{schéma}, le plan de construction. Il décrit la structure statique du logiciel, c'est-à-dire les classes, leurs attributs et opérations, et les relations entre ces classes. Le diagramme de classes est \textbf{abstrait} et général.
+    \item \textbf{Diagramme d'objets} : Représente une \textbf{instance} du schéma à un moment donné de l'exécution du logiciel. Il montre des objets concrets, leurs états (valeurs des attributs) et les liens entre ces objets. Le diagramme d'objets est \textbf{concret} et spécifique à un instant T. Il évolue avec l'exécution du logiciel.
+\end{itemize}
+
+Par exemple, un diagramme de classes peut définir la classe \texttt{Compte} avec les attributs \texttt{numéro}, \texttt{devise}, \texttt{solde} et les opérations \texttt{déposer()}, \texttt{retirer()}, \texttt{solde()}. Un diagramme d'objets, lui, montrera des instances de \texttt{Compte} comme \texttt{MonLivretA : Compte} avec \texttt{numéro = 123456}, \texttt{devise = EUR}, \texttt{solde = 3509,43}.
+
+
+\section{Concepts fondamentaux}
+
+\subsection{Classes}
+
+\subsubsection{Définition d'une classe}
+\begin{definition}
+Une \textbf{classe} est un regroupement d'objets de même nature, c'est-à-dire qui partagent les mêmes \textbf{attributs} et les mêmes \textbf{opérations}. Elle sert de \textbf{modèle} ou de \textbf{type} pour créer des objets.  On peut voir la classe comme un moule et les objets comme les instances créées à partir de ce moule.
+\end{definition}
+
+\subsubsection{Composants d'une classe : Attributs et Opérations}
+Une classe est définie par deux types de composants :
+
+\begin{itemize}
+    \item \textbf{Attributs} :  Ce sont les caractéristiques ou propriétés d'une classe. Un attribut décrit une information que chaque objet de la classe possède. Chaque attribut a un nom et un type. Pour chaque objet de la classe, un attribut a une \textbf{valeur}.
+    \item \textbf{Opérations} : Ce sont les actions ou services que les objets d'une classe peuvent réaliser ou que l'on peut leur demander de réaliser. Une opération est une fonction ou méthode applicable aux objets de la classe.
+\end{itemize}
+
+Dans un diagramme de classes, une classe est représentée par un rectangle divisé en trois parties (compartiments) :
+
+\begin{verbatim}
+
+#save_to: classe_compte.png
+from graphviz import Digraph
+
+dot = Digraph('ClasseCompte', comment='Classe Compte', graph_attr={'rankdir': 'TB'})
+
+# Using record-based label
+dot.node('Compte', label='{Compte||+ numéro : int\l+ devise : Devise\l+ solde : float\l|+ déposer(montant : float)\l+ retirer(montant : float)\l+ solde() : float\l}', shape='record')
+
+dot.render('classe_compte', format='png', view=False)
+
+\end{verbatim}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[ max width=\textwidth,
+     max height=0.4\textheight,
+     keepaspectratio]{classe_compte.png}
+    \caption{Représentation graphique de la classe \texttt{Compte}}
+    \label{fig:classe_compte}
+\end{figure}
+
+
+\begin{itemize}
+    \item Le compartiment supérieur contient le \textbf{nom de la classe} (ici, \texttt{Compte}).
+    \item Le compartiment du milieu liste les \textbf{attributs} avec leur type (par exemple, \texttt{numéro : int}, \texttt{devise : Devise}, \texttt{solde : float}).
+    \item Le compartiment inférieur liste les \textbf{opérations} (ou méthodes) avec leur signature (par exemple, \texttt{déposer(montant : float)}, \texttt{retirer(montant : float)}, \texttt{solde() : float}).
+\end{itemize}
+
+\subsubsection{Type des attributs}
+Le type d'un attribut définit le genre de valeurs qu'il peut prendre. Les types d'attributs peuvent être :
+\begin{itemize}
+    \item \textbf{Types simples} : Types de données de base comme \texttt{int} (entier), \texttt{float} (nombre à virgule flottante), \texttt{boolean} (booléen), \texttt{string} (chaîne de caractères).
+    \item \textbf{Types primitifs} : Types prédéfinis plus complexes, comme \texttt{Date}.
+    \item \textbf{Types énumérés} : Types définissant un ensemble fini de valeurs nommées. Par exemple, un type énuméré \texttt{Devise} pourrait avoir comme valeurs : \texttt{EUR}, \texttt{GBP}, \texttt{USD}, \texttt{CHF}.
+\end{itemize}
+
+\begin{verbatim}
+
+#save_to: enumeration_devise.png
+from graphviz import Digraph
+
+dot = Digraph('EnumerationDevise', comment='Enumeration Devise', graph_attr={'rankdir': 'TB'})
+
+# Using record-based label
+dot.node('Devise', label='{\<\<enumeration\>\>\\nDevise||EUR\lGBP\lUSD\lCHF\l}', shape='record')
+
+dot.render('enumeration_devise', format='png', view=False)
+
+\end{verbatim}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[ max width=\textwidth,
+     max height=0.4\textheight,
+     keepaspectratio]{enumeration_devise.png}
+    \caption{Représentation graphique de l'énumération \texttt{Devise}}
+    \label{fig:enumeration_devise}
+\end{figure}
+
+\begin{remark}
+Il est important de noter qu'un type énuméré n'est \textbf{pas une classe}. C'est un ensemble de valeurs possibles pour un attribut.
+\end{remark}
+
+
+\subsubsection{Classe vs Objet (Instance)}
+La classe est le concept, l'objet est la réalisation concrète de ce concept. Un \textbf{objet} est une \textbf{instance} d'une classe.  Cela signifie qu'un objet est créé à partir du modèle défini par la classe.  Pour une classe donnée, on peut créer de nombreux objets (instances). Chaque objet aura sa propre identité et son propre état (valeurs de ses attributs), mais tous partageront le même comportement (mêmes opérations définies dans la classe).
+
+
+\subsection{Objets}
+
+\subsubsection{Définition d'un objet}
+\begin{definition}
+Un \textbf{objet} est une entité concrète ou abstraite du domaine d'application que l'on cherche à modéliser. Il représente une occurrence particulière d'une classe.
+\end{definition}
+
+\subsubsection{Identité, état et comportement d'un objet}
+Chaque objet est caractérisé par :
+\begin{itemize}
+    \item \textbf{Identité} : Chaque objet possède une identité unique qui le distingue des autres objets, même s'ils ont le même état. En termes techniques, l'identité peut être vue comme son adresse mémoire.
+    \item \textbf{État} : L'état d'un objet est défini par les valeurs de ses attributs à un moment donné. L'état peut changer au cours du temps.
+    \item \textbf{Comportement} : Le comportement d'un objet est déterminé par les opérations (méthodes) qu'il peut effectuer ou que l'on peut lui demander d'effectuer. Le comportement est défini par la classe de l'objet.
+\end{itemize}
+
+Dans un diagramme d'objets, un objet est représenté par un rectangle, similaire à la classe, mais avec les spécifications suivantes :
+
+\begin{verbatim}
+
+#save_to: objet_monlivreta.png
+from graphviz import Digraph
+
+dot = Digraph('ObjetMonLivretA', comment='Objet MonLivretA', graph_attr={'rankdir': 'TB'})
+
+# Using record-based label
+dot.node('MonLivretA', label='{MonLivretA : Compte||numéro = 123456\ldevise = EUR\lsolde = 3509.43\l}', shape='record')
+
+dot.render('objet_monlivreta', format='png', view=False)
+
+\end{verbatim}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[ max width=\textwidth,
+     max height=0.4\textheight,
+     keepaspectratio]{objet_monlivreta.png}
+    \caption{Représentation graphique de l'objet \texttt{MonLivretA}}
+    \label{fig:objet_monlivreta}
+\end{figure}
+
+
+\begin{itemize}
+    \item Le compartiment supérieur contient le \textbf{nom de l'objet} suivi de deux points et du \textbf{nom de sa classe} (ici, \texttt{MonLivretA : Compte}).
+    \item Le compartiment du milieu liste les \textbf{attributs} et leur \textbf{valeur} pour cet objet spécifique (par exemple, \texttt{numéro = 123456}, \texttt{devise = EUR}, \texttt{solde = 3509,43}).  Les opérations ne sont généralement pas représentées dans les diagrammes d'objets, car elles sont définies par la classe.
+\end{itemize}
+
+\begin{remark}
+Des objets différents (ayant des identités différentes) peuvent avoir le même état (mêmes valeurs d'attributs). Par exemple, on peut avoir deux objets \texttt{Jean1 : Personne} et \texttt{Jean2 : Personne} avec les mêmes valeurs pour les attributs \texttt{nom}, \texttt{prénom} et \texttt{naissance}, mais ils restent deux objets distincts en mémoire.
+\end{remark}
+
+
+\section{Relations entre classes}
+
+Les relations entre classes permettent de modéliser les liens et les interactions entre les différents types d'objets d'un système. La relation la plus fondamentale est l'\textbf{association}.
+
+\subsection{Associations}
+
+\subsubsection{Définition d'une association binaire}
+\begin{definition}
+Une \textbf{association} binaire est une relation entre deux classes. Elle représente un lien sémantique entre les instances de ces classes.  Une association permet de naviguer d'un objet d'une classe vers les objets associés d'une autre classe.
+\end{definition}
+
+\subsubsection{Multiplicité des associations}
+La \textbf{multiplicité} d'une association indique le nombre d'objets d'une classe qui peuvent être associés à un objet de l'autre classe. La multiplicité est spécifiée à chaque extrémité de l'association. Les multiplicités courantes sont :
+
+\begin{itemize}
+    \item \textbf{1} : Exactement un.
+    \item \textbf{\*} : Zéro ou plusieurs (plusieurs).
+    \item \textbf{0..1} : Zéro ou un (au plus un).
+    \item \textbf{1..\*} : Un ou plusieurs (au moins un).
+    \item \textbf{n..m} : Entre n et m (n et m étant des entiers).
+\end{itemize}
+
+\begin{verbatim}
+
+#save_to: multiplicites.png
+from graphviz import Digraph
+
+dot = Digraph('Multiplicites', comment='Multiplicités', graph_attr={'rankdir': 'TB', 'nodesep': '0.5', 'ranksep': '0.5'})
+
+# Define nodes
+node_A_style = {'shape': 'box'}
+dot.node('A1', 'A', **node_A_style)
+dot.node('A2', 'A', **node_A_style)
+dot.node('A3', 'A', **node_A_style)
+dot.node('A4', 'A', **node_A_style)
+dot.node('A5', 'A', **node_A_style)
+dot.node('B1', 'B', **node_A_style)
+dot.node('B2', 'B', **node_A_style)
+dot.node('B3', 'B', **node_A_style)
+dot.node('B4', 'B', **node_A_style)
+dot.node('B5', 'B', **node_A_style)
+
+# Define edges with multiplicities
+dot.edge('A1', 'B1', label='n', headlabel='n', taillabel='*')
+dot.edge('A2', 'B2', label='n, m, p', headlabel='n, m, p', taillabel='*')
+dot.edge('A3', 'B3', label='n..m', headlabel='n..m', taillabel='*')
+dot.edge('A4', 'B4', label='n..*', headlabel='n..*', taillabel='*')
+dot.edge('A5', 'B5', label='*', headlabel='*', taillabel='*')
+
+# Add labels to edges explaining the multiplicity
+dot.edge('A1', 'B1', label='Exactement n',  labelfontsize='10', style='invis')
+dot.edge('A2', 'B2', label='Exactement n ou m ou p',  labelfontsize='10', style='invis')
+dot.edge('A3', 'B3', label='Entre n et m',  labelfontsize='10', style='invis')
+dot.edge('A4', 'B4', label='Au moins n',  labelfontsize='10', style='invis')
+dot.edge('A5', 'B5', label='Plusieurs (0 ou plus)',  labelfontsize='10', style='invis')
+
+
+dot.render('multiplicites', format='png', view=False)
+\end{verbatim}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[ max width=\textwidth,
+     max height=0.6\textheight,
+     keepaspectratio]{multiplicites.png}
+    \caption{Exemples de multiplicités}
+    \label{fig:multiplicites}
+\end{figure}
+
+\begin{remark}
+En pratique, les multiplicités les plus fréquemment utilisées sont :
+
+\begin{itemize}
+    \item \textbf{1} : Exactement 1.
+    \item \textbf{0..1} : Au plus 1 (zéro ou un).
+    \item \textbf{1..\*} : Au moins 1 (un ou plusieurs).
+    \item \textbf{\*} : Zéro ou plusieurs (plusieurs).
+\end{itemize}
+\end{remark}
+
+
+\subsubsection{Rôles des associations}
+Chaque extrémité d'une association peut avoir un \textbf{rôle}. Le rôle est un nom qui qualifie la façon dont une classe participe à l'association. Le rôle est utile pour préciser le sens de la navigation et pour accéder aux objets liés par l'association.
+
+Par exemple, dans une association entre \texttt{Personne} et \texttt{Compte}, on peut nommer les rôles \texttt{sesPropriétaires} pour l'extrémité côté \texttt{Personne} et \texttt{sesComptes} pour l'extrémité côté \texttt{Compte}.
+
+\subsubsection{Nom des associations}
+Une association peut avoir un \textbf{nom}, qui est un verbe ou une courte phrase décrivant la nature de la relation. Le nom de l'association est optionnel.  Par exemple, l'association entre \texttt{Personne} et \texttt{Compte} pourrait être nommée \texttt{possède}.
+
+\subsubsection{Navigabilité des associations}
+La \textbf{navigabilité} d'une association indique la direction dans laquelle on peut naviguer entre les objets associés. Par défaut, les associations sont \textbf{navigables dans les deux sens} (bidirectionnelles). On peut restreindre la navigabilité à un seul sens en ajoutant une flèche à l'extrémité navigable de l'association.  Une association navigable de A vers B signifie que depuis un objet de la classe A, on peut accéder aux objets associés de la classe B, mais pas l'inverse.
+
+
+\subsection{Associations particulières}
+
+\subsubsection{Association réflexive}
+\begin{example}
+Une \textbf{association réflexive} est une association où la même classe participe aux deux extrémités de la relation. Cela permet de modéliser des relations entre les instances d'une même classe.
+
+Par exemple, dans la classe \texttt{Personne}, on peut définir une association réflexive \texttt{parenté} pour représenter les relations parents-enfants entre personnes.
+\end{example}
+
+\begin{verbatim}
+
+#save_to: association_reflexive.png
+from graphviz import Digraph
+
+dot = Digraph('AssociationReflexive', comment='Association Réflexive', graph_attr={'rankdir': 'TB'})
+
+# Define Personne class node
+dot.node('Personne', label='{Personne||+ nom : string\l+ prénom : string\l+ naissance : Date\l}', shape='record')
+
+dot.edge('Personne', 'Personne', 
+         label='parenté', 
+         headlabel='enfants *', 
+         taillabel='parents 2',
+         arrowhead='vee', 
+         arrowtail='vee', 
+         dir='both',
+         constraint='false',  # Allows more flexible edge routing
+         minlen='2')          # Ensures enough space for the loop
+
+dot.render('association_reflexive', format='png', view=True)
+\end{verbatim}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[ max width=\textwidth,
+     max height=0.4\textheight,
+     keepaspectratio]{association_reflexive.png}
+    \caption{Exemple d'association réflexive : Relation de parenté entre personnes}
+    \label{fig:association_reflexive}
+\end{figure}
+
+
+\subsubsection{Associations multiples}
+\begin{example}
+Il est possible d'avoir \textbf{plusieurs associations} entre deux mêmes classes. Chaque association représente une relation sémantique différente entre les objets des classes concernées.
+
+Par exemple, entre les classes \texttt{Personne} et \texttt{Appartement}, on peut avoir deux associations : \texttt{loue} et \texttt{propose}. La première représente les appartements que la personne loue, et la seconde ceux qu'elle propose à la location.
+\end{example}
+
+\begin{verbatim}
+
+#save_to: associations_multiples.png
+from graphviz import Digraph
+
+dot = Digraph('AssociationsMultiples', comment='Associations Multiples', graph_attr={'rankdir': 'TB'})
+
+# Define classes
+dot.node('Personne', label='{Personne||+ nom : string\l+ prénom : string\l+ naissance : Date\l}', shape='record')
+dot.node('Appartement', label='{Appartement||+ adresse : string\l+ pièces : int\l+ loyer : float\l}', shape='record')
+
+# Define associations with different positioning
+# First association (loue) - positioned above
+dot.edge('Personne', 'Appartement', 
+         label='loue', 
+         arrowhead='vee', 
+         taillabel='*', 
+         headlabel='*',
+         constraint='true',
+         color='blue',
+         pos='e,0,0 0,0')
+
+# Second association (propose) - positioned below with a curve
+dot.edge('Personne', 'Appartement', 
+         label='propose', 
+         arrowhead='vee', 
+         taillabel='1',
+         headlabel='',
+         constraint='false',  # Allows more flexible edge routing
+         color='red',
+         style='dashed',
+         pos='s,0,0 0,0')
+
+dot.render('associations_multiples', format='png', view=True)
+
+\end{verbatim}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[ max width=\textwidth,
+     max height=0.4\textheight,
+     keepaspectratio]{associations_multiples.png}
+    \caption{Exemple d'associations multiples entre \texttt{Personne} et \texttt{Appartement}}
+    \label{fig:associations_multiples}
+\end{figure}
+
+
+\subsubsection{Classe-association}
+\begin{example}
+Une \textbf{classe-association} est une association qui est elle-même une classe. On utilise une classe-association lorsqu'une association a besoin de porter des attributs qui lui sont propres, ou de participer à d'autres associations.  Elle permet de paramétrer une association avec des informations supplémentaires.
+
+Par exemple, la relation \texttt{travaille pour} entre \texttt{Personne} et \texttt{Entreprise} peut être représentée par une classe-association \texttt{Emploi}.  Cette classe \texttt{Emploi} peut avoir des attributs comme \texttt{intitulé}, \texttt{date de début}, \texttt{date de fin}.
+\end{example}
+
+\begin{verbatim}
+
+#save_to: classe_association.png
+from graphviz import Digraph
+
+dot = Digraph('ClasseAssociation', comment='Classe Association', graph_attr={'rankdir': 'TB'})
+
+# Define classes
+dot.node('Personne', label='{Personne||+ nom : string\l+ prénom : string\l+ naissance : Date\l}', shape='record')
+dot.node('Entreprise', label='{Entreprise||+ nom : string\l+ ville : string\l}', shape='record')
+dot.node('Emploi', label='{Emploi||+ intitulé : string\l+ début : Date\l+ fin : Date\l}', shape='record')
+
+# Define associations (represented by edges to the class-association)
+dot.edge('Personne', 'Emploi', arrowhead='none', arrowtail='vee', taillabel='1..*')
+dot.edge('Entreprise', 'Emploi', arrowhead='none', arrowtail='vee', headlabel='*')
+
+
+dot.render('classe_association', format='png', view=False)
+\end{verbatim}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[ max width=\textwidth,
+     max height=0.4\textheight,
+     keepaspectratio]{classe_association.png}
+    \caption{Exemple de classe-association : \texttt{Emploi} entre \texttt{Personne} et \texttt{Entreprise}}
+    \label{fig:classe_association}
+\end{figure}
+
+
+\subsubsection{Association n-aire}
+\begin{example}
+Une \textbf{association n-aire} est une association qui relie \textbf{plus de deux classes}. L'association ternaire (n=3) est un cas particulier d'association n-aire fréquemment rencontré.  Ces associations sont utilisées pour modéliser des relations complexes impliquant plusieurs entités.
+
+Par exemple, une association ternaire pourrait relier les classes \texttt{Enseignant}, \texttt{Étudiant} et \texttt{Cours} pour représenter l'inscription des étudiants à des cours dispensés par des enseignants.
+\end{example}
+
+\begin{verbatim}
+
+#save_to: association_naire.png
+from graphviz import Digraph
+
+dot = Digraph('AssociationNAire', comment='Association N-aire', graph_attr={'rankdir': 'TB'})
+
+# Define classes
+dot.node('Enseignant', label='Enseignant', shape='box')
+dot.node('Étudiant', label='Étudiant', shape='box')
+dot.node('Cours', label='Cours', shape='box')
+dot.node('AssociationTernaire', label='', shape='diamond') # Diamond node for n-ary association
+
+# Connect classes to the diamond node
+dot.edge('Enseignant', 'AssociationTernaire', taillabel='1')
+dot.edge('Étudiant', 'AssociationTernaire', taillabel='1..*')
+dot.edge('AssociationTernaire', 'Cours', taillabel='1')
+
+dot.render('association_naire', format='png', view=False)
+\end{verbatim}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[ max width=\textwidth,
+     max height=0.4\textheight,
+     keepaspectratio]{association_naire.png}
+    \caption{Exemple d'association ternaire entre \texttt{Enseignant}, \texttt{Étudiant} et \texttt{Cours}}
+    \label{fig:association_naire}
+\end{figure}
+
+\begin{remark}
+La multiplicité d'une association n-aire est définie différemment des associations binaires. Pour chaque combinaison de (n-1) objets participants à l'association, la multiplicité contraint le nombre d'objets de la classe restante qui peuvent être associés.
+\end{remark}
+
+
+\subsection{Agrégation et Composition}
+
+L'agrégation et la composition sont des formes particulières d'association qui expriment des relations de type \textbf{composant-composite}. Elles indiquent qu'une classe (le composite) est constituée d'autres classes (les composants).
+
+\subsubsection{Agrégation faible (Agrégation par référence)}
+\begin{example}
+L'\textbf{agrégation faible} représente une relation de type "has-a" (a un). Le composite contient une \textbf{référence} vers ses composants. Les composants peuvent exister indépendamment du composite et peuvent être partagés entre plusieurs composites. Le cycle de vie du composite et de ses composants est indépendant.  On utilise un losange \textbf{vide} du côté du composite pour représenter l'agrégation faible.
+
+Par exemple, une \texttt{Liste de lecture} (composite) est composée de plusieurs \texttt{Morceaux} (composants).  Un morceau peut appartenir à plusieurs listes de lecture. Si on supprime une liste de lecture, les morceaux qui la composent continuent d'exister.
+\end{example}
+
+\begin{verbatim}
+
+#save_to: aggregation_faible.png
+from graphviz import Digraph
+
+dot = Digraph('AggregationFaible', comment='Agrégation Faible', graph_attr={'rankdir': 'TB'})
+
+# Define classes
+dot.node('ListeLecture', label='Liste de lecture', shape='box')
+dot.node('Morceau', label='Morceau', shape='box')
+
+# Define aggregation association
+dot.edge('ListeLecture', 'Morceau', arrowhead='vee', arrowtail='diamond', arrowtail_style='open', taillabel='*', headlabel='1..*')
+
+
+dot.render('aggregation_faible', format='png', view=False)
+\end{verbatim}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[ max width=\textwidth,
+     max height=0.4\textheight,
+     keepaspectratio]{aggregation_faible.png}
+    \caption{Exemple d'agrégation faible : \texttt{Liste de lecture} et \texttt{Morceau}}
+    \label{fig:aggregation_faible}
+\end{figure}
+
+\subsubsection{Composition (Agrégation forte ou Composition par valeur)}
+\begin{example}
+La \textbf{composition} est une forme plus forte d'agrégation qui représente une relation de type "part-of" (fait partie de).  Le composite \textbf{contient} physiquement ses composants. Les composants sont \textbf{exclusivement} liés au composite et leur cycle de vie est dépendant de celui du composite. Si le composite est détruit, ses composants sont également détruits. On utilise un losange \textbf{plein} du côté du composite pour représenter la composition.
+
+Par exemple, un \texttt{Album} (composite) est composé de plusieurs \texttt{Morceaux} (composants). Un morceau appartient à un et un seul album. Si on supprime un album, les morceaux qui le composent sont également supprimés.
+\end{example}
+
+\begin{verbatim}
+
+#save_to: composition.png
+from graphviz import Digraph
+
+dot = Digraph('Composition', comment='Composition', graph_attr={'rankdir': 'TB'})
+
+# Define classes
+dot.node('Album', label='Album', shape='box')
+dot.node('Morceau', label='Morceau', shape='box')
+
+# Define composition association
+dot.edge('Album', 'Morceau', arrowhead='vee', arrowtail='diamond', arrowtail_style='filled', taillabel='1', headlabel='1..*')
+
+
+dot.render('composition', format='png', view=False)
+\end{verbatim}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[ max width=\textwidth,
+     max height=0.4\textheight,
+     keepaspectratio]{composition.png}
+    \caption{Exemple de composition : \texttt{Album} et \texttt{Morceau}}
+    \label{fig:composition}
+\end{figure}
+
+\subsubsection{Différence entre Agrégation et Composition}
+\begin{remark}
+La principale différence entre agrégation faible et composition réside dans la \textbf{dépendance du cycle de vie} des composants par rapport au composite et dans le \textbf{partage} potentiel des composants. La composition implique une dépendance forte et une exclusivité, tandis que l'agrégation faible implique une indépendance et un partage possible. Graphiquement, la distinction se fait par le losange (vide pour l'agrégation, plein pour la composition).
+\end{remark}
+
+
+\section{Généralisation et Héritage}
+
+La généralisation et l'héritage sont des mécanismes fondamentaux de la modélisation orientée objet qui permettent d'organiser les classes en \textbf{hiérarchies} et de factoriser les attributs et opérations communs.
+
+\subsection{Hiérarchie de classes : Super-classes et Sous-classes}
+\begin{remark}
+L'héritage permet de définir une classe (appelée \textbf{sous-classe} ou classe dérivée) à partir d'une autre classe existante (appelée \textbf{super-classe} ou classe de base). La sous-classe hérite des attributs et des opérations de la super-classe.  On organise ainsi les classes en une \textbf{hiérarchie} ou \textbf{arborescence} de classes.
+
+La \textbf{généralisation} est le processus d'abstraction qui consiste à identifier les caractéristiques communes à plusieurs classes et à les regrouper dans une super-classe. La \textbf{spécialisation} est le processus inverse, qui consiste à raffiner une classe générale (super-classe) en classes plus spécifiques (sous-classes).
+\end{remark}
+
+
+Par exemple, on peut généraliser les classes \texttt{CompteCourant} et \texttt{CompteEpargne} en une super-classe \texttt{Compte}, qui représente les caractéristiques communes à tous les types de comptes bancaires (numéro, devise, solde, opérations déposer, retirer, solde). \texttt{CompteCourant} et \texttt{CompteEpargne} deviennent alors des sous-classes de \texttt{Compte}, héritant de ses attributs et opérations, et ajoutant leurs propres spécificités (découvert autorisé, frais de découvert pour \texttt{CompteCourant}, plafond, taux pour \texttt{CompteEpargne}).
+
+\begin{verbatim}
+
+#save_to: hierarchie_classes.png
+from graphviz import Digraph
+
+dot = Digraph('HierarchieClasses', comment='Hiérarchie de Classes', graph_attr={'rankdir': 'TB'})
+
+# Define classes
+dot.node('Compte', label='{Compte||+ numéro : int\l+ devise : Devise\l+ solde : float\l|+ déposer(montant : float)\l+ retirer(montant : float)\l+ solde() : float\l}', shape='record')
+dot.node('CompteCourant', label='{CompteCourant||+ découvertAutorisé : float\l+ fraisDécouvert : float\l}', shape='record')
+dot.node('CompteEpargne', label='{CompteÉpargne||+ plafond : float\l+ taux : float\l|+ calculerIntérêts() : float\l}', shape='record')
+
+# Define inheritance relationships
+dot.edge('Compte', 'CompteCourant', arrowhead='empty', style='solid')
+dot.edge('Compte', 'CompteEpargne', arrowhead='empty', style='solid')
+
+dot.render('hierarchie_classes', format='png', view=False)
+\end{verbatim}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[ max width=\textwidth,
+     max height=0.5\textheight,
+     keepaspectratio]{hierarchie_classes.png}
+    \caption{Exemple de hiérarchie de classes : \texttt{Compte}, \texttt{CompteCourant} et \texttt{CompteEpargne}}
+    \label{fig:hierarchie_classes}
+\end{figure}
+
+Dans un diagramme de classes, l'héritage est représenté par une flèche à tête triangulaire vide pointant de la sous-classe vers la super-classe.
+
+\subsection{Héritage des attributs et des opérations}
+Lorsqu'une classe B hérite d'une classe A, elle hérite de tous les attributs et opérations définis dans la classe A.  Les attributs et opérations hérités sont disponibles dans la sous-classe comme s'ils étaient directement définis dans celle-ci.  La sous-classe peut également ajouter ses propres attributs et opérations spécifiques, et peut redéfinir (surcharger) les opérations héritées pour adapter leur comportement.
+
+L'héritage favorise la réutilisation du code et la cohérence dans la modélisation. Il permet de créer des hiérarchies de classes bien structurées et de gérer la complexité des systèmes objets.
+
+\subsection{Classes abstraites}
+\begin{definition}
+Une \textbf{classe abstraite} est une classe qui ne peut pas être instanciée directement. Elle sert uniquement de \textbf{base} pour définir des classes héritées (sous-classes concrètes).  Une classe abstraite contient généralement des opérations abstraites, c'est-à-dire des opérations qui sont déclarées mais non implémentées dans la classe abstraite elle-même.  Les sous-classes concrètes doivent implémenter ces opérations abstraites.
+\end{definition}
+
+Une classe abstraite est utilisée pour modéliser des concepts généraux qui n'ont pas de réalisation concrète en soi, mais qui servent de modèle commun pour des concepts plus spécifiques.
+
+Dans un diagramme de classes, une classe abstraite est généralement notée de deux manières :
+\begin{itemize}
+    \item En mettant le \textbf{nom de la classe en italique}.
+    \item En utilisant le \textbf{stéréotype « abstract »} au-dessus du nom de la classe.
+\end{itemize}
+
+Par exemple, la classe \texttt{Compte} pourrait être définie comme une classe abstraite, car un compte bancaire générique n'existe pas en soi. Seuls les types spécifiques de comptes (compte courant, compte épargne, etc.) sont concrets.
+
+\begin{verbatim}
+
+#save_to: classe_abstraite.png
+from graphviz import Digraph
+
+dot = Digraph('ClasseAbstraite', comment='Classe Abstraite', graph_attr={'rankdir': 'TB'})
+
+# Define abstract class Compte (italic name)
+dot.node('Compte', label='{\<<i>Compte</i>\>||+ numéro : int\l+ devise : Devise\l+ solde : float\l|+ déposer(montant : float)\l+ retirer(montant : float)\l+ solde() : float\l}', shape='record')
+dot.node('CompteCourant', label='{CompteCourant||+ découvertAutorisé : float\l+ fraisDécouvert : float\l}', shape='record')
+dot.node('CompteEpargne', label='{CompteÉpargne||+ plafond : float\l+ taux : float\l|+ calculerIntérêts() : float\l}', shape='record')
+
+# Define inheritance relationships
+dot.edge('Compte', 'CompteCourant', arrowhead='empty', style='solid')
+dot.edge('Compte', 'CompteEpargne', arrowhead='empty', style='solid')
+
+dot.render('classe_abstraite', format='png', view=False)
+\end{verbatim}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[ max width=\textwidth,
+     max height=0.5\textheight,
+     keepaspectratio]{classe_abstraite.png}
+    \caption{Exemple de classe abstraite : \textit{Compte}}
+    \label{fig:classe_abstraite}
+\end{figure}
+
+
+\section{Exemple complet : Modélisation d'une bibliothèque}
+
+Pour illustrer l'ensemble des concepts présentés, nous allons développer pas à pas un modèle UML de diagramme de classes pour un système de gestion de bibliothèque.
+
+\subsection{Présentation du cas d'étude}
+On souhaite développer un système qui gère les emprunts et les retours de documents dans une bibliothèque.
+
+La bibliothèque gère deux types de ressources : des \textbf{livres} et des \textbf{revues}. Un livre est caractérisé par son titre, son auteur et son code ISBN. Un numéro de revue est caractérisé par le titre de la revue, un numéro de volume et sa date de parution.  Chaque \textbf{exemplaire} d'une ressource est identifié par un code barre.
+
+Pour emprunter un ouvrage, un \textbf{utilisateur} doit être enregistré.  Il s'enregistre auprès du bibliothécaire en donnant son nom et verse une caution.  Chaque ouvrage a une caution associée. Un utilisateur ne peut emprunter un ouvrage que si la caution qui lui reste sur son compte est supérieure à la caution de l'ouvrage. La durée de l'emprunt est fixée à 15 jours.  On ne peut pas emprunter plus d'un exemplaire d'une même ressource, ni emprunter une nouvelle ressource si on est en retard pour rendre une ressource.
+
+L'\textbf{emplacement} de stockage d'un ouvrage dans la bibliothèque est représenté par un numéro de travée, un numéro d'étagère dans la travée, et un niveau. Différentes ressources peuvent être rangées au même emplacement, mais tous les exemplaires d'une même ressource sont stockés au même endroit.
+
+\subsection{Diagrammes de classes successifs}
+
+\subsubsection{Version 1 : Classes et Attributs}
+
+Dans une première version, on identifie les classes principales et leurs attributs, sans se préoccuper des relations.
+
+\begin{verbatim}
+
+#save_to: bibliotheque_v1.png
+from graphviz import Digraph
+
+dot = Digraph('BibliothequeV1', comment='Bibliothèque V1', graph_attr={'rankdir': 'TB', 'nodesep': '0.5', 'ranksep': '0.5'})
+
+# Define classes and their attributes (version 1)
+dot.node('Utilisateur', label='{Utilisateur||+ nom : string\l+ caution : int\l}', shape='record')
+dot.node('Livre', label='{Livre||+ titre : string\l+ auteur : string\l+ ISBN : int\l+ caution : int\l}', shape='record')
+dot.node('Revue', label='{Revue||+ titre : string\l+ volume : int\l+ parution : Date\l+ caution : int\l}', shape='record')
+dot.node('Exemplaire', label='{Exemplaire||+ code_barre : int\l+ retour : Date\l}', shape='record')
+dot.node('Emplacement', label='{Emplacement||+ travée : int\l+ étagère : int\l+ niveau : int\l}', shape='record')
+
+dot.render('bibliotheque_v1', format='png', view=False)
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[ max width=0.7\textwidth,
+     max height=0.4\textheight,
+     keepaspectratio]{bibliotheque_v1.png}
+    \caption{Diagramme de classes - Version 1 : Classes et Attributs}
+    \label{fig:bibliotheque_v1}
+\end{figure}
+
+\subsubsection{Version 2 : Associations et Multiplicités}
+
+On ajoute maintenant les associations entre les classes et on précise les multiplicités.
+
+\begin{verbatim}
+
+#save_to: bibliotheque_v2.png
+from graphviz import Digraph
+
+dot = Digraph('BibliothequeV2', comment='Bibliothèque V2', graph_attr={'rankdir': 'TB', 'nodesep': '0.5', 'ranksep': '0.5'})
+
+# Define classes and their attributes (version 2 - same as V1 for attributes)
+dot.node('Utilisateur', label='{Utilisateur||+ nom : string\l+ caution : int\l}', shape='record')
+dot.node('Livre', label='{Livre||+ titre : string\l+ auteur : string\l+ ISBN : int\l+ caution : int\l}', shape='record')
+dot.node('Revue', label='{Revue||+ titre : string\l+ volume : int\l+ parution : Date\l+ caution : int\l}', shape='record')
+dot.node('Exemplaire', label='{Exemplaire||+ code_barre : int\l+ retour : Date\l}', shape='record')
+dot.node('Emplacement', label='{Emplacement||+ travée : int\l+ étagère : int\l+ niveau : int\l}', shape='record')
+
+# Define associations and multiplicities (version 2)
+dot.edge('Utilisateur', 'Exemplaire', arrowhead='vee', taillabel='0..1', headlabel='*')
+dot.edge('Livre', 'Exemplaire', arrowhead='vee', taillabel='0..1', headlabel='1..*')
+dot.edge('Revue', 'Exemplaire', arrowhead='vee', taillabel='0..1', headlabel='1..*')
+dot.edge('Emplacement', 'Exemplaire', arrowhead='vee', headlabel='1', taillabel='1')
+
+
+dot.render('bibliotheque_v2', format='png', view=False)
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[ max width=0.7\textwidth,
+     max height=0.4\textheight,
+     keepaspectratio]{bibliotheque_v2.png}
+    \caption{Diagramme de classes - Version 2 : Associations et Multiplicités}
+    \label{fig:bibliotheque_v2}
+\end{figure}
+
+\subsubsection{Version 3 : Introduction de la classe-association Emprunt}
+
+Pour gérer la date de retour d'un exemplaire lors d'un emprunt, on introduit une classe-association \texttt{Emprunt}.
+
+\begin{verbatim}
+
+#save_to: bibliotheque_v3.png
+from graphviz import Digraph
+
+dot = Digraph('BibliothequeV3', comment='Bibliothèque V3', graph_attr={'rankdir': 'TB', 'nodesep': '0.5', 'ranksep': '0.5'})
+
+# Define classes and their attributes (version 3 - same as V2 for classes)
+dot.node('Utilisateur', label='{Utilisateur||+ nom : string\l+ caution : int\l}', shape='record')
+dot.node('Livre', label='{Livre||+ titre : string\l+ auteur : string\l+ ISBN : int\l+ caution : int\l}', shape='record')
+dot.node('Revue', label='{Revue||+ titre : string\l+ volume : int\l+ parution : Date\l+ caution : int\l}', shape='record')
+dot.node('Exemplaire', label='{Exemplaire||+ code_barre : int\l+ retour : Date\l}', shape='record')
+dot.node('Emplacement', label='{Emplacement||+ travée : int\l+ étagère : int\l+ niveau : int\l}', shape='record')
+dot.node('Emprunt', label='{Emprunt||+ retour : Date\l}', shape='record') # Class-association Emprunt
+
+# Define associations and multiplicities (version 3 - using Emprunt)
+dot.edge('Utilisateur', 'Emprunt', arrowhead='none', arrowtail='vee', taillabel='0..1')
+dot.edge('Exemplaire', 'Emprunt', arrowhead='none', arrowtail='vee', headlabel='*') # Association to Emprunt
+dot.edge('Livre', 'Exemplaire', arrowhead='vee', taillabel='0..1', headlabel='1..*')
+dot.edge('Revue', 'Exemplaire', arrowhead='vee', taillabel='0..1', headlabel='1..*')
+dot.edge('Emplacement', 'Exemplaire', arrowhead='vee', headlabel='1', taillabel='1')
+
+
+dot.render('bibliotheque_v3', format='png', view=False)
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[ max width=0.7\textwidth,
+     max height=0.4\textheight,
+     keepaspectratio]{bibliotheque_v3.png}
+    \caption{Diagramme de classes - Version 3 : Classe-association \texttt{Emprunt}}
+    \label{fig:bibliotheque_v3}
+\end{figure}
+
+
+\subsubsection{Version 4 : Généralisation avec la classe abstraite Ressource}
+
+On remarque que \texttt{Livre} et \texttt{Revue} partagent des attributs communs (titre, caution). On peut les généraliser en une classe abstraite \texttt{Ressource}.
+
+\begin{verbatim}
+
+#save_to: bibliotheque_v4.png
+from graphviz import Digraph
+
+dot = Digraph('BibliothequeV4', comment='Bibliothèque V4', graph_attr={'rankdir': 'TB', 'nodesep': '0.5', 'ranksep': '0.5'})
+
+# Define classes and their attributes (version 4 - Ressource abstract class)
+dot.node('Utilisateur', label='{Utilisateur||+ nom : string\l+ caution : int\l}', shape='record')
+dot.node('Ressource', label='{\<<i>Ressource</i>\>||+ titre : string\l+ caution : int\l}', shape='record') # Abstract class Ressource
+dot.node('Livre', label='{Livre||+ auteur : string\l+ ISBN : int\l}', shape='record')
+dot.node('Revue', label='{Revue||+ volume : int\l+ parution : Date\l}', shape='record')
+dot.node('Exemplaire', label='{Exemplaire||+ code_barre : int\l}', shape='record') # Retour attribute moved to Emprunt
+dot.node('Emplacement', label='{Emplacement||+ travée : int\l+ étagère : int\l+ niveau : int\l}', shape='record')
+dot.node('Emprunt', label='{Emprunt||+ retour : Date\l}', shape='record')
+
+# Define associations and multiplicities (version 4 - Ressource hierarchy)
+dot.edge('Utilisateur', 'Emprunt', arrowhead='none', arrowtail='vee', taillabel='0..1')
+dot.edge('Exemplaire', 'Emprunt', arrowhead='none', arrowtail='vee', headlabel='*')
+dot.edge('Ressource', 'Exemplaire', arrowhead='vee', taillabel='1', headlabel='1..*') # Association to Ressource
+dot.edge('Emplacement', 'Exemplaire', arrowhead='vee', headlabel='1', taillabel='1')
+dot.edge('Ressource', 'Livre', arrowhead='empty', style='solid') # Inheritance from Ressource
+dot.edge('Ressource', 'Revue', arrowhead='empty', style='solid') # Inheritance from Ressource
+
+
+dot.render('bibliotheque_v4', format='png', view=False)
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[ max width=0.7\textwidth,
+     max height=0.4\textheight,
+     keepaspectratio]{bibliotheque_v4.png}
+    \caption{Diagramme de classes - Version 4 : Généralisation avec \textit{Ressource}}
+    \label{fig:bibliotheque_v4}
+\end{figure}
+
+\subsubsection{Version 5 : Ajout de la composition entre Ressource et Exemplaire}
+
+On considère que la suppression d'une ressource (Livre ou Revue) doit entraîner la suppression de ses exemplaires. On utilise donc la composition entre \texttt{Ressource} et \texttt{Exemplaire}.
+
+\begin{verbatim}
+
+#save_to: bibliotheque_v5.png
+from graphviz import Digraph
+
+dot = Digraph('BibliothequeV5', comment='Bibliothèque V5', graph_attr={'rankdir': 'TB', 'nodesep': '0.5', 'ranksep': '0.5'})
+
+# Define classes and their attributes (version 5 - same as V4 for attributes)
+dot.node('Utilisateur', label='{Utilisateur||+ nom : string\l+ caution : int\l}', shape='record')
+dot.node('Ressource', label='{\<<i>Ressource</i>\>||+ titre : string\l+ caution : int\l}', shape='record') # Abstract class Ressource
+dot.node('Livre', label='{Livre||+ auteur : string\l+ ISBN : int\l}', shape='record')
+dot.node('Revue', label='{Revue||+ volume : int\l+ parution : Date\l}', shape='record')
+dot.node('Exemplaire', label='{Exemplaire||+ code_barre : int\l}', shape='record') # Retour attribute moved to Emprunt
+dot.node('Emplacement', label='{Emplacement||+ travée : int\l+ étagère : int\l+ niveau : int\l}', shape='record')
+dot.node('Emprunt', label='{Emprunt||+ retour : Date\l}', shape='record')
+
+# Define associations and multiplicities (version 5 - Composition and Ressource hierarchy)
+dot.edge('Utilisateur', 'Emprunt', arrowhead='none', arrowtail='vee', taillabel='0..1')
+dot.edge('Exemplaire', 'Emprunt', arrowhead='none', arrowtail='vee', headlabel='*')
+dot.edge('Ressource', 'Exemplaire', arrowhead='vee', arrowtail='diamond', arrowtail_style='filled', taillabel='1', headlabel='1..*') # Composition
+dot.edge('Emplacement', 'Exemplaire', arrowhead='vee', headlabel='1', taillabel='1')
+dot.edge('Ressource', 'Livre', arrowhead='empty', style='solid') # Inheritance from Ressource
+dot.edge('Ressource', 'Revue', arrowhead='empty', style='solid') # Inheritance from Ressource
+
+
+dot.render('bibliotheque_v5', format='png', view=False)
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[ max width=0.7\textwidth,
+     max height=0.4\textheight,
+     keepaspectratio]{bibliotheque_v5.png}
+    \caption{Diagramme de classes - Version 5 : Composition entre \texttt{Ressource} et \texttt{Exemplaire}}
+    \label{fig:bibliotheque_v5}
+\end{figure}
+
+
+\subsection{Exemples de diagrammes d'objets correspondants}
+
+Pour chaque version du diagramme de classes, on peut créer des diagrammes d'objets pour illustrer des instances concrètes.  Voici des exemples de diagrammes d'objets correspondant aux versions présentées.
+
+\subsubsection{Diagramme d'objets pour la version 2}
+
+\begin{verbatim}
+
+#save_to: bibliotheque_objets_v2.png
+from graphviz import Digraph
+
+dot = Digraph('BibliothequeObjetsV2', comment='Bibliothèque Objets V2', graph_attr={'rankdir': 'TB'})
+
+# Define object nodes for Version 2 diagram
+dot.node('Dupont', label='{Dupont : Utilisateur||nom = "Dupont"\lcaution = 10\l}', shape='record')
+dot.node('Martin', label='{Martin : Utilisateur||nom = "Martin"\lcaution = 25\l}', shape='record')
+dot.node('ex1', label='{ex1 : Exemplaire||code_barre = 1234\lretour = 27/12/2017\l}', shape='record')
+dot.node('ex2', label='{ex2 : Exemplaire||code_barre = 4576\lretour = null\l}', shape='record')
+dot.node('ex3', label='{ex3 : Exemplaire||code_barre = 9864\lretour = 5/01/2018\l}', shape='record')
+dot.node('Mis', label='{Mis : Livre||titre = "Les Misérables"\lauteur = "Victor Hugo"\lISBN = ...\lcaution = 5\l}', shape='record')
+dot.node('Nature', label='{Nature : Revue||titre = "Nature"\lvolume = 130\lparution = 5/12/2017\lcaution = 2\l}', shape='record')
+dot.node('e1', label='{e1 : Emplacement||travée = 1\létagère = 2\lniveau = 1\l}', shape='record')
+
+# Define object links for Version 2
+dot.edge('Dupont', 'ex1')
+dot.edge('Dupont', 'ex2')
+dot.edge('Martin', 'ex3')
+dot.edge('Mis', 'ex1')
+dot.edge('Mis', 'ex2')
+dot.edge('Nature', 'ex3')
+dot.edge('e1', 'ex1')
+dot.edge('e1', 'ex2')
+dot.edge('e1', 'ex3')
+
+
+dot.render('bibliotheque_objets_v2', format='png', view=False)
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[ max width=0.9\textwidth,
+     max height=0.5\textheight,
+     keepaspectratio]{bibliotheque_objets_v2.png}
+    \caption{Diagramme d'objets pour la version 2 du diagramme de classes}
+    \label{fig:bibliotheque_objets_v2}
+\end{figure}
+
+
+\subsubsection{Diagramme d'objets pour la version 3}
+
+\begin{verbatim}
+
+#save_to: bibliotheque_objets_v3.png
+from graphviz import Digraph
+
+dot = Digraph('BibliothequeObjetsV3', comment='Bibliothèque Objets V3', graph_attr={'rankdir': 'TB'})
+
+# Define object nodes for Version 3 diagram
+dot.node('Dupont', label='{Dupont : Utilisateur||nom = "Dupont"\lcaution = 10\l}', shape='record')
+dot.node('Martin', label='{Martin : Utilisateur||nom = "Martin"\lcaution = 25\l}', shape='record')
+dot.node('ex1', label='{ex1 : Exemplaire||code_barre = 1234\lretour = 27/12/2017\l}', shape='record')
+dot.node('ex2', label='{ex2 : Exemplaire||code_barre = 4576\lretour = null\l}', shape='record')
+dot.node('ex3', label='{ex3 : Exemplaire||code_barre = 9864\lretour = 5/01/2018\l}', shape='record')
+dot.node('Mis', label='{Mis : Livre||titre = "Les Misérables"\lauteur = "Victor Hugo"\lISBN = ...\lcaution = 5\l}', shape='record')
+dot.node('Nature', label='{Nature : Revue||titre = "Nature"\lvolume = 130\lparution = 5/12/2017\lcaution = 2\l}', shape='record')
+dot.node('e1', label='{e1 : Emplacement||travée = 1\létagère = 2\lniveau = 1\l}', shape='record')
+dot.node('emp1', label='{emp1 : Emprunt||retour = 10/12/2017\l}', shape='record')
+dot.node('emp2', label='{emp2 : Emprunt||retour = 5/01/2018\l}', shape='record')
+
+# Define object links for Version 3 (using Emprunt)
+dot.edge('Dupont', 'emp1', style='dotted')
+dot.edge('Dupont', 'emp2', style='dotted')
+dot.edge('ex1', 'emp1', style='dotted')
+dot.edge('ex3', 'emp2', style='dotted')
+dot.edge('Mis', 'ex1')
+dot.edge('Mis', 'ex2')
+dot.edge('Nature', 'ex3')
+dot.edge('e1', 'ex1')
+dot.edge('e1', 'ex2')
+dot.edge('e1', 'ex3')
+
+
+dot.render('bibliotheque_objets_v3', format='png', view=False)
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[ max width=0.9\textwidth,
+     max height=0.5\textheight,
+     keepaspectratio]{bibliotheque_objets_v3.png}
+    \caption{Diagramme d'objets pour la version 3 du diagramme de classes}
+    \label{fig:bibliotheque_objets_v3}
+\end{figure}
+
+
+\section{Contraintes}
+
+Les diagrammes de classes UML permettent de représenter des contraintes simples graphiquement, notamment à travers les multiplicités. Cependant, pour des contraintes plus complexes, il est nécessaire d'utiliser d'autres mécanismes.
+
+\begin{remark}
+Une contrainte importante en modélisation UML est de \textbf{ne pas utiliser d'attribut dont le type est une classe du diagramme}.  En effet, une relation entre classes doit être modélisée par une \textbf{association}, et non par un attribut.
+\end{remark}
+
+
+Par exemple, dans une première modélisation, on pourrait être tenté d'ajouter un attribut \texttt{propriétaire : Personne} à la classe \texttt{Compte}.  Cependant, cela viole la règle de modélisation. La relation entre \texttt{Compte} et \texttt{Personne} (un compte a un propriétaire qui est une personne) doit être modélisée par une association, comme illustré ci-dessous.
+
+\begin{verbatim}
+
+#save_to: contrainte_attribut_classe.png
+from graphviz import Digraph
+
+dot = Digraph('ContrainteAttributClasse', comment='Contrainte Attribut Classe', 
+              graph_attr={'rankdir': 'LR', 'nodesep': '0.5', 'ranksep': '0.5'})
+
+# Define classes with attribute vs. association
+dot.node('CompteAvecAttribut', label='{Compte (incorrect)||+ numéro : int\l+ devise : Devise\l+ solde : float\l+ propriétaire : Personne\l}', 
+         shape='record')
+
+dot.node('CompteAvecAssociation', label='{Compte (correct)||+ numéro : int\l+ devise : Devise\l+ solde : float\l}', 
+         shape='record')
+
+dot.node('Personne', label='{Personne||+ nom : string\l+ prénom : string\l+ adresse : string\l+ naissance : Date\l}', 
+         shape='record')
+
+# Create an association node to better represent the relationship
+dot.node('Possede', label='possède', shape='diamond')
+
+# Connect with role names and multiplicities
+dot.edge('CompteAvecAssociation', 'Possede', taillabel='*', headlabel='', label='sesComptes')
+dot.edge('Possede', 'Personne', taillabel='', headlabel='1', label='sonPropriétaire')
+
+dot.render('contrainte_attribut_classe', format='png', view=True)
+
+
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[ max width=0.9\textwidth,
+     max height=0.3\textheight,
+     keepaspectratio]{contrainte_attribut_classe.png}
+    \caption{Contrainte : Pas d'attribut dont le type est une classe (comparaison incorrect vs correct)}
+    \label{fig:contrainte_attribut_classe}
+\end{figure}
+
+\begin{remark}
+Utiliser une association permet de préciser la multiplicité de la relation (un compte a un et un seul propriétaire, une personne peut avoir zéro ou plusieurs comptes), de nommer les rôles (sonPropriétaire, sesComptes) et potentiellement d'ajouter d'autres caractéristiques à la relation (navigabilité, agrégation, etc.).  En résumé, les associations sont plus riches et plus expressives que les simples attributs pour représenter les relations entre objets.
+\end{remark}
+
+
+\end{document}
+```
