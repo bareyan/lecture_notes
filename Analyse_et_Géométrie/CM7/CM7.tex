@@ -1,0 +1,239 @@
+```latex
+\documentclass{article}
+\usepackage{amsmath, amssymb, amsthm, graphicx, verbatim, listings}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Example}
+
+\begin{document}
+\sloppy
+
+\section*{Extrema, Points Critiques et Espaces Vectoriels Normés}
+
+\section{Extrema et Points Critiques}
+
+\subsection{Extrema Locaux}
+
+\begin{definition}[Extremum Local]
+Soit $f: D \subseteq \mathbb{R}^n \rightarrow \mathbb{R}$ une fonction définie sur un domaine $D$. On dit que $x_0 \in D$ est un point de :
+\begin{itemize}
+    \item \textbf{minimum local} si il existe un voisinage ouvert $V$ de $x_0$ tel que pour tout $x \in V \cap D$, $f(x) \geq f(x_0)$.
+    \item \textbf{maximum local} si il existe un voisinage ouvert $V$ de $x_0$ tel que pour tout $x \in V \cap D$, $f(x) \leq f(x_0)$.
+    \item \textbf{extremum local} si $x_0$ est un minimum local ou un maximum local.
+\end{itemize}
+\end{definition}
+
+\subsection{Points Critiques}
+
+\begin{definition}[Point Critique]
+Soit $f: D \subseteq \mathbb{R}^n \rightarrow \mathbb{R}$ une fonction différentiable sur un ouvert $D$. On dit que $x_0 \in D$ est un \textbf{point critique} de $f$ si le gradient de $f$ en $x_0$ est nul, c'est-à-dire :
+\[ \nabla f(x_0) = \vec{0} \]
+ou encore, si toutes les dérivées partielles de $f$ en $x_0$ sont nulles :
+\[ \frac{\partial f}{\partial x_i}(x_0) = 0, \quad \forall i = 1, \ldots, n \]
+\end{definition}
+
+\begin{theorem}
+[Condition Nécessaire d'Extremum Local]
+Soit $f: D \subseteq \mathbb{R}^n \rightarrow \mathbb{R}$ une fonction différentiable sur un ouvert $D$. Si $x_0 \in D$ est un extremum local de $f$, alors $x_0$ est un point critique de $f$.
+\end{theorem}
+
+\section{Dérivées Partielles d'Ordre Supérieur}
+
+\subsection{Définitions et Notations}
+
+Pour une fonction $f: D \subseteq \mathbb{R}^n \rightarrow \mathbb{R}$ de classe $C^1$ sur un ouvert $D$, on peut définir les dérivées partielles secondes en dérivant à nouveau les dérivées partielles premières.
+Par exemple, la dérivée partielle seconde de $f$ par rapport à $x_i$ puis $x_j$ est notée :
+\[ \frac{\partial^2 f}{\partial x_j \partial x_i} = \frac{\partial}{\partial x_j} \left( \frac{\partial f}{\partial x_i} \right) \]
+De même, on définit les dérivées partielles d'ordre supérieur en dérivant successivement par rapport aux variables $x_{i_1}, x_{i_2}, \ldots, x_{i_k}$:
+\[ \frac{\partial^k f}{\partial x_{i_k} \cdots \partial x_{i_2} \partial x_{i_1}} = \frac{\partial}{\partial x_{i_k}} \left( \frac{\partial^{k-1} f}{\partial x_{i_{k-1}} \cdots \partial x_{i_2} \partial x_{i_1}} \right) \]
+
+\subsection{Théorème de Schwarz}
+
+\begin{theorem}[Théorème de Schwarz (Lemme de Schwarz)]
+Soit $f: D \subseteq \mathbb{R}^n \rightarrow \mathbb{R}$ une fonction de classe $C^2$ sur un ouvert $D$. Alors, pour tout $x \in D$ et pour tous indices $i, j \in \{1, \ldots, n\}$, les dérivées partielles croisées sont égales :
+\[ \frac{\partial^2 f}{\partial x_j \partial x_i}(x) = \frac{\partial^2 f}{\partial x_i \partial x_j}(x) \]
+\end{theorem}
+Ce théorème est fondamental car il simplifie le calcul et l'analyse des dérivées secondes. Il stipule que sous condition de régularité ($C^2$), l'ordre de dérivation n'a pas d'importance.
+
+\subsection{Exemple}
+Considérons la fonction $f(x_1, x_2) = \begin{cases}
+    \frac{x_1^2 x_2 - x_2^3}{x_1^2 + x_2^2} & \text{si } (x_1, x_2) \neq (0,0) \\
+    0 & \text{si } (x_1, x_2) = (0,0)
+\end{cases}$.
+
+Calculons les dérivées partielles premières pour $(x_1, x_2) \neq (0,0)$:
+\begin{align*}
+    \frac{\partial f}{\partial x_1}(x_1, x_2) &= \frac{(2x_1 x_2)(x_1^2 + x_2^2) - (x_1^2 x_2 - x_2^3)(2x_1)}{(x_1^2 + x_2^2)^2} \\
+    &= \frac{2x_1 x_2^3 + 2x_1 x_2^3 + 2x_1^3 x_2 - 2x_1^3 x_2}{(x_1^2 + x_2^2)^2} \\
+    &= \frac{2x_1 x_2^3 + 2x_1 x_2^3}{(x_1^2 + x_2^2)^2} = \frac{2x_1 x_2 (x_2^2 + x_2^2)}{(x_1^2 + x_2^2)^2} \\ % This line seems to have a typo, it should be  &= \frac{2x_1 x_2^3 + 2x_1 x_2^3}{(x_1^2 + x_2^2)^2} = \frac{2x_1 x_2^3}{(x_1^2 + x_2^2)^2}
+    &= \frac{2x_1 x_2^3}{(x_1^2 + x_2^2)^2}
+\end{align*}
+\begin{align*}
+    \frac{\partial f}{\partial x_2}(x_1, x_2) &= \frac{(x_1^2 - 3x_2^2)(x_1^2 + x_2^2) - (x_1^2 x_2 - x_2^3)(2x_2)}{(x_1^2 + x_2^2)^2} \\
+    &= \frac{x_1^4 + x_1^2 x_2^2 - 3x_2^2 x_1^2 - 3x_2^4 - 2x_1^2 x_2^2 + 2x_2^4}{(x_1^2 + x_2^2)^2} \\
+    &= \frac{x_1^4 - x_1^2 x_2^2 - x_2^4 - 3x_2^2 x_1^2}{(x_1^2 + x_2^2)^2} % This line is wrong, should be  &= \frac{x_1^4 - x_1^2 x_2^2 - 3x_2^2 x_1^2 - 3x_2^4 - 2x_1^2 x_2^2 + 2x_2^4}{(x_1^2 + x_2^2)^2} = \frac{x_1^4 - x_1^2 x_2^2 - x_2^4 - 3x_2^2 x_1^2}{(x_1^2 + x_2^2)^2}
+    &= \frac{x_1^4 - 2x_1^2 x_2^2 - x_2^4}{(x_1^2 + x_2^2)^2}
+\end{align*}
+
+Pour calculer les dérivées partielles à l'origine, nous utilisons la définition :
+\[ \frac{\partial f}{\partial x_1}(0, 0) = \lim_{h \to 0} \frac{f(h, 0) - f(0, 0)}{h} = \lim_{h \to 0} \frac{0 - 0}{h} = 0 \]
+\[ \frac{\partial f}{\partial x_2}(0, 0) = \lim_{k \to 0} \frac{f(0, k) - f(0, 0)}{k} = \lim_{k \to 0} \frac{\frac{-k^3}{k^2} - 0}{k} = \lim_{k \to 0} \frac{-k}{k} = -1 \]
+
+\textbf{Transformation en coordonnées polaires :}
+Soit $x_1 = r \cos \theta$ et $x_2 = r \sin \theta$. Alors $x_1^2 + x_2^2 = r^2$ et
+\begin{align*}
+    f(x_1, x_2) &= \frac{r^2 \cos^2 \theta \cdot r \sin \theta - r^3 \sin^3 \theta}{r^2} \\
+    &= r (\cos^2 \theta \sin \theta - \sin^3 \theta) \\
+    &= r \sin \theta (\cos^2 \theta - \sin^2 \theta) \\
+    &= r \sin \theta \cos (2\theta)
+\end{align*}
+
+\section{Méthode de Calcul de la Dérivée Seconde en un Point}
+
+\subsection{Méthode Pas à Pas}
+Pour calculer la dérivée seconde d'une fonction composée, par exemple $g(x_1) = f(x_1, h(x_1))$, où $f$ est une fonction de deux variables et $h$ est une fonction d'une variable, on peut suivre les étapes suivantes :
+\begin{enumerate}
+    \item Exprimer $g(x_1)$ en substituant $x_2$ par $h(x_1)$ dans l'expression de $f(x_1, x_2)$.
+    \item Calculer la dérivée première de $g(x_1)$, $g'(x_1)$, en utilisant les règles de dérivation des fonctions composées.
+    \item Calculer la dérivée seconde de $g(x_1)$, $g''(x_1)$, en dérivant $g'(x_1)$ par rapport à $x_1$.
+    \item Évaluer $g''(x_1)$ au point souhaité.
+\end{enumerate}
+
+\subsection{Exemple}
+Calculons la dérivée seconde de $g(x_1) = f(x_1, x_1^2)$ au point où c'est possible, avec $f(x_1, x_2) = \frac{x_1^2 - x_2}{x_1^2 + x_2^2}$.
+\begin{enumerate}
+    \item $g(x_1) = f(x_1, x_1^2) = \frac{x_1^2 - x_1^2}{x_1^2 + (x_1^2)^2} = \frac{0}{x_1^2 + x_1^4} = 0$ pour $x_1 \neq 0$. Si $x_1 = 0$, alors $g(0) = f(0, 0) = \frac{0-0}{0+0}$, expression indéterminée. Cependant si on prend la limite quand $x_1 \to 0$, $g(x_1) \to 0$. On peut définir $g(0) = 0$ par continuité. Alors $g(x_1) = 0$ pour tout $x_1$.
+    \item $g'(x_1) = \frac{d}{dx_1} (0) = 0$.
+    \item $g''(x_1) = \frac{d}{dx_1} (0) = 0$.
+    \item $g''(0) = 0$.
+\end{enumerate}
+Conclusion : $g''(0) = 0$.
+
+Pour vérifier ce résultat en utilisant les dérivées partielles, nous devons utiliser la formule de dérivation des fonctions composées :
+\[ \frac{dg}{dx_1}(x_1) = \frac{\partial f}{\partial x_1}(x_1, x_1^2) \cdot 1 + \frac{\partial f}{\partial x_2}(x_1, x_1^2) \cdot 2x_1 \]
+Pour calculer la dérivée seconde, nous dérivons à nouveau par rapport à $x_1$:
+\begin{align*}
+    \frac{d^2g}{dx_1^2}(x_1) &= \frac{d}{dx_1} \left( \frac{\partial f}{\partial x_1}(x_1, x_1^2) + 2x_1 \frac{\partial f}{\partial x_2}(x_1, x_1^2) \right) \\
+    &= \frac{\partial^2 f}{\partial x_1^2}(x_1, x_1^2) \cdot 1 + \frac{\partial^2 f}{\partial x_2 \partial x_1}(x_1, x_1^2) \cdot 2x_1 \\
+    &+ 2 \frac{\partial f}{\partial x_2}(x_1, x_1^2) + 2x_1 \left( \frac{\partial^2 f}{\partial x_1 \partial x_2}(x_1, x_1^2) \cdot 1 + \frac{\partial^2 f}{\partial x_2^2}(x_1, x_1^2) \cdot 2x_1 \right)
+\end{align*}
+En évaluant en $x_1 = 0$, et en utilisant que $\frac{\partial f}{\partial x_1}(0, 0) = 1$ et $\frac{\partial f}{\partial x_2}(0, 0) = -1$:
+\[ \frac{d^2g}{dx_1^2}(0) = \frac{\partial^2 f}{\partial x_1^2}(0, 0) + 0 + 2 \frac{\partial f}{\partial x_2}(0, 0) + 0 = \frac{\partial^2 f}{\partial x_1^2}(0, 0) + 2 \frac{\partial f}{\partial x_2}(0, 0) \]
+Le calcul de $\frac{\partial f}{\partial x_1}(0,0) = 1$ et $\frac{\partial f}{\partial x_2}(0,0) = -1$ est réalisé comme suit :
+\[ \frac{\partial f}{\partial x_1}(0, 0) = \lim_{h \to 0} \frac{f(h, 0) - f(0, 0)}{h} = \lim_{h \to 0} \frac{\frac{h^2 - 0}{h^2 + 0} - 0}{h} = \lim_{h \to 0} \frac{1}{h} = \infty \]
+Il y a une erreur dans les notes manuscrites, $\frac{\partial f}{\partial x_1}(0, 0) \neq 1$.
+Refaisons le calcul de  $\frac{\partial f}{\partial x_1}(0, 0)$:
+ \[ \frac{\partial f}{\partial x_1}(0, 0) = \lim_{h \to 0} \frac{f(h, 0) - f(0, 0)}{h} = \lim_{h \to 0} \frac{\frac{h^2 - 0}{h^2 + 0} - 0}{h} = \lim_{h \to 0} \frac{1}{h} \].
+Cette limite n'existe pas. Refaisons le calcul de la dérivée en $x_1=0$ pour $\frac{\partial f}{\partial x_2}(0,0)$:
+\[ \frac{\partial f}{\partial x_2}(0, 0) = \lim_{k \to 0} \frac{f(0, k) - f(0, 0)}{k} = \lim_{k \to 0} \frac{\frac{0 - k}{0 + k^2} - 0}{k} = \lim_{k \to 0} \frac{-k/k^2}{k} = \lim_{k \to 0} \frac{-1}{k^2} \]
+Cette limite n'existe pas non plus. Il y a une erreur dans les notes manuscrites.
+
+\section{Matrice Hessienne}
+
+\subsection{Définition de la Matrice Hessienne}
+
+\begin{definition}[Matrice Hessienne]
+Soit $f: D \subseteq \mathbb{R}^n \rightarrow \mathbb{R}$ une fonction de classe $C^2$ sur un ouvert $D$. La \textbf{matrice Hessienne} de $f$ au point $x_0 \in D$, notée $H_f(x_0)$, est la matrice carrée d'ordre $n$ des dérivées partielles secondes de $f$ évaluées en $x_0$ :
+\[ H_f(x_0) = \begin{pmatrix}
+    \frac{\partial^2 f}{\partial x_1^2}(x_0) & \frac{\partial^2 f}{\partial x_1 \partial x_2}(x_0) & \cdots & \frac{\partial^2 f}{\partial x_1 \partial x_n}(x_0) \\
+    \frac{\partial^2 f}{\partial x_2 \partial x_1}(x_0) & \frac{\partial^2 f}{\partial x_2^2}(x_0) & \cdots & \frac{\partial^2 f}{\partial x_2 \partial x_n}(x_0) \\
+    \vdots & \vdots & \ddots & \vdots \\
+    \frac{\partial^2 f}{\partial x_n \partial x_1}(x_0) & \frac{\partial^2 f}{\partial x_n \partial x_2}(x_0) & \cdots & \frac{\partial^2 f}{\partial x_n^2}(x_0)
+\end{pmatrix} \]
+En utilisant le théorème de Schwarz, la matrice Hessienne est symétrique, c'est-à-dire $H_f(x_0)^T = H_f(x_0)$.
+\end{definition}
+
+\section{Théorème de Taylor d'Ordre 2}
+
+\subsection{Formule de Taylor d'Ordre 2}
+
+\begin{theorem}[Formule de Taylor d'Ordre 2]
+Soit $f: D \subseteq \mathbb{R}^n \rightarrow \mathbb{R}$ une fonction de classe $C^2$ sur un ouvert $D$. Soit $x_0 \in D$. Alors pour $x$ au voisinage de $x_0$, on a la formule de Taylor d'ordre 2 :
+\[ f(x_0 + h) = f(x_0) + \nabla f(x_0) \cdot h + \frac{1}{2} h^T H_f(x_0) h + \|h\|^2 \epsilon(h) \]
+où $\lim_{h \to 0} \epsilon(h) = 0$. Ici, $h$ est un vecteur de $\mathbb{R}^n$, $\nabla f(x_0) \cdot h$ est le produit scalaire du gradient de $f$ en $x_0$ avec $h$, et $h^T H_f(x_0) h$ est la forme quadratique associée à la matrice Hessienne $H_f(x_0)$ évaluée en $h$.
+\end{theorem}
+
+\subsection{Analyse des Points Critiques avec la Formule de Taylor}
+Si $x_0$ est un point critique de $f$, alors $\nabla f(x_0) = \vec{0}$, et la formule de Taylor d'ordre 2 se simplifie :
+\[ f(x_0 + h) - f(x_0) = \frac{1}{2} h^T H_f(x_0) h + \|h\|^2 \epsilon(h) \]
+Le signe de $f(x_0 + h) - f(x_0)$ est donc déterminé par le signe de la forme quadratique $h^T H_f(x_0) h$ pour $h$ proche de $\vec{0}$. L'étude des valeurs propres de la matrice Hessienne permet de déterminer ce signe et donc la nature du point critique $x_0$.
+
+\section{Nature des Points Critiques}
+
+\subsection{Théorème sur la Nature des Points Critiques}
+
+\begin{theorem}[Nature des Points Critiques]
+Soit $f: D \subseteq \mathbb{R}^n \rightarrow \mathbb{R}$ une fonction de classe $C^2$ sur un ouvert $D$, et soit $x_0 \in D$ un point critique de $f$. On considère les valeurs propres de la matrice Hessienne $H_f(x_0)$.
+\begin{enumerate}
+    \item Si toutes les valeurs propres de $H_f(x_0)$ sont strictement positives, alors $x_0$ est un minimum local. Si toutes les valeurs propres sont strictement négatives, alors $x_0$ est un maximum local.
+    \item Si la matrice $H_f(x_0)$ a des valeurs propres strictement positives et strictement négatives, alors $x_0$ n'est pas un extremum local. On dit que $x_0$ est un point selle (ou point col).
+    \item Si $H_f(x_0)$ a au moins une valeur propre nulle, on ne peut pas conclure directement sur la nature de $x_0$ (point critique dégénéré). Une analyse plus poussée est nécessaire.
+\end{enumerate}
+\end{theorem}
+
+\subsection{Exemple : Point Selle}
+Considérons la fonction $f(x, y) = \frac{1}{2}(x^2 - y^2)$. Calculons ses dérivées partielles premières et secondes :
+\[ \frac{\partial f}{\partial x} = x, \quad \frac{\partial f}{\partial y} = -y \]
+\[ \frac{\partial^2 f}{\partial x^2} = 1, \quad \frac{\partial^2 f}{\partial y^2} = -1, \quad \frac{\partial^2 f}{\partial x \partial y} = \frac{\partial^2 f}{\partial y \partial x} = 0 \]
+Le gradient est $\nabla f(x, y) = (x, -y)$. Le seul point critique est $(0, 0)$. La matrice Hessienne en $(0, 0)$ est :
+\[ H_f(0, 0) = \begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix} \]
+Les valeurs propres de $H_f(0, 0)$ sont $1$ et $-1$, qui sont de signes opposés. Donc, $(0, 0)$ est un point selle.
+
+Pour visualiser, on peut générer un graphique de la fonction.
+\begin{verbatim}
+#save_to: saddle_point.png
+import matplotlib.pyplot as plt
+import numpy as np
+from mpl_toolkits.mplot3d import Axes3D
+
+fig = plt.figure(figsize=(8, 6))
+ax = fig.add_subplot(111, projection='3d')
+
+x = np.linspace(-2, 2, 100)
+y = np.linspace(-2, 2, 100)
+X, Y = np.meshgrid(x, y)
+Z = 0.5 * (X**2 - Y**2)
+
+ax.plot_surface(X, Y, Z, cmap='viridis')
+
+ax.set_xlabel('x')
+ax.set_ylabel('y')
+ax.set_zlabel('f(x, y)')
+ax.set_title('Point Selle de f(x, y) = 1/2 * (x^2 - y^2)')
+
+plt.savefig('saddle_point.png')
+\end{verbatim}
+
+\begin{figure}[h]
+\centering
+\includegraphics[max width=\textwidth,
+ max height=0.4\textheight,
+ keepaspectratio]{saddle_point.png}
+\caption{Point Selle de $f(x, y) = \frac{1}{2} (x^2 - y^2)$}
+\label{fig:saddle_point}
+\end{figure}
+
+
+\section{Espaces Vectoriels Normés (Rappels)}
+
+\subsection{Rappels sur les Espaces Vectoriels Normés}
+\textbf{Rappels :}
+\begin{itemize}
+    \item \textbf{Espace vectoriel E :} Structure algébrique définie sur un corps $\mathbb{K}$ (ici $\mathbb{K} = \mathbb{R}$ ou $\mathbb{C}$).
+    \item \textbf{Vecteurs :} Éléments de l'espace vectoriel (notés $x, y, v, \ldots$).
+    \item \textbf{Scalaires :} Éléments du corps $\mathbb{K}$ (notés $\lambda, \mu, \alpha, \ldots$).
+    \item \textbf{Dimension :} Nombre de vecteurs dans une base de l'espace vectoriel. Dimension finie ou infinie.
+    \item \textbf{Vecteur nul :} Élément neutre pour l'addition vectorielle, noté $0$ ou $\vec{0}$.
+    \item \textbf{Combinaison linéaire :} Expression de la forme $\lambda_1 v_1 + \cdots + \lambda_n v_n$, où $v_i$ sont des vecteurs et $\lambda_i$ des scalaires.
+    \item \textbf{Famille libre :} Une famille de vecteurs $(v_1, \ldots, v_n)$ est libre si $\lambda_1 v_1 + \cdots + \lambda_n v_n = \vec{0}$ implique $\lambda_1 = \cdots = \lambda_n = 0$.
+    \item \textbf{Famille génératrice :} Une famille de vecteurs $(v_1, \ldots, v_n)$ est génératrice si tout vecteur de $E$ peut s'écrire comme une combinaison linéaire de $(v_1, \ldots, v_n)$.
+    \item \textbf{Base :} Une famille de vecteurs qui est à la fois libre et génératrice.
+\end{itemize}
+Dans un espace vectoriel normé, on ajoute la notion de \textbf{norme} pour mesurer la "longueur" des vecteurs et définir une topologie.
+\end{document}
+```

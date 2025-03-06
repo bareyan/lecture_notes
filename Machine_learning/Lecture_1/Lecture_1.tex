@@ -1,0 +1,557 @@
+```latex
+\documentclass{article}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{listings}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Example}
+
+\usepackage[margin=1in]{geometry}
+\begin{document}
+\sloppy
+\section{The Learning Problem}
+
+\section{Introduction}
+
+Welcome to the fascinating world of machine learning! This chapter serves as an introduction to the fundamental concepts of machine learning, specifically focusing on the very first question: what is the learning problem? Machine learning is a broad field that spans from abstract theoretical concepts to practical applications that impact our daily lives. Its relevance stems from its ability to extract meaningful patterns and make predictions from data, a capability that is increasingly valuable in our data-rich world.
+
+Consider examples like movie recommendation systems that suggest films you might enjoy, or financial forecasting tools that predict market trends. These are just a few applications showcasing the power of machine learning.  The inclusion of topics in this course, and indeed in this chapter, is based on their relevance to the core principles of machine learning. We will explore both the mathematical underpinnings, which provide a conceptual framework, and the practical aspects, which equip you with the tools to build real-world learning systems.
+
+The topics discussed in this chapter, and throughout this material, build upon each other to create a cohesive storyline.  This storyline begins by asking fundamental questions: What exactly is learning? Is it even feasible to learn? If so, how can we achieve it? And importantly, how can we ensure that we are learning effectively? This chapter, "The Learning Problem," addresses the first of these questions, setting the stage for our exploration into the theory and practice of machine learning.  Let us begin by understanding the essence of what constitutes a 'learning problem'.
+
+\section{What is the Learning Problem?}
+
+At its core, machine learning is about discovering patterns and making predictions. But when is it appropriate to use machine learning?  What types of problems are actually 'learning problems'?  There are three essential components that define a problem as being suitable for a machine learning approach. If a problem in your field exhibits these three characteristics, then machine learning is likely a relevant and powerful tool to consider.
+
+\subsection{The Three Components of Machine Learning}
+
+\begin{enumerate}
+    \item \textbf{A Pattern Exists}:  First and foremost, for learning to be possible, there must be an underlying pattern to be discovered. If there is no consistent relationship within the data, there is nothing for a machine learning algorithm to learn. In the context of movie ratings, for example, the pattern is the relationship between a viewer's preferences and movie characteristics, and how these influence their rating. We intuitively know that such a pattern exists; a person's taste in movies is not entirely random.
+
+    \item \textbf{We Cannot Pin it Down Mathematically}: If we could explicitly define the pattern using a mathematical formula, then there would be no need for machine learning. We would simply program the formula.  The power of machine learning comes into play when the pattern is complex, subtle, or unknown, and we cannot express it through traditional programming or mathematical models.  For instance, while we believe a pattern governs movie ratings, we cannot easily write down a precise equation (like a polynomial) that accurately predicts how everyone will rate every movie.  This inability to define the pattern mathematically is a key motivator for using machine learning.
+
+    \item \textbf{Data is Available}: Machine learning is fundamentally about "learning from data." Without data, there is nothing for a learning algorithm to learn from. Data serves as the source of information from which the algorithm infers patterns and builds its predictive model.  Therefore, the availability of relevant data is crucial.  In fact, the first question to ask when considering a machine learning application is: "What data do we have?".  If data is abundant and relevant, machine learning becomes a viable solution. If data is scarce or non-existent, then machine learning techniques may not be applicable.
+\end{enumerate}
+
+If all three of these conditions are met, then you have a potential machine learning problem.  Let's illustrate these components with a concrete example.
+
+\subsection{Example: Movie Rating Prediction}
+
+Consider the problem of predicting how a viewer will rate a movie.  This is a problem that companies like Netflix face, and as discussed in the lecture, even a small improvement in prediction accuracy can be incredibly valuable.
+
+\begin{figure}[H]
+    \centering}
+    \includegraphics[max width=0.8\textwidth]{Lecture_01_frame_00_02_41.png}
+    \caption{Outline of the Course}
+    \label{fig:outline_course}
+\end{figure}
+
+As we discussed, there's clearly a pattern: a viewer's rating is related to their past ratings and the ratings of others, and to the characteristics of the movie itself.  However, we can't simply write down a formula to predict this rating directly.  This is where machine learning comes in.
+
+Let's contrast a 'non-learning' approach with a machine learning approach to solve this movie rating problem. Imagine we want to explicitly build a system to predict movie ratings without 'learning'. We might try to analyze movies and viewers based on certain 'factors'.
+
+\begin{figure}[H]
+    \centering}
+    \includegraphics[max width=0.8\textwidth]{Lecture_01_frame_00_08_17.png}
+    \caption{Movie rating - a solution}
+    \label{fig:movie_rating_solution}
+\end{figure}
+
+As illustrated in Figure \ref{fig:movie_rating_solution}, we could manually define 'factors' for both viewers and movies.  For viewers, these factors could be preferences like "likes comedy?", "likes action?", "prefers blockbusters?", and so on. For movies, factors might be "comedy content", "action content", "blockbuster?", etc. To predict a rating, we could try to match these factors.  If a viewer likes comedy and a movie has high comedy content, it contributes positively to the rating.  By combining these contributions across all factors, we could arrive at a predicted rating.
+
+However, this approach has significant drawbacks.  It requires us to:
+
+\begin{itemize}
+    \item \textbf{Manually analyze movie content}:  We would need to watch and analyze each movie to quantify its 'comedy content', 'action content', etc.
+    \item \textbf{Explicitly interview viewers}: We'd need to interview viewers to determine their taste profile – do they really 'like comedy?', 'prefer blockbusters?', etc.
+\end{itemize}
+
+This manual process is not scalable and is subjective. It is not truly 'machine learning'.
+
+\textbf{The Machine Learning Approach}:
+
+The machine learning approach, in contrast, automates this process.  Instead of manually defining and quantifying factors, we let the machine learn them from data.  The core idea is to reverse-engineer the rating process.
+
+Imagine we start with random 'factors' for viewers and movies. Initially, these factors are meaningless, just random numbers.  When we calculate a predicted rating based on these random factors, it will likely be far from the actual rating.
+
+However, the learning process begins when we compare our prediction with an actual rating from historical data.  We then adjust the factors slightly to make the prediction closer to the actual rating.  This adjustment, repeated many times over millions of ratings, is the essence of learning.
+
+Over time, and after processing a vast amount of rating data, these initially random factors start to become meaningful. The 'comedy content' factor, for example, will adjust itself to align with movies that are generally rated highly by viewers who like comedy.  Similarly, viewer factors will adjust to reflect their actual preferences as revealed by their ratings.
+
+The beauty of this approach is that we don't need to pre-define factors or manually analyze movies or viewers. The machine learning algorithm discovers these factors automatically from the data.  Once the learning is complete, we can use these learned factors to predict ratings for new movies and viewers, without needing to explicitly understand what each factor represents.  This automated discovery of patterns and predictive modeling is what makes machine learning so powerful.
+
+\section{Mathematical Formalization of the Learning Problem}
+
+To understand machine learning more deeply, we need to formalize the learning problem mathematically.  Let's use another example, credit approval, as a metaphor to abstract the essential components of learning.
+
+\subsection{Example: Credit Approval Metaphor}
+
+Imagine you apply for a credit card. The bank needs to decide whether to approve or deny your application. From the bank's perspective, the decision hinges on whether you are likely to be a 'good' customer (profitable) or a 'bad' customer (risky).  Just like movie ratings, there's no magic formula for credit approval. Banks rely on historical data from past customers to build a system for making these decisions.
+
+\begin{figure}[H]
+    \centering}
+    \includegraphics[max width=0.8\textwidth]{Lecture_01_frame_00_14_02.png}
+    \caption{Applicant Information for Credit Approval}
+    \label{fig:credit_application_info}
+\end{figure}
+
+As shown in Figure \ref{fig:credit_application_info}, when you apply for credit, you provide information such as your age, gender, income, debt, etc.  The bank believes that these attributes are related to your creditworthiness.  The goal is to use this information to make a reliable credit decision.
+
+\subsection{Components of the Learning Problem - Formalized}
+
+Let's formalize the components we've discussed using mathematical notation.
+
+\begin{enumerate}
+    \item \textbf{Input (x)}: The input is the information available when making a decision. In the credit approval example, the input, denoted by \(x\), is the customer application. We can represent this as a \(d\)-dimensional vector, where each dimension corresponds to an attribute like salary, years in residence, outstanding debt, etc.  So, \(x = (x_1, x_2, ..., x_d)\), where \(x \in \mathcal{X}\), and \(\mathcal{X}\) is the input space (e.g., \(\mathbb{R}^d\)).
+
+    \item \textbf{Output (y)}: The output is the decision or prediction we want to make. In credit approval, the output, denoted by \(y\), is the credit decision: approve (+1) or deny (-1). Thus, \(y \in \mathcal{Y} = \{+1, -1\}\), where \(\mathcal{Y}\) is the output space.
+
+    \item \textbf{Target Function (f)}: The target function, denoted by \(f\), is the ideal function that we are trying to learn. It represents the true relationship between the input \(x\) and the output \(y\). In credit approval, \(f(x)\) would be the ideal credit approval formula – the perfect way to decide if a customer with application \(x\) is creditworthy. We can express this as \(f: \mathcal{X} \rightarrow \mathcal{Y}\).  Crucially, the target function \(f\) is \textbf{unknown} to us. If we knew \(f\), we wouldn't need machine learning!
+
+    \item \textbf{Data (D)}: To learn the target function, we need data.  The data, denoted by \(D\), consists of historical records of past experiences. In credit approval, \(D\) would be records of previous customer applications along with how those customers turned out in hindsight (good or bad credit behavior). We represent the data as a set of input-output pairs: \(D = \{(x_1, y_1), (x_2, y_2), ..., (x_N, y_n)\}\), where \(N\) is the number of data points. Each \((x_n, y_n)\) pair represents an example, with \(x_n\) being the input and \(y_n = f(x_n)\) being the corresponding output from the target function (which we observe in the historical data).
+
+    \item \textbf{Hypothesis (g)}: Our goal is to use the data \(D\) to learn a hypothesis, denoted by \(g\), which is our best guess or approximation of the target function \(f\).  The hypothesis \(g\) is a function from the same input space \(\mathcal{X}\) to the output space \(\mathcal{Y}\), i.e., \(g: \mathcal{X} \rightarrow \mathcal{Y}\). We hope that \(g\) is a good approximation of \(f\), meaning that \(g(x) \approx f(x)\) for unseen inputs \(x\). The hypothesis \(g\) is what the bank will actually use to make credit decisions for new applicants.
+\end{enumerate}
+
+\subsection{The Learning Process Diagram}
+
+The relationship between these components can be visualized as follows:
+
+\begin{figure}[H]
+    \centering
+    \begin{verbatim}
+#save_to: learning_process_diagram.png
+from graphviz import Digraph
+
+dot = Digraph('LearningProcess', comment='Learning Process Diagram', graph_attr={'rankdir': 'LR'})
+
+dot.node('TargetFunction', 'Target Function (f)\nIdeal Credit Approval Formula\n(Unknown)', shape='record')
+dot.node('TrainingExamples', 'Training Examples (D)\nHistorical Records\n{(x1, y1), ..., (xN, yN)}', shape='record')
+dot.node('LearningAlgorithm', 'Learning Algorithm\n(PLA, etc.)', shape='box')
+dot.node('HypothesisSet', 'Hypothesis Set (H)\nSet of Candidate Formulas\n(Linear Models, Neural Networks, etc.)', shape='box')
+dot.node('FinalHypothesis', 'Final Hypothesis (g)\nLearned Formula\n(Approximation of f)', shape='record')
+
+dot.edge('TargetFunction', 'TrainingExamples', label='  \'sees\'\nExamples of f')
+dot.edge('TrainingExamples', 'LearningAlgorithm', label='uses\n')
+dot.edge('LearningAlgorithm', 'FinalHypothesis', label='produces\n')
+dot.edge('HypothesisSet', 'LearningAlgorithm', label='chooses from\n')
+dot.edge('HypothesisSet', 'FinalHypothesis', style='dashed', color='gray')
+
+
+dot.render('learning_process_diagram', format='png', view=False)
+    \end{verbatim}
+    \centering
+    \includegraphics[max width=0.9\textwidth, max height=0.7\textheight, keepaspectratio]{learning_process_diagram.png}
+    \caption{The Learning Process}
+    \label{fig:learning_process_diagram}
+\end{figure}
+
+
+Figure \ref{fig:learning_process_diagram} illustrates the flow of the learning process.  The unknown Target Function \(f\) generates Training Examples \(D\). The Learning Algorithm takes the Training Examples and chooses a Final Hypothesis \(g\) from a set of possible Hypothesis Functions \(H\), known as the Hypothesis Set. The goal is for \(g\) to be a good approximation of \(f\).
+
+\textbf{Why a Hypothesis Set?}
+
+You might wonder why we introduce the concept of a Hypothesis Set \(H\). Why doesn't the learning algorithm simply create a hypothesis from 'anything'?  There are two key reasons for explicitly defining a Hypothesis Set:
+
+\begin{itemize}
+    \item \textbf{No Downside}: From a practical perspective, we always work within a predefined set of models.  When we want to learn, we decide to use a linear model, a neural network, a decision tree, etc.  We are inherently restricting our search for a hypothesis to a specific family of functions.  Defining a hypothesis set formalizes this practical constraint. Even if we were to consider 'all possible hypotheses', we could simply define \(H\) as the set of all possible functions from \(\mathcal{X}\) to \(\mathcal{Y}\).  Thus, there is no loss of generality in including a hypothesis set in our formulation.
+
+    \item \textbf{Upside: Theoretical Foundation}: The Hypothesis Set plays a pivotal role in the theory of learning, as we will see in subsequent chapters. It helps us answer crucial questions like: Can we learn? How well can we learn?  The properties of the Hypothesis Set directly influence our ability to learn and generalize.  By making the Hypothesis Set an explicit component, we can develop a robust theoretical framework for understanding learning.
+\end{itemize}
+
+The Target Function \(f\) and the Training Data \(D\) are typically given to us – they are part of the problem definition. Our solution tools are the \textbf{Hypothesis Set} \(H\) and the \textbf{Learning Algorithm}. We choose these to solve the learning problem.  Together, the choice of a Hypothesis Set and a Learning Algorithm constitute a \textbf{Learning Model}. For instance, we might choose the 'Perceptron Model,' which includes the 'Perceptron Hypothesis Set' and the 'Perceptron Learning Algorithm,' as we will explore next.
+
+\section{A Simple Learning Algorithm: The Perceptron}
+
+Let's explore a concrete example of a learning model: the Perceptron.  The Perceptron is a simple yet foundational model in machine learning, particularly useful for binary classification problems (where the output is either +1 or -1).
+
+\subsection{The Perceptron Hypothesis Set}
+
+The Perceptron model uses a linear function to make decisions.  Consider an input \(x = (x_1, x_2, ..., x_d) \in \mathbb{R}^d\).  The Perceptron hypothesis \(h(x)\) is defined as:
+
+\[
+h(x) = \text{sign} \left( \left( \sum_{i=1}^{d} w_i x_i \right) - \text{threshold} \right)
+\]
+
+where:
+\begin{itemize}
+    \item \(x = (x_1, x_2, ..., x_d)\) is the input vector.
+    \item \(w = (w_1, w_2, ..., w_d)\) is a vector of weights, where each weight \(w_i\) corresponds to the input feature \(x_i\).
+    \item \(\text{threshold}\) is a scalar threshold value.
+    \item \(\text{sign}(z) = +1\) if \(z \geq 0\) and \(\text{sign}(z) = -1\) if \(z < 0\).
+\end{itemize}
+
+The term \(\sum_{i=1}^{d} w_i x_i\) is a linear combination of the input features, often interpreted as a 'score'.  We compare this score to the \(\text{threshold}\). If the score exceeds the threshold, the Perceptron outputs +1 (e.g., approve credit); otherwise, it outputs -1 (e.g., deny credit).
+
+The parameters that define a specific Perceptron hypothesis are the weights \(w_1, w_2, ..., w_d\) and the \(\text{threshold}\).  Different choices of these parameters lead to different hypotheses within the Perceptron Hypothesis Set.
+
+Visually, in a 2-dimensional input space (\(d=2\)), a Perceptron represents a straight line. This line acts as a decision boundary, separating the input space into two regions. Points on one side of the line are classified as +1, and points on the other side as -1.  In higher dimensions, the decision boundary becomes a hyperplane.
+
+\begin{figure}[H]
+    \centering
+    \begin{tabular}{cc}
+        \includegraphics[max width=0.45\textwidth]{Lecture_01_frame_00_26_53.png} &
+        \includegraphics[max width=0.45\textwidth]{Lecture_01_frame_00_26_30.png} \\
+        (a) & (b)
+    \end{tabular}
+    \caption{Perceptron as a linear separator. Each purple line represents a different Perceptron hypothesis, defined by weights and threshold.}
+    \label{fig:perceptron_separator}
+\end{figure}
+
+Figure \ref{fig:perceptron_separator} illustrates this.  Each purple line represents a different Perceptron hypothesis, determined by a specific set of weights and threshold.  The learning algorithm's task is to find the 'best' line (or hyperplane) that separates the data points according to their target outputs.
+
+\subsection{Notational Simplification}
+
+We can simplify the Perceptron formula by introducing a slight change in notation. Instead of using a \(\text{threshold}\), we can rewrite the formula as:
+
+\[
+h(x) = \text{sign} \left( \left( \sum_{i=1}^{d} w_i x_i \right) + w_0 \right)
+\]
+
+where \(w_0 = -\text{threshold}\).  To further simplify, we introduce an artificial coordinate \(x_0 = +1\) and extend the input vector to \(x = (x_0, x_1, ..., x_d)\).  Now, we can write the Perceptron hypothesis in a compact vector form:
+
+\[
+h(x) = \text{sign} \left( \sum_{i=0}^{d} w_i x_i \right) = \text{sign} (w^T x)
+\]
+
+where \(w = (w_0, w_1, ..., w_d)^T\) and \(x = (x_0, x_1, ..., x_d)^T\) are now column vectors, and \(w^T x\) denotes their inner product. This form is mathematically equivalent to the original formula and is more convenient to work with.
+
+\subsection{The Perceptron Learning Algorithm (PLA)}
+
+Now that we have defined the Perceptron Hypothesis Set, we need a learning algorithm to find a good hypothesis \(g\) from this set, based on the training data \(D\).  The Perceptron Learning Algorithm (PLA) is a simple iterative algorithm designed to learn a Perceptron hypothesis if the data is linearly separable.
+
+The PLA works as follows:
+
+\begin{enumerate}
+    \item \textbf{Initialization}: Initialize the weight vector \(w\) to some random values (or all zeros).
+
+    \item \textbf{Iteration}:
+    \begin{enumerate}
+        \item \textbf{Find a misclassified point}: Iterate through the training data points \((x_n, y_n)\) in \(D\).  For each point, check if it is misclassified by the current hypothesis \(h(x) = \text{sign}(w^T x)\). A point \((x_n, y_n)\) is misclassified if \(\text{sign}(w^T x_n) \neq y_n\).
+        \item \textbf{Update the weight vector}: If a misclassified point \((x_n, y_n)\) is found, update the weight vector using the following rule:
+        \[
+        w \leftarrow w + y_n x_n
+        \]
+        \item \textbf{Repeat}: Repeat steps (a) and (b) until no misclassified points are found in the training data, or until a maximum number of iterations is reached.
+    \end{enumerate}
+
+    \item \textbf{Return Final Hypothesis}: Once the algorithm terminates (ideally when no misclassified points are found), return the current weight vector \(w\) which defines the final hypothesis \(g(x) = \text{sign}(w^T x)\).
+\end{enumerate}
+
+\textbf{Why does the PLA Update Rule Work?}
+
+The update rule \(w \leftarrow w + y_n x_n\) is designed to correct the misclassification of the point \((x_n, y_n)\).  Let's consider two cases:
+
+\begin{itemize}
+    \item \textbf{Case 1: \(y_n = +1\)}.  If the point is misclassified, it means our current hypothesis incorrectly predicted \(-1\), i.e., \(\text{sign}(w^T x_n) = -1\), which implies \(w^T x_n < 0\).  We want to adjust \(w\) so that \(w^T x_n\) becomes positive (or at least closer to zero).  By updating \(w \leftarrow w + y_n x_n = w + x_n\), we effectively increase \(w^T x_n\):
+    \[
+    (w + x_n)^T x_n = w^T x_n + x_n^T x_n = w^T x_n + ||x_n||^2
+    \]
+    Since \(||x_n||^2 > 0\), and \(w^T x_n < 0\), adding \(x_n\) to \(w\) makes \(w^T x_n\) less negative and closer to being correctly classified.
+
+    \item \textbf{Case 2: \(y_n = -1\)}. If the point is misclassified, our hypothesis predicted \(+1\), i.e., \(\text{sign}(w^T x_n) = +1\), which implies \(w^T x_n > 0\). We want to make \(w^T x_n\) negative (or closer to zero). By updating \(w \leftarrow w + y_n x_n = w - x_n\), we effectively decrease \(w^T x_n\):
+    \[
+    (w - x_n)^T x_n = w^T x_n - x_n^T x_n = w^T x_n - ||x_n||^2
+    \]
+    Since \(||x_n||^2 > 0\) and \(w^T x_n > 0\), subtracting \(x_n\) from \(w\) makes \(w^T x_n\) less positive and closer to being correctly classified.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \begin{tabular}{cc}
+        \begin{verbatim}
+#save_to: pla_update_y_pos.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots()
+
+# Vectors
+w = np.array([1, 1])
+x = np.array([-2, 1])
+w_plus_x = w + x
+
+# Origin
+origin = [0, 0]
+
+# Plot vectors
+ax.quiver(*origin, *w, color='red', angles='xy', scale_units='xy', scale=1, label='w')
+ax.quiver(*origin, *x, color='black', angles='xy', scale_units='xy', scale=1, label='x')
+ax.quiver(*origin, *w_plus_x, color='blue', angles='xy', scale_units='xy', scale=1, label='w+yx')
+
+
+# Plot points (just for visual context)
+ax.plot(0,0, 'ko', markersize=5) # Origin point
+ax.plot(w[0], w[1], 'ro', markersize=5) # w end point
+ax.plot(x[0], x[1], 'ko', markersize=5) # x end point
+ax.plot(w_plus_x[0], w_plus_x[1], 'bo', markersize=5) # w+yx end point
+
+# Labels for points (adjust positions slightly)
+ax.text(w[0]+0.1, w[1]+0.1, 'w', color='red')
+ax.text(x[0]+0.1, x[1]+0.1, 'x', color='black')
+ax.text(w_plus_x[0]+0.1, w_plus_x[1]+0.1, 'w+yx', color='blue')
+
+# Set plot limits and aspect ratio
+ax.set_xlim([-3, 3])
+ax.set_ylim([-1, 3])
+ax.set_aspect('equal', adjustable='box')
+
+# Add grid lines
+ax.grid(True, linestyle='--', alpha=0.7)
+
+# Add title and labels
+ax.set_title('PLA Update for y = +1')
+ax.set_xlabel('x-axis')
+ax.set_ylabel('y-axis')
+ax.legend()
+
+
+plt.savefig('pla_update_y_pos.png')
+        \end{verbatim}
+        \caption{PLA Update for \(y = +1\). When \(y = +1\) and a point is misclassified, adding \(x\) to \(w\) rotates \(w\) towards \(x\), making the inner product \(w^T x\) more positive.}
+        \label{fig:pla_update_y_pos}
+        &
+        \begin{verbatim}
+#save_to: pla_update_y_neg.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots()
+
+# Vectors
+w = np.array([1, 1])
+x = np.array([2, 1])
+w_minus_x = w - x
+
+# Origin
+origin = [0, 0]
+
+# Plot vectors
+ax.quiver(*origin, *w, color='red', angles='xy', scale_units='xy', scale=1, label='w')
+ax.quiver(*origin, *x, color='black', angles='xy', scale_units='xy', scale=1, label='x')
+ax.quiver(*origin, *w_minus_x, color='blue', angles='xy', scale_units='xy', scale=1, label='w+yx')
+
+
+# Plot points (just for visual context)
+ax.plot(0,0, 'ko', markersize=5) # Origin point
+ax.plot(w[0], w[1], 'ro', markersize=5) # w end point
+ax.plot(x[0], x[1], 'ko', markersize=5) # x end point
+ax.plot(w_minus_x[0], w_minus_x[1], 'bo', markersize=5) # w-yx end point
+
+# Labels for points (adjust positions slightly)
+ax.text(w[0]+0.1, w[1]+0.1, 'w', color='red')
+ax.text(x[0]+0.1, x[1]+0.1, 'x', color='black')
+ax.text(w_minus_x[0]+0.1, w_minus_x[1]+0.1, 'w+yx', color='blue')
+
+# Set plot limits and aspect ratio
+ax.set_xlim([-1, 3])
+ax.set_ylim([-1, 3])
+ax.set_aspect('equal', adjustable='box')
+
+# Add grid lines
+ax.grid(True, linestyle='--', alpha=0.7)
+
+# Add title and labels
+ax.set_title('PLA Update for y = -1')
+ax.set_xlabel('x-axis')
+ax.set_ylabel('y-axis')
+ax.legend()
+
+
+plt.savefig('pla_update_y_neg.png')
+        \end{verbatim}
+        \caption{PLA Update. (a) For \(y = +1\). (b) For \(y = -1\). When \(y = -1\) and a point is misclassified, subtracting \(x\) from \(w\) rotates \(w\) away from \(x\), making the inner product \(w^T x\) more negative.}
+        \label{fig:pla_update_rules}
+    \end{tabular}
+\end{figure}
+
+Figure \ref{fig:pla_update_rules} visually demonstrates how the PLA update rule adjusts the weight vector \(w\) in both cases \(y=+1\) and \(y=-1\) to move towards correct classification.
+
+\textbf{Convergence of PLA}
+
+A key property of the PLA is that if the training data is \textbf{linearly separable}, the PLA is guaranteed to converge and find a weight vector \(w\) that correctly classifies all training points in a finite number of iterations. Linear separability means that there exists a hyperplane that can perfectly separate the data points belonging to class +1 from those belonging to class -1.
+
+However, if the data is not linearly separable, the PLA will not converge. It will keep iterating indefinitely, or until a predefined stopping criterion (like a maximum number of iterations) is met. In such cases, the PLA may not find a perfect solution, and modifications like the 'pocket algorithm' are needed to find a 'best possible' solution.
+
+\begin{figure}[H]
+    \centering}
+    \includegraphics[max width=0.6\textwidth]{Lecture_01_frame_00_33_11.png}
+    \caption{Iterations of PLA. The purple line (Perceptron boundary) is adjusted iteratively to correctly classify misclassified points, eventually separating blue and red regions if the data is linearly separable.}
+    \label{fig:pla_iterations}
+\end{figure}
+
+Figure \ref{fig:pla_iterations} visually shows how the decision boundary (purple line) moves in each iteration of PLA to correct misclassifications, ultimately leading to a solution if the data is linearly separable.
+
+While the Perceptron and PLA are simple, they provide a foundational understanding of linear models and iterative learning algorithms, which are crucial concepts in machine learning.
+
+\section{Types of Learning}
+
+Machine learning encompasses various types of learning, categorized based on the nature of the data and the learning objective.  All types of learning share a common premise.
+
+\subsection{Premise of Learning}
+
+The fundamental premise of all forms of learning is:
+
+\begin{quote}
+    \textit{Use a set of observations (data) to uncover an underlying process.}
+\end{quote}
+
+In our formalized learning problem, this 'underlying process' is represented by the target function \(f\).  Different types of learning arise from different contexts and assumptions about the data and the information available to learn.  The three primary types of learning we will consider are: Supervised Learning, Unsupervised Learning, and Reinforcement Learning.
+
+\subsection{Supervised Learning}
+
+\begin{definition}[Supervised Learning]
+    In supervised learning, the training data consists of input-output pairs \((x_n, y_n)\), where the output \(y_n\) is the \textbf{correct} output or label for the input \(x_n\).  The learning algorithm is 'supervised' by these correct outputs.
+\end{definition}
+
+The credit approval and movie rating examples we discussed are instances of supervised learning. We have labeled data: customer applications paired with credit behavior outcomes, and movies paired with viewer ratings.
+
+\textbf{Example: Coin Recognition (Supervised)}
+
+Consider a vending machine that needs to recognize coins. We can measure physical attributes of coins, such as size and mass.
+
+\begin{figure}[H]
+    \centering
+    \begin{verbatim}
+#save_to: supervised_coin_recognition.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Coin data (approximate size and mass)
+coin_data = {
+    '25': {'size': np.random.normal(24.26, 0.5, 50), 'mass': np.random.normal(5.67, 0.2, 50), 'color': 'limegreen'}, # Quarters
+    '5':  {'size': np.random.normal(21.21, 0.4, 60), 'mass': np.random.normal(5.00, 0.15, 60), 'color': 'red'},     # Nickels
+    '1':  {'size': np.random.normal(19.05, 0.3, 70), 'mass': np.random.normal(2.50, 0.1, 70), 'color': 'yellow'},  # Pennies
+    '10': {'size': np.random.normal(17.91, 0.2, 80), 'mass': np.random.normal(2.27, 0.08, 80), 'color': 'skyblue'}   # Dimes
+}
+
+fig, ax = plt.subplots()
+
+for coin_value, data in coin_data.items():
+    ax.scatter(data['size'], data['mass'], color=data['color'], label=coin_value, s=20)
+    ax.annotate(coin_value, (np.mean(data['size']), np.mean(data['mass'])), textcoords="offset points", xytext=(5,5), ha='center')
+
+
+ax.set_xlabel('Size')
+ax.set_ylabel('Mass')
+ax.set_title('Supervised Learning: Coin Recognition')
+ax.legend(title='Coin Value (cents)')
+ax.grid(True, linestyle='--', alpha=0.6)
+plt.savefig('supervised_coin_recognition.png')
+    \end{verbatim}
+    \centering
+    \includegraphics[max width=0.7\textwidth, max height=0.5\textheight, keepaspectratio]{supervised_coin_recognition.png}
+    \caption{Supervised Learning: Coin Recognition.  Data points are labeled with coin denominations, allowing a supervised algorithm to learn to classify future coins.}
+    \label{fig:supervised_coin_recognition}
+\end{figure}
+
+\subsection{Unsupervised Learning}
+
+\begin{definition}[Unsupervised Learning]
+    In unsupervised learning, the training data consists only of inputs \(x_n\), without corresponding correct outputs \(y_n\). The learning algorithm must find patterns or structure in the input data without explicit supervision.
+\end{definition}
+
+\textbf{Example: Coin Recognition (Unsupervised)}
+
+Now consider the same coin recognition problem, but without labels. We only have measurements of size and mass for a collection of coins, but we don't know which denomination each coin belongs to.
+
+\begin{figure}[H]
+    \centering
+    \begin{verbatim}
+#save_to: unsupervised_coin_recognition.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Coin data (approximate size and mass) - unlabeled
+coin_data_unlabeled = {
+    'Cluster 1': {'size': np.random.normal(24.26, 0.5, 50), 'mass': np.random.normal(5.67, 0.2, 50), 'color': 'lightcoral'}, # Quarters
+    'Cluster 2':  {'size': np.random.normal(21.21, 0.4, 60), 'mass': np.random.normal(5.00, 0.15, 60), 'color': 'lightcoral'},     # Nickels
+    'Cluster 3':  {'size': np.random.normal(19.05, 0.3, 70), 'mass': np.random.normal(2.50, 0.1, 70), 'color': 'lightcoral'},  # Pennies
+    'Cluster 4': {'size': np.random.normal(17.91, 0.2, 80), 'mass': np.random.normal(2.27, 0.08, 80), 'color': 'lightcoral'}   # Dimes
+}
+
+fig, ax = plt.subplots()
+
+for cluster_name, data in coin_data_unlabeled.items():
+    ax.scatter(data['size'], data['mass'], color=data['color'], label=cluster_name, s=20)
+
+
+ax.set_xlabel('Size')
+ax.set_ylabel('Mass')
+ax.set_title('Unsupervised Learning: Coin Recognition')
+ax.legend()
+ax.grid(True, linestyle='--', alpha=0.6)
+plt.savefig('unsupervised_coin_recognition.png')
+    \end{verbatim}
+    \centering
+    \includegraphics[max width=0.7\textwidth, max height=0.5\textheight, keepaspectratio]{unsupervised_coin_recognition.png}
+    \caption{Unsupervised Learning: Coin Recognition. Data points are unlabeled, but the algorithm can still identify clusters representing different coin types based on size and mass.}
+    \label{fig:unsupervised_coin_recognition}
+    \end{figure}
+\end{figure}
+
+\subsection{Reinforcement Learning}
+
+\begin{definition}[Reinforcement Learning]
+    In reinforcement learning, the training data arises from an agent interacting with an environment. For each action the agent takes in the environment, it receives feedback in the form of a reward (positive or negative). The goal is for the agent to learn a policy (strategy) that maximizes the cumulative reward over time.
+\end{definition}
+
+In reinforcement learning, we don't get correct outputs or labels directly. Instead, we get a 'grade' or a reward signal that indicates how good our action was in a given situation.
+
+\textbf{Example: Toddler and Hot Tea}
+
+The example of a toddler learning about a hot cup of tea illustrates reinforcement learning. The toddler (agent) interacts with the environment (the cup of tea).  When the toddler touches the hot cup (action), they receive a negative reward (pain, 'Ouch!'). Through repeated interactions and feedback (pain or lack thereof), the toddler learns to avoid touching hot cups of tea in the future. The reward reinforces the 'not touching' action in the presence of a hot cup.
+
+\textbf{Example: Backgammon}
+
+A more sophisticated example is a computer learning to play backgammon. The computer (agent) plays against an opponent.  For each move (action) it makes, there's no immediate 'correct' output provided.  However, at the end of the game, the computer either wins (positive reward) or loses (negative reward).  The reinforcement learning algorithm then works backward to adjust the computer's strategy (policy) to increase the likelihood of winning in future games.  This is a trial-and-error process driven by rewards.  Through playing millions of games and receiving reinforcement signals (win or lose), a computer can learn to play backgammon at a world-champion level, as has been demonstrated.
+
+\section{The Learning Puzzle: The Limits of Learning}
+
+To appreciate the challenges and subtleties of learning, let's consider a puzzle presented in the lecture.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[max width=0.7\textwidth]{Lecture_01_frame_00_53_40.png}
+    \caption{A Learning Puzzle. Given the examples above the line, what is the value of \(f\) for the pattern below the line?}
+    \label{fig:learning_puzzle}
+\end{figure}
+
+Figure \ref{fig:learning_puzzle} presents a supervised learning problem. We are given six examples of 3x3 binary patterns, with three labeled as \(f = -1\) and three as \(f = +1\).  Below the line, there is a new, unlabeled pattern. The puzzle is to predict the value of the target function \(f\) for this new pattern: is \(f = +1\) or \(f = -1\)?
+
+Take a moment to look at the patterns and try to discern a rule or pattern that distinguishes the \(f = -1\) examples from the \(f = +1\) examples.  Based on this pattern, make a prediction for the unlabeled pattern.
+
+When this puzzle is presented to an audience, there is usually a split in responses. Some people predict \(f = +1\), while others predict \(f = -1\).  This diversity in answers highlights a fundamental issue: \textbf{ambiguity} in learning.
+
+The key insight from this puzzle is that with a finite set of training examples, there can be multiple possible target functions that are consistent with the data.  For the six examples given, you can likely find several different rules or patterns that correctly classify these six examples but may classify the test pattern differently.
+
+For instance, one might hypothesize that \(f(x) = -1\) if the top-left square is black, and \(f(x) = +1\) otherwise.  This rule correctly classifies all six training examples.  However, for the test pattern, the top-left square is white, so this rule would predict \(f = +1\).
+
+Another possible rule could be based on symmetry: \(f(x) = +1\) if the pattern is symmetric (e.g., symmetrical about a vertical axis), and \(f(x) = -1\) otherwise.  Applying this rule, the test pattern is symmetric, so it would also predict \(f = +1\).
+
+However, other valid patterns might lead to a prediction of \(f = -1\) for the test example.  The point is, with limited data, we cannot definitively determine the 'true' target function \(f\).
+
+This puzzle underscores a crucial limitation of learning. We are trying to learn an unknown function \(f\) from a finite set of examples.  There will always be functions that fit the given data but diverge outside of it.  This is why \textbf{generalization} – the ability to perform well on unseen data – is the central challenge in machine learning.
+
+If our goal were simply to memorize the training examples, the task would be trivial. But learning is about more than memorization; it's about discovering underlying patterns that generalize beyond the observed data. The learning puzzle highlights that this generalization is not guaranteed and is inherently uncertain.
+
+\section{Conclusion}
+
+In this chapter, we have introduced the fundamental concept of the learning problem. We defined the three essential components that characterize a machine learning problem: the existence of a pattern, our inability to mathematically define it, and the availability of data. We formalized the learning problem mathematically, defining key components like the target function, hypothesis set, and learning algorithm.  We explored a simple learning model – the Perceptron – and its learning algorithm (PLA).  Finally, we discussed different types of learning and considered a puzzle that highlighted the inherent limitations and challenges in learning and generalization.
+
+The key takeaway is that learning is about approximating an unknown target function from limited data. The ambiguity illustrated by the learning puzzle naturally leads to the question: \textbf{Is learning even feasible?}  Despite the challenges, machine learning is indeed possible and powerful.  In the next chapter, we will delve into the theoretical foundations to understand the conditions under which learning is feasible and how we can approach the problem of generalization effectively.
+
+\end{document}
+```

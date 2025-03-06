@@ -1,0 +1,329 @@
+```latex
+\documentclass{article}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{listings}
+
+\newtheorem{theorem}{Théorème}
+\newtheorem{lemma}{Lemme}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}{Définition}
+\newtheorem{remark}{Remarque}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Exemple}
+
+\usepackage[margin=1in]{geometry}
+
+\begin{document}
+\sloppy
+
+\section{Rappel de cours}
+
+\subsection*{Normes sur $\mathbb{R}^d$}
+
+\textbf{Définition des normes usuelles sur $\mathbb{R}^d$}
+
+Soit $X = (x_1, \dots, x_d) \in \mathbb{R}^d$. On définit les normes suivantes :
+\begin{itemize}
+    \item Norme euclidienne (ou norme $\ell^2$) :
+    \[
+    \|X\| = \|X\|_2 = \sqrt{\sum_{i=1}^d x_i^2} = \sqrt{X \cdot X}
+    \]
+    \item Norme $\ell^1$ :
+    \[
+    \|X\|_1 = \sum_{i=1}^d |x_i|
+    \]
+    \item Norme $\ell^\infty$ (ou norme du maximum) :
+    \[
+    \|X\|_\infty = \max_{1 \leq i \leq d} |x_i|
+    \]
+\end{itemize}
+
+\subsection*{Propriétés des normes}
+
+\textbf{Définition (Norme)}
+\begin{definition}
+Pour toute norme $\|\cdot\|$ sur $\mathbb{R}^d$ et pour tous $X, Y \in \mathbb{R}^d$ et $\lambda \in \mathbb{R}$, on a :
+\begin{enumerate}
+    \item $\|\lambda X\| = |\lambda| \|X\|$ (Homogénéité)
+    \item $\|X + Y\| \leq \|X\| + \|Y\|$ (Inégalité triangulaire)
+    \item $\|X\| \geq 0$ et $\|X\| = 0 \Leftrightarrow X = 0$ (Séparation)
+\end{enumerate}
+\end{definition}
+
+\subsection*{Inégalité de Cauchy-Schwarz}
+
+\begin{theorem}[Inégalité de Cauchy-Schwarz]
+Pour tous $X, Y \in \mathbb{R}^d$, on a :
+\[
+|X \cdot Y| \leq \|X\| \|Y\|
+\]
+\end{theorem}
+
+\subsection*{Distances sur $\mathbb{R}^d$ et $\mathbb{C}^d$}
+
+\textbf{Définition de la distance euclidienne}
+\begin{definition}
+La distance euclidienne entre deux points $X, Y \in \mathbb{R}^d$ est définie par :
+\[
+d(X, Y) = \|Y - X\| = \sqrt{\sum_{i=1}^d (x_i - y_i)^2}
+\]
+\end{definition}
+
+\textbf{Définition générale d'une distance}
+\begin{definition}
+Plus généralement, une distance $d$ sur un ensemble $E$ est une application $d: E \times E \rightarrow \mathbb{R}^+$ satisfaisant les propriétés suivantes pour tous $x, y, z \in E$ :
+\begin{enumerate}
+    \item $d(x, y) \geq 0$ (Positivité)
+    \item $d(x, y) = d(y, x)$ (Symétrie)
+    \item $d(x, y) \leq d(x, z) + d(z, y)$ (Inégalité triangulaire)
+    \item $d(x, y) = 0 \Leftrightarrow x = y$ (Axiome de séparation)
+\end{enumerate}
+\end{definition}
+
+\section{Exercices résolus}
+
+\subsection{Exercice 1}
+
+\textbf{Énoncé de l'exercice 1 :}
+On pose pour $X = (x_1, \dots, x_d) \in \mathbb{R}^d$:
+\[
+\|X\|_1 = \sum_{i=1}^d |x_i|, \quad \|X\|_2 = (\sum_{i=1}^d x_i^2)^{1/2}, \quad \|X\|_\infty = \max_{1 \leq i \leq d} |x_i|
+\]
+1) Montrer que $\|\cdot\|_1$, $\|\cdot\|_2$ et $\|\cdot\|_\infty$ sont des normes sur $\mathbb{R}^d$, $\forall X \in \mathbb{R}^d$.
+
+2) Montrer que
+\[
+\|X\|_\infty \leq \|X\|_2 \leq \|X\|_1, \quad \forall X \in \mathbb{R}^d.
+\]
+
+3) Montrer que
+\[
+\|X\|_1 \leq d \|X\|_\infty, \quad \forall X \in \mathbb{R}^d.
+\]
+
+4) Montrer que
+\[
+\|X\|_2 \leq \sqrt{d} \|X\|_\infty, \quad \forall X \in \mathbb{R}^d.
+\]
+
+
+\begin{solution}[Solution de l'exercice 1]
+Soit $X = (x_1, \dots, x_d) \in \mathbb{R}^d$ et $\lambda \in \mathbb{R}$.
+
+\textbf{1) Pour $\|\cdot\|_1$ : }
+\begin{itemize}
+    \item $\|\lambda X\|_1 = \sum_{i=1}^d |\lambda x_i| = |\lambda| \sum_{i=1}^d |x_i| = |\lambda| \|X\|_1$
+    \item $\|X + Y\|_1 = \sum_{i=1}^d |x_i + y_i| \leq \sum_{i=1}^d (|x_i| + |y_i|) = \sum_{i=1}^d |x_i| + \sum_{i=1}^d |y_i| = \|X\|_1 + \|Y\|_1$
+    \item $\|X\|_1 = \sum_{i=1}^d |x_i| \geq 0$. De plus, $\|X\|_1 = 0 \Leftrightarrow \sum_{i=1}^d |x_i| = 0 \Leftrightarrow |x_i| = 0$ pour tout $i \Leftrightarrow x_i = 0$ pour tout $i \Leftrightarrow X = 0$.
+\end{itemize}
+Donc $\|\cdot\|_1$ est une norme.
+
+\textbf{Pour $\|\cdot\|_\infty$ : }
+\begin{itemize}
+    \item $\|\lambda X\|_\infty = \max_{i} |\lambda x_i| = |\lambda| \max_{i} |x_i| = |\lambda| \|X\|_\infty$
+    \item $\|X + Y\|_\infty = \max_{i} |x_i + y_i| \leq \max_{i} (|x_i| + |y_i|) \leq \max_{i} |x_i| + \max_{i} |y_i| = \|X\|_\infty + \|Y\|_\infty$
+    \item $\|X\|_\infty = \max_{i} |x_i| \geq 0$. De plus, $\|X\|_\infty = 0 \Leftrightarrow \max_{i} |x_i| = 0 \Leftrightarrow |x_i| = 0$ pour tout $i \Leftrightarrow x_i = 0$ pour tout $i \Leftrightarrow X = 0$.
+\end{itemize}
+Donc $\|\cdot\|_\infty$ est une norme.
+
+\textbf{Pour $\|\cdot\|_2$ : }
+\begin{itemize}
+    \item $\|\lambda X\|_2 = \sqrt{\sum_{i=1}^d (\lambda x_i)^2} = \sqrt{\lambda^2 \sum_{i=1}^d x_i^2} = |\lambda| \sqrt{\sum_{i=1}^d x_i^2} = |\lambda| \|X\|_2$
+    \item Inégalité triangulaire (Minkowski) admise.
+    \item $\|X\|_2 = \sqrt{\sum_{i=1}^d x_i^2} \geq 0$. De plus, $\|X\|_2 = 0 \Leftrightarrow \sqrt{\sum_{i=1}^d x_i^2} = 0 \Leftrightarrow \sum_{i=1}^d x_i^2 = 0 \Leftrightarrow x_i^2 = 0$ pour tout $i \Leftrightarrow x_i = 0$ pour tout $i \Leftrightarrow X = 0$.
+\end{itemize}
+Donc $\|\cdot\|_2$ est une norme.
+
+\textbf{2) Montrons $\|X\|_\infty \leq \|X\|_2 \leq \|X\|_1$ : }
+\begin{itemize}
+    \item \textbf{i) $\|X\|_\infty \leq \|X\|_2$ : }
+    Soit $i_0$ tel que $|x_{i_0}| = \max_{i} |x_i| = \|X\|_\infty$.
+    \[
+    \|X\|_2 = \sqrt{\sum_{i=1}^d x_i^2} = \sqrt{x_1^2 + \dots + x_{i_0}^2 + \dots + x_d^2} \geq \sqrt{x_{i_0}^2} = |x_{i_0}| = \|X\|_\infty
+    \]
+    Donc $\|X\|_\infty \leq \|X\|_2$.
+
+    \item \textbf{ii) $\|X\|_2 \leq \|X\|_1$ : }
+    \[
+    \|X\|_2^2 = \sum_{i=1}^d x_i^2 = \sum_{i=1}^d |x_i|^2 = \sum_{i=1}^d |x_i| |x_i| \leq \max_{i} |x_i| \sum_{i=1}^d |x_i| = \|X\|_\infty \|X\|_1
+    \]
+    Ceci ne marche pas directement.
+
+    On utilise plutôt que $|x_i| \leq \|X\|_1$ et donc $|x_i|^2 \leq |x_i| \|X\|_1$.
+    \[
+    \|X\|_2^2 = \sum_{i=1}^d x_i^2 = \sum_{i=1}^d |x_i|^2 \leq \sum_{i=1}^d |x_i| \|X\|_1 = \|X\|_1 \sum_{i=1}^d |x_i| = \|X\|_1^2
+    \]
+    Donc $\|X\|_2^2 \leq \|X\|_1^2$. Comme les normes sont positives, on a $\|X\|_2 \leq \|X\|_1$.
+\end{itemize}
+
+\textbf{3) Montrons $\|X\|_1 \leq d \|X\|_\infty$ : }
+\[
+\|X\|_1 = \sum_{i=1}^d |x_i| = |x_1| + \dots + |x_d| \leq \max_{i} |x_i| + \dots + \max_{i} |x_i| = d \max_{i} |x_i| = d \|X\|_\infty
+\]
+Donc $\|X\|_1 \leq d \|X\|_\infty$.
+
+\textbf{4) Montrons $\|X\|_2 \leq \sqrt{d} \|X\|_\infty$ : }
+\[
+\|X\|_2^2 = \sum_{i=1}^d x_i^2 = \sum_{i=1}^d |x_i|^2 = |x_1|^2 + \dots + |x_d|^2 \leq (\max_{i} |x_i|)^2 + \dots + (\max_{i} |x_i|)^2 = d (\max_{i} |x_i|)^2 = d \|X\|_\infty^2
+\]
+Donc $\|X\|_2^2 \leq d \|X\|_\infty^2$. Comme les normes sont positives, on a $\|X\|_2 \leq \sqrt{d} \|X\|_\infty$.
+\end{solution}
+
+\subsection{Exercice 2}
+
+\textbf{Énoncé de l'exercice 2 :}
+Soit $\|\cdot\|$ la norme euclidienne sur $\mathbb{R}^d$. Montrer l'identité du parallélogramme :
+\[
+\|X + Y\|^2 + \|X - Y\|^2 = 2(\|X\|^2 + \|Y\|^2), \quad \forall X, Y \in \mathbb{R}^d.
+\]
+
+\begin{solution}[Solution de l'exercice 2]
+Soient $X = (x_1, \dots, x_d) \in \mathbb{R}^d$ et $Y = (y_1, \dots, y_d) \in \mathbb{R}^d$.
+\begin{align*}
+\|X + Y\|^2 &= \sum_{i=1}^d (x_i + y_i)^2 = \sum_{i=1}^d (x_i^2 + 2x_i y_i + y_i^2) = \sum_{i=1}^d x_i^2 + 2 \sum_{i=1}^d x_i y_i + \sum_{i=1}^d y_i^2 \\
+&= \|X\|^2 + 2 \sum_{i=1}^d x_i y_i + \|Y\|^2
+\end{align*}
+\begin{align*}
+\|X - Y\|^2 &= \sum_{i=1}^d (x_i - y_i)^2 = \sum_{i=1}^d (x_i^2 - 2x_i y_i + y_i^2) = \sum_{i=1}^d x_i^2 - 2 \sum_{i=1}^d x_i y_i + \sum_{i=1}^d y_i^2 \\
+&= \|X\|^2 - 2 \sum_{i=1}^d x_i y_i + \|Y\|^2
+\end{align*}
+Donc en sommant :
+\begin{align*}
+\|X + Y\|^2 + \|X - Y\|^2 &= (\|X\|^2 + 2 \sum_{i=1}^d x_i y_i + \|Y\|^2) + (\|X\|^2 - 2 \sum_{i=1}^d x_i y_i + \|Y\|^2) \\
+&= 2\|X\|^2 + 2\|Y\|^2 = 2(\|X\|^2 + \|Y\|^2)
+\end{align*}
+D'où l'identité du parallélogramme.
+\end{solution}
+
+\subsection{Exercice 3}
+
+\textbf{Énoncé de l'exercice 3 :}
+Soit $\delta(X, Y)$ la distance usuelle dans $\mathbb{R}^2$. On pose
+\[
+\delta(X, Y) = \begin{cases}
+d(X, Y) & \text{si } 0, X, Y \text{ alignés,} \\
+d(0, X) + d(0, Y) & \text{sinon.}
+\end{cases}
+\]
+Montrer que $\delta$ est une distance sur $\mathbb{R}^2$.
+
+\begin{solution}[Solution de l'exercice 3]
+On vérifie les 4 axiomes d'une distance.
+\begin{enumerate}
+    \item \textbf{Positivité :} $\delta(X, Y) \geq 0$ car $d$ est une distance donc $d(X, Y) \geq 0$ et $d(0, X) + d(0, Y) \geq 0$. \textbf{OK}
+    \item \textbf{Symétrie :} $\delta(X, Y) = \delta(Y, X)$.
+    \begin{itemize}
+        \item Si $0, X, Y$ alignés, alors $0, Y, X$ alignés et $\delta(X, Y) = d(X, Y) = d(Y, X) = \delta(Y, X)$.
+        \item Si $0, X, Y$ non alignés, alors $0, Y, X$ non alignés et $\delta(X, Y) = d(0, X) + d(0, Y) = d(0, Y) + d(0, X) = \delta(Y, X)$.
+    \end{itemize}
+    \textbf{OK}
+    \item \textbf{Axiome de séparation :} $\delta(X, Y) = 0 \Leftrightarrow X = Y$.
+    \begin{itemize}
+        \item Si $X = Y$, alors $0, X, Y$ alignés et $\delta(X, Y) = d(X, Y) = d(X, X) = 0$.
+        \item Si $\delta(X, Y) = 0$.
+        \begin{itemize}
+            \item Si $0, X, Y$ alignés, alors $\delta(X, Y) = d(X, Y) = 0 \Leftrightarrow X = Y$.
+            \item Si $0, X, Y$ non alignés, alors $\delta(X, Y) = d(0, X) + d(0, Y) = 0 \Rightarrow d(0, X) = 0$ et $d(0, Y) = 0 \Rightarrow X = 0$ et $Y = 0 \Rightarrow X = Y = 0$.
+        \end{itemize}
+    \end{itemize}
+    \textbf{OK}
+    \item \textbf{Inégalité triangulaire :} $\delta(X, Y) \leq \delta(X, Z) + \delta(Z, Y)$.
+    \begin{itemize}
+        \item \textbf{Remarque utile :} Si $0, U, V$ alignés et $0, V, W$ alignés, et $0, U, W$ non alignés, alors $V = 0$.
+        \item \textbf{i) Si $0, X, Y$ alignés : } $\delta(X, Y) = d(X, Y)$.
+        On veut montrer $d(X, Y) \leq \delta(X, Z) + \delta(Z, Y)$.
+        \begin{itemize}
+            \item \textbf{Cas 1) $0, X, Z$ alignés et $0, Z, Y$ alignés. }
+            Alors $0, X, Y, Z$ alignés.
+            \[
+            \delta(X, Z) + \delta(Z, Y) = d(X, Z) + d(Z, Y) \geq d(X, Y) = \delta(X, Y)
+            \]
+            (Inégalité triangulaire pour $d$). \textbf{OK}
+            \item \textbf{Cas 2) $0, X, Z$ non alignés ou $0, Z, Y$ non alignés. }
+            Alors $\delta(X, Z) + \delta(Z, Y) \geq \delta(X, Z)$ ou $\delta(X, Z) + \delta(Z, Y) \geq \delta(Z, Y)$.
+            Comme $\delta(X, Z) = d(0, X) + d(0, Z) \geq d(X, 0) = d(0, X)$ et $\delta(Z, Y) = d(0, Z) + d(0, Y) \geq d(0, Y)$.
+            \[
+            \delta(X, Z) + \delta(Z, Y) \geq \max(\delta(X, Z), \delta(Z, Y)) \geq \max(d(0, X), d(0, Y)) \geq d(X, Y) = \delta(X, Y)
+            \]
+            Si $X = 0$ ou $Y = 0$, c'est immédiat car $\delta(X,Y) = d(X,Y)$ si $0, X, Y$ alignés.
+        \end{itemize}
+        \item \textbf{ii) Si $0, X, Y$ non alignés : } $\delta(X, Y) = d(0, X) + d(0, Y)$.
+        On veut montrer $d(0, X) + d(0, Y) \leq \delta(X, Z) + \delta(Z, Y)$.
+        \[
+        \delta(X, Z) + \delta(Z, Y) \geq d(0, Z) + d(0, X) + d(0, Z) + d(0, Y) = d(0, X) + d(0, Y) + 2d(0, Z) \geq d(0, X) + d(0, Y) = \delta(X, Y)
+        \]
+        Car $d(0, Z) \geq 0$. \textbf{OK}
+    \end{itemize}
+\end{enumerate}
+Donc $\delta$ est une distance sur $\mathbb{R}^2$.
+\end{solution}
+
+\subsection{Exercice 4}
+
+\textbf{Énoncé de l'exercice 4 :}
+On pose pour $x, y \in \mathbb{R}^{+\ast}$:
+\[
+d_{\log}(x, y) = |\log_{10}(\frac{y}{x})| = |\log_{10}(y) - \log_{10}(x)|
+\]
+1) Montrer que $d_{\log}$ est une distance sur $\mathbb{R}^{+\ast}$.
+
+2) Calculer $d_{\log}(10^p, 10^q)$ pour $p, q \in \mathbb{Z}$.
+
+3) Montrer qu'il n'existe pas de constante $C > 0$ telle que
+\[
+d_{\log}(x, y) \leq C|x - y|, \quad \forall x, y \in \mathbb{R}^{+\ast}.
+\]
+Indication : prendre $x = 1$ et $y = y_n$ pour une suite $(y_n)$ bien choisie.
+
+4) Montrer qu'il n'existe pas de constante $C > 0$ telle que
+\[
+|x - y| \leq C d_{\log}(x, y), \quad \forall x, y \in \mathbb{R}^{+\ast}.
+\]
+
+\begin{solution}[Solution de l'exercice 4]
+\textbf{1) Montrons que $d_{\log}$ est une distance sur $\mathbb{R}^{+\ast}$ : }
+\begin{enumerate}
+    \item \textbf{Positivité :} $d_{\log}(x, y) = |\log_{10}(\frac{y}{x})| \geq 0$. \textbf{OK}
+    \item \textbf{Symétrie :} $d_{\log}(x, y) = |\log_{10}(\frac{y}{x})| = |-\log_{10}(\frac{x}{y})| = |\log_{10}(\frac{x}{y})| = d_{\log}(y, x)$. \textbf{OK}
+    \item \textbf{Axiome de séparation :} $d_{\log}(x, y) = 0 \Leftrightarrow |\log_{10}(\frac{y}{x})| = 0 \Leftrightarrow \log_{10}(\frac{y}{x}) = 0 \Leftrightarrow \frac{y}{x} = 10^0 = 1 \Leftrightarrow y = x$. \textbf{OK}
+    \item \textbf{Inégalité triangulaire : }
+    \begin{align*}
+    d_{\log}(x, z) &= |\log_{10}(\frac{z}{x})| = |\log_{10}(\frac{z}{y} \frac{y}{x})| = |\log_{10}(\frac{z}{y}) + \log_{10}(\frac{y}{x})| \\
+    &\leq |\log_{10}(\frac{z}{y})| + |\log_{10}(\frac{y}{x})| = d_{\log}(y, z) + d_{\log}(x, y) = d_{\log}(x, y) + d_{\log}(y, z)
+    \end{align*}
+    Donc $d_{\log}(x, z) \leq d_{\log}(x, y) + d_{\log}(y, z)$. \textbf{OK}
+\end{enumerate}
+Donc $d_{\log}$ est une distance sur $\mathbb{R}^{+\ast}$.
+
+\textbf{2) Calculons $d_{\log}(10^p, 10^q)$ : }
+\[
+d_{\log}(10^p, 10^q) = |\log_{10}(\frac{10^q}{10^p})| = |\log_{10}(10^{q-p})| = |q - p|
+\]
+Donc $d_{\log}(10^p, 10^q) = |p - q|$.
+
+\textbf{3) Montrons qu'il n'existe pas de constante $C > 0$ telle que $d_{\log}(x, y) \leq C|x - y|$ : }
+On prend $x = 1$ et $y = y_n = \frac{1}{n}$. Alors $y_n \rightarrow 0$ et $y_n \in \mathbb{R}^{+\ast}$.
+\[
+\frac{d_{\log}(1, \frac{1}{n})}{|1 - \frac{1}{n}|} = \frac{|\log_{10}(\frac{1/n}{1})|}{|1 - \frac{1}{n}|} = \frac{|\log_{10}(\frac{1}{n})|}{\frac{n - 1}{n}} = \frac{|-\log_{10}(n)|}{\frac{n - 1}{n}} = \frac{\log_{10}(n)}{\frac{n - 1}{n}} = \frac{n}{n - 1} \log_{10}(n)
+\]
+$\frac{n}{n - 1} \rightarrow 1$ et $\log_{10}(n) \rightarrow +\infty$. Donc $\frac{d_{\log}(1, \frac{1}{n})}{|1 - \frac{1}{n}|} \rightarrow +\infty$.
+Donc il n'existe pas de constante $C > 0$ telle que $d_{\log}(x, y) \leq C|x - y|$.
+
+\textbf{4) Montrons qu'il n'existe pas de constante $C > 0$ telle que $|x - y| \leq C d_{\log}(x, y)$ : }
+On prend $x = 1$ et $y = y_n = 1 + 10^n$.
+\[
+\frac{|1 - (1 + 10^n)|}{d_{\log}(1, 1 + 10^n)} = \frac{|-10^n|}{|\log_{10}(\frac{1 + 10^n}{1})|} = \frac{10^n}{|\log_{10}(1 + 10^n)|} = \frac{10^n}{\log_{10}(10^n(10^{-n} + 1))} = \frac{10^n}{\log_{10}(10^n) + \log_{10}(10^{-n} + 1)}
+\]
+\[
+= \frac{10^n}{n + \log_{10}(10^{-n} + 1)} \sim \frac{10^n}{n} \rightarrow +\infty
+\]
+Donc il n'existe pas de constante $C > 0$ telle que $|x - y| \leq C d_{\log}(x, y)$.
+\end{solution}
+
+\end{document}
+```

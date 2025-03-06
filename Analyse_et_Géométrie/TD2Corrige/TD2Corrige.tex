@@ -1,0 +1,495 @@
+```latex
+\documentclass[oneside]{book}
+\usepackage{amssymb,amsmath,amsthm, thmtools}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage[Sonny]{fncychap}
+\usetikzlibrary{arrows}
+\usepackage{listings}
+\usepackage[margin=1in]{geometry}
+\usetikzlibrary{shapes.geometric}
+\usepackage[utf8]{inputenc}
+\pgfplotsset{compat=1.16}
+
+\definecolor{GoodGreen}{rgb}{0.0667, 0.2078, 0.2157}
+\definecolor{GreenBackground}{rgb}{0.5176, 0.6902, 0.5098}
+\definecolor{DarkPurple}{rgb}{0.4157, 0.1804, 0.2078}
+\definecolor{RedBackground}{rgb}{0.9490, 0.7333, 0.7529}
+\definecolor{OxfordBlue}{rgb}{0.0, 0.1333, 0.2667}
+\definecolor{BlueBackground}{rgb}{0.4471, 0.6314, 0.8980}
+
+\definecolor{Gold}{rgb}{0.9176, 0.6667, 0.0784} % Define the color
+
+
+
+\declaretheoremstyle[
+    headfont=\bfseries\sffamily\color{GoodGreen}, bodyfont=\normalfont,
+    mdframed={
+        linewidth=2pt,
+        rightline=false, topline=false, bottomline=false,
+        linecolor=GoodGreen, backgroundcolor=GreenBackground!30!white,
+    }
+]{thmgreenbox}
+
+\declaretheoremstyle[
+    headfont=\bfseries\sffamily\color{OxfordBlue}, bodyfont=\normalfont,
+    mdframed={
+        linewidth=2pt,
+        rightline=false, topline=false, bottomline=false,
+        linecolor=OxfordBlue, backgroundcolor=BlueBackground!15
+    }
+]{thmblueline}
+
+\declaretheoremstyle[
+    headfont=\bfseries\sffamily\color{DarkPurple}, bodyfont=\normalfont,
+    mdframed={
+        linewidth=2pt,
+        rightline=false, topline=false, bottomline=false,
+        linecolor=DarkPurple, backgroundcolor=RedBackground!40,
+    }
+]{thmredbox}
+
+\declaretheoremstyle[
+     headfont=\bfseries\sffamily\color{Gold}, bodyfont=\normalfont,
+    mdframed={
+        linewidth=2pt,
+        rightline=false, topline=false, bottomline=false,
+        linecolor=Gold, backgroundcolor=Gold!10
+    }
+]{rmrk}
+
+
+\declaretheoremstyle[
+    headfont=\bfseries\sffamily\color{OxfordBlue}, bodyfont=\normalfont,
+    % unnumbered=true,
+    mdframed={
+        linewidth=2pt,
+        rightline=false, topline=false, bottomline=false,
+        linecolor=OxfordBlue,backgroundcolor=BlueBackground!15
+    },
+    qed=\qedsymbol
+]{thmproofbox}
+
+% Consistent theorem styling:
+\declaretheorem[numberwithin=chapter, style=thmgreenbox, name=Definition]{definition}
+\declaretheorem[sibling=definition, style=thmredbox, name=Theorem]{theorem}
+\declaretheorem[sibling=definition, style=thmredbox, name=Lemma]{lemma}
+\declaretheorem[sibling=definition, style=thmredbox, name=Proposition]{proposition}
+\declaretheorem[sibling=definition, style=rmrk, name=Remark]{remark}
+\declaretheorem[sibling=definition, style=thmblueline, name=Example]{example}
+\declaretheorem[unnumbered=true, style=thmproofbox, name=Solution]{solution}
+\declaretheorem[unnumbered=true, style=thmproofbox, name=Preuve]{prf}
+
+
+\renewcommand{\proof}{
+\begin{prf}}
+\renewcommand{\endproof}{\end{prf}}
+
+\begin{document}
+\sloppy
+
+\chapter*{Recueil de Solutions d'Exercices de Topologie}
+
+\section{Rappels de Cours}
+
+\begin{definition}[Distance]
+Soit $E$ un ensemble. Une application $d : E \times E \to \mathbb{R}^+$ est appelée distance sur $E$ si :
+\begin{enumerate}
+    \item $d(x, y) \geq 0$ (positivité)
+    \item $d(x, y) = d(y, x)$ (symétrie)
+    \item $d(x, y) \leq d(x, z) + d(z, y)$ (inégalité triangulaire)
+    \item $d(x, y) = 0 \Leftrightarrow x = y$ (axiome de séparation)
+\end{enumerate}
+$(E, d)$ est appelé espace métrique.
+\end{definition}
+
+\begin{definition}[Boule ouverte]
+Soit $(E, d)$ un espace métrique, $x_0 \in E$ et $r \geq 0$.
+La boule ouverte de centre $x_0$ et de rayon $r$ est l'ensemble
+    \[
+    B(x_0, r) = \{x \in E : d(x_0, x) < r\}
+    \]
+\end{definition}
+
+\begin{definition}[Ensemble ouvert]
+Soit $(E, d)$ un espace métrique.
+$U \subset E$ est ouvert si
+    \[
+    \forall x_0 \in U, \exists r > 0 \text{ tel que } B(x_0, r) \subset U.
+    \]
+\end{definition}
+
+\begin{theorem}[Propriétés des ouverts]
+\begin{enumerate}
+    \item Soit $U_i, i \in I$ une collection d'ouverts. Alors $\bigcup_{i \in I} U_i$ est ouvert.
+    \item Si $U_1, \dots, U_n$ sont ouverts, alors $\bigcap_{i=1}^n U_i$ est ouvert.
+\end{enumerate}
+\end{theorem}
+
+\begin{definition}[Ensemble compact]
+$K \subset E$ est compact si de tout recouvrement ouvert $(U_i)_{i \in I}$ de $K$, on peut extraire un sous-recouvrement fini, c'est-à-dire qu'il existe un sous-ensemble fini $J \subset I$ tel que $K \subset \bigcup_{i \in J} U_i$.
+\end{definition}
+
+\begin{theorem}[Théorème de Borel-Lebesgue]
+Dans $\mathbb{R}^n$ avec la distance usuelle, $K \subset \mathbb{R}^n$ est compact si et seulement si $K$ est fermé et borné.
+\end{theorem}
+
+\section{Exercices et Solutions}
+
+\textbf{TD2 Topo 1 - Exercice 1}
+
+\textbf{Énoncé:}
+
+Soit $(E, d)$ un espace métrique.
+
+\begin{enumerate}
+    \item  Rappel de cours : Un ensemble $U \subset E$ est ouvert si :
+    $\forall x \in U$, $\exists \epsilon > 0$ t.q. $B(x, \epsilon) \subset U$.
+    (Rq : on peut prendre $B(x, \epsilon)$ ou $B_d(x, \epsilon)$).
+
+    Soit $z \in E$. Est-ce que $\{z\}$ est ouvert ?
+    Non. Il faut $\exists \epsilon > 0$ t.q. $B(z, \epsilon) \subset \{z\}$.
+    Faux. $B(z, \epsilon) = \{x \in E : d(x, z) < \epsilon\}$.
+    Si $\epsilon > 0$, $B(z, \epsilon) \neq \{z\}$ si $E$ contient au moins deux points.
+    $\implies$ $\{z\}$ n'est pas ouvert.
+
+    Est-ce que $E$ est ouvert ? Oui, évident (pourquoi ?).
+    $\forall x \in E$, $\exists \epsilon > 0$ t.q. $B(x, \epsilon) \subset E$. On prend $\epsilon = 1$. $B(x, 1) \subset E$.
+
+    Est-ce que $\emptyset$ est ouvert ? Oui (pourquoi ?).
+    $\forall x \in \emptyset$ (faux), $\exists \epsilon > 0$ t.q. $B(x, \epsilon) \subset \emptyset$.
+    Vrai par contraposée.
+    Non($\exists x \in \emptyset$, $\exists \epsilon > 0$ t.q. $B(x, \epsilon) \subset \emptyset$).
+    $\nexists x \in \emptyset$ donc la proposition est fausse.
+    Donc la négation est vraie.
+    $\forall x \in \emptyset$, ... est vrai.
+
+    \item  Rappel de cours : Définition d'un fermé : $F$ est fermé $\iff$ $E \setminus F$ est ouvert.
+    D'après 1), $\{z\}^c = E \setminus \{z\}$ est-il ouvert ?
+    Si $E = \mathbb{R}$, $E \setminus \{z\} = ]-\infty, z[ \cup ]z, +\infty[$ ouvert.
+    Si $E$ contient au moins deux points, $E \setminus \{z\}$ est ouvert ssi $\{z\}$ n'est pas adhérent à $E \setminus \{z\}$.
+    Si $x \in E \setminus \{z\}$, $x \neq z$. On pose $r = d(x, z) > 0$.
+    $B(x, \frac{r}{2}) \subset E \setminus \{z\}$ ?
+    Si $y \in B(x, \frac{r}{2})$, $d(y, x) < \frac{r}{2}$.
+    $d(y, z) \geq d(x, z) - d(x, y) > r - \frac{r}{2} = \frac{r}{2} > 0$.
+    $d(y, z) > 0 \implies y \neq z \implies y \in E \setminus \{z\}$.
+    Donc $B(x, \frac{r}{2}) \subset E \setminus \{z\}$.
+    Donc $E \setminus \{z\}$ est ouvert.
+    Donc $\{z\}$ est fermé.
+
+    \item  Soit $\Omega \subset E$. $U = \bigcup_{x \in \Omega} B(x, \epsilon)$.
+    Est-ce que $U$ est ouvert ? Oui (union d'ouverts).
+    Soit $x \in U = \bigcup_{x \in \Omega} B(x, \epsilon)$.
+    $\implies \exists x_0 \in \Omega$ t.q. $x \in B(x_0, \epsilon)$.
+    $B(x_0, \epsilon)$ est ouvert $\implies \exists r > 0$ t.q. $B(x, r) \subset B(x_0, \epsilon) \subset U$.
+    $\implies U$ est ouvert. (pour $r$ petit, $r < \epsilon - d(x, x_0)$).
+    Soit $x \in B(x_0, \epsilon)$. On cherche $\delta > 0$ t.q. $B(x, \delta) \subset B(x_0, \epsilon)$.
+    Il faut que si $y \in B(x, \delta)$, $y \in B(x_0, \epsilon)$.
+    $d(y, x_0) \leq d(y, x) + d(x, x_0) < \delta + d(x, x_0) < \epsilon$.
+    Il suffit de prendre $\delta = \epsilon - d(x, x_0)$. Mais $\delta$ doit être $> 0$.
+    Il faut prendre $\delta = \frac{\epsilon - d(x, x_0)}{2}$ si $d(x, x_0) < \epsilon$.
+    On peut prendre $\delta = \epsilon - d(x, x_0)$ si on veut $\delta > 0$ ?
+    Non, il faut prendre $\delta = \frac{\epsilon - d(x, x_0)}{2}$ ? Non plus.
+    On prend $\delta = \epsilon - d(x, x_0)$ si $d(x, x_0) < \epsilon$. Oui !
+    Si $x \in B(x_0, \epsilon)$, $d(x, x_0) < \epsilon$. On pose $\delta = \epsilon - d(x, x_0) > 0$.
+    Si $y \in B(x, \delta)$, $d(y, x) < \delta = \epsilon - d(x, x_0)$.
+    $d(y, x_0) \leq d(y, x) + d(x, x_0) < \epsilon - d(x, x_0) + d(x, x_0) = \epsilon$.
+    $d(y, x_0) < \epsilon \implies y \in B(x_0, \epsilon)$.
+    Donc $B(x, \delta) \subset B(x_0, \epsilon)$. Donc $B(x_0, \epsilon)$ est ouvert.
+
+    Donc $U = \bigcup_{x \in \Omega} B(x, \epsilon)$ est ouvert comme union d'ouverts.
+\end{enumerate}
+\end{solution}
+
+\textbf{TD2 Topo 1 - Exercice 2}
+
+\textbf{Énoncé:}
+
+Soit $(X, d)$ espace métrique. Sur $X \times X$ on définit $\delta(x, y) = \min(1, d(x, y))$.
+
+\begin{enumerate}
+    \item Montrer que $(X, \delta)$ est un espace métrique.
+
+    \item a) Montrer qu'une suite $(u_n)$ dans $X$ converge pour $d$ si et seulement si elle converge pour $\delta$.
+
+    b) Les espaces $(X, \delta)$ et $(X, d)$ ont-ils les mêmes ensembles ouverts ?
+
+    \item Montrer que $\delta(x, y) \leq d(x, y)$ pour tous $x, y \in X$.
+    Sous quelles conditions existe-t-il une constante $C > 0$ telle que $d(x, y) \leq C \delta(x, y)$ pour tous $x, y \in X$ ?
+\end{enumerate}
+
+\begin{solution}
+\begin{enumerate}
+    \item Pour montrer que $(X, \delta)$ est un espace métrique, il faut vérifier les quatre propriétés d'une distance pour $\delta$.
+    \begin{enumerate}
+        \item \textbf{Positivité:} $\delta(x, y) = \min(1, d(x, y))$. Comme $d(x, y) \geq 0$ et $1 > 0$, $\min(1, d(x, y)) \geq 0$. Donc $\delta(x, y) \geq 0$.
+
+        \item \textbf{Symétrie:} $\delta(x, y) = \min(1, d(x, y)) = \min(1, d(y, x)) = \delta(y, x)$ car $d$ est symétrique.
+
+        \item \textbf{Séparation:} Si $\delta(x, y) = 0$, alors $\min(1, d(x, y)) = 0$. Comme $\min(a, b) = 0 \implies a = 0$ ou $b = 0$, et $1 \neq 0$, alors $d(x, y) = 0$. Puisque $d$ est une distance, $d(x, y) = 0 \implies x = y$. Réciproquement, si $x = y$, alors $d(x, y) = 0$, donc $\delta(x, y) = \min(1, 0) = 0$.
+
+        \item \textbf{Inégalité triangulaire:} Il faut montrer que $\delta(x, y) \leq \delta(x, z) + \delta(z, y)$.
+        Posons $a = d(x, z)$ et $b = d(z, y)$. Alors $d(x, y) \leq a + b$.
+        On a $\delta(x, z) = \min(1, a)$ et $\delta(z, y) = \min(1, b)$. On veut montrer que $\min(1, d(x, y)) \leq \min(1, a) + \min(1, b)$.
+        On a $d(x, y) \leq a + b$. Considérons $\min(1, d(x, y))$.
+        \begin{itemize}
+            \item Si $a \geq 1$ et $b \geq 1$, alors $\min(1, a) = 1$, $\min(1, b) = 1$, $\min(1, a) + \min(1, b) = 2$.
+                  $\delta(x, z) + \delta(z, y) = 2 \geq \delta(x, y) = \min(1, d(x, y)) \leq 1$.
+            \item Si $a < 1$ et $b < 1$, alors $\min(1, a) = a$, $\min(1, b) = b$, $\min(1, a) + \min(1, b) = a + b$.
+                  $\delta(x, z) + \delta(z, y) = a + b \geq d(x, y) \geq \min(1, d(x, y)) = \delta(x, y)$.
+            \item Si $a < 1$ et $b \geq 1$ (ou $a \geq 1$ et $b < 1$, c'est symétrique), alors $\min(1, a) = a$, $\min(1, b) = 1$, $\min(1, a) + \min(1, b) = a + 1$.
+                  $\delta(x, z) + \delta(z, y) = a + 1 \geq 1 \geq \min(1, d(x, y)) = \delta(x, y)$.
+        \end{itemize}
+        Dans tous les cas, l'inégalité triangulaire est vérifiée. Donc $\delta$ est une distance sur $X$.
+
+    \end{enumerate}
+
+    \item a) Montrer qu'une suite $(u_n)$ dans $X$ converge pour $d$ ssi elle converge pour $\delta$.
+    \begin{itemize}
+        \item Supposons que $(u_n)$ converge vers $l$ pour $d$. Alors $\lim_{n \to \infty} d(u_n, l) = 0$.
+              On veut montrer que $\lim_{n \to \infty} \delta(u_n, l) = 0$.
+              $\delta(u_n, l) = \min(1, d(u_n, l))$. Comme $d(u_n, l) \xrightarrow[n \to \infty]{} 0$, et $\min(1, t) \xrightarrow[t \to 0]{} 0$, alors $\delta(u_n, l) = \min(1, d(u_n, l)) \xrightarrow[n \to \infty]{} 0$. Donc $(u_n)$ converge vers $l$ pour $\delta$.
+
+        \item Supposons que $(u_n)$ converge vers $l$ pour $\delta$. Alors $\lim_{n \to \infty} \delta(u_n, l) = 0$.
+              On veut montrer que $\lim_{n \to \infty} d(u_n, l) = 0$.
+              $\delta(u_n, l) = \min(1, d(u_n, l))$. Si $\lim_{n \to \infty} \min(1, d(u_n, l)) = 0$, alors pour $n$ assez grand, $\min(1, d(u_n, l)) < 1$, donc $\min(1, d(u_n, l)) = d(u_n, l)$.
+              Alors pour $n$ assez grand, $\delta(u_n, l) = d(u_n, l)$.
+              Comme $\lim_{n \to \infty} \delta(u_n, l) = 0$, alors $\lim_{n \to \infty} d(u_n, l) = 0$. Donc $(u_n)$ converge vers $l$ pour $d$.
+
+    \end{itemize}
+
+    b) Les espaces $(X, \delta)$ et $(X, d)$ ont-ils les mêmes ensembles ouverts ? Oui. Car la convergence des suites est la même, et les ouverts sont caractérisés par les suites.
+    Alternativement, montrons que les boules ouvertes sont les mêmes "topologiquement".
+    Soit $B_d(x, r) = \{y \in X : d(x, y) < r\}$ boule ouverte pour $d$.
+    Soit $B_\delta(x, r) = \{y \in X : \delta(x, y) < r\}$ boule ouverte pour $\delta$.
+    \begin{itemize}
+        \item Montrons que $B_\delta(x, r)$ est ouvert pour $d$.
+              Soit $B_\delta(x, r)$ une boule ouverte pour $\delta$. Est-ce que $B_\delta(x, r)$ est ouvert pour $d$ ?
+              Si $r > 1$, $B_\delta(x, r) = X$ qui est ouvert pour $d$.
+              Si $r \leq 1$, $B_\delta(x, r) = \{y \in X : \delta(x, y) < r\} = \{y \in X : \min(1, d(x, y)) < r\}$.
+              Si $r \leq 1$, $\min(1, d(x, y)) < r \iff d(x, y) < r$.
+              Donc $B_\delta(x, r) = B_d(x, r)$ si $r \leq 1$.
+              Donc si $r \leq 1$, $B_\delta(x, r) = B_d(x, r)$ est ouvert pour $d$.
+              Donc $B_\delta(x, r)$ est toujours ouvert pour $d$.
+
+        \item Réciproquement, montrer que $B_d(x, r)$ est ouvert pour $\delta$.
+              Soit $B_d(x, r)$ une boule ouverte pour $d$. Est-ce que $B_d(x, r)$ est ouvert pour $\delta$ ?
+              Soit $y \in B_d(x, r)$. Alors $d(x, y) < r$. On cherche $\epsilon > 0$ t.q. $B_\delta(y, \epsilon) \subset B_d(x, r)$.
+              On prend $\epsilon = \min(1, r - d(x, y)) > 0$.
+              Si $z \in B_\delta(y, \epsilon)$, alors $\delta(y, z) < \epsilon = \min(1, r - d(x, y)) \leq r - d(x, y)$.
+              $\delta(y, z) = \min(1, d(y, z)) < r - d(x, y)$.
+              Donc $d(y, z) < r - d(x, y)$.
+              $d(x, z) \leq d(x, y) + d(y, z) < d(x, y) + r - d(x, y) = r$.
+              $d(x, z) < r \implies z \in B_d(x, r)$.
+              Donc $B_\delta(y, \epsilon) \subset B_d(x, r)$. Donc $B_d(x, r)$ est ouvert pour $\delta$.
+
+    \end{itemize}
+    Donc les ouverts sont les mêmes.
+
+    \item $\delta(x, y) = \min(1, d(x, y)) \leq d(x, y)$. Donc $\delta(x, y) \leq d(x, y)$.
+    Existe-t-il $C > 0$ t.q. $d(x, y) \leq C \delta(x, y)$ ?
+    $d(x, y) \leq C \min(1, d(x, y))$.
+    Si $d(x, y) \leq 1$, $\min(1, d(x, y)) = d(x, y)$. Alors $d(x, y) \leq C d(x, y) \implies C \geq 1$.
+    Si $d(x, y) > 1$, $\min(1, d(x, y)) = 1$. Alors $d(x, y) \leq C \cdot 1 = C$.
+    Donc il faut $d(x, y) \leq C$ pour tout $x, y \in X$.
+    Il existe $C$ ssi $d$ est bornée.
+    Par exemple si $X$ n'est pas borné pour $d$, non. Si $X = \mathbb{R}$ et $d(x, y) = |x - y|$.
+    Non, il n'existe pas de constante $C$ car $d$ n'est pas bornée.
+    Si $X$ est borné pour $d$, oui. Si $\exists M > 0$ t.q. $d(x, y) \leq M$ pour tout $x, y \in X$.
+    On prend $C = M$. Si $d(x, y) \leq 1$, $d(x, y) \leq C \delta(x, y) = M \delta(x, y) = M d(x, y)$. Vrai.
+    Si $d(x, y) > 1$, $d(x, y) \leq M \delta(x, y) = M \cdot 1 = M$. Il faut $d(x, y) \leq M$ qui est vrai.
+    Donc existe $C$ ssi $d$ est bornée.
+\end{enumerate}
+\end{solution}
+
+\textbf{TD2 Topo 1 - Exercice 3}
+
+\textbf{Énoncé:}
+
+Dire si les affirmations suivantes sont vraies ou fausses. Si vous pensez qu'une affirmation est juste, donnez en une démonstration. Si vous pensez qu'elle est fausse, donnez en un contre-exemple.
+
+\begin{enumerate}
+    \item Si $(u_n) \subset \mathbb{R}^2$ est une suite non bornée, alors $||u_n|| \xrightarrow[n \to +\infty]{} +\infty$ quand $n \to +\infty$. FAUX.
+
+    \item Soit $(u_n) \subset \mathbb{R}^2$ avec $u_n = (x_n, y_n)$. Si $||u_n|| \xrightarrow[n \to +\infty]{} +\infty$ quand $n \to +\infty$, alors $|x_n| \xrightarrow[n \to +\infty]{} +\infty$ et $|y_n| \xrightarrow[n \to +\infty]{} +\infty$. FAUX.
+
+    \item Soit $(E, d)$ un espace métrique. $A \subset E$. Si $A$ n'est pas ouvert, alors $A$ est fermé. FAUX.
+
+    \item Un ouvert non vide de $\mathbb{R}$ contient forcément un intervalle fermé $[a, b]$ avec $a < b$. VRAI.
+
+    \item Un ouvert non vide de $\mathbb{R}$ contient forcément une infinité dénombrable de points. VRAI.
+\end{enumerate}
+
+\begin{solution}
+\begin{enumerate}
+    \item \textbf{Faux}. Contre-exemple: $u_n = \begin{cases} (n, 0) & \text{si } n \text{ pair} \\ (1, 0) & \text{si } n \text{ impair} \end{cases}$.
+      Suite non bornée car la sous-suite $(u_{2k}) = (2k, 0)$ n'est pas bornée.
+      Cependant $||u_n||$ ne tend pas vers $+\infty$. Car $||u_{2k}|| = 2k \xrightarrow[k \to +\infty]{} +\infty$. Mais $||u_{2k+1}|| = 1$ ne tend pas vers $+\infty$.
+      Donc $||u_n||$ ne tend pas vers $+\infty$.
+
+    \item \textbf{Faux}. Contre-exemple: $u_n = (n, (-1)^n n)$. $||u_n|| = \sqrt{n^2 + ((-1)^n n)^2} = \sqrt{2n^2} = \sqrt{2} n \xrightarrow[n \to +\infty]{} +\infty$.
+    Cependant $y_n = (-1)^n n$ ne tend pas vers $+\infty$ (en valeur absolue).
+
+    \item \textbf{Faux}. Contre-exemple: $E = \mathbb{R}$. $A = ]0, 1]$. $A$ n'est pas ouvert (car $1 \in A$, $B(1, \epsilon) = ]1 - \epsilon, 1 + \epsilon[ \not\subset A$). $A$ n'est pas fermé car $\mathbb{R} \setminus A = ]-\infty, 0] \cup ]1, +\infty[$ n'est pas ouvert (pb en $0$).
+    $A = ]0, 1]$ n'est ni ouvert, ni fermé.
+
+    \item \textbf{Vrai}. Démonstration : Soit $U \subset \mathbb{R}$ un ouvert non vide. Alors $\exists x_0 \in U$. Comme $U$ est ouvert, $\exists \epsilon > 0$ tel que $B(x_0, \epsilon) = ]x_0 - \epsilon, x_0 + \epsilon[ \subset U$.
+    On prend $[a, b] = [x_0 - \frac{\epsilon}{2}, x_0 + \frac{\epsilon}{2}]$. Alors $a = x_0 - \frac{\epsilon}{2} < x_0 + \frac{\epsilon}{2} = b$ car $\epsilon > 0$. Et $[a, b] = [x_0 - \frac{\epsilon}{2}, x_0 + \frac{\epsilon}{2}] \subset ]x_0 - \epsilon, x_0 + \epsilon[ = B(x_0, \epsilon) \subset U$.
+    Donc $[a, b] \subset U$ et $a < b$.
+
+    \item \textbf{Vrai}. Démonstration : Soit $U \subset \mathbb{R}$ un ouvert non vide. D'après 4), $U$ contient un intervalle fermé $[a, b]$ avec $a < b$.
+    $[a, b] = \{x \in \mathbb{R} : a \leq x \leq b\}$. Si $a < b$, $[a, b]$ contient une infinité non dénombrable de points (autant que $\mathbb{R}$).
+    Encore plus fort, montrons que $[a, b]$ contient une infinité dénombrable de points.
+    Par exemple, on prend les rationnels $\mathbb{Q} \cap [a, b]$. $\mathbb{Q} \cap [a, b]$ est dénombrable infini si $a < b$.
+    Donc $[a, b]$ contient une infinité dénombrable de points.
+    Donc $U$ contient une infinité dénombrable de points.
+\end{enumerate}
+\end{solution}
+
+\textbf{TD2 Topo 2 - Exercice 10}
+
+\textbf{Énoncé:}
+
+Soit $(X, d)$ espace métrique. $A, B \subset X$. On rappelle $d(A, B) = \inf \{d(a, b) : a \in A, b \in B\}$.
+On dit que $d(A, B)$ est atteint s'il existe $a_0 \in A, b_0 \in B$ tels que $d(A, B) = d(a_0, b_0)$.
+Déterminer si $d(A, B)$ est atteint dans les cas suivants :
+
+\begin{enumerate}
+    \item $A$ et $B$ sont fermés. FAUX.
+
+    \item $A$ est fermé, $B$ est compact. VRAI.
+
+    \item $A$ et $B$ sont compacts. VRAI.
+\end{enumerate}
+
+\begin{solution}
+\begin{enumerate}
+    \item \textbf{Faux}. Contre-exemple: $A = \{(x, y) \in \mathbb{R}^2 : y \geq \frac{1}{x}, x > 0\}$ et $B = \{(x, y) \in \mathbb{R}^2 : y \leq 0, x > 0\}$.
+        $A$ est fermé (graphe de $y = \frac{1}{x}$ est fermé, et $y \geq \frac{1}{x}$ est fermé). $B$ est fermé (plan $y = 0$ est fermé, et $y \leq 0$ est fermé).
+        $A \cap B = \emptyset$. $d(A, B) = \inf \{d((x_1, y_1), (x_2, y_2)) : (x_1, y_1) \in A, (x_2, y_2) \in B\}$.
+        Pour $x > 0$, on prend $a_x = (x, \frac{1}{x}) \in A$ et $b_x = (x, 0) \in B$.
+        $d(a_x, b_x) = \sqrt{(x - x)^2 + (\frac{1}{x} - 0)^2} = \frac{1}{x}$.
+        Quand $x \to +\infty$, $\frac{1}{x} \to 0$. Donc $d(A, B) = 0$.
+        Cependant $d(A, B)$ n'est pas atteint. Il n'existe pas $a_0 \in A, b_0 \in B$ tels que $d(a_0, b_0) = 0$.
+        Si $d(a_0, b_0) = 0$, alors $a_0 = b_0$. Mais $A \cap B = \emptyset$. Donc $a_0 \neq b_0$. Contradiction.
+        Donc $d(A, B)$ n'est pas atteint.
+
+        \begin{verbatim}
+#save_to: AB_non_atteint.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, ax = plt.subplots()
+
+x = np.linspace(0.1, 5, 400)
+y_A = 1/x
+y_B = np.zeros_like(x)
+
+ax.plot(x, y_A, label='$A: y \geq 1/x, x > 0$', color='blue')
+ax.fill_between(x, y_A, 5, color='blue', alpha=0.2)
+ax.plot(x, y_B, label='$B: y \leq 0, x > 0$', color='red')
+ax.fill_between(x, y_B, -1, color='red', alpha=0.2)
+
+ax.axhline(0, color='black',linewidth=0.5)
+ax.axvline(0, color='black',linewidth=0.5)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xlim([-0.5, 5.5])
+ax.set_ylim([-1, 5])
+ax.set_xlabel('$x$')
+ax.set_ylabel('$y$')
+ax.set_title('$A$ et $B$ fermés, $d(A, B) = 0$ non atteint')
+ax.legend()
+plt.savefig('AB_non_atteint.png')
+        \end{verbatim}
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[ max width=\textwidth,
+                max height=0.4\textheight,
+                keepaspectratio]{AB_non_atteint.png}
+            \caption{$A$ et $B$ fermés, $d(A, B) = 0$ non atteint}
+            \label{fig:AB_non_atteint}
+        \end{figure}
+
+    \item \textbf{Vrai}. Démonstration : $A$ fermé, $B$ compact.
+        Soit $(a_n, b_n) \subset A \times B$ une suite minimisante de $d(A, B)$.
+        $d(a_n, b_n) \xrightarrow[n \to +\infty]{} d(A, B) = \inf \{d(a, b) : a \in A, b \in B\}$.
+        $(b_n) \subset B$ compact. On extrait une sous-suite $(b_{\phi(n)})$ qui converge vers $b_0 \in B$.
+        $(d(a_{\phi(n)}, b_{\phi(n)})) \xrightarrow[n \to +\infty]{} d(A, B)$.
+        $d(a_{\phi(n)}, b_{\phi(n)}) \leq C$ bornée car converge. Donc $a_{\phi(n)}$ est bornée ? Non.
+        Il faut montrer que $(a_{\phi(n)})$ est bornée. On fixe $b_0 \in B$.
+        $d(a_{\phi(n)}, b_{\phi(n)}) \geq d(a_{\phi(n)}, B) \geq 0$.
+        $d(a_{\phi(n)}, b_{\phi(n)}) \xrightarrow[n \to +\infty]{} d(A, B) < +\infty$.
+        $d(a_{\phi(n)}, b_{\phi(n)}) \leq M < +\infty$ bornée.
+        $d(a_{\phi(n)}, b_0) \leq d(a_{\phi(n)}, b_{\phi(n)}) + d(b_{\phi(n)}, b_0) \leq M + d(b_{\phi(n)}, b_0)$.
+        $d(b_{\phi(n)}, b_0) \xrightarrow[n \to +\infty]{} 0$. Donc $d(a_{\phi(n)}, b_0)$ est bornée.
+        Donc $(a_{\phi(n)})$ est bornée (car distance à $b_0$ est bornée).
+        $(a_{\phi(n)})$ bornée dans $\mathbb{R}^2$. On peut extraire une sous-suite $(a_{\psi \circ \phi(n)})$ qui converge vers $a_0$.
+        Notons $a'_n = a_{\psi \circ \phi(n)}$ et $b'_n = b_{\psi \circ \phi(n)}$.
+        $(a'_n)$ converge vers $a_0$. $(b'_n)$ converge vers $b_0$.
+        $b'_n = b_{\psi \circ \phi(n)}$ est une sous-suite de $(b_{\phi(n)})$ qui converge vers $b_0$. Donc $b'_n \xrightarrow[n \to +\infty]{} b_0$.
+        $a'_n \xrightarrow[n \to +\infty]{} a_0$.
+        $b'_n \subset B$, $B$ compact donc fermé, donc $b_0 \in B$.
+        $a'_n = a_{\psi \circ \phi(n)} \subset A$. Si $A$ est fermé, $a_0 \in A$.
+        Donc $a_0 \in A$ car $A$ fermé, $b_0 \in B$ car $B$ compact (fermé).
+        $d(a'_n, b'_n) \xrightarrow[n \to +\infty]{} d(a_0, b_0)$ car $d$ est continue.
+        $d(a'_n, b'_n) = d(a_{\psi \circ \phi(n)}, b_{\psi \circ \phi(n)}) \xrightarrow[n \to +\infty]{} d(A, B)$.
+        Donc $d(a_0, b_0) = d(A, B)$. Donc $d(A, B)$ est atteint en $(a_0, b_0) \in A \times B$.
+
+    \item \textbf{Vrai}. Démonstration : $A$ et $B$ compacts $\implies$ $A$ fermé et $B$ compact. D'après 2), $d(A, B)$ est atteint.
+\end{enumerate}
+\end{solution}
+
+\textbf{TD2 Topo 2 - Exercice 11}
+
+\textbf{Énoncé:}
+
+Soit $A, B, C \subset E$ des parties d'un espace métrique $(E, d)$. Montrer que :
+
+\begin{enumerate}
+    \item Montrer que si $C \subset B$ alors $d(A, C) \geq d(A, B)$.
+
+    \item On note par $\text{Adh}^d(A)$ l'adhérence de l'ensemble $A$. Montrer que
+    \[
+    d(A, B) = d(\text{Adh}^d(A), B) = d(\text{Adh}^d(A), \text{Adh}^d(B)).
+    \]
+\end{enumerate}
+
+\begin{solution}
+\begin{enumerate}
+    \item Montrer que si $C \subset B$ alors $d(A, C) \geq d(A, B)$.
+    Par définition, $d(A, C) = \inf \{d(a, c) : a \in A, c \in C\}$ et $d(A, B) = \inf \{d(a, b) : a \in A, b \in B\}$.
+    Comme $C \subset B$, si $c \in C$, alors $c \in B$.
+    Donc $\{d(a, c) : a \in A, c \in C\} \subset \{d(a, b) : a \in A, b \in B\}$.
+    L'inf sur un ensemble plus grand est plus petit. Donc $\inf \{d(a, c) : a \in A, c \in C\} \geq \inf \{d(a, b) : a \in A, b \in B\}$.
+    Donc $d(A, C) \geq d(A, B)$.
+
+    \item Montrer que $d(A, B) = d(\text{Adh}^d(A), B) = d(\text{Adh}^d(A), \text{Adh}^d(B))$.
+    On utilise 1) pour montrer les inégalités.
+    $A \subset \text{Adh}^d(A)$. D'après 1), $d(\text{Adh}^d(A), B) \leq d(A, B)$.
+    Il faut montrer l'inégalité inverse $d(\text{Adh}^d(A), B) \geq d(A, B)$.
+    Par définition, $d(\text{Adh}^d(A), B) = \inf \{d(a', b) : a' \in \text{Adh}^d(A), b \in B\}$.
+    Comme $A \subset \text{Adh}^d(A)$, $\{d(a, b) : a \in A, b \in B\} \subset \{d(a', b) : a' \in \text{Adh}^d(A), b \in B\}$.
+    Donc $\inf \{d(a, b) : a \in A, b \in B\} \geq \inf \{d(a', b) : a' \in \text{Adh}^d(A), b \in B\}$.
+    Donc $d(A, B) \geq d(\text{Adh}^d(A), B)$.
+    Donc $d(A, B) = d(\text{Adh}^d(A), B)$.
+
+    Montrons que $d(\text{Adh}^d(A), B) = d(\text{Adh}^d(A), \text{Adh}^d(B))$.
+    $B \subset \text{Adh}^d(B)$. D'après 1), $d(\text{Adh}^d(A), \text{Adh}^d(B)) \leq d(\text{Adh}^d(A), B)$.
+    Il faut montrer l'inégalité inverse $d(\text{Adh}^d(A), \text{Adh}^d(B)) \geq d(\text{Adh}^d(A), B)$.
+    $d(\text{Adh}^d(A), \text{Adh}^d(B)) = \inf \{d(a', b') : a' \in \text{Adh}^d(A), b' \in \text{Adh}^d(B)\}$.
+    $d(\text{Adh}^d(A), B) = \inf \{d(a', b) : a' \in \text{Adh}^d(A), b \in B\}$.
+    Comme $B \subset \text{Adh}^d(B)$, $\{d(a', b) : a' \in \text{Adh}^d(A), b \in B\} \subset \{d(a', b') : a' \in \text{Adh}^d(A), b' \in \text{Adh}^d(B)\}$.
+    Donc $\inf \{d(a', b) : a' \in \text{Adh}^d(A), b \in B\} \geq \inf \{d(a', b') : a' \in \text{Adh}^d(A), b' \in \text{Adh}^d(B)\}$.
+    Donc $d(\text{Adh}^d(A), B) \geq d(\text{Adh}^d(A), \text{Adh}^d(B))$.
+
+    Donc $d(A, B) = d(\text{Adh}^d(A), B) = d(\text{Adh}^d(A), \text{Adh}^d(B))$.
+\end{enumerate}
+\end{solution}
+
+\end{document}
+```
