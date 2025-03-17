@@ -1,0 +1,586 @@
+```latex
+\documentclass{article}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{listings}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Example}
+
+\usepackage[margin=1in]{geometry}
+
+\begin{document}
+\sloppy
+
+\section{Introduction}
+
+In numerical methods, approximating continuous functions is a fundamental problem. Polynomial interpolation offers a powerful approach to achieve this, where we construct a polynomial that passes through a given set of points sampled from the function.  However, the selection of these interpolation points significantly impacts the accuracy of the polynomial approximation. This document explores the critical role of interpolation point choice, examining phenomena like Runge's phenomenon and introducing Chebyshev interpolation as a strategy to enhance approximation accuracy. We will also discuss the Lebesgue constant as a tool to analyze the stability and convergence of interpolation schemes, independent of the specific function being approximated.
+
+\section{Polynomial Interpolation Error}
+
+Given a continuous function $f(x)$ defined on an interval $[a, b]$, and a set of interpolation points $x_0, x_1, \dots, x_n$ within this interval, we can construct a polynomial interpolant $p_n(x)$ of degree $n$ that passes through the points $(x_i, f(x_i))$. The error between the function $f(x)$ and its polynomial interpolant $p_n(x)$ at a point $x$ is given by the formula:
+\[
+f(x) - p_n(x) = \frac{f^{(n+1)}(\theta)}{(n+1)!} \prod_{i=0}^{n} (x - x_i)
+\]
+where $f^{(n+1)}(\theta)$ denotes the $(n+1)$-th derivative of $f$ evaluated at some point $\theta$ in the interval $(a, b)$, and $\prod_{i=0}^{n} (x - x_i)$ is the product of terms $(x - x_i)$ for each interpolation point $x_i$.
+
+Here,
+\begin{itemize}
+    \item $f(x) - p_n(x)$: represents the interpolation error at a point $x$.
+    \item $f^{(n+1)}(\theta)$: is the $(n+1)$-th derivative of the function $f$ at some unknown point $\theta$ within the interval $(a,b)$.  This term reflects how smooth the function $f$ is.
+    \item $(n+1)!$: is the factorial of $(n+1)$, which scales down the error as the degree of the polynomial $n$ increases.
+    \item $\prod_{i=0}^{n} (x - x_i)$: is the product term that depends on the interpolation points $x_i$. This term vanishes at each interpolation point $x = x_i$, ensuring that $p_n(x_i) = f(x_i)$.
+\end{itemize}
+
+\subsection{Proof for $n=1$}
+
+Let's prove the interpolation error formula for the case $n=1$. Consider a function $f$ that is twice differentiable on an interval $[a, b]$. Let $p_1(x)$ be the linear interpolant of $f(x)$ based on interpolation points $x_0$ and $x_1$.  We define a function $q(x)$ as:
+\[
+q(x) = p_1(x) + \lambda (x - x_0)(x - x_1)
+\]
+where $\lambda$ is a constant to be determined. Note that the quadratic term $(x - x_0)(x - x_1)$ vanishes at $x_0$ and $x_1$, so $q(x_0) = p_1(x_0) = f(x_0)$ and $q(x_1) = p_1(x_1) = f(x_1)$.
+
+Now, fix an arbitrary point $x_{\text{hat}} \in (x_0, x_1)$. We choose $\lambda$ such that $q(x_{\text{hat}}) = f(x_{\text{hat}})$. This gives us:
+\[
+f(x_{\text{hat}}) = p_1(x_{\text{hat}}) + \lambda (x_{\text{hat}} - x_0)(x_{\text{hat}} - x_1)
+\]
+Solving for $\lambda$:
+\[
+\lambda = \frac{f(x_{\text{hat}}) - p_1(x_{\text{hat}})}{(x_{\text{hat}} - x_0)(x_{\text{hat}} - x_1)}
+\]
+Define the error function $e(x) = f(x) - q(x)$. By construction, $e(x_0) = f(x_0) - q(x_0) = 0$, $e(x_1) = f(x_1) - q(x_1) = 0$, and $e(x_{\text{hat}}) = f(x_{\text{hat}}) - q(x_{\text{hat}}) = 0$. Thus, $e(x)$ has at least three roots in the interval $[x_0, x_1]$ at $x_0$, $x_1$, and $x_{\text{hat}}$.
+
+
+By Rolle's Theorem, since $e(x)$ has three roots, its first derivative $e'(x)$ must have at least two roots in $(x_0, x_1)$, and its second derivative $e''(x)$ must have at least one root in $(x_0, x_1)$. Let $\theta \in (x_0, x_1)$ be a root of $e''(x)$, so $e''(\theta) = 0$.
+
+Now we compute the second derivative of $e(x)$:
+\[
+e''(x) = \frac{d^2}{dx^2} [f(x) - q(x)] = f''(x) - q''(x)
+\]
+Since $q(x) = p_1(x) + \lambda (x - x_0)(x - x_1)$ and $p_1(x)$ is linear, $p_1''(x) = 0$. Also, $\frac{d^2}{dx^2} [(x - x_0)(x - x_1)] = \frac{d^2}{dx^2} [x^2 - (x_0+x_1)x + x_0x_1] = 2$. Thus, $q''(x) = 2\lambda$.
+
+Therefore, $e''(x) = f''(x) - 2\lambda$.  Since $e''(\theta) = 0$, we have $f''(\theta) - 2\lambda = 0$, which implies $\lambda = \frac{f''(\theta)}{2}$.
+
+Substituting this value of $\lambda$ back into the expression for $\lambda$:
+\[
+\frac{f''(\theta)}{2} = \frac{f(x_{\text{hat}}) - p_1(x_{\text{hat}})}{(x_{\text{hat}} - x_0)(x_{\text{hat}} - x_1)}
+\]
+Rearranging this, we get the error formula for $n=1$ at $x_{\text{hat}}$:
+\[
+f(x_{\text{hat}}) - p_1(x_{\text{hat}}) = \frac{f''(\theta)}{2!} (x_{\text{hat}} - x_0)(x_{\text{hat}} - x_1)
+\]
+Since $x_{\text{hat}}$ was an arbitrary point in $(x_0, x_1)$, this formula holds for any $x \in (x_0, x_1)$ with some $\theta \in (x_0, x_1)$.  This proves the error formula for $n=1$.
+
+\section{Runge's Phenomenon}
+
+\begin{definition}[Runge's Phenomenon]
+Runge's Phenomenon refers to the problem encountered when interpolating certain functions, particularly high-degree polynomials with equally spaced interpolation points. In such cases, increasing the degree of the polynomial does not necessarily lead to better approximation; instead, oscillations can develop near the edges of the interval, and the interpolant may diverge from the function.
+\end{definition}
+
+A famous example demonstrating Runge's phenomenon is given by the Runge function:
+\[
+f(x) = \frac{1}{1 + 25x^2}, \quad x \in [-1, 1]
+\]
+When we interpolate this function using equally spaced points, we observe that as the number of interpolation points increases, the polynomial interpolant oscillates wildly near the boundaries of the interval $[-1, 1]$.
+
+\begin{verbatim}
+#save_to: runge_phenomenon_plots.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+def runge_function(x):
+    return 1 / (1 + 25 * x**2)
+
+def lagrange_interpolation(xp, yp, x):
+    n = len(xp)
+    p = 0
+    for k in range(n):
+        lk = 1
+        for j in range(n):
+            if j != k:
+                lk *= (x - xp[j]) / (xp[k] - xp[j])
+        p += yp[k] * lk
+    return p
+
+x_fine = np.linspace(-1, 1, 500)
+f_fine = runge_function(x_fine)
+
+n_values = [5, 10, 15, 20]
+num_rows = 2
+num_cols = 2
+fig, axes = plt.subplots(num_rows, num_cols, figsize=(10, 8))
+axes = axes.flatten()
+
+for i, n in enumerate(n_values):
+    xp = np.linspace(-1, 1, n)
+    yp = runge_function(xp)
+    p_fine = [lagrange_interpolation(xp, yp, xi) for xi in x_fine]
+
+    ax = axes[i]
+    ax.plot(x_fine, f_fine, label='Runge Function', color='red')
+    ax.plot(x_fine, p_fine, label=f'Interpolant (n={n})', color='blue')
+    ax.plot(xp, yp, 'kx', markersize=8, label='Interpolation Points')
+    ax.set_title(f'n = {n} Equally Spaced Points')
+    ax.set_xlim([-1.2, 1.2])
+    ax.set_ylim([-0.2, 1.2])
+    ax.legend()
+    ax.grid(True)
+
+plt.tight_layout()
+plt.savefig('runge_phenomenon_plots.png')
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{runge_phenomenon_plots.png}
+    \caption{Runge's Phenomenon: Polynomial interpolation of the Runge function using equally spaced points for increasing polynomial degrees. Oscillations at the edges become more pronounced with higher degrees.}
+    \label{fig:runge_phenomenon}
+\end{figure}
+
+As illustrated in Figure \ref{fig:runge_phenomenon}, for low degrees, the interpolant reasonably approximates the Runge function. However, as the degree increases (n=10, 15, 20), oscillations near $x = \pm 1$ become increasingly severe. Instead of converging to the Runge function, the polynomial interpolant diverges at the edges of the interval.
+
+To quantify the approximation error over the entire interval, we use the infinity norm (or maximum norm):
+\begin{definition}[Infinity Norm]
+The infinity norm of the error between a function $f(x)$ and its polynomial interpolant $p_n(x)$ on the interval $[-1, 1]$ is defined as:
+\[
+||f - p_n||_{\infty} = \max_{x \in [-1,1]} |f(x) - p_n(x)|
+\]
+\end{definition}
+
+For Runge's function with equally spaced points, the infinity norm of the error actually increases exponentially as the degree of the polynomial increases. This indicates that polynomial interpolation with equally spaced points is not a reliable method for approximating continuous functions in general, especially for higher degrees.
+
+\section{Chebyshev Interpolation}
+
+To mitigate Runge's phenomenon, we can strategically choose interpolation points to minimize the error term. Recall the error formula:
+\[
+|f(x) - p_n(x)| = \left| \frac{f^{(n+1)}(\theta)}{(n+1)!} \prod_{i=0}^{n} (x - x_i) \right|
+\]
+To minimize the error, especially when we have limited control over the derivatives of $f$, we can focus on minimizing the polynomial term $ \prod_{i=0}^{n} (x - x_i) $ in the interval $[-1, 1]$.
+
+\begin{theorem}[Approximation Theory Result]
+For $x \in [-1, 1]$, the minimum value of the infinity norm of polynomials of the form $ \prod_{i=0}^{n} (x - x_i) $ is $1/2^n$. This minimum value is achieved when the roots $\{x_i\}_{i=0}^n$ are the roots of the Chebyshev polynomial of the first kind of order $n+1$, $T_{n+1}(x)$, scaled by $1/2^n$. The monic polynomial achieving this minimum is $T_{n+1}(x) / 2^n$.
+\end{theorem}
+
+\begin{definition}[Chebyshev Polynomials of the First Kind]
+Chebyshev polynomials of the first kind, $T_n(x)$, can be defined in two equivalent ways:
+\begin{enumerate}
+    \item \textbf{Cosine Definition:} $T_n(x) = \cos(n \arccos(x))$ for $x \in [-1, 1]$.
+    \item \textbf{Recurrence Relation:}
+    \begin{align*}
+        T_0(x) &= 1 \\
+        T_1(x) &= x \\
+        T_{n+1}(x) &= 2x T_n(x) - T_{n-1}(x), \quad n \geq 1
+    \end{align*}
+\end{enumerate}
+\end{definition}
+
+The Chebyshev polynomial $T_{n+1}(x)$ of order $n+1$ has $n+1$ roots. We use these roots as our interpolation points. The roots of $T_n(x)$ are given by:
+\[
+x_j = \cos\left(\frac{2j - 1}{2n} \pi\right), \quad j = 1, 2, \dots, n
+\]
+These points are called \textbf{Chebyshev points}. They are not equally spaced; instead, they are clustered more densely near the endpoints $\pm 1$ of the interval $[-1, 1]$.
+
+Using Chebyshev points for polynomial interpolation, especially for smooth functions, leads to significantly faster convergence and avoids the severe oscillations seen with equally spaced points.
+
+\begin{verbatim}
+#save_to: chebyshev_interpolation_runge.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+def runge_function(x):
+    return 1 / (1 + 25 * x**2)
+
+def lagrange_interpolation(xp, yp, x):
+    n = len(xp)
+    p = 0
+    for k in range(n):
+        lk = 1
+        for j in range(n):
+            if j != k:
+                lk *= (x - xp[j]) / (xp[k] - xp[j])
+        p += yp[k] * lk
+    return p
+
+def chebyshev_points(n):
+    points = [np.cos(((2*j - 1) / (2*n)) * np.pi) for j in range(1, n + 1)]
+    return np.array(points)
+
+n_cheb = 32
+xp_cheb = chebyshev_points(n_cheb)
+yp_cheb = runge_function(xp_cheb)
+x_fine = np.linspace(-1, 1, 500)
+f_fine = runge_function(x_fine)
+p_fine_cheb = [lagrange_interpolation(xp_cheb, yp_cheb, xi) for xi in x_fine]
+
+
+plt.figure(figsize=(8, 6))
+plt.plot(x_fine, f_fine, label='Runge Function', color='red')
+plt.plot(x_fine, p_fine_cheb, label=f'Chebyshev Interpolant (n={n_cheb})', color='blue')
+plt.plot(xp_cheb, yp_cheb, 'kx', markersize=8, label='Chebyshev Points')
+plt.title(f'Chebyshev Interpolation of Runge Function (n = {n_cheb})')
+plt.xlim([-1.2, 1.2])
+plt.ylim([-0.2, 1.2])
+plt.xlabel('x')
+plt.ylabel('y')
+plt.legend()
+plt.grid(True)
+plt.savefig('chebyshev_interpolation_runge.png')
+
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{chebyshev_interpolation_runge.png}
+    \caption{Chebyshev Interpolation of the Runge function with n=32 points. The interpolant closely approximates the Runge function, with Chebyshev points clustered near the interval ends.}
+    \label{fig:chebyshev_runge}
+\end{figure}
+
+Figure \ref{fig:chebyshev_runge} shows the polynomial interpolant of the Runge function using Chebyshev points with $n=32$.  The approximation is significantly improved compared to using equally spaced points. The oscillations are effectively controlled, and the interpolant is almost indistinguishable from the original Runge function. Notice the Chebyshev points are clustered towards the ends of the interval $[-1, 1]$. This clustering is key to controlling the polynomial term in the error formula and reducing oscillations.
+
+
+\section{Code Example and Convergence}
+
+The provided Python code \texttt{ch\_inter.py} (Listing \ref{lst:ch_inter_py}) demonstrates and compares polynomial interpolation using both linearly spaced points and Chebyshev points. It interpolates a chosen function (Runge function or absolute value function) and plots the results.
+
+\lstset{language=Python, caption=Listing~1: \texttt{ch\_inter.py}, label=lst:ch_inter_py, breaklines=true}
+\begin{lstlisting}
+#!/usr/bin/python
+
+from math import *
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Function to interpolate
+def f(x):
+    return 1/(1+25*x**2)
+    #return abs(x)
+
+# Function to evaluate the Lagrange Interpolation
+def lagr(xp,yp,x):
+    lm=0.
+    for k in range(xp.size):
+        xc=xp[k]
+        L=1.
+        for l in range(xp.size):
+            if l != k:
+                L=L*(x-xp[l])/(xp[k]-xp[l])
+        lm=lm+yp[k]*L
+    return lm
+
+# Control points
+n=16
+xp=np.linspace(-1.,1.,n) # (Linearly spaced)
+#xp=np.array([cos((2*j-1)*pi/(2*n)) for j in range(n)]) # (Chebyshev points)
+yp=np.array([f(q) for q in xp])
+
+# Sample points
+xx=np.linspace(-1.,1.,500)
+yy=np.array([lagr(xp,yp,q) for q in xx])
+yyf=np.array([f(q) for q in xx])
+
+# Plot figure using Matplotlib
+plt.figure(1)
+plt.plot(xx,yy,'-',label='Interpolant')
+plt.plot(xx,yyf,'-',label='Function')
+plt.plot(xp,yp,'*')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.legend()
+plt.show()
+\end{lstlisting}
+
+
+The code allows switching between linearly spaced points and Chebyshev points by commenting/uncommenting lines. It also allows switching between the Runge function and the absolute value function. Running this code with the Runge function and Chebyshev points illustrates the effective interpolation achieved.
+
+To compare the convergence rates for different functions, particularly for the Runge function (smooth) and $f(x) = |x|$ (not smooth), we can examine the infinity norm of the error as the number of interpolation points increases.  The code \texttt{ch\_inter.py} can be adapted to calculate and plot these convergence rates, although it's not explicitly shown in the provided code snippet.  The lecture mentions that for the Runge function, convergence is very rapid with Chebyshev points, while for $|x|$, convergence is slower due to the lack of smoothness (non-differentiability at $x=0$).
+
+\begin{verbatim}
+#save_to: convergence_plot.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+def runge_function(x):
+    return 1 / (1 + 25 * x**2)
+
+def abs_function(x):
+    return np.abs(x)
+
+def lagrange_interpolation(xp, yp, x):
+    n = len(xp)
+    p = 0
+    for k in range(n):
+        lk = 1
+        for j in range(n):
+            if j != k:
+                lk *= (x - xp[j]) / (xp[k] - xp[j])
+        p += yp[k] * lk
+    return p
+
+def chebyshev_points(n):
+    points = [np.cos(((2*j - 1) / (2*n)) * np.pi) for j in range(1, n + 1)]
+    return np.array(points)
+
+def infinity_norm_error(f, interp_func, points, x_fine):
+    yp = f(points)
+    p_fine = [interp_func(points, yp, xi) for xi in x_fine]
+    f_fine = f(x_fine)
+    error = np.max(np.abs(f_fine - p_fine))
+    return error
+
+n_points_range = range(5, 51)
+errors_runge = []
+errors_abs = []
+x_fine = np.linspace(-1, 1, 500)
+
+for n in n_points_range:
+    xp_cheb = chebyshev_points(n)
+    errors_runge.append(infinity_norm_error(runge_function, lagrange_interpolation, xp_cheb, x_fine))
+    errors_abs.append(infinity_norm_error(abs_function, lagrange_interpolation, xp_cheb, x_fine))
+
+plt.figure(figsize=(8, 6))
+plt.semilogy(n_points_range, errors_runge, label='Runge Function', linestyle='-', marker='o', markersize=3)
+plt.semilogy(n_points_range, errors_abs, label='Abs Function', linestyle='--', marker='x', markersize=3)
+plt.xlabel('Number of Interpolation Points (n)')
+plt.ylabel('Infinity Norm Error')
+plt.title('Convergence of Chebyshev Interpolation')
+plt.legend()
+plt.grid(True)
+plt.savefig('convergence_plot.png')
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{convergence_plot.png}
+    \caption{Convergence of Chebyshev Interpolation for Runge Function (smooth) and Absolute Value Function (not smooth). The error is plotted against the number of interpolation points on a semi-logarithmic scale.}
+    \label{fig:convergence_comparison}
+\end{figure}
+
+Figure \ref{fig:convergence_comparison} demonstrates the convergence rates.  The Runge function exhibits much faster convergence (exponential convergence) compared to the absolute value function.  This highlights that the smoothness of the function significantly impacts the convergence rate of polynomial interpolation, even when using Chebyshev points.
+
+\section{The Lebesgue Constant}
+
+The error bound derived from the derivative of $f$ depends on the function itself, as $f^{(n+1)}(\theta)$ varies with $f$.  To obtain a measure of the quality of interpolation points that is independent of the function $f$, we introduce the Lebesgue constant.
+
+\begin{definition}[Lebesgue Constant]
+For a set of interpolation points $X = \{x_0, x_1, \dots, x_n\}$ on an interval $[a, b]$, the Lebesgue constant $\Lambda_n(X)$ is defined as:
+\[
+\Lambda_n(X) = \max_{x \in [a,b]} \sum_{k=0}^{n} |L_k(x)|
+\]
+where $L_k(x)$ are the Lagrange basis polynomials associated with the interpolation points $X$.
+\end{definition}
+
+The Lebesgue constant is always greater than or equal to 1. To see this, consider any interpolation point $x_j \in X$. Then,
+\[
+\sum_{k=0}^{n} |L_k(x_j)| = |L_j(x_j)| + \sum_{k \neq j} |L_k(x_j)| = |1| + \sum_{k \neq j} |0| = 1
+\]
+Since $\Lambda_n(X)$ is the maximum of this sum over all $x \in [a, b]$, it must be at least 1.
+
+Polynomial interpolation can be viewed as a linear operator $I_n$ that maps a continuous function $f$ to its polynomial interpolant $p_n = I_n(f)$. We can express $I_n(f)$ in terms of Lagrange basis polynomials:
+\[
+I_n(f)(x) = p_n(x) = \sum_{k=0}^{n} f(x_k) L_k(x)
+\]
+The Lebesgue constant provides a bound on the operator norm of $I_n$. Let's consider the infinity norm of $I_n(f)$:
+\[
+||I_n(f)||_{\infty} = \max_{x \in [a,b]} |I_n(f)(x)| = \max_{x \in [a,b]} \left| \sum_{k=0}^{n} f(x_k) L_k(x) \right|
+\]
+Using the triangle inequality, we have:
+\[
+||I_n(f)||_{\infty} \leq \max_{x \in [a,b]} \sum_{k=0}^{n} |f(x_k)| |L_k(x)|
+\]
+Since $|f(x_k)| \leq \max_{x \in [a,b]} |f(x)| = ||f||_{\infty}$, we can write:
+\[
+||I_n(f)||_{\infty} \leq ||f||_{\infty} \max_{x \in [a,b]} \sum_{k=0}^{n} |L_k(x)| = \Lambda_n(X) ||f||_{\infty}
+\]
+Thus, the Lebesgue constant $\Lambda_n(X)$ bounds the operator norm of $I_n$.
+
+The Lebesgue constant is crucial because it relates the interpolation error to the best possible polynomial approximation error. Let $p_n^*(x)$ be the best $n$-th degree polynomial approximation to $f(x)$ in the infinity norm. Then, the error of interpolation $f - I_n(f)$ can be bounded by:
+\[
+||f - I_n(f)||_{\infty} \leq ||f - p_n^*||_{\infty} + ||p_n^* - I_n(f)||_{\infty}
+\]
+Since $I_n(p_n^*) = p_n^*$ (interpolating a polynomial of degree $n$ gives itself), we have $p_n^* - I_n(f) = I_n(p_n^*) - I_n(f) = I_n(p_n^* - f)$. Therefore,
+\[
+||p_n^* - I_n(f)||_{\infty} = ||I_n(p_n^* - f)||_{\infty} \leq \Lambda_n(X) ||p_n^* - f||_{\infty} = \Lambda_n(X) ||f - p_n^*||_{\infty}
+\]
+Substituting this back into the error bound:
+\[
+||f - I_n(f)||_{\infty} \leq ||f - p_n^*||_{\infty} + \Lambda_n(X) ||f - p_n^*||_{\infty} = (1 + \Lambda_n(X)) ||f - p_n^*||_{\infty}
+\]
+This inequality shows that the interpolation error is at most $(1 + \Lambda_n(X))$ times the error of the best polynomial approximation. If $\Lambda_n(X)$ is small, then the interpolation error is not much larger than the best possible error.
+
+\subsection{Wirestrass Approximation Theorem and Bernstein Polynomials}
+The Wirestrass Approximation Theorem states that any continuous function on a closed interval can be uniformly approximated by polynomials to arbitrary accuracy.  Formally, for any continuous function $f$ on $[a, b]$ and any $\epsilon > 0$, there exists a polynomial $p_n^*$ of some degree $n$ such that $||f - p_n^*||_{\infty} < \epsilon$. This theorem guarantees that the best approximation error $||f - p_n^*||_{\infty}$ can be made arbitrarily small as $n \to \infty$.
+
+Bernstein polynomials provide a constructive proof of the Wirestrass Approximation Theorem. For a function $f$ defined on $[0, 1]$, the Bernstein polynomial of degree $n$ is given by:
+\[
+B_n(f, x) = \sum_{m=0}^{n} f\left(\frac{m}{n}\right) \binom{n}{m} x^m (1 - x)^{n-m}
+\]
+As $n \to \infty$, $B_n(f, x)$ converges uniformly to $f(x)$ for any continuous function $f$ on $[0, 1]$.  While Bernstein polynomials guarantee convergence, they typically converge very slowly and are not practically used for interpolation. However, they are theoretically important for proving the Wirestrass Approximation Theorem.
+
+\subsection{Calculating Lebesgue Constant and \texttt{lsum.py}}
+
+The Python code \texttt{lsum.py} (Listing \ref{lst:lsum_py}) calculates the sum of the absolute values of Lagrange basis polynomials, $\sum_{k=0}^{n} |L_k(x)|$, which is used to evaluate the Lebesgue constant. By finding the maximum value of this sum over the interval $[−1, 1]$, we can approximate the Lebesgue constant for a given set of interpolation points.
+
+\lstset{language=Python, caption=Listing~2: \texttt{lsum.py}, label=lst:lsum_py, breaklines=true}
+\begin{lstlisting}
+#!/usr/bin/python
+
+from math import *
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Function to calculate the sum of absolute values of Lagrange polynomials
+def lsum(xp,x):
+    ls=0.
+    for k in range(xp.size):
+        xc=xp[k]
+        L=1.
+        for l in range(xp.size):
+            if l != k:
+                L=L*(x-xp[l])/(xp[k]-xp[l])
+        ls=ls+abs(L)
+    return ls
+
+
+# Control points (either linearly spaced, or Chebyshev)
+n=16
+xp=np.linspace(-1.,1.,n) # (Linearly spaced)
+#xp=np.array([cos((2*j-1)*pi/(2*n)) for j in range(n)]) # (Chebyshev points)
+yp=np.array([0. for q in xp])
+
+# Sample points
+xx=np.linspace(-1.,1.,500)
+yy=np.array([lsum(xp,q) for q in xx])
+
+
+# Plot figure using Matplotlib
+plt.figure(1)
+plt.plot(xx,yy,'-')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.show()
+\end{lstlisting}
+
+
+\begin{verbatim}
+#save_to: lebesgue_constant_plots.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+def lagrange_basis_sum(xp, x):
+    ls = 0.
+    for k in range(len(xp)):
+        lk = 1.
+        for l in range(len(xp)):
+            if l != k:
+                lk *= (x - xp[l]) / (xp[k] - xp[l])
+        ls += abs(lk)
+    return ls
+
+def chebyshev_points(n):
+    return np.array([np.cos(((2*j - 1) / (2*n)) * np.pi) for j in range(1, n + 1)])
+
+n_values = [11, 21, 31]
+x_fine = np.linspace(-1, 1, 500)
+
+fig, axes = plt.subplots(3, 2, figsize=(12, 12))
+
+for i, n in enumerate(n_values):
+    # Equally spaced points
+    xp_equi = np.linspace(-1, 1, n)
+    yy_equi = [lagrange_basis_sum(xp_equi, x) for x in x_fine]
+    Lambda_equi = np.max(yy_equi)
+
+    ax_equi = axes[i, 0]
+    ax_equi.plot(x_fine, yy_equi)
+    ax_equi.set_title(f'Equally Spaced Points (n={n-1}), $\Lambda_{{{n-1}}}(X^{{equi}}) \approx$ {Lambda_equi:.0f}')
+    ax_equi.set_ylabel('$\sum |L_k(x)|$')
+    ax_equi.set_xlim([-1, 1])
+    ax_equi.grid(True)
+
+    # Chebyshev points
+    xp_cheb = chebyshev_points(n)
+    yy_cheb = [lagrange_basis_sum(xp_cheb, x) for x in x_fine]
+    Lambda_cheb = np.max(yy_cheb)
+
+    ax_cheb = axes[i, 1]
+    ax_cheb.plot(x_fine, yy_cheb)
+    ax_cheb.set_title(f'Chebyshev Points (n={n-1}), $\Lambda_{{{n-1}}}(X^{{cheb}}) \approx$ {Lambda_cheb:.2f}')
+    ax_cheb.set_xlim([-1, 1])
+    ax_cheb.grid(True)
+
+
+axes[2,0].set_xlabel('x')
+axes[2,1].set_xlabel('x')
+
+plt.tight_layout()
+plt.savefig('lebesgue_constant_plots.png')
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{lebesgue_constant_plots.png}
+    \caption{Comparison of $\sum_{k=0}^{n} |L_k(x)|$ for equally spaced points and Chebyshev points for n=10, 20, and 30 (number of interpolation points is n+1). The Lebesgue constant $\Lambda_n(X)$ is approximately the maximum value of these plots.}
+    \label{fig:lebesgue_constant_comparison}
+\end{figure}
+
+Figure \ref{fig:lebesgue_constant_comparison} compares the plots of $\sum_{k=0}^{n} |L_k(x)|$ for equally spaced and Chebyshev points for $n=10, 20,$ and $30$. For equally spaced points, the sum of Lagrange basis polynomials grows dramatically at the endpoints as $n$ increases, leading to large Lebesgue constants. For Chebyshev points, the sum remains much smaller and more uniformly bounded, resulting in significantly smaller Lebesgue constants.
+
+The approximate values of the Lebesgue constants from Figure \ref{fig:lebesgue_constant_comparison} are:
+\begin{itemize}
+    \item For equally spaced points ($X^{equi}$):
+    \begin{itemize}
+        \item $\Lambda_{10}(X^{equi}) \approx 29.9$
+        \item $\Lambda_{20}(X^{equi}) \approx 10,987$
+        \item $\Lambda_{30}(X^{equi}) \approx 6,600,000$
+    \end{itemize}
+    \item For Chebyshev points ($X^{cheb}$):
+    \begin{itemize}
+        \item $\Lambda_{10}(X^{cheb}) \approx 2.49$
+        \item $\Lambda_{20}(X^{cheb}) \approx 2.9$
+        \item $\Lambda_{30}(X^{cheb}) \approx 3.15$
+    \end{itemize}
+\end{itemize}
+The Lebesgue constant for equally spaced points grows explosively with $n$, indicating the instability and divergence associated with Runge's phenomenon. In contrast, the Lebesgue constant for Chebyshev points grows much more slowly.
+
+\section{Scaling of Lebesgue Constant}
+
+The asymptotic scaling of the Lebesgue constant as $n \to \infty$ differs significantly for equally spaced and Chebyshev points:
+
+\begin{itemize}
+    \item \textbf{Equally Spaced Points:} $\Lambda_n(X^{equi}) \sim O\left(\frac{2^n}{e n \log n}\right)$. This exponential growth confirms the rapid deterioration of interpolation quality with equally spaced points as $n$ increases.
+    \item \textbf{Chebyshev Points:} $\Lambda_n(X^{cheb}) \sim O(\log n)$.  The logarithmic growth is much more favorable, ensuring that the Lebesgue constant remains reasonably small even for large $n$.
+\end{itemize}
+
+While Chebyshev points provide a favorable scaling of the Lebesgue constant and greatly improve interpolation compared to equally spaced points, they are not theoretically optimal in minimizing the Lebesgue constant. However, they represent a very effective and practical choice for polynomial interpolation, offering a good balance between computational simplicity and approximation accuracy.
+
+\section{Summary}
+
+In summary, we have considered two key aspects of polynomial interpolation:
+
+\begin{enumerate}
+    \item \textbf{Polynomial Interpolation for Fitting Discrete Data:}
+    \begin{itemize}
+        \item We can achieve "zero error" at the interpolation points regardless of their choice. We are guaranteed to fit the discrete data exactly.
+        \item Lagrange polynomial basis is a well-conditioned and effective method for this task.
+    \end{itemize}
+    \item \textbf{Polynomial Interpolation for Approximating Continuous Functions:}
+    \begin{itemize}
+        \item We use the same methodology as for discrete data to construct the interpolant.
+        \item The choice of interpolation points becomes crucial in determining the magnitude of the approximation error $||f - I_n(f)||_{\infty}$.
+        \item Chebyshev points are a superior choice compared to equally spaced points for function approximation, as they control oscillations and provide better convergence properties, reflected in the slower growth of their Lebesgue constant.
+    \end{itemize}
+\end{enumerate}
+
+Choosing appropriate interpolation points, such as Chebyshev points, is essential for achieving accurate and stable polynomial approximations of continuous functions. The Lebesgue constant provides a valuable tool for analyzing and comparing the stability and potential error amplification of different interpolation schemes, independent of the function being approximated.
+
+\end{document}
+```

@@ -1,0 +1,485 @@
+```latex
+\documentclass{article}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{listings}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Example}
+
+\usepackage[margin=1in]{geometry}
+\begin{document}
+\sloppy
+
+\section{Introduction to Data Fitting}
+
+Data fitting is a fundamental topic in scientific computing and numerical methods. It concerns constructing a continuous function that represents a given discrete set of data points. This process is essential for interpreting data, discovering hidden parameters, finding underlying trends, and processing data for subsequent analysis such as differentiation or integration.
+
+There are two primary approaches to data fitting:
+
+\begin{itemize}
+    \item \textbf{Interpolation}:  Fitting a function that matches the given data points exactly.
+    \item \textbf{Least Squares}: Minimizing the error between the function and the given data, particularly useful when dealing with noisy data, such as experimental measurements.
+\end{itemize}
+
+We will explore these approaches, starting with motivation and then delving into the details of interpolation and least squares methods.
+
+\subsection{Motivation}
+
+Consider a scenario where we are given a set of discrete data points. We often need to estimate values at points between these given data points.
+
+\subsubsection{Piecewise Linear Interpolation}
+
+The simplest approach is to "connect the dots," which is known as piecewise linear interpolation. This method creates a continuous function by linearly interpolating between consecutive data points.
+
+\begin{figure}[h]
+    \centering
+    \begin{verbatim}
+#save_to: piecewise_linear_interpolation.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+x_data = np.array([0.0, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.9, 1.2, 1.5, 2.0])
+y_data = np.array([2.5, 3.1, 3.2, 3.0, 3.2, 3.1, 3.2, 3.5, 3.2, 4.0, 4.2])
+
+plt.figure(figsize=(8, 6))
+plt.plot(x_data, y_data, marker='x', linestyle='-', color='blue')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Piecewise Linear Interpolation')
+plt.xlim(0, 2.1)
+plt.ylim(2.0, 4.3)
+plt.grid(True)
+plt.savefig('piecewise_linear_interpolation.png')
+    \end{verbatim}
+    \includegraphics[max width=\textwidth,
+    max height=0.4\textheight,
+    keepaspectratio]{piecewise_linear_interpolation.png}
+    \caption{Piecewise Linear Interpolation.}
+    \label{fig:piecewise_linear_interpolation}
+\end{figure}
+
+While straightforward and useful in many cases, piecewise linear interpolation introduces "kinks" at each data point, which might be undesirable if a smoother approximation is required.
+
+\subsubsection{Polynomial Interpolation}
+
+To obtain a smoother approximation, we can consider polynomial interpolation. Given $n+1$ data points, we can construct a unique polynomial of degree $n$ that passes through all these points. For example, with 11 data points, we can use a degree 10 polynomial.
+
+\begin{figure}[h]
+    \centering
+    \begin{verbatim}
+#save_to: degree_10_polynomial.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+x_data = np.array([0.0, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.9, 1.2, 1.5, 2.0])
+y_data = np.array([2.5, 3.1, 3.2, 3.0, 3.2, 3.1, 3.2, 3.5, 3.2, 4.0, 4.2])
+
+p = np.polyfit(x_data, y_data, 10)
+x_plot = np.linspace(0, 2, 100)
+y_plot = np.polyval(p, x_plot)
+
+
+plt.figure(figsize=(8, 6))
+plt.plot(x_plot, y_plot, linestyle='-', color='blue')
+plt.plot(x_data, y_data, 'x', color='black')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Degree 10 Polynomial Interpolation')
+plt.xlim(0, 2.1)
+plt.ylim(2.0, 4.7)
+plt.grid(True)
+plt.savefig('degree_10_polynomial.png')
+    \end{verbatim}
+    \includegraphics[max width=\textwidth,
+    max height=0.4\textheight,
+    keepaspectratio]{degree_10_polynomial.png}
+    \caption{Degree 10 Polynomial Interpolation.}
+    \label{fig:degree_10_polynomial}
+\end{figure}
+
+While smoother, high-degree polynomial interpolations can exhibit undesirable oscillations, especially at the ends of the interval, which may not accurately reflect the underlying data.
+
+\subsubsection{Least Squares Fitting}
+
+Another approach is to use least squares fitting, which is particularly useful when we suspect noise in our data or when we want to capture the general trend rather than exactly passing through all data points.
+
+\paragraph{Linear Regression}
+
+Linear regression attempts to fit a straight line to the data by minimizing the error between the line and the data points.
+
+\begin{figure}[h]
+    \centering
+    \begin{verbatim}
+#save_to: linear_regression.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+x_data = np.array([0.0, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.9, 1.2, 1.5, 2.0])
+y_data = np.array([2.5, 3.1, 3.2, 3.0, 3.2, 3.1, 3.2, 3.5, 3.2, 4.0, 4.2])
+
+p_lin = np.polyfit(x_data, y_data, 1)
+x_plot = np.linspace(0, 2, 100)
+y_lin_plot = np.polyval(p_lin, x_plot)
+
+plt.figure(figsize=(8, 6))
+plt.plot(x_plot, y_lin_plot, linestyle='-', color='blue', label=f'Best linear fit: y = {p_lin[0]:.2f}x + {p_lin[1]:.2f}')
+plt.plot(x_data, y_data, 'x', color='black')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Linear Regression')
+plt.xlim(0, 2.1)
+plt.ylim(2.0, 4.7)
+plt.legend()
+plt.grid(True)
+plt.savefig('linear_regression.png')
+    \end{verbatim}
+    \includegraphics[max width=\textwidth,
+    max height=0.4\textheight,
+    keepaspectratio]{linear_regression.png}
+    \caption{Linear Regression: Best linear fit: \(y = 0.24x + 2.94\). Clearly not a good fit!}
+    \label{fig:linear_regression}
+\end{figure}
+
+As seen in Figure \ref{fig:linear_regression}, a linear fit might not capture the complexities of the data and may systematically miss important features.
+
+\paragraph{Generalizing to Higher Order Polynomials}
+
+Linear regression can be generalized to fit higher-order polynomials using least squares.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \begin{verbatim}
+#save_to: quadratic_fit.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+x_data = np.array([0.0, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.9, 1.2, 1.5, 2.0])
+y_data = np.array([2.5, 3.1, 3.2, 3.0, 3.2, 3.1, 3.2, 3.5, 3.2, 4.0, 4.2])
+
+p_quad = np.polyfit(x_data, y_data, 2)
+x_plot = np.linspace(0, 2, 100)
+y_quad_plot = np.polyval(p_quad, x_plot)
+
+plt.figure(figsize=(8, 6))
+plt.plot(x_plot, y_quad_plot, linestyle='-', color='blue', label=f'Best quadratic fit: y = {p_quad[0]:.2f}x^2 + {p_quad[1]:.2f}x + {p_quad[2]:.2f}')
+plt.plot(x_data, y_data, 'x', color='black')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Quadratic Fit')
+plt.xlim(0, 2.1)
+plt.ylim(2.0, 4.7)
+plt.legend()
+plt.grid(True)
+plt.savefig('quadratic_fit.png')
+        \end{verbatim}
+        \includegraphics[max width=\textwidth,
+        max height=0.7\textheight,
+        keepaspectratio]{quadratic_fit.png}
+        \caption{Quadratic Fit: Best quadratic fit: \(y = 0.53x^2 - 0.83x + 3.27\). Still not so good ...}
+        \label{fig:quadratic_fit}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+        \begin{verbatim}
+#save_to: cubic_fit.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+x_data = np.array([0.0, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.9, 1.2, 1.5, 2.0])
+y_data = np.array([2.5, 3.1, 3.2, 3.0, 3.2, 3.1, 3.2, 3.5, 3.2, 4.0, 4.2])
+
+p_cubic = np.polyfit(x_data, y_data, 3)
+x_plot = np.linspace(0, 2, 100)
+y_cubic_plot = np.polyval(p_cubic, x_plot)
+
+plt.figure(figsize=(8, 6))
+plt.plot(x_plot, y_cubic_plot, linestyle='-', color='blue', label=f'Best cubic fit: y = {p_cubic[0]:.2f}x^3 + {p_cubic[1]:.2f}x^2 + {p_cubic[2]:.2f}x + {p_cubic[3]:.2f}')
+plt.plot(x_data, y_data, 'x', color='black')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Cubic Fit')
+plt.xlim(0, 2.1)
+plt.ylim(2.0, 4.7)
+plt.legend()
+plt.grid(True)
+plt.savefig('cubic_fit.png')
+        \end{verbatim}
+        \includegraphics[max width=\textwidth,
+        max height=0.7\textheight,
+        keepaspectratio]{cubic_fit.png}
+        \caption{Cubic Fit: Best cubic fit: \(y = 0.93x^3 - 2.27x^2 + 1.31x + 3.00\). Looks good! A "cubic model" captures this data well.}
+        \label{fig:cubic_fit}
+    \end{minipage}
+\end{figure}
+
+As we increase the polynomial order, such as moving from a quadratic fit (Figure \ref{fig:quadratic_fit}) to a cubic fit (Figure \ref{fig:cubic_fit}), the fit to the data improves significantly. A cubic model appears to capture the trends in the data well without exhibiting excessive oscillations. In real-world problems, choosing the "right" model for experimental data can be challenging and depends on factors like the presence of noise and the complexity of the underlying phenomenon.
+
+\paragraph{Data Fitting with Multi-Dimensional Data}
+
+Data fitting is not limited to scalar functions; it can also be extended to multi-dimensional data. For example, we might want to fit a 2D surface to a 3D cloud of data points, finding the best hypersurface in $\mathbb{R}^N$.
+
+\begin{figure}[h]
+    \centering
+    \begin{verbatim}
+#save_to: 2d_data_fitting.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+from mpl_toolkits.mplot3d import Axes3D
+
+# Sample data for a 2D surface fitting (replace with your actual data)
+x = np.linspace(0, 1, 20)
+y = np.linspace(0, 1, 20)
+X, Y = np.meshgrid(x, y)
+Z = np.sin(np.pi * X) * np.cos(np.pi * Y) + 0.1 * np.random.randn(20, 20) # Example surface
+
+fig = plt.figure(figsize=(8, 6))
+ax = fig.add_subplot(111, projection='3d')
+ax.plot_surface(X, Y, Z, cmap='viridis')
+
+# Add scatter plot for 'data points' - using the same points for simplicity here
+ax.scatter(X, Y, Z, color='red', marker='x', s=20)
+
+
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_zlabel('Z')
+ax.set_title('2D Data Fitting Example')
+ax.view_init(elev=30, azim=45) # Adjust view angle for better perspective
+
+plt.savefig('2d_data_fitting.png')
+    \end{verbatim}
+    \includegraphics[max width=\textwidth,
+    max height=0.4\textheight,
+    keepaspectratio]{2d_data_fitting.png}
+    \caption{2D Data Fitting Example: Data fitting is often performed with multi-dimensional data (find the best hypersurface in $\mathbb{R}^N$). 2D Example.}
+    \label{fig:2d_data_fitting}
+\end{figure}
+
+\section{Interpolating Discrete Data}
+
+We now focus on polynomial interpolation in more detail. Let $P_n$ be the set of all polynomials of degree $n$ on the real numbers. An $n^{th}$ degree polynomial $p(x) \in P_n$ can be written as:
+\[ p(x) = b_0 + b_1 x + b_2 x^2 + \dots + b_n x^n \]
+where $b_0, b_1, \dots, b_n$ are the coefficients. We can represent these coefficients as a vector $b = [b_0, b_1, \dots, b_n]^T \in \mathbb{R}^{n+1}$.
+
+Suppose we are given $n+1$ data points $(x_0, y_0), (x_1, y_1), \dots, (x_n, y_n)$, which we denote as a set $S = \{(x_i, y_i)\}_{i=0}^n$. We want to find a polynomial $p(x) \in P_n$ such that it passes through all these data points, i.e., $p(x_i) = y_i$ for $i = 0, 1, \dots, n$. These $x_i$ values are called interpolation points.
+
+\subsection{Vandermonde Matrix Approach}
+
+The condition $p(x_i) = y_i$ for each data point gives us a system of $n+1$ linear equations:
+
+\begin{align*}
+b_0 + b_1 x_0 + b_2 x_0^2 + \dots + b_n x_0^n &= y_0 \\
+b_0 + b_1 x_1 + b_2 x_1^2 + \dots + b_n x_1^n &= y_1 \\
+& \vdots \\
+b_0 + b_1 x_n + b_2 x_n^2 + \dots + b_n x_n^n &= y_n
+\end{align*}
+
+This system can be written in matrix form as $Vb = y$, where:
+
+\[ V = \begin{pmatrix}
+1 & x_0 & x_0^2 & \dots & x_0^n \\
+1 & x_1 & x_1^2 & \dots & x_1^n \\
+\vdots & \vdots & \vdots & \ddots & \vdots \\
+1 & x_n & x_n^2 & \dots & x_n^n
+\end{pmatrix}, \quad
+b = \begin{pmatrix}
+b_0 \\ b_1 \\ \vdots \\ b_n
+\end{pmatrix}, \quad
+y = \begin{pmatrix}
+y_0 \\ y_1 \\ \vdots \\ y_n
+\end{pmatrix} \]
+
+Here, $V$ is the Vandermonde matrix, $b$ is the vector of polynomial coefficients we want to find, and $y$ is the vector of the given $y$-values.
+
+\begin{theorem}
+For any set of $n+1$ distinct interpolation points $\{x_0, x_1, \dots, x_n\}$, the Vandermonde system $Vb = y$ has a unique solution.
+\end{theorem}
+\begin{proof}
+To prove uniqueness, we need to show that if $Vz = 0$ implies $z = 0$. Suppose $Vb = 0$. This means that the polynomial $p(x) = b_0 + b_1 x + \dots + b_n x^n$ satisfies $p(x_i) = 0$ for $i = 0, 1, \dots, n$. Thus, $p(x)$ has $n+1$ roots at $x_0, x_1, \dots, x_n$. A polynomial of degree $n$ can have at most $n$ roots unless it is the zero polynomial. Therefore, $p(x)$ must be the zero polynomial, which implies all coefficients $b_i = 0$. Hence, $b=0$ is the only solution to $Vb=0$, and $V$ is non-singular, ensuring a unique solution for $Vb=y$.
+\end{proof}
+
+Although a unique solution exists, solving the Vandermonde system directly is generally not used in practice because the Vandermonde matrix is often ill-conditioned.
+
+\subsection{Ill-Conditioning of the Vandermonde Matrix}
+
+The Vandermonde matrix is ill-conditioned, especially for higher degrees, because it corresponds to using the monomial basis $\{1, x, x^2, \dots, x^n\}$ for polynomial interpolation.
+
+\begin{figure}[h]
+    \centering
+    \begin{verbatim}
+#save_to: monomial_basis_example.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+x = np.linspace(-1, 1, 100)
+powers = [1, 2, 4, 8, 16, 32]
+colors = ['blue', 'red', 'green', 'purple', 'orange', 'cyan']
+
+plt.figure(figsize=(8, 6))
+for power, color in zip(powers, colors):
+    plt.plot(x, x**power, label=f'$x^{{{power}}}$', color=color)
+
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Monomial Basis Functions')
+plt.xlim(-1, 1)
+plt.ylim(-1.1, 1.1)
+plt.legend()
+plt.grid(True)
+plt.savefig('monomial_basis_example.png')
+    \end{verbatim}
+    \includegraphics[max width=\textwidth,
+    max height=0.4\textheight,
+    keepaspectratio]{monomial_basis_example.png}
+    \caption{Monomial Basis Functions: Monomial basis functions become increasingly indistinguishable for higher powers.}
+    \label{fig:monomial_basis_example}
+\end{figure}
+
+As shown in Figure \ref{fig:monomial_basis_example}, monomial basis functions, such as $x^{14}$ and $x^{16}$ (or $x^7$ and $x^9$), become increasingly similar in shape, especially on intervals like $[-1, 1]$. This near linear dependence of the columns of the Vandermonde matrix leads to ill-conditioning.
+
+\subsubsection{Condition Number of Vandermonde Matrix}
+
+The condition number quantifies the sensitivity of the solution of a linear system to perturbations in the input. A large condition number indicates ill-conditioning. Let's examine the condition number of Vandermonde matrices using Python.
+
+\begin{lstlisting}[caption=Condition number calculation for a diagonal matrix, breaklines=true]
+>>> import numpy as np
+>>> a = np.array([[0.5,0.0,0.0],[0.0,2.0,0.0],[0.0,0.0,3.0]])
+>>> np.linalg.cond(a)
+6.0
+\end{lstlisting}
+
+For a diagonal matrix, the condition number is the ratio of the largest to the smallest diagonal element, which is $\frac{3}{0.5} = 6$ in this example, as expected.
+
+Now, let's calculate the condition number for Vandermonde matrices.
+
+\begin{lstlisting}[caption=Condition number calculation for a 5x5 Vandermonde matrix, breaklines=true]
+>>> x=np.linspace(0,1,5)
+>>> np.vander(x)
+array([[1.        , 0.        , 0.        , 0.        , 0.        ],
+       [1.        , 0.25      , 0.0625    , 0.015625  , 0.00390625],
+       [1.        , 0.5       , 0.25      , 0.125     , 0.0625    ],
+       [1.        , 0.75      , 0.5625    , 0.421875  , 0.31640625],
+       [1.        , 1.        , 1.        , 1.        , 1.        ]])
+>>> np.linalg.cond(np.vander(x))
+686.07...
+\end{lstlisting}
+
+For a 5x5 Vandermonde matrix with points linearly spaced in [0, 1], the condition number is approximately 686, which is already quite large.
+
+Increasing the size to a 10x10 Vandermonde matrix dramatically increases the condition number.
+
+\begin{lstlisting}[caption=Condition number calculation for a 10x10 Vandermonde matrix, breaklines=true]
+>>> x=np.linspace(0,1,10)
+>>> np.linalg.cond(np.vander(x))
+1.5497...e+07
+\end{lstlisting}
+The condition number is now around 15 million.
+
+Changing the interval of interpolation points, e.g., to [1, 2], further worsens the conditioning.
+
+\begin{lstlisting}[caption=Condition number calculation for a 10x10 Vandermonde matrix with points in [1, 2], breaklines=true]
+>>> x=np.linspace(1,2,10)
+>>> np.linalg.cond(np.vander(x))
+2.675...e+11
+\end{lstlisting}
+The condition number becomes approximately 267 billion, demonstrating severe ill-conditioning.
+
+\subsubsection{Practical Consequences of Ill-Conditioning}
+
+Due to finite precision arithmetic, solving $Vb=y$ numerically yields an approximation $\hat{b}$. While a stable numerical method ensures a small residual $||V\hat{b} - y||$, the error in the coefficients $||b - \hat{b}||$ can be large if $V$ is ill-conditioned. Small perturbations in $\hat{b}$ can lead to large perturbations in $V\hat{b}$ and consequently, large residuals.
+
+Consider a 2D vector space with basis vectors $v_1 = (1, 0)$ and $v_2 = (1, 0.0001)$. These basis vectors are nearly linearly dependent.
+
+Let $y = (1, 0)$ and $\tilde{y} = (1, 0.0005)$. In the basis $\{v_1, v_2\}$, we express $y = b_1 v_1 + b_2 v_2$ and $\tilde{y} = \tilde{b}_1 v_1 + \tilde{b}_2 v_2$.
+
+For $y = (1, 0)$:
+$b = (1, 0)$ because $y = 1 \cdot v_1 + 0 \cdot v_2$.
+
+For $\tilde{y} = (1, 0.0005)$: we need to solve
+$\begin{pmatrix} 1 & 1 \\ 0 & 0.0001 \end{pmatrix} \begin{pmatrix} \tilde{b}_1 \\ \tilde{b}_2 \end{pmatrix} = \begin{pmatrix} 1 \\ 0.0005 \end{pmatrix}$.
+From the second equation, $0.0001 \tilde{b}_2 = 0.0005 \implies \tilde{b}_2 = 5$.
+From the first equation, $\tilde{b}_1 + \tilde{b}_2 = 1 \implies \tilde{b}_1 = 1 - \tilde{b}_2 = 1 - 5 = -4$.
+Thus, $\tilde{b} = (-4, 5)$.
+
+Even though $y$ and $\tilde{y}$ are very close, their coefficients $b = (1, 0)$ and $\tilde{b} = (-4, 5)$ are quite different. This illustrates the sensitivity to perturbations caused by an ill-conditioned basis.
+
+\subsection{Horner's Method for Polynomial Evaluation}
+
+To efficiently evaluate a polynomial $p(x) = b_0 + b_1 x + b_2 x^2 + \dots + b_n x^n$, we can use Horner's method. For a cubic polynomial $ax^3 + bx^2 + cx + d$, direct evaluation is:
+\[ ax^3 + bx^2 + cx + d = ax \cdot x \cdot x + bx \cdot x + cx + d \]
+Horner's method rewrites it to minimize multiplications and additions:
+\[ ax^3 + bx^2 + cx + d = ((ax + b)x + c)x + d \]
+This reduces the number of operations and is computationally more efficient and numerically stable, especially for higher-degree polynomials. For an $n^{th}$ degree polynomial, Horner's method requires $n$ additions and $n$ multiplications.
+
+\subsection{Lagrange Interpolation}
+
+To overcome the ill-conditioning issues of the Vandermonde approach, we can use Lagrange interpolation, which employs a well-conditioned basis. The key idea is to construct Lagrange basis polynomials $L_k(x)$ for $k = 0, 1, \dots, n$ such that:
+\[ L_k(x_i) = \begin{cases} 1 & \text{if } i = k \\ 0 & \text{if } i \neq k \end{cases} \]
+These Lagrange basis polynomials are given by:
+\[ L_k(x) = \prod_{\substack{j=0 \\ j \neq k}}^n \frac{x - x_j}{x_k - x_j} \]
+Using these basis polynomials, the polynomial interpolant $p_n(x)$ can be directly constructed as:
+\[ p_n(x) = \sum_{k=0}^n y_k L_k(x) \]
+This form ensures that $p_n(x_i) = \sum_{k=0}^n y_k L_k(x_i) = y_i L_i(x_i) = y_i \cdot 1 = y_i$, since $L_k(x_i) = 0$ for $k \neq i$ and $L_i(x_i) = 1$.
+
+\begin{figure}[h]
+    \centering
+    \begin{verbatim}
+#save_to: lagrange_basis_polynomials.png
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.interpolate import lagrange
+
+x_interp_points = np.linspace(-1, 1, 6)
+x_plot = np.linspace(-1, 1, 100)
+
+plt.figure(figsize=(8, 6))
+
+for k in range(len(x_interp_points)):
+    y_values = [1 if i == k else 0 for i in range(len(x_interp_points))]
+    poly = lagrange(x_interp_points, y_values)
+    plt.plot(x_plot, poly(x_plot), label=f'$L_{k}(x)$')
+
+plt.scatter(x_interp_points, [0]*len(x_interp_points), color='black', marker='o', label='Interpolation Points')
+plt.scatter(x_interp_points, [1 if i == i else 0 for i in range(len(x_interp_points))], color='red', marker='x')
+
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Lagrange Basis Polynomials (degree 5)')
+plt.xlim(-1.2, 1.2)
+plt.ylim(-0.2, 1.2)
+plt.legend(loc='upper right')
+plt.grid(True)
+plt.savefig('lagrange_basis_polynomials.png')
+    \end{verbatim}
+    \includegraphics[max width=\textwidth,
+    max height=0.4\textheight,
+    keepaspectratio]{lagrange_basis_polynomials.png}
+    \caption{Lagrange Basis Polynomials: Example of Lagrange basis polynomials of degree 5, using 6 interpolation points over [-1, 1].}
+    \label{fig:lagrange_basis_polynomials}
+\end{figure}
+
+Figure \ref{fig:lagrange_basis_polynomials} illustrates Lagrange basis polynomials. For instance, the blue curve ($L_2(x)$) is 1 at the third interpolation point and 0 at all others, and similarly for the red curve ($L_5(x)$), it is 1 at the last interpolation point and 0 elsewhere, satisfying the desired properties. Lagrange interpolation provides a well-conditioned approach to polynomial interpolation.
+
+\section{Conclusion}
+
+Data fitting is a crucial tool in scientific computing, with interpolation and least squares methods offering different approaches for constructing continuous functions from discrete data. While Vandermonde interpolation, based on monomial basis, is conceptually straightforward, it suffers from ill-conditioning, especially for higher degrees. Lagrange interpolation provides a more stable and well-conditioned alternative by using Lagrange basis polynomials. For noisy data or when capturing trends is more important than exact interpolation, least squares fitting, including linear and higher-order polynomial regression, becomes invaluable. Efficient and stable algorithms for these methods are essential, especially when dealing with large datasets in real-world applications.
+
+\end{document}
+```
