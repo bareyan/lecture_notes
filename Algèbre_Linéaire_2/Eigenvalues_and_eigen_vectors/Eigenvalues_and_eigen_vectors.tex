@@ -1,0 +1,317 @@
+```latex
+\documentclass{article}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{listings}
+\usepackage{verbatim} % Add verbatim package
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Example}
+
+\usepackage[margin=1in]{geometry}
+
+\begin{document}
+\sloppy
+
+\section{Eigenvalues and Eigenvectors}
+
+\section{Introduction}
+
+In linear algebra, eigenvalues and eigenvectors are fundamental concepts, especially when dealing with square matrices. They reveal crucial information about the matrix's behavior and properties.  Understanding eigenvalues and eigenvectors is essential for many applications, and this lecture introduces these special numbers and vectors.
+
+\section{Definition of Eigenvalues and Eigenvectors}
+
+\begin{definition}[Eigenvector and Eigenvalue]
+For a square matrix $A$, a non-zero vector $x$ is called an \textbf{eigenvector} of $A$ if there exists a scalar $\lambda$ such that:
+\[Ax = \lambda x\]
+The scalar $\lambda$ is called the \textbf{eigenvalue} corresponding to the eigenvector $x$.
+\end{definition}
+
+In essence, when a matrix $A$ multiplies an eigenvector $x$, the resulting vector $Ax$ is parallel to $x$. It's just a scaled version of $x$, where $\lambda$ is the scaling factor. For most vectors, when multiplied by a matrix, the resulting vector will point in a different direction. Eigenvectors are special because their direction is preserved (or reversed, or become zero) under the transformation represented by $A$.
+
+The eigenvalue $\lambda$ can be any scalar. It can be zero, negative, or even a complex number.
+
+\subsection{Eigenvalue Zero}
+If an eigenvalue $\lambda$ is zero, then $Ax = 0x = 0$. This means that the eigenvector $x$ belongs to the null space of $A$.
+\begin{remark}
+If a matrix $A$ is singular, it means there exists a non-zero vector $x$ such that $Ax=0$. In this case, $\lambda = 0$ is an eigenvalue of $A$, and the eigenvectors corresponding to $\lambda = 0$ are the vectors in the null space of $A$.
+\end{remark}
+
+
+\section{Finding Eigenvalues}
+
+To find the eigenvalues and eigenvectors, we start with the equation:
+\[Ax = \lambda x\]
+Rearrange this equation to bring all terms to one side:
+\[Ax - \lambda x = 0\]
+To factor out $x$, we need to express $\lambda x$ as a matrix multiplication. We can write $x = Ix$, where $I$ is the identity matrix. Thus,
+\[Ax - \lambda Ix = 0\]
+\[(A - \lambda I)x = 0\]
+For this equation to have a non-zero solution for $x$ (since eigenvectors must be non-zero), the matrix $(A - \lambda I)$ must be singular. A matrix is singular if and only if its determinant is zero. Therefore, we have the \textbf{characteristic equation}:
+\[\det(A - \lambda I) = 0\]
+Solving this equation for $\lambda$ will give us the eigenvalues of the matrix $A$. For an $n \times n$ matrix, the characteristic equation will be a polynomial of degree $n$ in $\lambda$, and thus it will have $n$ roots, which are the $n$ eigenvalues (counting multiplicities).
+
+\begin{remark}
+An $n \times n$ matrix has $n$ eigenvalues. These eigenvalues may not all be distinct and can be repeated. Repeated eigenvalues can sometimes lead to complications, particularly when there is a shortage of independent eigenvectors.
+\end{remark}
+
+
+\section{Finding Eigenvectors}
+
+Once we have found an eigenvalue $\lambda$, we can find the corresponding eigenvector(s) by substituting $\lambda$ back into the equation $(A - \lambda I)x = 0$. We then solve this homogeneous system of linear equations to find the null space of the matrix $(A - \lambda I)$. The non-zero vectors in this null space are the eigenvectors corresponding to the eigenvalue $\lambda$.
+
+\begin{remark}
+For each eigenvalue, there is a subspace of eigenvectors (plus the zero vector), which is the null space of $(A - \lambda I)$. We typically find a basis for this null space to describe all eigenvectors associated with the eigenvalue. If the null space is a line, we can just provide one vector to represent the eigenvector.
+\end{remark}
+
+
+\section{Examples}
+
+\subsection{Projection Matrix}
+
+Consider a projection matrix $P$ that projects vectors onto a plane. Let's visualize this.
+
+\begin{verbatim}
+#save_to: projection_matrix.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+from mpl_toolkits.mplot3d import Axes3D # Import Axes3D for 3D projection
+
+fig = plt.figure() # Create figure outside subplot
+ax = fig.add_subplot(111, projection='3d')
+
+# Define the plane and vectors
+plane_normal = np.array([1, 1, 1]) # Normal vector to the plane
+plane_point = np.array([0, 0, 0]) # A point on the plane
+
+# Vector b (not in the plane)
+b = np.array([2, 1, 2])
+
+# Calculate projection matrix P
+def projection_matrix(n):
+    n = n / np.linalg.norm(n) # Normalize normal vector
+    return np.eye(3) - np.outer(n, n)
+
+P = projection_matrix(plane_normal)
+
+# Project b onto the plane
+Pb = P.dot(b)
+
+# Origin
+origin = np.array([0, 0, 0])
+
+# Draw Plane
+xx, yy = np.meshgrid(np.linspace(-3,3,10), np.linspace(-3,3,10))
+z = (-plane_normal[0] * xx - plane_normal[1] * yy + np.dot(plane_normal, plane_point)) * 1. / plane_normal[2]
+ax.plot_surface(xx, yy, z, alpha=0.2, color='blue')
+
+
+# Vector b
+ax.quiver(*origin, *b, color='r', label='b', arrow_length_ratio=0.1)
+# Vector Pb (projection of b)
+ax.quiver(*origin, *Pb, color='g', label='Pb', arrow_length_ratio=0.1)
+
+
+# Set plot limits and labels
+ax.set_xlim([-3, 3])
+ax.set_ylim([-3, 3])
+ax.set_zlim([-3, 3])
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_zlabel('Z')
+ax.set_title('Projection onto a Plane')
+ax.legend()
+
+plt.savefig('projection_matrix.png')
+\end{verbatim}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[ max width=\textwidth,
+     max height=0.4\textheight,
+     keepaspectratio]{projection_matrix.png}
+    \caption{Projection of a vector $b$ onto a plane resulting in $Pb$. In general, $b$ is not an eigenvector.}
+    \label{fig:projection_matrix}
+\end{figure}
+
+
+As shown in Figure \ref{fig:projection_matrix}, for a general vector $b$, its projection $Pb$ onto the plane is in a different direction from $b$. Therefore, $b$ is typically not an eigenvector of $P$.
+
+Now, let's consider vectors that are eigenvectors of $P$.
+\begin{itemize}
+    \item \textbf{Vectors in the plane:} If a vector $x$ lies in the projection plane, then projecting $x$ onto the plane leaves it unchanged. That is, $Px = x = 1 \cdot x$.  Thus, any vector in the plane is an eigenvector of $P$ with eigenvalue $\lambda = 1$.
+    \item \textbf{Vectors perpendicular to the plane:} If a vector $x$ is perpendicular to the plane, then its projection onto the plane is the zero vector. That is, $Px = 0 = 0 \cdot x$. Thus, any vector perpendicular to the plane is an eigenvector of $P$ with eigenvalue $\lambda = 0$. These vectors form the null space in this context.
+\end{itemize}
+Therefore, the eigenvalues of a projection matrix are 1 and 0.
+
+\subsection{Permutation Matrix}
+Consider the permutation matrix $A = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}$. This matrix swaps the components of a vector. Let's find its eigenvalues and eigenvectors.
+
+First, we find the eigenvalues by solving $\det(A - \lambda I) = 0$:
+\[A - \lambda I = \begin{pmatrix} 0-\lambda & 1 \\ 1 & 0-\lambda \end{pmatrix} = \begin{pmatrix} -\lambda & 1 \\ 1 & -\lambda \end{pmatrix}\]
+\[\det(A - \lambda I) = (-\lambda)(-\lambda) - (1)(1) = \lambda^2 - 1\]
+Setting the determinant to zero, we get $\lambda^2 - 1 = 0$, which gives eigenvalues $\lambda_1 = 1$ and $\lambda_2 = -1$.
+
+Now, let's find the eigenvectors for each eigenvalue.
+
+\textbf{For $\lambda_1 = 1$:}
+We need to solve $(A - 1I)x = 0$:
+\[A - I = \begin{pmatrix} -1 & 1 \\ 1 & -1 \end{pmatrix}\]
+The equation $(A - I)x = 0$ becomes:
+\[\begin{pmatrix} -1 & 1 \\ 1 & -1 \end{pmatrix} \begin{pmatrix} x_1 \\ x_2 \end{pmatrix} = \begin{pmatrix} 0 \\ 0 \end{pmatrix}\]
+This leads to the equation $-x_1 + x_2 = 0$, or $x_1 = x_2$. An eigenvector is $x_1 = \begin{pmatrix} 1 \\ 1 \end{pmatrix}$. Indeed, $A x_1 = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix} \begin{pmatrix} 1 \\ 1 \end{pmatrix} = \begin{pmatrix} 1 \\ 1 \end{pmatrix} = 1 \cdot x_1$.
+
+\textbf{For $\lambda_2 = -1$:}
+We need to solve $(A - (-1)I)x = (A + I)x = 0$:
+\[A + I = \begin{pmatrix} 1 & 1 \\ 1 & 1 \end{pmatrix}\]
+The equation $(A + I)x = 0$ becomes:
+\[\begin{pmatrix} 1 & 1 \\ 1 & 1 \end{pmatrix} \begin{pmatrix} x_1 \\ x_2 \end{pmatrix} = \begin{pmatrix} 0 \\ 0 \end{pmatrix}\]
+This leads to the equation $x_1 + x_2 = 0$, or $x_2 = -x_1$. An eigenvector is $x_2 = \begin{pmatrix} 1 \\ -1 \end{pmatrix}$ or equivalently $x_2 = \begin{pmatrix} -1 \\ 1 \end{pmatrix}$. Let's take $x_2 = \begin{pmatrix} -1 \\ 1 \end{pmatrix}$.
+Indeed, $A x_2 = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix} \begin{pmatrix} -1 \\ 1 \end{pmatrix} = \begin{pmatrix} 1 \\ -1 \end{pmatrix} = (-1) \cdot x_2$.
+
+We found two eigenvalues, $1$ and $-1$, and corresponding eigenvectors $\begin{pmatrix} 1 \\ 1 \end{pmatrix}$ and $\begin{pmatrix} -1 \\ 1 \end{pmatrix}$.
+
+\subsection{Matrix $A = \begin{pmatrix} 3 & 1 \\ 0 & 3 \end{pmatrix}$}
+
+Let's find the eigenvalues of $A = \begin{pmatrix} 3 & 1 \\ 0 & 3 \end{pmatrix}$.
+\[A - \lambda I = \begin{pmatrix} 3-\lambda & 1 \\ 0 & 3-\lambda \end{pmatrix}\]
+\[\det(A - \lambda I) = (3-\lambda)(3-\lambda) - (1)(0) = (3-\lambda)^2\]
+Setting the determinant to zero, we get $(3-\lambda)^2 = 0$, so $\lambda = 3$ is a repeated eigenvalue (with algebraic multiplicity 2).
+
+Now, let's find the eigenvector(s) for $\lambda = 3$. We need to solve $(A - 3I)x = 0$:
+\[A - 3I = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}\]
+The equation $(A - 3I)x = 0$ becomes:
+\[\begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix} \begin{pmatrix} x_1 \\ x_2 \end{pmatrix} = \begin{pmatrix} 0 \\ 0 \end{pmatrix}\]
+This leads to the equation $x_2 = 0$. $x_1$ is a free variable. We can choose $x_1 = 1$. So, an eigenvector is $x = \begin{pmatrix} 1 \\ 0 \end{pmatrix}$.
+For this matrix with a repeated eigenvalue $\lambda = 3$, we only found one independent eigenvector.
+
+\subsection{Rotation Matrix (90 degrees)}
+
+Consider the rotation matrix for a 90-degree rotation: $Q = \begin{pmatrix} 0 & 1 \\ -1 & 0 \end{pmatrix}$.
+Let's recalculate the determinant:
+\[Q - \lambda I = \begin{pmatrix} -\lambda & 1 \\ -1 & -\lambda \end{pmatrix}\]
+\[\det(Q - \lambda I) = (-\lambda)(-\lambda) - (1)(-1) = \lambda^2 + 1\]
+Setting the determinant to zero, we get $\lambda^2 + 1 = 0$, so $\lambda^2 = -1$, which gives complex eigenvalues $\lambda_1 = i$ and $\lambda_2 = -i$.
+
+For rotation matrices, especially rotations by 90 degrees, we expect complex eigenvalues because a rotation in the real plane (2D real space) typically does not have real eigenvectors. No real vector, when rotated by 90 degrees, ends up in the same or opposite direction unless it is the zero vector.
+
+\section{Trace and Determinant}
+
+\subsection{Trace}
+The trace of a square matrix is the sum of its diagonal elements.
+For a matrix $A = \begin{pmatrix} a_{11} & a_{12} \\ a_{21} & a_{22} \end{pmatrix}$, the trace is $\text{Trace}(A) = a_{11} + a_{22}$.
+A key property is that the trace of a matrix is also equal to the sum of its eigenvalues:
+\[\text{Trace}(A) = \sum_{i=1}^{n} \lambda_i = \lambda_1 + \lambda_2 + \dots + \lambda_n\]
+\begin{example}
+In the example $A = \begin{pmatrix} 3 & 1 \\ 0 & 3 \end{pmatrix}$, $\text{Trace}(A) = 3 + 3 = 6$. The eigenvalues were $\lambda_1 = 3, \lambda_2 = 3$, and indeed $\lambda_1 + \lambda_2 = 6$.
+\end{example}
+\begin{example}
+For the permutation matrix $A = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}$, $\text{Trace}(A) = 0 + 0 = 0$. The eigenvalues were $\lambda_1 = 1, \lambda_2 = -1$, and $\lambda_1 + \lambda_2 = 1 + (-1) = 0$.
+\end{example}
+\begin{example}
+For the rotation matrix $Q = \begin{pmatrix} 0 & 1 \\ -1 & 0 \end{pmatrix}$, $\text{Trace}(Q) = 0 + 0 = 0$. The eigenvalues were $\lambda_1 = i, \lambda_2 = -i$, and $\lambda_1 + \lambda_2 = i + (-i) = 0$.
+\end{example}
+
+
+\subsection{Determinant}
+The determinant of a square matrix is related to the product of its eigenvalues:
+\[\det(A) = \prod_{i=1}^{n} \lambda_i = \lambda_1 \cdot \lambda_2 \cdot \dots \cdot \lambda_n\]
+\begin{example}
+For the matrix $A = \begin{pmatrix} 3 & 1 \\ 0 & 3 \end{pmatrix}$, $\det(A) = (3)(3) - (1)(0) = 9$. The eigenvalues were $\lambda_1 = 3, \lambda_2 = 3$, and $\lambda_1 \cdot \lambda_2 = 3 \cdot 3 = 9$.
+\end{example}
+\begin{example}
+For the permutation matrix $A = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}$, $\det(A) = (0)(0) - (1)(1) = -1$. The eigenvalues were $\lambda_1 = 1, \lambda_2 = -1$, and $\lambda_1 \cdot \lambda_2 = (1)(-1) = -1$.
+\end{example}
+\begin{example}
+For the rotation matrix $Q = \begin{pmatrix} 0 & 1 \\ -1 & 0 \end{pmatrix}$, $\det(Q) = (0)(0) - (1)(-1) = 1$. The eigenvalues were $\lambda_1 = i, \lambda_2 = -i$, and $\lambda_1 \cdot \lambda_2 = (i)(-i) = -i^2 = 1$.
+\end{example}
+
+
+\subsection{Characteristic Polynomial for 2x2 matrices}
+For a 2x2 matrix $A$, the characteristic equation $\det(A - \lambda I) = 0$ can be written as:
+\[\lambda^2 - \text{Trace}(A)\lambda + \det(A) = 0\]
+This quadratic equation can be solved to find the two eigenvalues $\lambda_1$ and $\lambda_2$.  If we know one eigenvalue, say $\lambda_1$, for a 2x2 matrix, we can find the other eigenvalue $\lambda_2$ using the trace: $\lambda_2 = \text{Trace}(A) - \lambda_1$.
+
+\section{Special Matrix Types and Eigenvalues}
+
+\subsection{Symmetric Matrices}
+A symmetric matrix is a matrix that is equal to its transpose, i.e., $A^T = A$. Symmetric matrices have important properties regarding eigenvalues and eigenvectors.
+\begin{itemize}
+    \item \textbf{Real Eigenvalues:} Eigenvalues of a symmetric matrix are always real numbers.
+    \item \textbf{Orthogonal Eigenvectors:} Eigenvectors corresponding to distinct eigenvalues of a symmetric matrix are orthogonal.
+\end{itemize}
+\begin{example}
+The permutation matrix $A = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}$ is symmetric ($A^T = A$). Its eigenvalues $1$ and $-1$ are real, and its eigenvectors $\begin{pmatrix} 1 \\ 1 \end{pmatrix}$ and $\begin{pmatrix} -1 \\ 1 \end{pmatrix}$ are orthogonal (their dot product is $(1)(-1) + (1)(1) = 0$).
+\end{example}
+
+
+\subsection{Triangular Matrices}
+A triangular matrix is a square matrix where all entries above or below the main diagonal are zero. For example, an upper triangular matrix has all entries below the main diagonal as zero. For triangular matrices (both upper and lower), the eigenvalues are the entries on the main diagonal.
+\begin{example}
+For $A = \begin{pmatrix} 3 & 1 \\ 0 & 3 \end{pmatrix}$, it's an upper triangular matrix, and its eigenvalues are indeed the diagonal entries, which are both 3.
+\end{example}
+
+
+\section{Adding a Multiple of the Identity Matrix}
+
+Suppose a matrix $A$ has an eigenvalue $\lambda$ and a corresponding eigenvector $x$, so $Ax = \lambda x$. Consider a new matrix $B = A + cI$, where $c$ is a scalar and $I$ is the identity matrix. Let's see what happens when $B$ acts on the same eigenvector $x$:
+\[Bx = (A + cI)x = Ax + cIx = \lambda x + cx = (\lambda + c)x\]
+So, $(A + cI)x = (\lambda + c)x$. This shows that $x$ is also an eigenvector of $B = A + cI$, but the corresponding eigenvalue is now $\lambda + c$.
+
+\begin{proposition}
+If $A$ has eigenvalues $\lambda_1, \lambda_2, \dots, \lambda_n$ and corresponding eigenvectors $x_1, x_2, \dots, x_n$, then the matrix $A + cI$ has eigenvalues $\lambda_1 + c, \lambda_2 + c, \dots, \lambda_n + c$ and the same eigenvectors $x_1, x_2, \dots, x_n$. Adding $cI$ to a matrix shifts all its eigenvalues by $c$, but does not change the eigenvectors.
+\end{proposition}
+
+\begin{example}
+Let $A = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}$. We found eigenvalues $1, -1$.
+Let $B = A + 3I = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix} + 3\begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix} = \begin{pmatrix} 3 & 1 \\ 1 & 3 \end{pmatrix}$.
+The eigenvalues of $B$ should be $1+3=4$ and $-1+3=2$.
+Let's verify this by computing the characteristic polynomial of $B$:
+\[B - \lambda I = \begin{pmatrix} 3-\lambda & 1 \\ 1 & 3-\lambda \end{pmatrix}\]
+\[\det(B - \lambda I) = (3-\lambda)^2 - 1 = \lambda^2 - 6\lambda + 9 - 1 = \lambda^2 - 6\lambda + 8 = (\lambda - 4)(\lambda - 2)\]
+Setting the determinant to zero gives eigenvalues $\lambda = 4$ and $\lambda = 2$, as expected. The eigenvectors also remain the same for matrices A and B.
+\end{example}
+
+
+\section{Caution About Adding General Matrices}
+
+It is important to note that, in general, if you know the eigenvalues and eigenvectors of two matrices $A$ and $B$, you cannot easily determine the eigenvalues and eigenvectors of $A + B$ or $AB$.
+
+\textbf{Eigenvalues of $A+B$ are generally not eigenvalues of $A$ plus eigenvalues of $B$.}
+\textbf{Eigenvalues of $AB$ are generally not eigenvalues of $A$ times eigenvalues of $B$.}
+
+This is because if $x$ is an eigenvector of $A$ and $y$ is an eigenvector of $B$, there is no guarantee that $x$ is also an eigenvector of $B$, or $y$ is also an eigenvector of $A$, unless $A$ and $B$ share the same set of eigenvectors, which is a special case. For general matrices, eigenvectors are different, and therefore, there is no simple relationship between the eigenvalues of $A$, $B$ and $A+B$ or $AB$.
+
+\section{Complex Eigenvalues}
+
+Real matrices can have complex eigenvalues, as we saw with the rotation matrix example.  If a matrix $A$ is real and has a complex eigenvalue $\lambda = a + bi$ (where $b \neq 0$), then its complex conjugate $\overline{\lambda} = a - bi$ is also an eigenvalue of $A$. Complex eigenvalues for real matrices always come in conjugate pairs.
+
+Matrices that are far from being symmetric can have complex eigenvalues.  A special case is when a matrix $Q$ is anti-symmetric, meaning $Q^T = -Q$. Rotation matrices are examples of matrices that can be anti-symmetric or orthogonal, and these can have pure imaginary eigenvalues (like $\pm i$). Symmetric matrices have real eigenvalues, while anti-symmetric matrices can have pure imaginary eigenvalues, representing opposite ends of a spectrum.
+
+\section{Repeated Eigenvalues and Defective Matrices}
+
+When an eigenvalue is repeated (has algebraic multiplicity greater than 1), it is possible that there is a shortage of linearly independent eigenvectors associated with that eigenvalue. In such cases, the matrix is sometimes referred to as \textbf{defective} or \textbf{degenerate}.
+
+\begin{example}
+For example, consider $A = \begin{pmatrix} 3 & 1 \\ 0 & 3 \end{pmatrix}$. We found that the eigenvalue $\lambda = 3$ is repeated, but we could only find one linearly independent eigenvector $\begin{pmatrix} 1 \\ 0 \end{pmatrix}$.  In a $2 \times 2$ matrix, we would ideally like to find two linearly independent eigenvectors to fully understand the matrix's action. When we have fewer eigenvectors than the dimension of the matrix, it indicates a kind of degeneracy in the matrix's eigenstructure.
+\end{example}
+
+
+For triangular matrices, the eigenvalues are easily found on the diagonal. However, as the example $\begin{pmatrix} 3 & 1 \\ 0 & 3 \end{pmatrix}$ shows, even with easily identifiable eigenvalues, there can be a lack of a complete set of eigenvectors.
+
+\section{Conclusion}
+
+In this lecture, we introduced the concepts of eigenvalues and eigenvectors, learned how to calculate them using the characteristic equation and null space, and explored several examples. We saw how eigenvalues and eigenvectors behave for different types of matrices like projection, permutation, rotation, and triangular matrices. We also discussed the properties of trace and determinant in relation to eigenvalues, the effect of adding a multiple of the identity matrix, the caution with adding general matrices, complex eigenvalues, and the issue of repeated eigenvalues leading to a shortage of eigenvectors.  The next lectures can expand on these concepts and explore their applications in more depth for a wider range of matrices and problems.
+
+\end{document}
+```

@@ -1,0 +1,642 @@
+```latex
+\documentclass{article}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{listings}
+\usepackage{verbatim}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Example}
+
+\usepackage[margin=1in]{geometry}
+
+\begin{document}
+\sloppy
+\section{Introduction to Curves in Computer Graphics}
+
+\subsection{Motivation}
+
+In computer graphics, curves are fundamental for representing a wide variety of shapes and paths. From the smooth outlines of characters in vector graphics to the trajectories of objects in animations, curves provide a flexible and intuitive way to define continuous forms.  Unlike pixel-based raster images, vector graphics, which rely on mathematical descriptions of shapes, offer scalability without loss of quality, making curves indispensable in design and modeling tools.
+
+\subsection{Limitations of Polylines}
+
+A naive approach to representing curves might be to approximate them using a series of connected line segments, forming a polyline. While polylines are easy to store and render, they present significant drawbacks when it comes to design and manipulation.  Consider editing a curve composed of many small line segments; adjusting the shape smoothly and intuitively becomes cumbersome.  If we want a curve to pass through a specific point while maintaining smoothness, manipulating individual vertices of a polyline can lead to discontinuities and unnatural results.  This lack of high-level control and smoothness makes polylines inadequate for many advanced graphics applications.
+
+\subsection{Parametric Representation of Curves and Surfaces}
+
+To overcome the limitations of polylines, computer graphics often employs parametric representations for curves and surfaces.  In this approach, a curve is defined as a function of one or more parameters, typically denoted as \(t\) for curves and \(u, v\) for surfaces.
+
+\begin{definition}[Parametric Curve]
+A parametric curve in 2D or 3D space is defined by a function \(\gamma(t)\) that maps a parameter \(t\) from an interval (e.g., \([0, 1]\)) to a point in 2D or 3D space.
+\[ \gamma(t) = \begin{pmatrix} x(t) \\ y(t) \end{pmatrix} \quad \text{or} \quad \gamma(t) = \begin{pmatrix} x(t) \\ y(t) \\ z(t) \end{pmatrix} \]
+\end{definition}
+
+Similarly, surfaces can be represented parametrically using two parameters.
+
+\begin{definition}[Parametric Surface]
+A parametric surface in 3D space is defined by a function \(\beta(u, v)\) that maps two parameters \(u\) and \(v\) from a domain in 2D space to a point in 3D space.
+\[ \beta(u, v) = \begin{pmatrix} x(u, v) \\ y(u, v) \\ z(u, v) \end{pmatrix} \]
+\end{definition}
+
+While parametric representations are central to this chapter, it's worth noting that implicit representations offer an alternative. Implicit surfaces, for instance, are defined by an equation of the form \(f(x, y, z) = 0\). However, we will primarily focus on parametric curves in this chapter.
+
+\subsection{Chapter Overview}
+
+This chapter will introduce Bezier curves and the fundamental concepts needed to understand and work with them. We will explore different basis functions used in curve representations, including monomial, Hermite, and Bernstein bases. We will also delve into the de Casteljau algorithm, a cornerstone for evaluating and subdividing Bezier curves. By the end of this chapter, you will gain a solid understanding of cubic curves and their mathematical foundations, equipping you with essential tools for curve design and manipulation in computer graphics.
+
+\section{Parametric Curves: Basic Concepts}
+
+\subsection{What is a Parametrized Curve?}
+
+A parametrized curve is a way to describe a curve using a parameter, often denoted as \(t\). As the parameter \(t\) varies over a certain range, the function \(\gamma(t)\) traces out the points that form the curve.  Think of it as a particle moving in space, where \(t\) represents time, and \(\gamma(t)\) gives the particle's position at time \(t\).
+
+\subsection{Primitives in Computer Graphics}
+
+In computer graphics, the term "primitives" refers to the basic building blocks used to construct more complex scenes and objects. For 2D graphics, common primitives include points, lines, triangles, and curves.  These are the fundamental shapes that graphics systems are designed to handle efficiently.  While lines and triangles are considered lower-level primitives, curves offer a higher-level primitive for design and modeling, which can then be converted into lower-level primitives (like polylines or triangles) for rendering.
+
+\subsection{Examples of Parametric Curves}
+
+\subsubsection{Parametrized Line}
+
+Consider a line in 2D or 3D space. We can parametrize a line passing through a point \(\vec{\gamma}_0\) and having a direction vector \(\vec{d}\) as follows:
+
+\begin{equation}
+\gamma(t) = \vec{\gamma}_0 + t\vec{d}
+\end{equation}
+
+Here, \(\vec{\gamma}_0\) is the starting point of the line (when \(t=0\)), and \(\vec{d}\) is the direction vector that determines the line's orientation. As \(t\) varies, we move along the line.
+
+\begin{verbatim}
+#save_to: parameterized_line.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots()
+
+gamma0 = np.array([1, 1])
+d = np.array([2, 1])
+
+t_values = np.linspace(0, 1, 100)
+gamma_t = gamma0[:, np.newaxis] + t_values * d[:, np.newaxis]
+
+ax.plot(gamma_t[0], gamma_t[1], 'r-', label='$\\gamma(t) = \\vec{\\gamma}_0 + t\\vec{d}$')
+ax.plot(gamma0[0], gamma0[1], 'ro', markersize=8, label='$\\vec{\\gamma}_0$')
+ax.quiver(gamma0[0], gamma0[1], d[0], d[1], angles='xy', scale_units='xy', scale=1, color='r', label='$\\vec{d}$')
+
+ax.set_xlabel('x')
+ax.set_ylabel('y')
+ax.set_title('Parameterized Line')
+ax.axis('equal')
+ax.grid(True)
+ax.legend()
+
+plt.savefig('parameterized_line.png')
+\end{verbatim}
+
+\begin{figure}[h]
+\centering
+\includegraphics[ max width=\textwidth,
+ max height=0.4\textheight,
+ keepaspectratio]{parameterized_line.png}
+\caption{Parametrized Line}
+\label{fig:parameterized_line}
+\end{figure}
+
+
+\subsubsection{Parametrized Circle}
+
+A circle centered at the origin with radius 1 can be parametrized using trigonometric functions:
+
+\begin{equation}
+\gamma(t) = \begin{pmatrix} \cos(t) \\ \sin(t) \end{pmatrix}
+\end{equation}
+
+Here, as \(t\) varies from \(0\) to \(2\pi\), the function \(\gamma(t)\) traces out a circle. It is important to note that while this is a smooth curve, the functions \(\cos(t)\) and \(\sin(t)\) are not polynomials. Most of the curves we will discuss in detail in this chapter will be polynomial curves, but it's crucial to recognize that not all curves are polynomial.
+
+\begin{verbatim}
+#save_to: parameterized_circle.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots()
+
+t_values = np.linspace(0, 2*np.pi, 100)
+gamma_t = np.array([np.cos(t_values), np.sin(t_values)])
+
+ax.plot(gamma_t[0], gamma_t[1], 'g-', label='$\\gamma(t) = (\\cos(t), \\sin(t))$')
+
+ax.set_xlabel('x')
+ax.set_ylabel('y')
+ax.set_title('Parameterized Circle')
+ax.axis('equal')
+ax.grid(True)
+ax.legend()
+
+plt.savefig('parameterized_circle.png')
+\end{verbatim}
+
+\begin{figure}[h]
+\centering
+\includegraphics[ max width=\textwidth,
+ max height=0.4\textheight,
+ keepaspectratio]{parameterized_circle.png}
+\caption{Parametrized Circle}
+\label{fig:parameterized_circle}
+\end{figure}
+
+\subsection{Vector Graphics vs. Raster Graphics}
+
+The choice of curve representation is deeply tied to the type of graphics system being used: vector or raster.
+
+\begin{itemize}
+    \item \textbf{Vector Graphics:} Represent images using mathematical descriptions of geometric shapes like points, lines, curves, and polygons.  Vector graphics are resolution-independent, meaning they can be scaled up or down without losing quality.  Formats like SVG, PDF, and formats used by drawing programs (e.g., Adobe Illustrator, Inkscape) are vector-based. Curves in vector graphics are typically represented parametrically using splines or Bezier curves.
+
+    \item \textbf{Raster Graphics:} Represent images as a grid of pixels, where each pixel is assigned a color. Raster graphics are resolution-dependent; scaling them up can lead to pixelation. Formats like JPEG, PNG, and BMP are raster-based.  Programs like MS Paint and image editing software like Adobe Photoshop often work with raster images.
+\end{itemize}
+
+Parametric curves are essential for vector graphics because they provide a compact and scalable way to represent smooth, complex shapes. When vector graphics are rendered for display, these curves are often tessellated into simpler primitives (like lines or triangles) which are then rasterized (converted into pixels).
+
+\section{Basis Functions and Curve Representation}
+
+\subsection{The Need for Basis Functions}
+
+Representing curves directly using polynomial equations can become complex and unwieldy, especially when we need to manipulate or design curves interactively. Basis functions offer a more structured and manageable approach.  Instead of defining a curve by its polynomial coefficients directly, we define it as a linear combination of simpler, pre-defined functions called basis functions. This method simplifies curve construction, manipulation, and evaluation.
+
+\subsection{General Formula}
+
+In the basis function approach, a curve \(\gamma(t)\) is expressed as a sum of basis functions \(\phi_i(t)\) multiplied by coefficients \(a_i\):
+
+\begin{equation}
+\gamma(t) = \sum_{i=0}^{n} a_i \phi_i(t)
+\end{equation}
+
+Here, \(\{\phi_0(t), \phi_1(t), \ldots, \phi_n(t)\}\) is the set of basis functions, and \(\{a_0, a_1, \ldots, a_n\}\) are the coefficients.  The choice of basis functions \(\phi_i(t)\) determines the properties of the curves we can represent and influences how easily we can control and manipulate them.
+
+\subsection{Monomial Basis}
+
+The monomial basis is perhaps the most straightforward set of basis functions, consisting of powers of \(t\).
+
+\begin{definition}[Monomial Basis]
+The monomial basis functions are given by:
+\[ \phi_i(t) = t^i, \quad i = 0, 1, 2, 3, \ldots \]
+For cubic polynomials (degree 3), the monomial basis functions are \( \{1, t, t^2, t^3\} \).
+\end{definition}
+
+A cubic polynomial \(f(t)\) in the monomial basis is expressed as:
+
+\begin{equation}
+f(t) = a_3 t^3 + a_2 t^2 + a_1 t + a_0
+\end{equation}
+where \(a_0, a_1, a_2, a_3\) are the coefficients.
+
+\subsubsection{Example: Representing a Polynomial in Monomial Basis}
+
+Consider the polynomial \(f(t) = 1 - t + t^2\). In the monomial basis, this polynomial is represented by the coefficients \(a_0 = 1\), \(a_1 = -1\), \(a_2 = 1\), and \(a_3 = 0\).  We can represent these coefficients as a vector:
+
+\[ \begin{pmatrix} a_0 \\ a_1 \\ a_2 \\ a_3 \end{pmatrix} = \begin{pmatrix} 1 \\ -1 \\ 1 \\ 0 \end{pmatrix} \]
+
+\subsubsection{Matrix Representation}
+
+We can express a set of functions, say \(x(t), y(t), z(t), w(t)\), in matrix form using the monomial basis. For example, if we have:
+
+\begin{align*}
+x(t) &= 1 + t^2 \\
+y(t) &= 1 + t + t^2 \\
+z(t) &= 0 \\
+w(t) &= 0
+\end{align*}
+
+We can write this in matrix form as:
+
+\[ \begin{pmatrix} x(t) \\ y(t) \\ z(t) \\ w(t) \end{pmatrix} = \begin{pmatrix} 1 & 0 & 1 & 0 \\ 1 & 1 & 1 & 0 \\ 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 \end{pmatrix} \begin{pmatrix} 1 \\ t \\ t^2 \\ t^3 \end{pmatrix} \]
+
+Here, the matrix contains the coefficients, and the vector contains the monomial basis functions \(\begin{pmatrix} 1, t, t^2, t^3 \end{pmatrix}^T\).
+
+\subsubsection{Drawbacks of Monomial Basis}
+
+\begin{remark}
+While the monomial basis is simple to understand, it has several drawbacks in the context of curve design and computer graphics:
+\begin{itemize}
+    \item \textbf{Lack of Intuitive Control:}  Modifying the coefficients \(a_i\) in the monomial form does not provide an intuitive way to control the shape of the curve.  It's not immediately clear how changing a coefficient will affect the curve's form.
+    \item \textbf{Difficulty in Interpolation:} Solving interpolation problems, such as finding a curve that passes through specific points or has certain tangent properties, becomes algebraically complex in the monomial basis.
+    \item \textbf{Numerical Instability:} For higher-degree polynomials, the monomial basis can lead to numerical instability due to the large range of values that powers of \(t\) can take, especially for \(t\) outside the interval \([0, 1]\).
+\end{itemize}
+
+These limitations motivate the need for alternative basis functions that offer better control, stability, and ease of computation for curve design and manipulation.
+\end{remark}
+
+\section{Hermite Curves}
+
+\subsection{Motivation: Specifying Points and Tangents}
+
+In interactive curve design, it is often natural to specify a curve by defining its endpoints and the tangents at those endpoints. This approach provides intuitive control over the curve's shape. Hermite curves are designed precisely for this purpose. They allow us to construct a cubic curve segment given two endpoints and the tangent vectors at those points.
+
+\subsection{The Hermite Interpolation Problem}
+
+The Hermite interpolation problem for cubic curves can be stated as follows:
+
+\textbf{Problem:} Given two points \(\vec{p}_0\) and \(\vec{p}_1\) and tangent vectors \(\vec{m}_0\) and \(\vec{m}_1\) at \(\vec{p}_0\) and \(\vec{p}_1\) respectively, find a cubic polynomial curve \(\gamma(t)\) such that:
+\begin{align*}
+\gamma(0) &= \vec{p}_0 \\
+\gamma(1) &= \vec{p}_1 \\
+\gamma'(0) &= \vec{m}_0 \\
+\gamma'(1) &= \vec{m}_1
+\end{align*}
+Here, \(\gamma'(t)\) denotes the derivative of \(\gamma(t)\) with respect to \(t\), representing the tangent vector to the curve at parameter \(t\).
+
+\subsection{Derivation of Hermite Basis Functions}
+
+Let's consider a cubic polynomial in monomial form:
+\begin{equation}
+p(t) = a t^3 + b t^2 + c t + d
+\end{equation}
+Its derivative is:
+\begin{equation}
+p'(t) = 3 a t^2 + 2 b t + c
+\end{equation}
+
+We want to determine the coefficients \(a, b, c, d\) such that the curve satisfies the Hermite interpolation conditions. Let \(h_0, h_1, h_2, h_3\) represent the values \(p(0), p(1), p'(0), p'(1)\) respectively. Applying the conditions, we get a system of linear equations:
+
+\begin{align*}
+p(0) &= d = h_0 \\
+p(1) &= a + b + c + d = h_1 \\
+p'(0) &= c = h_2 \\
+p'(1) &= 3a + 2b + c = h_3
+\end{align*}
+
+In matrix form, this system is:
+
+\[ \begin{pmatrix} 0 & 0 & 0 & 1 \\ 1 & 1 & 1 & 1 \\ 0 & 0 & 1 & 0 \\ 3 & 2 & 1 & 0 \end{pmatrix} \begin{pmatrix} a \\ b \\ c \\ d \end{pmatrix} = \begin{pmatrix} h_0 \\ h_1 \\ h_2 \\ h_3 \end{pmatrix} \]
+
+To solve for \(a, b, c, d\) in terms of \(h_0, h_1, h_2, h_3\), we can invert the matrix and multiply by the vector \(\begin{pmatrix} h_0 \\ h_1 \\ h_2 \\ h_3 \end{pmatrix}\).  Alternatively, we can solve the system directly. From the first and third equations, we immediately have \(d = h_0\) and \(c = h_2\). Substituting these into the second and fourth equations, we get:
+
+\begin{align*}
+a + b + h_2 + h_0 &= h_1 \\
+3a + 2b + h_2 &= h_3
+\end{align*}
+Rearranging:
+\begin{align*}
+a + b &= h_1 - h_0 - h_2 \\
+3a + 2b &= h_3 - h_2
+\end{align*}
+Multiply the first equation by 2 and subtract it from the second:
+\[ (3a + 2b) - 2(a + b) = (h_3 - h_2) - 2(h_1 - h_0 - h_2) \]
+\[ a = h_3 - h_2 - 2h_1 + 2h_0 + 2h_2 = 2h_0 - 2h_1 + h_2 + h_3 \]
+Substitute \(a\) back into \(a + b = h_1 - h_0 - h_2\):
+\[ b = (h_1 - h_0 - h_2) - a = (h_1 - h_0 - h_2) - (2h_0 - 2h_1 + h_2 + h_3) = -3h_0 + 3h_1 - 2h_2 - h_3 \]
+
+Thus we have:
+\begin{align*}
+a &= 2h_0 - 2h_1 + h_2 + h_3 \\
+b &= -3h_0 + 3h_1 - 2h_2 - h_3 \\
+c &= h_2 \\
+d &= h_0
+\end{align*}
+
+Substituting these coefficients back into \(p(t) = a t^3 + b t^2 + c t + d\) and regrouping terms with respect to \(h_0, h_1, h_2, h_3\), we obtain:
+
+\begin{align*}
+p(t) &= (2h_0 - 2h_1 + h_2 + h_3)t^3 + (-3h_0 + 3h_1 - 2h_2 - h_3)t^2 + h_2 t + h_0 \\
+&= h_0 (2t^3 - 3t^2 + 1) + h_1 (-2t^3 + 3t^2) + h_2 (t^3 - 2t^2 + t) + h_3 (t^3 - t^2)
+\end{align*}
+So, we can express \(p(t)\) as a linear combination of Hermite basis functions \(h_{i}(t)\) and the values \(h_i\):
+
+\begin{equation}
+p(t) = h_0 h_0(t) + h_1 h_1(t) + h_2 h_2(t) + h_3 h_3(t)
+\end{equation}
+where \(h_0(t) = 2t^3 - 3t^2 + 1\), \(h_1(t) = -2t^3 + 3t^2\), \(h_2(t) = t^3 - 2t^2 + t\), and \(h_3(t) = t^3 - t^2\).
+
+\subsection{The Hermite Basis Functions}
+
+The Hermite basis functions for cubic curves are:
+\begin{align*}
+h_0(t) &= 2t^3 - 3t^2 + 1 \\
+h_1(t) &= -2t^3 + 3t^2 \\
+h_2(t) &= t^3 - 2t^2 + t \\
+h_3(t) &= t^3 - t^2
+\end{align*}
+
+These basis functions have the following properties:
+
+\begin{itemize}
+    \item \(h_0(0) = 1, h_0(1) = 0, h_0'(0) = 0, h_0'(1) = 0\)
+    \item \(h_1(0) = 0, h_1(1) = 1, h_1'(0) = 0, h_1'(1) = 0\)
+    \item \(h_2(0) = 0, h_2(1) = 0, h_2'(0) = 1, h_2'(1) = 0\)
+    \item \(h_3(0) = 0, h_3(1) = 0, h_3'(0) = 0, h_3'(1) = 1\)
+\end{itemize}
+
+These properties ensure that when we form the curve \(p(t) = h_0 h_0(t) + h_1 h_1(t) + h_2 h_2(t) + h_3 h_3(t)\), we automatically satisfy the Hermite interpolation conditions: \(p(0) = h_0\), \(p(1) = h_1\), \(p'(0) = h_2\), and \(p'(1) = h_3\).
+
+\begin{verbatim}
+#save_to: hermite_basis_functions.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+def h0(t):
+    return 2*t**3 - 3*t**2 + 1
+
+def h1(t):
+    return -2*t**3 + 3*t**2
+
+def h2(t):
+    return t**3 - 2*t**2 + t
+
+def h3(t):
+    return t**3 - t**2
+
+t_values = np.linspace(0, 1, 100)
+
+plt.figure(figsize=(8, 6))
+plt.plot(t_values, h0(t_values), label='$h_0(t) = 2t^3 - 3t^2 + 1$')
+plt.plot(t_values, h1(t_values), label='$h_1(t) = -2t^3 + 3t^2$')
+plt.plot(t_values, h2(t_values), label='$h_2(t) = t^3 - 2t^2 + t$')
+plt.plot(t_values, h3(t_values), label='$h_3(t) = t^3 - t^2$')
+
+plt.xlabel('t')
+plt.ylabel('Basis Function Value')
+plt.title('Hermite Basis Functions')
+plt.legend()
+plt.grid(True)
+plt.savefig('hermite_basis_functions.png')
+\end{verbatim}
+
+\begin{figure}[h]
+\centering
+\includegraphics[ max width=\textwidth,
+ max height=0.4\textheight,
+ keepaspectratio]{hermite_basis_functions.png}
+\caption{Hermite Basis Functions}
+\label{fig:hermite_basis_functions}
+\end{figure}
+
+
+\subsection{Advantage of Hermite Basis}
+
+\begin{remark}
+The primary advantage of the Hermite basis is that it directly solves the Hermite interpolation problem.  It provides an intuitive way to construct curves by specifying endpoint positions and tangents, making it suitable for design interfaces where artists and designers want to control curve shapes in this manner.
+\end{remark}
+
+\subsection{Example: Different Parametrizations of the Same Curve}
+
+Consider the line segment from \((0, 0)\) to \((1, 2)\).  We can parametrize this line in multiple ways using cubic Hermite curves. Two possible parametrizations are:
+
+\begin{enumerate}
+    \item \textbf{Constant Speed Parametrization:}
+    Let \(\vec{p}_0 = \begin{pmatrix} 0 \\ 0 \end{pmatrix}\), \(\vec{p}_1 = \begin{pmatrix} 1 \\ 2 \end{pmatrix}\), \(\vec{m}_0 = \vec{m}_1 = \vec{p}_1 - \vec{p}_0 = \begin{pmatrix} 1 \\ 2 \end{pmatrix}\).
+    Using the Hermite basis, we get a parametrization \(\gamma_1(t)\).
+
+    \item \textbf{Non-Constant Speed Parametrization:}
+    Let \(\vec{p}_0 = \begin{pmatrix} 0 \\ 0 \end{pmatrix}\), \(\vec{p}_1 = \begin{pmatrix} 1 \\ 2 \end{pmatrix}\), \(\vec{m}_0 = \vec{m}_1 = 0 = \begin{pmatrix} 0 \\ 0 \end{pmatrix}\).
+    Using the Hermite basis with these tangents, we get another parametrization \(\gamma_2(t)\). In this case, the "car" slows down at the origin.
+\end{enumerate}
+
+Both \(\gamma_1(t)\) and \(\gamma_2(t)\) trace out the same geometric line segment, but they traverse it at different "speeds". This illustrates that parametric representations of curves are not unique, and different parametrizations can lead to different dynamic properties even for the same geometric shape.
+
+
+\section{Bezier Curves and the de Casteljau Algorithm}
+
+\subsection{Cubic Blossoms}
+
+The concept of blossoms provides a deeper understanding of polynomial curves and leads to efficient algorithms like the de Casteljau algorithm for evaluating Bezier curves.
+
+\begin{definition}[Cubic Blossom]
+For a cubic polynomial \(f(t)\), its cubic blossom is a function \(F(t_1, t_2, t_3)\) of three variables that satisfies the following properties:
+\begin{enumerate}
+    \item \textbf{Symmetry:} \(F(t_1, t_2, t_3)\) is symmetric in its arguments, i.e., \(F(t_1, t_2, t_3) = F(t_{\sigma(1)}, t_{\sigma(2)}, t_{\sigma(3)})\) for any permutation \(\sigma\) of \(\{1, 2, 3\}\).
+    \item \textbf{Affine Property:} \(F\) is affine in each argument. For example, for the first argument:
+    \[ F(\alpha t_1 + \beta t_1', t_2, t_3) = \alpha F(t_1, t_2, t_3) + \beta F(t_1', t_2, t_3) \]
+    where \(\alpha + \beta = 1\). The same holds for the second and third arguments.
+    \item \textbf{Diagonal Property:} \(F(t, t, t) = f(t)\) for all \(t\).
+\end{enumerate}
+\end{definition}
+
+For every cubic polynomial, there exists a unique cubic blossom. Let's derive the cubic blossoms for monomial basis functions:
+
+\subsubsection{Blossom for \(f(t) = 1\)}
+The blossom is simply:
+\[ F(t_1, t_2, t_3) = 1 \]
+This satisfies all three properties: symmetry, affine property, and diagonal property.
+
+\subsubsection{Blossom for \(f(t) = t\)}
+The blossom is:
+\[ F(t_1, t_2, t_3) = \frac{t_1 + t_2 + t_3}{3} \]
+This is symmetric and affine in each argument. For the diagonal property: \(F(t, t, t) = \frac{t + t + t}{3} = t = f(t)\).
+
+\subsubsection{Blossom for \(f(t) = t^2\)}
+The blossom is:
+\[ F(t_1, t_2, t_3) = \frac{t_1 t_2 + t_1 t_3 + t_2 t_3}{3} \]
+Again, symmetry and affine properties are satisfied. For the diagonal property: \(F(t, t, t) = \frac{t^2 + t^2 + t^2}{3} = t^2 = f(t)\).
+
+\subsubsection{Blossom for \(f(t) = t^3\)}
+The blossom is:
+\[ F(t_1, t_2, t_3) = t_1 t_2 t_3 \]
+This is symmetric and affine in each argument. For the diagonal property: \(F(t, t, t) = t \cdot t \cdot t = t^3 = f(t)\).
+
+\subsubsection{Generalization}
+For any cubic polynomial \(f(t) = a_3 t^3 + a_2 t^2 + a_1 t + a_0\), its blossom \(F(t_1, t_2, t_3)\) can be found by linearly combining the blossoms of \(1, t, t^2, t^3\) with coefficients \(a_0, a_1, a_2, a_3\):
+\[ F(t_1, t_2, t_3) = a_3 (t_1 t_2 t_3) + a_2 \left( \frac{t_1 t_2 + t_1 t_3 + t_2 t_3}{3} \right) + a_1 \left( \frac{t_1 + t_2 + t_3}{3} \right) + a_0 (1) \]
+
+\subsection{Geometric Interpretation of Bezier Curves}
+
+A cubic Bezier curve is defined by four control points, say \(\vec{b}_0, \vec{b}_1, \vec{b}_2, \vec{b}_3\). These control points are geometrically related to the blossom of the Bezier curve.  In fact, these control points are blossom values at specific parameter values:
+\begin{align*}
+\vec{b}_0 &= F(0, 0, 0) \\
+\vec{b}_1 &= F(0, 0, 1) \\
+\vec{b}_2 &= F(0, 1, 1) \\
+\vec{b}_3 &= F(1, 1, 1)
+\end{align*}
+The cubic Bezier curve \(\gamma(t)\) is then given by the diagonal values of the blossom: \(\gamma(t) = F(t, t, t)\).
+The tangent vectors at the endpoints of a Bezier curve can also be expressed in terms of its control points. For a cubic Bezier curve defined by control points \(\vec{b}_0, \vec{b}_1, \vec{b}_2, \vec{b}_3\):
+
+\begin{align*}
+\gamma'(0) &= 3(\vec{b}_1 - \vec{b}_0) \\
+\gamma'(1) &= 3(\vec{b}_3 - \vec{b}_2)
+\end{align*}
+This relationship highlights how the first and last segments of the Bezier control polygon influence the tangents at the curve's endpoints.
+
+\subsection{The de Casteljau Algorithm}
+
+The de Casteljau algorithm is an efficient and geometrically intuitive method for evaluating a Bezier curve at a specific parameter value \(t\). It is based on repeated linear interpolation of the control points.
+
+\subsubsection{Algorithm Steps}
+
+Given control points \(\vec{b}_0, \vec{b}_1, \vec{b}_2, \vec{b}_3\) and a parameter value \(t \in [0, 1]\), the de Casteljau algorithm proceeds as follows:
+
+\textbf{Level 1 Interpolation:}
+\begin{align*}
+\vec{b}_0^{(1)} &= (1-t) \vec{b}_0 + t \vec{b}_1 \\
+\vec{b}_1^{(1)} &= (1-t) \vec{b}_1 + t \vec{b}_2 \\
+\vec{b}_2^{(1)} &= (1-t) \vec{b}_2 + t \vec{b}_3
+\end{align*}
+These steps compute points that are \(t\) fraction of the way from \(\vec{b}_0\) to \(\vec{b}_1\), \(\vec{b}_1\) to \(\vec{b}_2\), and \(\vec{b}_2\) to \(\vec{b}_3\), respectively.
+
+\textbf{Level 2 Interpolation:}
+\begin{align*}
+\vec{b}_0^{(2)} &= (1-t) \vec{b}_0^{(1)} + t \vec{b}_1^{(1)} \\
+\vec{b}_1^{(2)} &= (1-t) \vec{b}_1^{(1)} + t \vec{b}_2^{(1)}
+\end{align*}
+These steps interpolate between the points computed in Level 1.
+
+\textbf{Level 3 Interpolation:}
+\begin{equation}
+\vec{b}_0^{(3)} = (1-t) \vec{b}_0^{(2)} + t \vec{b}_1^{(2)}
+\end{equation}
+The final point \(\vec{b}_0^{(3)}\) is the point on the Bezier curve at parameter \(t\), i.e., \(\gamma(t) = \vec{b}_0^{(3)}\).
+
+\begin{verbatim}
+#save_to: de_casteljau_algorithm.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+def de_casteljau(points, t):
+    b = points.copy()
+    for r in range(1, len(points)):
+        for i in range(len(points) - r):
+            b[i] = (1 - t) * b[i] + t * b[i+1]
+    return b[0]
+
+control_points = np.array([[0, 0], [1, 2], [4, 1], [5, 0]], dtype=float)
+t_val = 0.5
+curve_point = de_casteljau(control_points.copy(), t_val)
+
+fig, ax = plt.subplots()
+
+# Plot control polygon
+ax.plot(control_points[:, 0], control_points[:, 1], 'k--o', label='Control Polygon')
+ax.plot(control_points[:, 0], control_points[:, 1], 'ko', markersize=8)
+
+# De Casteljau levels at t=0.5
+level1_points = np.array([(1-0.5)*control_points[i] + 0.5*control_points[i+1] for i in range(3)])
+ax.plot([control_points[0][0], control_points[1][0]], [control_points[0][1], control_points[1][1]], 'b-')
+ax.plot([control_points[1][0], control_points[2][0]], [control_points[1][1], control_points[2][1]], 'b-')
+ax.plot([control_points[2][0], control_points[3][0]], [control_points[2][1], control_points[3][1]], 'b-')
+ax.plot(level1_points[:, 0], level1_points[:, 1], 'bo', markersize=6)
+
+level2_points = np.array([(1-0.5)*level1_points[i] + 0.5*level1_points[i+1] for i in range(2)])
+ax.plot([level1_points[0][0], level1_points[1][0]], [level1_points[0][1], level1_points[1][1]], 'g-')
+ax.plot([level1_points[1][0], level1_points[2][0]], [level1_points[1][1], level1_points[2][1]], 'g-')
+ax.plot(level2_points[:, 0], level2_points[:, 1], 'go', markersize=6)
+
+
+level3_point = de_casteljau(control_points.copy(), 0.5)
+ax.plot([level2_points[0][0], level2_points[1][0]], [level2_points[0][1], level2_points[1][1]], 'r-')
+ax.plot(level3_point[0], level3_point[1], 'ro', markersize=8, label='$\\gamma(0.5)$')
+
+
+# Generate Bezier curve points for plotting
+t_curve = np.linspace(0, 1, 100)
+bezier_curve_points = np.array([de_casteljau(control_points.copy(), t) for t in t_curve])
+ax.plot(bezier_curve_points[:, 0], bezier_curve_points[:, 1], 'r-', label='Bezier Curve')
+
+
+ax.set_xlabel('x')
+ax.set_ylabel('y')
+ax.set_title('de Casteljau Algorithm at t=0.5')
+ax.axis('equal')
+ax.grid(True)
+ax.legend()
+plt.savefig('de_casteljau_algorithm.png')
+\end{verbatim}
+
+\begin{figure}[h]
+\centering
+\includegraphics[ max width=\textwidth,
+ max height=0.6\textheight,
+ keepaspectratio]{de_casteljau_algorithm.png}
+\caption{de Casteljau Algorithm at t=0.5}
+\label{fig:de_casteljau_algorithm}
+\end{figure}
+
+
+\subsubsection{Relationship to Cubic Blossoms}
+
+\begin{remark}
+Each linear interpolation step in the de Casteljau algorithm corresponds to evaluating an affine combination of blossom values. For example, \(\vec{b}_0^{(1)} = (1-t) \vec{b}_0 + t \vec{b}_1\) is equivalent to \(F(0, 0, t) = (1-t)F(0, 0, 0) + tF(0, 0, 1)\) due to the affine property of blossoms. The algorithm recursively computes blossom values with mixed parameters, eventually arriving at \(F(t, t, t) = \gamma(t)\).
+\end{remark}
+
+\subsubsection{Advantage: Subdivision and Sampling}
+
+\begin{remark}
+The de Casteljau algorithm is not only useful for evaluating points on a Bezier curve, but also for subdivision. At each level of interpolation, the points \(\vec{b}_0^{(r)}, \vec{b}_1^{(r)}, \ldots\) form the control points of new Bezier curves.  Specifically, at \(t = 0.5\), \(\{\vec{b}_0, \vec{b}_0^{(1)}, \vec{b}_0^{(2)}, \vec{b}_0^{(3)}\}\) and \(\{\vec{b}_0^{(3)}, \vec{b}_1^{(2)}, \vec{b}_2^{(1)}, \vec{b}_3\}\) are control points for two Bezier curves that together form the original curve, subdivided at \(t=0.5\).
+
+This subdivision property is crucial for adaptive tessellation and curve rendering.  The de Casteljau algorithm also provides a stable and efficient way to sample points along the Bezier curve, which is valuable for converting vector curves into raster approximations.
+\end{remark}
+
+\subsection{Bernstein Basis (Optional)}
+
+The Bernstein basis functions for cubic Bezier curves are defined as:
+\begin{align*}
+B_{0}^{3}(t) &= (1-t)^3 \\
+B_{1}^{3}(t) &= 3t(1-t)^2 \\
+B_{2}^{3}(t) &= 3t^2(1-t) \\
+B_{3}^{3}(t) &= t^3
+\end{align*}
+A cubic Bezier curve with control points \(\vec{b}_0, \vec{b}_1, \vec{b}_2, \vec{b}_3\) can be expressed in the Bernstein basis as:
+\begin{equation}
+\gamma(t) = \sum_{i=0}^{3} \vec{b}_i B_{i}^{3}(t) = \vec{b}_0 B_{0}^{3}(t) + \vec{b}_1 B_{1}^{3}(t) + \vec{b}_2 B_{2}^{3}(t) + \vec{b}_3 B_{3}^{3}(t)
+\end{equation}
+
+\subsubsection{Conversion Matrix}
+
+The conversion matrix from the monomial basis \(\begin{pmatrix} 1 \\ t \\ t^2 \\ t^3 \end{pmatrix}\) to the Bernstein basis \(\begin{pmatrix} B_{0}^{3}(t) \\ B_{1}^{3}(t) \\ B_{2}^{3}(t) \\ B_{3}^{3}(t) \end{pmatrix}\) is:
+
+\[ M_{B \leftarrow M} = \begin{pmatrix} 1 & 0 & 0 & 0 \\ -3 & 3 & 0 & 0 \\ 3 & -6 & 3 & 0 \\ -1 & 3 & -3 & 1 \end{pmatrix} \]
+And the inverse matrix, from Bernstein to Monomial basis is:
+ \[ M_{M \leftarrow B} = M_{B \leftarrow M}^{-1} = \begin{pmatrix} 1 & 0 & 0 & 0 \\ -3 & 3 & 0 & 0 \\ 3 & -6 & 3 & 0 \\ -1 & 3 & -3 & 1 \end{pmatrix}^{-1} = \begin{pmatrix} 1 & 0 & 0 & 0 \\ 1 & 1/3 & 0 & 0 \\ 1 & 2/3 & 1/3 & 0 \\ 1 & 1 & 1 & 1 \end{pmatrix} \]
+
+
+\subsection{Comparison of Bases}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+         & Monomial Basis & Hermite Basis & Bernstein Basis \\
+        \hline
+        \textbf{Basis Functions} & \( \{1, t, t^2, t^3\} \) & \( \{h_0(t), h_1(t), h_2(t), h_3(t)\} \) & \( \{B_{0}^{3}(t), B_{1}^{3}(t), B_{2}^{3}(t), B_{3}^{3}(t)\} \) \\
+        \hline
+        \textbf{Control} & Coefficients \(a_i\) & Values and Tangents at Endpoints & Bezier Control Points \\
+        \hline
+        \textbf{Intuitive Control} & Low & Medium & High (Geometric) \\
+        \hline
+        \textbf{Interpolation} & Algebraically Complex & Direct (by definition) & Geometrically via de Casteljau \\
+        \hline
+        \textbf{Evaluation} & Direct Polynomial Evaluation & Direct Basis Summation & de Casteljau Algorithm \\
+        \hline
+        \textbf{Subdivision} & Complex & Not naturally suited & de Casteljau Algorithm \\
+        \hline
+        \textbf{Use Cases} & Mathematical Analysis & Curve Interpolation, CAD & Vector Graphics, Curve Design \\
+        \hline
+    \end{tabular}
+    \caption{Comparison of Cubic Curve Bases}
+    \label{tab:basis_comparison}
+\end{table}
+
+\begin{remark}
+Each basis serves different purposes and provides unique advantages. The Monomial basis is simple mathematically but lacks intuitive geometric control. The Hermite basis directly addresses endpoint interpolation. The Bernstein basis, together with the de Casteljau algorithm, offers geometric intuition, stability, and efficient evaluation and subdivision, making it particularly suitable for computer graphics applications.
+\end{remark}
+
+
+\section{Conclusion}
+
+\subsection{Review}
+
+In this chapter, we explored the representation of cubic curves in computer graphics, focusing on three different basis functions: monomial, Hermite, and Bernstein. Each basis provides a unique way to define and manipulate cubic curves, suitable for various applications and computational tasks. We highlighted the de Casteljau algorithm as a central tool for evaluating and subdividing Bezier curves, emphasizing its geometric elegance and efficiency. Understanding these foundations is crucial for further exploration into splines and advanced curve and surface modeling techniques in computer graphics.
+
+\subsection{Preview}
+
+In the next lecture, we will build upon the concepts of cubic curves to explore splines. Splines are constructed by joining multiple curve segments together smoothly, allowing for the creation of more complex and versatile curves. We will investigate techniques for ensuring continuity and smoothness at the joints between curve segments, paving the way for modeling intricate shapes and surfaces.
+
+\end{document}
+```

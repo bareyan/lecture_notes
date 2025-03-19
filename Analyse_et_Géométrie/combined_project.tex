@@ -1,0 +1,1654 @@
+\documentclass[oneside]{book}
+\usepackage{amssymb,amsmath,amsthm, thmtools}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage[Sonny]{fncychap}
+\usetikzlibrary{arrows}
+\usepackage{listings}
+\usepackage[margin=1in]{geometry}
+\usetikzlibrary{shapes.geometric}
+\usepackage[utf8]{inputenc}
+\pgfplotsset{compat=1.16}
+
+\definecolor{GoodGreen}{rgb}{0.0667, 0.2078, 0.2157}
+\definecolor{GreenBackground}{rgb}{0.5176, 0.6902, 0.5098}
+\definecolor{DarkPurple}{rgb}{0.4157, 0.1804, 0.2078}
+\definecolor{RedBackground}{rgb}{0.9490, 0.7333, 0.7529}
+\definecolor{OxfordBlue}{rgb}{0.0, 0.1333, 0.2667}
+\definecolor{BlueBackground}{rgb}{0.4471, 0.6314, 0.8980}
+
+\definecolor{Gold}{rgb}{0.9176, 0.6667, 0.0784} % Define the color
+
+
+
+\declaretheoremstyle[
+    headfont=\bfseries\sffamily\color{GoodGreen}, bodyfont=\normalfont,
+    mdframed={
+        linewidth=2pt,
+        rightline=false, topline=false, bottomline=false,
+        linecolor=GoodGreen, backgroundcolor=GreenBackground!30!white,
+    }
+]{thmgreenbox}
+
+\declaretheoremstyle[
+    headfont=\bfseries\sffamily\color{OxfordBlue}, bodyfont=\normalfont,
+    mdframed={
+        linewidth=2pt,
+        rightline=false, topline=false, bottomline=false,
+        linecolor=OxfordBlue, backgroundcolor=BlueBackground!15
+    }
+]{thmblueline}
+
+\declaretheoremstyle[
+    headfont=\bfseries\sffamily\color{DarkPurple}, bodyfont=\normalfont,
+    mdframed={
+        linewidth=2pt,
+        rightline=false, topline=false, bottomline=false,
+        linecolor=DarkPurple, backgroundcolor=RedBackground!40,
+    }
+]{thmredbox}
+
+\declaretheoremstyle[
+     headfont=\bfseries\sffamily\color{Gold}, bodyfont=\normalfont,
+    mdframed={
+        linewidth=2pt,
+        rightline=false, topline=false, bottomline=false,
+        linecolor=Gold, backgroundcolor=Gold!10
+    }
+]{rmrk}
+
+
+\declaretheoremstyle[
+    headfont=\bfseries\sffamily\color{OxfordBlue}, bodyfont=\normalfont,
+    % unnumbered=true,
+    mdframed={
+        linewidth=2pt,
+        rightline=false, topline=false, bottomline=false,
+        linecolor=OxfordBlue,backgroundcolor=BlueBackground!15
+    },
+    qed=\qedsymbol
+]{thmproofbox}
+
+% Consistent theorem styling:
+\declaretheorem[numberwithin=chapter, style=thmgreenbox, name=Definition]{definition}
+\declaretheorem[sibling=definition, style=thmredbox, name=Theorem]{theorem}
+\declaretheorem[sibling=definition, style=thmredbox, name=Lemma]{lemma}
+\declaretheorem[sibling=definition, style=thmredbox, name=Proposition]{proposition}
+\declaretheorem[sibling=definition, style=rmrk, name=Remark]{remark}
+\declaretheorem[sibling=definition, style=thmblueline, name=Example]{example}
+\declaretheorem[unnumbered=true, style=thmproofbox, name=Solution]{solution}
+\declaretheorem[unnumbered=true, style=thmproofbox, name=Preuve]{prf}
+
+
+\renewcommand{\proof}{
+\begin{prf}}
+\renewcommand{\endproof}{\end{prf}}
+
+\begin{document}
+\sloppy
+\chapter{CM1}
+\sloppy
+
+\section{Analyse}
+
+\section{Introduction aux espaces vectoriels $\mathbb{R}^d$ et $\mathbb{C}^d$}
+
+\subsection{Définitions et propriétés fondamentales}
+
+Nous allons définir les espaces vectoriels $\mathbb{R}^d$ et $\mathbb{C}^d$.
+
+\begin{definition}
+L'espace $\mathbb{R}^d$, pour $d \geq 1$, est défini comme l'ensemble des $d$-uplets de nombres réels :
+\[
+\mathbb{R}^d := \{X = (x_1, \ldots, x_d) : x_i \in \mathbb{R}\}
+\]
+où $x_1, \ldots, x_d$ sont les coordonnées cartésiennes du point $X$.
+\end{definition}
+
+Pour $d=2$, on note parfois les points de $\mathbb{R}^2$ par $(x, y)$, et pour $d=3$, par $(x, y, z)$.
+
+\begin{definition}
+L'espace $\mathbb{C}^d$, pour $d \geq 1$, est défini de manière analogue comme l'ensemble des $d$-uplets de nombres complexes :
+\[
+\mathbb{C}^d := \{X = (x_1, \ldots, x_d) : x_i \in \mathbb{C}\}
+\]
+où $x_1, \ldots, x_d$ sont des nombres complexes.
+\end{definition}
+
+Tout nombre complexe $z \in \mathbb{C}$ peut être écrit sous la forme $z = a + bi$, où $a = Re(z)$ est la partie réelle de $z$ et $b = Im(z)$ est la partie imaginaire de $z$. On peut écrire pour $X \in \mathbb{C}^d$,
+\[
+X = Re(X) + i Im(X)
+\]
+où $Re(X) = (Re(x_1), \ldots, Re(x_d)) \in \mathbb{R}^d$ et $Im(X) = (Im(x_1), \ldots, Im(x_d)) \in \mathbb{R}^d$.
+
+$\mathbb{R}^d$ et $\mathbb{C}^d$ sont des espaces vectoriels. L'addition vectorielle et la multiplication par un scalaire sont définies de la manière suivante dans $\mathbb{R}^d$ (et de même dans $\mathbb{C}^d$) :
+Pour $X = (x_1, \ldots, x_d) \in \mathbb{R}^d$, $Y = (y_1, \ldots, y_d) \in \mathbb{R}^d$ et $\lambda \in \mathbb{R}$,
+\begin{itemize}
+    \item \textbf{Addition vectorielle} : $X + Y = (x_1 + y_1, \ldots, x_d + y_d)$
+    \item \textbf{Multiplication par un scalaire} : $\lambda X = (\lambda x_1, \ldots, \lambda x_d)$
+    \item \textbf{Vecteur nul} : $\overrightarrow{0} = (0, \ldots, 0)$
+\end{itemize}
+Pour $\mathbb{C}^d$, le corps des scalaires est $\mathbb{C}$.
+
+\subsection{Coordonnées polaires et sphériques}
+
+Dans $\mathbb{R}^2$, on peut utiliser les coordonnées polaires $(r, \theta) \in \mathbb{R}^+ \times [0, 2\pi[$ définies par :
+\begin{align*}
+    x &= r \cos \theta \\
+    y &= r \sin \theta
+\end{align*}
+avec $r = \sqrt{x^2 + y^2}$.
+
+Dans $\mathbb{R}^3$, on peut utiliser les coordonnées sphériques $(r, \theta, \varphi) \in \mathbb{R}^+ \times [-\pi/2, \pi/2] \times [0, 2\pi[$ définies par :
+\begin{align*}
+    x &= r \sin \theta \cos \varphi \\
+    y &= r \sin \theta \sin \varphi \\
+    z &= r \cos \theta
+\end{align*}
+avec $r = \sqrt{x^2 + y^2 + z^2}$.
+
+\subsection{Représentation graphique de $\mathbb{R}^3$}
+
+On peut représenter un point $X = (x, y, z)$ de $\mathbb{R}^3$ à l'aide des coordonnées sphériques.
+Dans la figure ci-dessous, $\theta$ est l'angle entre l'axe $z$ et le vecteur $OX$, et $\varphi$ est l'angle entre l'axe $x$ et la projection de $OX$ sur le plan $(xOy)$.
+
+\begin{verbatim}
+```python
+#save_to: R3_coordinates.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig = plt.figure(figsize=(6,6))
+ax = fig.add_subplot(111, projection='3d')
+
+# Axes
+ax.quiver(0, 0, 0, 1, 0, 0, color='k', arrow_length_ratio=0.05, linestyle='--')
+ax.quiver(0, 0, 0, 0, 1, 0, color='k', arrow_length_ratio=0.05, linestyle='--')
+ax.quiver(0, 0, 0, 0, 0, 1, color='k', arrow_length_ratio=0.05, linestyle='--')
+ax.text(1.1, 0, 0, 'x')
+ax.text(0, 1.1, 0, 'y')
+ax.text(0, 0, 1.1, 'z')
+
+# Point X
+x, y, z = 0.8, 0.5, 0.6
+ax.scatter(x, y, z, color='red', s=50)
+ax.text(x*1.1, y*1.1, z*1.1, 'X')
+
+# Vector OX
+ax.quiver(0, 0, 0, x, y, z, color='blue', arrow_length_ratio=0.1)
+
+# Projection on xy plane
+ax.plot([0, x], [0, y], [0, 0], linestyle='--', color='gray')
+ax.scatter(x, y, 0, color='gray', s=30)
+
+# Angles
+r = np.sqrt(x**2 + y**2 + z**2)
+theta = np.arccos(z/r)
+phi = np.arctan2(y, x)
+
+# Arc for theta
+arc_theta_radius = 0.5
+arc_theta_start = np.arctan2(np.sqrt(x**2+y**2), z)
+arc_theta = patches.Arc((0,0,0), arc_theta_radius, arc_theta_radius, 0, 0, np.degrees(theta))
+ax.add_patch(arc_theta)
+from mpl_toolkits.mplot3d import art3d
+art3d.pathpatch_2d_to_3d(arc_theta, z=0, zdir="y")
+ax.text(arc_theta_radius*0.6, -0.1, arc_theta_radius*0.6, r'$\theta$')
+
+
+# Arc for phi
+arc_phi_radius = 0.4
+arc_phi_start = 0
+arc_phi_end = np.degrees(phi)
+arc_phi = patches.Arc((0,0,0), arc_phi_radius, arc_phi_radius, 0, 0, arc_phi_end)
+ax.add_patch(arc_phi)
+art3d.pathpatch_2d_to_3d(arc_phi, z=0, zdir="z")
+ax.text(arc_phi_radius*0.7, arc_phi_radius*0.7, 0, r'$\varphi$')
+
+
+ax.set_xlabel("x")
+ax.set_ylabel("y")
+ax.set_zlabel("z")
+ax.set_xlim([-0.2, 1.2])
+ax.set_ylim([-0.2, 1.2])
+ax.set_zlim([-0.2, 1.2])
+ax.view_init(elev=20, azim=-135)
+plt.savefig('R3_coordinates.png')
+```
+\end{verbatim}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{R3_coordinates.png}
+    \caption{Représentation des coordonnées sphériques dans $\mathbb{R}^3$}
+    \label{fig:R3_coordinates}
+\end{figure}
+
+
+\subsection{Produit scalaire dans $\mathbb{R}^d$}
+
+\begin{definition}
+Le produit scalaire de deux vecteurs $X = (x_1, \ldots, x_d) \in \mathbb{R}^d$ et $Y = (y_1, \ldots, y_d) \in \mathbb{R}^d$ est défini par :
+\[
+X \cdot Y = \sum_{i=1}^d x_i y_i
+\]
+\end{definition}
+
+\subsection{Propriétés du produit scalaire dans $\mathbb{R}^d$}
+
+Le produit scalaire dans $\mathbb{R}^d$ possède les propriétés suivantes :
+
+\begin{enumerate}
+    \item \textbf{Bilinéarité} :
+    Pour tous vecteurs $X, Y, Z \in \mathbb{R}^d$ et scalaire $\lambda \in \mathbb{R}$,
+    \begin{align*}
+        (X + Y) \cdot Z &= X \cdot Z + Y \cdot Z \\
+        Z \cdot (X + Y) &= Z \cdot X + Z \cdot Y \\
+        (\lambda X) \cdot Y &= X \cdot (\lambda Y) = \lambda (X \cdot Y)
+    \end{align*}
+    \item \textbf{Symétrie} :
+    Pour tous vecteurs $X, Y \in \mathbb{R}^d$,
+    \[
+    X \cdot Y = Y \cdot X
+    \]
+    \item \textbf{Positivité et caractère défini} :
+    Pour tout vecteur $X \in \mathbb{R}^d$,
+    \[
+    X \cdot X \geq 0 \quad \text{et} \quad (X \cdot X = 0 \iff X = \overrightarrow{0})
+    \]
+\end{enumerate}
+
+\begin{proposition}[Inégalité de Cauchy-Schwarz]
+Pour tous vecteurs $X, Y \in \mathbb{R}^d$, on a l'inégalité de Cauchy-Schwarz :
+\[
+|X \cdot Y| \leq \sqrt{(X \cdot X)} \sqrt{(Y \cdot Y)}
+\]
+\end{proposition}
+
+\begin{proof}
+Fixons $X, Y \in \mathbb{R}^d$ et considérons la fonction polynomiale $P : \mathbb{R} \to \mathbb{R}$ définie par
+\[
+P(t) = (X + tY) \cdot (X + tY)
+\]
+En développant, on obtient
+\[
+P(t) = t^2 (Y \cdot Y) + 2t (X \cdot Y) + (X \cdot X)
+\]
+Comme $P(t) = ||X + tY||^2 \geq 0$ pour tout $t \in \mathbb{R}$, le polynôme $P(t)$ de degré 2 est toujours positif ou nul. Son discriminant $\Delta$ est donc négatif ou nul :
+\[
+\Delta = (2(X \cdot Y))^2 - 4 (Y \cdot Y) (X \cdot X) = 4 (X \cdot Y)^2 - 4 (X \cdot X) (Y \cdot Y) \leq 0
+\]
+D'où $(X \cdot Y)^2 \leq (X \cdot X) (Y \cdot Y)$, et en prenant la racine carrée, on obtient l'inégalité de Cauchy-Schwarz.
+\end{proof}
+
+
+\section{Normes}
+
+\subsection{Norme associée au produit scalaire dans $\mathbb{R}^d$}
+
+\begin{definition}
+La norme euclidienne associée au produit scalaire dans $\mathbb{R}^d$ est définie par :
+\[
+\|X\| = \sqrt{X \cdot X} = \sqrt{\sum_{i=1}^d x_i^2}
+\]
+pour $X = (x_1, \ldots, x_d) \in \mathbb{R}^d$.
+\end{definition}
+Cette norme représente la longueur du vecteur $X$. Elle est parfois notée $\|X\|_2$.
+
+\subsection{Propriétés des normes}
+
+Les normes possèdent les propriétés suivantes :
+
+\begin{enumerate}
+    \item \textbf{Homogénéité} : Pour tout vecteur $X \in \mathbb{R}^d$ et scalaire $\lambda \in \mathbb{R}$,
+    \[
+    \|\lambda X\| = |\lambda| \|X\|
+    \]
+    \item \textbf{Inégalité triangulaire} : Pour tous vecteurs $X, Y \in \mathbb{R}^d$,
+    \[
+    \|X + Y\| \leq \|X\| + \|Y\|
+    \]
+    \item \textbf{Positivité et caractère défini} : Pour tout vecteur $X \in \mathbb{R}^d$,
+    \[
+    \|X\| \geq 0 \quad \text{et} \quad (\|X\| = 0 \iff X = \overrightarrow{0})
+    \]
+\end{enumerate}
+
+\subsection{Définition générale d'une norme}
+
+\begin{definition}
+Une norme sur $\mathbb{R}^d$ est une application $N : \mathbb{R}^d \to \mathbb{R}^+$ satisfaisant les propriétés suivantes pour tous $X, Y \in \mathbb{R}^d$ et $\lambda \in \mathbb{R}$ :
+\begin{enumerate}
+    \item $N(\lambda X) = |\lambda| N(X)$
+    \item $N(X + Y) \leq N(X) + N(Y)$
+    \item $N(X) \geq 0$ et $(N(X) = 0 \iff X = \overrightarrow{0})$
+\end{enumerate}
+\end{definition}
+
+\subsection{Exemples de normes sur $\mathbb{R}^d$}
+
+Outre la norme euclidienne $\|X\| = \|X\|_2$, on peut définir d'autres normes sur $\mathbb{R}^d$ :
+
+\begin{enumerate}
+    \item \textbf{Norme 1} : $\|X\|_1 = \sum_{i=1}^d |x_i|$
+    \item \textbf{Norme infini} : $\|X\|_\infty = \max_{1 \leq i \leq d} |x_i|$
+\end{enumerate}
+
+
+\section{Espace $\mathbb{C}^d$}
+
+\subsection{Définition et produit scalaire hermitien}
+
+Nous rappelons la définition de l'espace vectoriel $\mathbb{C}^d$ sur $\mathbb{C}$ :
+\[
+\mathbb{C}^d = \{X = (x_1, \ldots, x_d) : x_i \in \mathbb{C}\}
+\]
+
+\begin{definition}
+Le produit scalaire hermitien de deux vecteurs $X = (x_1, \ldots, x_d) \in \mathbb{C}^d$ et $Y = (y_1, \ldots, y_d) \in \mathbb{C}^d$ est défini par :
+\[
+(X|Y) = \sum_{i=1}^d x_i \overline{y_i}
+\]
+\end{definition}
+Notez la conjugaison complexe sur les composantes de $Y$. Certains auteurs utilisent la conjugaison sur les composantes de $X$.
+
+\subsection{Propriétés du produit scalaire hermitien dans $\mathbb{C}^d$}
+
+Le produit scalaire hermitien dans $\mathbb{C}^d$ possède les propriétés suivantes :
+
+\begin{enumerate}
+    \item \textbf{Sesquilinéarité} :
+    Pour tous vecteurs $X, Y, Z \in \mathbb{C}^d$ et scalaires $\lambda, \mu \in \mathbb{C}$,
+    \begin{align*}
+        (X + Y|Z) &= (X|Z) + (Y|Z) \\
+        (\lambda X|Z) &= \lambda (X|Z) \\
+        (Z|X + Y) &= (Z|X) + (Z|Y) \\
+        (Z|\lambda Y) &= \overline{\lambda} (Z|Y)
+    \end{align*}
+    On dit que le produit scalaire est linéaire par rapport au premier argument (à gauche) et antilinéaire par rapport au deuxième argument (à droite). Certains auteurs choisissent la convention inverse.
+
+    \item \textbf{Hermiticité (ou symétrie hermitienne)} :
+    Pour tous vecteurs $X, Y \in \mathbb{C}^d$,
+    \[
+    (X|Y) = \overline{(Y|X)}
+    \]
+
+    \item \textbf{Positivité et caractère défini} :
+    Pour tout vecteur $X \in \mathbb{C}^d$,
+    \[
+    (X|X) = \sum_{i=1}^d |x_i|^2 \geq 0 \quad \text{et} \quad ((X|X) = 0 \iff X = \overrightarrow{0})
+    \]
+\end{enumerate}
+
+
+\section{Norme Hilbertienne dans $\mathbb{C}^d$}
+
+\begin{definition}
+La norme Hilbertienne (ou norme euclidienne) associée au produit scalaire hermitien dans $\mathbb{C}^d$ est définie par :
+\[
+\|X\| = \sqrt{(X|X)} = \sqrt{\sum_{i=1}^d |x_i|^2}
+\]
+pour $X = (x_1, \ldots, x_d) \in \mathbb{C}^d$.
+\end{definition}
+On a $\|X\|^2 = \sum_{i=1}^d |x_i|^2 = \|Re(X)\|^2 + \|Im(X)\|^2$.
+
+\begin{lemma}
+Pour tout $X \in \mathbb{C}^d$, on a :
+\[
+\|X\| = \sup_{\|Y\| \leq 1} |(X|Y)|
+\]
+\end{lemma}
+
+\begin{proof}
+Par l'inégalité de Cauchy-Schwarz appliquée au produit scalaire hermitien (qui est aussi valable dans $\mathbb{C}^d$), on a
+\[
+|(X|Y)| \leq \sqrt{(X|X)} \sqrt{(Y|Y)} = \|X\| \|Y\|
+\]
+Si $\|Y\| \leq 1$, alors $|(X|Y)| \leq \|X\|$. Donc $\sup_{\|Y\| \leq 1} |(X|Y)| \leq \|X\|$.
+
+Inversement, considérons $X \neq \overrightarrow{0}$ (si $X = \overrightarrow{0}$, l'égalité est triviale). Posons $Y = \frac{X}{\|X\|}$. Alors $\|Y\| = 1$ et
+\[
+(X|Y) = \left(X \Big| \frac{X}{\|X\|} \right) = \frac{1}{\|X\|} (X|X) = \frac{\|X\|^2}{\|X\|} = \|X\|
+\]
+Donc, il existe $Y$ avec $\|Y\| \leq 1$ tel que $|(X|Y)| = \|X\|$. D'où $\sup_{\|Y\| \leq 1} |(X|Y)| \geq \|X\|$.
+
+En conclusion, on a bien l'égalité $\|X\| = \sup_{\|Y\| \leq 1} |(X|Y)|$.
+\end{proof}
+
+\subsection{Autres normes sur $\mathbb{C}^d$}
+
+De même que pour $\mathbb{R}^d$, on peut définir les normes $\|\cdot\|_1$ et $\|\cdot\|_\infty$ sur $\mathbb{C}^d$ :
+\begin{itemize}
+    \item Norme 1 : $\|X\|_1 = \sum_{i=1}^d |x_i|$
+    \item Norme infini : $\|X\|_\infty = \max_{1 \leq i \leq d} |x_i|$
+\end{itemize}
+
+
+\section{Distances}
+
+\subsection{Distance induite par une norme}
+
+\begin{definition}
+Soit $\|\cdot\|$ une norme sur $\mathbb{R}^d$ (ou $\mathbb{C}^d$). La distance induite par cette norme entre deux points $X, Y$ est définie par :
+\[
+d(X, Y) = \|Y - X\|
+\]
+\end{definition}
+
+\subsection{Propriétés d'une distance}
+
+Une distance $d : E \times E \to \mathbb{R}^+$ sur un ensemble $E$ doit satisfaire les propriétés suivantes :
+
+\begin{definition}
+Une application $d: E \times E \to \mathbb{R}^+$ est une distance sur $E$ si elle satisfait pour tous $x, y, z \in E$:
+\begin{enumerate}
+    \item \textbf{Positivité} : $d(x, y) \geq 0$
+    \item \textbf{Symétrie} : $d(x, y) = d(y, x)$
+    \item \textbf{Inégalité triangulaire} : $d(x, y) \leq d(x, z) + d(z, y)$
+    \item \textbf{Séparation} : $d(x, y) = 0 \iff x = y$
+\end{enumerate}
+\end{definition}
+
+\subsection{Exemples de distances}
+
+\begin{enumerate}
+    \item \textbf{Distance euclidienne} (ou distance $d_2$) : induite par la norme euclidienne $\|\cdot\|_2$.
+    \[
+    d_2(X, Y) = \|X - Y\|_2 = \sqrt{\sum_{i=1}^d (x_i - y_i)^2}
+    \]
+    \item \textbf{Distance $d_1$} : induite par la norme $\|\cdot\|_1$.
+    \[
+    d_1(X, Y) = \|X - Y\|_1 = \sum_{i=1}^d |x_i - y_i|
+    \]
+    \item \textbf{Distance $d_\infty$} : induite par la norme $\|\cdot\|_\infty$.
+    \[
+    d_\infty(X, Y) = \|X - Y\|_\infty = \max_{1 \leq i \leq d} |x_i - y_i|
+    \]
+    \item \textbf{Distance logarithmique} sur $\mathbb{R}^+ = ]0, +\infty[$ :
+    \[
+    d_{log}(a, b) = |\ln(b/a)| = |\ln(b) - \ln(a)|
+    \]
+    En base 10 : $d_{log_{10}}(x, y) = |\log_{10}(y/x)|$.
+
+    \item \textbf{Distance SNCF} sur un ensemble de points. Si on considère trois points $0, X, Y$ non alignés :
+
+\begin{verbatim}
+```python
+#save_to: SNCF_distance.png
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots()
+
+points = {'O': (0, 0), 'X': (2, 0), 'Y': (2, 2)}
+
+# Draw points
+for name, coord in points.items():
+    ax.plot(*coord, 'o', markersize=8, label=name)
+    ax.annotate(name, coord, textcoords="offset points", xytext=(0,5), ha='center')
+
+# Connect O-X and O-Y
+ax.plot([points['O'][0], points['X'][0]], [points['O'][1], points['X'][1]], 'k-')
+ax.plot([points['O'][0], points['Y'][0]], [points['O'][1], points['Y'][1]], 'k-')
+
+ax.set_xlim([-1, 4])
+ax.set_ylim([-1, 3])
+ax.set_aspect('equal', adjustable='box')
+ax.axis('off')
+plt.savefig('SNCF_distance.png')
+```
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.3\textwidth]{SNCF_distance.png}
+    \caption{Distance SNCF}
+    \label{fig:sncf_distance}
+\end{figure}
+    La distance SNCF entre $X$ et $Y$ est définie par
+    \[
+    d_{SNCF}(X, Y) = d(0, X) + d(0, Y)
+    \]
+
+    \item \textbf{Distance usuelle dans $\mathbb{R}^2$} :
+    \[
+    \delta(X, Y) =
+    \begin{cases}
+        d(X, Y) & \text{si } 0, X, Y \text{ alignés} \\
+        d(0, X) + d(0, Y) & \text{sinon}
+    \end{cases}
+    \]
+\end{enumerate}
+
+
+\section{Espaces métriques}
+
+\begin{definition}
+Un espace métrique est un couple $(E, d)$ où $E$ est un ensemble et $d : E \times E \to \mathbb{R}^+$ est une distance sur $E$.
+\end{definition}
+
+\subsection{Inégalité triangulaire inverse}
+Dans un espace métrique $(E, d)$, on a l'inégalité triangulaire inverse :
+Pour tous $x, y, z \in E$,
+\[
+|d(x, z) - d(y, z)| \leq d(x, y)
+\]
+
+\subsection{Distance induite sur un sous-ensemble}
+Si $(E, d)$ est un espace métrique et $U \subset E$ est un sous-ensemble de $E$, la restriction de $d$ à $U \times U$ fait de $(U, d)$ un espace métrique.
+
+\section{Boules dans les espaces métriques}
+
+Soit $(E, d)$ un espace métrique, $x_0 \in E$ et $r \geq 0$.
+
+\begin{definition}
+\begin{enumerate}
+    \item La \textbf{boule ouverte} de centre $x_0$ et de rayon $r$ est l'ensemble
+    \[
+    B(x_0, r) = \{x \in E : d(x_0, x) < r\}
+    \]
+    \item La \textbf{boule fermée} de centre $x_0$ et de rayon $r$ est l'ensemble
+    \[
+    B_f(x_0, r) = \{x \in E : d(x_0, x) \leq r\}
+    \]
+    \item La \textbf{sphère} de centre $x_0$ et de rayon $r$ est l'ensemble
+    \[
+    S(x_0, r) = \{x \in E : d(x_0, x) = r\}
+    \]
+\end{enumerate}
+\end{definition}
+
+\subsection{Propriétés des boules}
+
+\begin{lemma}
+\begin{enumerate}
+    \item $B(x_0, 0) = \emptyset$ et $B_f(x_0, 0) = \{x_0\}$
+    \item Pour $0 \leq r_1 < r_2$, on a $B(x_0, r_1) \subset B_f(x_0, r_1) \subset B(x_0, r_2)$
+    \item Si $d(x_0, x_1) + r_1 \leq r$, alors $B(x_1, r_1) \subset B(x_0, r)$
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+\begin{enumerate}
+    \item Les propriétés (1) et (2) sont évidentes d'après la définition des boules.
+
+    \item Pour montrer (3), supposons $x \in B(x_1, r_1)$. Alors $d(x_1, x) < r_1$.
+    Par l'inégalité triangulaire, on a
+    \[
+    d(x_0, x) \leq d(x_0, x_1) + d(x_1, x) < d(x_0, x_1) + r_1 \leq r
+    \]
+    Donc $d(x_0, x) < r$, ce qui signifie que $x \in B(x_0, r)$. D'où $B(x_1, r_1) \subset B(x_0, r)$.
+\end{enumerate}
+\end{proof}\chapter{CM2}
+\sloppy
+
+\section{Espaces métriques}
+
+\begin{definition}
+Soit $E$ un ensemble. Une application $d : E \times E \to \mathbb{R}^+$ est appelée distance sur $E$ si :
+\begin{enumerate}
+    \item $d(x, y) \geq 0$ (positivité)
+    \item $d(x, y) = d(y, x)$ (symétrie)
+    \item $d(x, y) \leq d(x, z) + d(z, y)$ (inégalité triangulaire)
+    \item $d(x, y) = 0 \Leftrightarrow x = y$ (axiome de séparation)
+\end{enumerate}
+$(E, d)$ est appelé espace métrique.
+\end{definition}
+
+\begin{proposition}
+[Inégalité triangulaire]
+Dans un espace métrique $(E, d)$, on a aussi l'inégalité suivante:
+\[
+|d(x, y) - d(x, z)| \leq d(y, z)
+\]
+\end{proposition}
+
+\subsection{Exemples}
+
+\begin{example}
+\begin{enumerate}
+    \item $E = \mathbb{R}$. On définit $d(x, y) = |x - y|$. \\
+    Boule $B(x_0, r) = \{x \in \mathbb{R} : d(x, x_0) < r \} = ]x_0 - r, x_0 + r[$.
+
+    \item $E = \mathbb{R}^d$, $d = 2, 3, \dots$. On a différentes normes :
+    \begin{itemize}
+        \item Norme euclidienne: $||x||_2 = (\sum_{i=1}^d x_i^2)^{1/2}$
+        \item Norme $1$: $||x||_1 = \sum_{i=1}^d |x_i|$
+        \item Norme $\infty$: $||x||_\infty = \max_{1 \leq i \leq d} |x_i|$
+    \end{itemize}
+    Pour $E = \mathbb{R}^d$, on définit la distance $d_2(x, y) = ||y - x||_2 = ||\overrightarrow{xy}||_2$. De même, on peut définir $d_1(x, y) = ||y - x||_1$ et $d_\infty(x, y) = ||y - x||_\infty$.
+
+    Boule $B_2(0, r)$ pour $d_2$ dans $\mathbb{R}^2$:
+
+    \begin{verbatim}
+    ```python
+#save_to: boule_d2.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+r=1
+fig, ax = plt.subplots()
+circle = patches.Circle((0, 0), r, edgecolor='black', facecolor='lightgray', fill=True, linewidth=1)
+ax.add_patch(circle)
+ax.axhline(0, color='black',linewidth=0.5)
+ax.axvline(0, color='black',linewidth=0.5)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xlim([-1.5*r, 1.5*r])
+ax.set_ylim([-1.5*r, 1.5*r])
+ax.set_xticks([-r, 0, r])
+ax.set_yticks([-r, 0, r])
+ax.set_xlabel('$x$')
+ax.set_ylabel('$y$')
+ax.set_title('$B_2(0, r)$')
+plt.savefig('boule_d2.png')
+    ```
+    \end{verbatim}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\textwidth]{boule_d2.png}
+        \caption{Boule $B_2(0, r)$ dans $\mathbb{R}^2$}
+        \label{fig:boule_d2}
+    \end{figure}
+
+    Boule $B_\infty(0, r)$ pour $d_\infty$ dans $\mathbb{R}^2$:
+
+    \begin{verbatim}
+    ```python
+#save_to: boule_d_infini.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+r=1
+fig, ax = plt.subplots()
+square = patches.Rectangle((-r, -r), 2*r, 2*r, edgecolor='black', facecolor='lightgray', fill=True, linewidth=1)
+ax.add_patch(square)
+ax.axhline(0, color='black',linewidth=0.5)
+ax.axvline(0, color='black',linewidth=0.5)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xlim([-1.5*r, 1.5*r])
+ax.set_ylim([-1.5*r, 1.5*r])
+ax.set_xticks([-r, 0, r])
+ax.set_yticks([-r, 0, r])
+ax.set_xlabel('$x$')
+ax.set_ylabel('$y$')
+ax.set_title('$B_\infty(0, r)$')
+plt.savefig('boule_d_infini.png')
+    ```
+    \end{verbatim}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\textwidth]{boule_d_infini.png}
+        \caption{Boule $B_\infty(0, r)$ dans $\mathbb{R}^2$}
+        \label{fig:boule_d_infini}
+    \end{figure}
+
+        Boule $B_1(0, r)$ pour $d_1$ dans $\mathbb{R}^2$:
+
+    \begin{verbatim}
+    ```python
+#save_to: boule_d1.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+r=1
+fig, ax = plt.subplots()
+diamond = patches.Polygon([[r, 0], [0, r], [-r, 0], [0, -r]], closed=True, edgecolor='black', facecolor='lightgray', fill=True, linewidth=1)
+ax.add_patch(diamond)
+ax.axhline(0, color='black',linewidth=0.5)
+ax.axvline(0, color='black',linewidth=0.5)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xlim([-1.5*r, 1.5*r])
+ax.set_ylim([-1.5*r, 1.5*r])
+ax.set_xticks([-r, 0, r])
+ax.set_yticks([-r, 0, r])
+ax.set_xlabel('$x$')
+ax.set_ylabel('$y$')
+ax.set_title('$B_1(0, r)$')
+plt.savefig('boule_d1.png')
+    ```
+    \end{verbatim}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\textwidth]{boule_d1.png}
+        \caption{Boule $B_1(0, r)$ dans $\mathbb{R}^2$}
+        \label{fig:boule_d1}
+    \end{figure}
+
+    \begin{remark}
+    \textbf{Important:} notion de proximité, pas la forme.
+    \end{remark}
+
+    Dans $\mathbb{R}^n$, on a les relations entre les distances:
+    \begin{align*}
+        d_\infty(x, y) &\leq d_1(x, y) \leq n d_\infty(x, y) \\
+        d_\infty(x, y) &\leq d_2(x, y) \leq \sqrt{n} d_\infty(x, y)
+    \end{align*}
+\end{enumerate}
+\end{example}
+
+\section{Parties bornées}
+
+\begin{definition}
+Soit $(E, d)$ un espace métrique et $A \subset E$. $A$ est dite \textbf{bornée} si
+\[
+\exists R > 0 \text{ et } \exists x_0 \in E \text{ tel que } A \subset B(x_0, R).
+\]
+\end{definition}
+
+\begin{lemma}
+Les propriétés suivantes sont équivalentes:
+\begin{enumerate}
+    \item $A$ est bornée.
+    \item $\forall x_0 \in E, \exists r > 0$ tel que $A \subset B(x_0, r)$.
+    \item $\exists r > 0$ tel que $\forall x, y \in A$, on a $d(x, y) < r$.
+\end{enumerate}
+\end{lemma}
+
+\begin{solution}
+[Démonstration:]
+\textbf{1) $\Rightarrow$ 2) $\Rightarrow$ 3) $\Rightarrow$ 1)}
+
+\textbf{Preuve que 1) $\Rightarrow$ 2)}
+
+Hyp: $\exists x_1 \in E, \exists r_1 > 0$ tel que $A \subset B(x_1, r_1)$.
+
+Soit $x_0 \in E$. But: trouver $r$ tel que $A \subset B(x_0, r)$.
+
+Si $x \in A$, alors $x \in B(x_1, r_1)$, on a $d(x, x_1) < r_1$.
+
+On veut $d(x_0, x) < r$.
+
+\begin{align*}
+    d(x_0, x) &\leq d(x_0, x_1) + d(x_1, x) \\
+              &\leq d(x_0, x_1) + r_1 \\
+              &< r \text{ si } r > d(x_0, x_1) + r_1
+\end{align*}
+Il suffit de prendre $r = d(x_0, x_1) + r_1$.
+
+\textbf{2) $\Rightarrow$ 3)}
+
+On fixe $x_0 \in E$. D'après 2), $\exists r_0 > 0$ tel que $A \subset B(x_0, r_0)$.
+Alors $\forall x, y \in A$,
+\begin{align*}
+    d(x, y) &\leq d(x, x_0) + d(x_0, y) \\
+              &< r_0 + r_0 = 2r_0
+\end{align*}
+On prend $r = 2r_0$.
+
+\textbf{3) $\Rightarrow$ 1)}
+
+On fixe $x_0 \in E$ (n'importe lequel). D'après 3), $\exists r > 0$ tel que $\forall x, y \in A$, $d(x, y) < r$.
+Alors $\forall x \in A$, $d(x_0, x) \leq d(x_0, y) + d(y, x) < d(x_0, y) + r$.
+On fixe $y \in A$. Alors $d(x_0, y) < \infty$ est fixe. On prend $R = d(x_0, y) + r$.
+Alors $\forall x \in A$, $d(x_0, x) < R$, donc $A \subset B(x_0, R)$.
+\end{solution}
+
+\begin{proposition}
+[Propriétés élémentaires]
+\begin{enumerate}
+    \item Toute partie finie est bornée.
+    \item Si $A$ bornée et $B \subset A$ alors $B$ bornée.
+    \item L'union d'un nb fini de bornées est bornée.
+\end{enumerate}
+\end{proposition}
+
+\begin{solution}
+[Démonstration:]
+\textbf{1) Tout partie finie est bornée}
+
+Soit $A = \{a_1, \dots, a_n\}$ une partie finie de $E$. On fixe $x_0 \in E$.
+Pour chaque $a_i$, $d(x_0, a_i) < \infty$. Soit $r_i = d(x_0, a_i) + 1$. Alors $a_i \in B(x_0, r_i)$.
+On prend $R = \max_{1 \leq i \leq n} r_i$. Alors $a_i \in B(x_0, R)$ pour tout $i$.
+Donc $A \subset B(x_0, R)$.
+
+\textbf{2) Si $A$ bornée et $B \subset A$ alors $B$ bornée}
+
+Si $A$ est bornée, $\exists x_0, R$ tq $A \subset B(x_0, R)$. Comme $B \subset A$, on a $B \subset B(x_0, R)$. Donc $B$ est bornée.
+
+\textbf{3) L'union d'un nb fini de bornées est bornée (Partie)}
+
+Soient $A_1, \dots, A_n$ sont bornées. Je fixe $x_0 \in E$.
+$A_i$ bornée ($1 \leq i \leq n$) donc $\exists r_i > 0$ tel que $A_i \subset B(x_0, r_i)$.
+Soit $r = \max_{1 \leq i \leq n} r_i$.
+Si $x \in \bigcup_{i=1}^n A_i$, alors $x \in A_i$ pour un $i$. Donc $x \in B(x_0, r_i) \subset B(x_0, r)$.
+Donc $\bigcup_{i=1}^n A_i \subset B(x_0, r)$.
+\end{solution}
+
+\section{Fonctions bornées}
+
+\begin{definition}
+Soit $B$ un ensemble. Une fonction $F: B \to E$ est \textbf{bornée} si
+\[
+F(B) = \{F(b) : b \in B\} \subset E
+\]
+est bornée.
+\end{definition}
+
+\section{Distances entre ensembles}
+
+\begin{definition}
+Soit $A, B$ deux parties de $E$. On pose
+\[
+d(A, B) = \inf_{\substack{x \in A \\ y \in B}} d(x, y).
+\]
+\end{definition}
+
+\begin{remark}
+$\forall x \in A, y \in B$, $d(A, B) \leq d(x, y)$.
+$\forall \epsilon > 0$, $\exists x \in A, y \in B$ tq $d(x, y) \leq d(A, B) + \epsilon$.
+\end{remark}
+
+\begin{proposition}
+[Notation Proposition]
+\[
+d(x, A) = \inf_{y \in A} d(x, y) = d(\{x\}, A).
+\]
+\end{proposition}
+
+\section{Topologie des espaces métriques}
+
+\textbf{Concepts importants:} distance $\to$ boules $B(x_0, r)$ $\to$ ensembles ouverts.
+
+\begin{definition}
+Soit $(E, d)$ espace métrique.
+\begin{enumerate}
+    \item $U \subset E$ est \textbf{ouvert} si
+    \[
+    \forall x_0 \in U, \exists r > 0 \text{ tel que } B(x_0, r) \subset U.
+    \]
+    \item $F \subset E$ est \textbf{fermé} si $E \setminus F$ est ouvert.
+\end{enumerate}
+\end{definition}
+
+\begin{remark}
+Dans $\mathbb{R}$ les intervalles ouverts sont des ouverts.
+\end{remark}
+
+\textbf{Comment montrer que l'ensemble est ouvert ou fermé.} Dans le poly.
+
+\begin{itemize}
+    \item $\emptyset$ est ouvert (par définition).
+    \item $E$ est ouvert.
+    \item $E$ est fermé, $\emptyset$ est fermé (comme complémentaires d'ouverts).
+\end{itemize}
+
+\section{Lemmes et théorèmes}
+
+\begin{lemma}
+$1) B(x_0, r)$ est ouvert.
+
+$2) B_f(x_0, r)$ est fermé.
+\end{lemma}
+
+\begin{solution}
+[Démo dans le poly]
+\end{solution}
+
+\begin{example}
+$E = \mathbb{R}$, $d(x, y) = |y - x|$.
+$A = ]0, 1[$ ouvert dans $\mathbb{R}$.
+$A = ]0, 1[$ pas fermé dans $A$.
+$R \setminus A = ]-\infty, 0] \cup [1, \infty[$ fermé dans $\mathbb{R}$.
+
+Je regarde $A$ comme partie de $(A, d)$.
+$A$ est fermé dans $A$.
+\end{example}
+
+\begin{theorem}
+\begin{enumerate}
+    \item Soit $U_i, i \in I$ une collection d'ouverts. Alors $\bigcup_{i \in I} U_i$ est ouvert (l'union quelconque d'ouverts est un ouvert).
+    \item Si $U_1, \dots, U_n$ sont ouverts, alors $\bigcap_{i=1}^n U_i$ est ouvert (l'intersection d'une famille finie d'ouverts est ouvert).
+    \item Si $F_i, i \in I$ sont fermés, alors $\bigcap_{i \in I} F_i$ est fermé (l'intersection quelconque de fermés est fermé).
+    \item $F_1, \dots, F_n$ fermés, alors $\bigcup_{i=1}^n F_i$ est fermé.
+\end{enumerate}
+\end{theorem}
+
+\begin{example}
+[Examples et remarques]
+$U_i = ]-\frac{1}{i}, \frac{1}{i}[$, $i \geq 0$.
+$\bigcap_{i \in \mathbb{N}} U_i = \{0\}$ pas ouvert dans $\mathbb{R}$.
+
+$F_i = [0, 1 - \frac{1}{i}]$ fermé dans $\mathbb{R}$.
+$\bigcup_{i \in \mathbb{N}} F_i = [0, 1[$ pas fermé dans $\mathbb{R}$.
+\end{example}
+
+\begin{solution}
+[Dem:]
+\textbf{1) Soit $x \in \bigcup_{i \in I} U_i = U$}. Il existe un $i$ noté $i_0$ tel que $x \in U_{i_0}$.
+$U_{i_0}$ est ouvert donc $\exists r > 0$ tel que $B(x, r) \subset U_{i_0} \subset \bigcup_{i \in I} U_i = U$. Donc $U$ est ouvert.
+
+\textbf{2) Soit $x \in \bigcap_{i=1}^n U_i = U$}. $x \in U_i$ pour $1 \leq i \leq n$. $U_i$ ouvert donc $\exists r_i > 0$ tel que $B(x, r_i) \subset U_i$.
+Soit $r = \min_{1 \leq i \leq n} r_i > 0$.
+$B(x, r) \subset B(x, r_i) \subset U_i$ $1 \leq i \leq n$.
+Donc $B(x, r) \subset \bigcap_{i=1}^n U_i = U$.
+Donc $B(x, r) \subset U$.
+\end{solution}\chapter{CM3}
+\sloppy
+
+\section{Intérieur, Adhérence, Frontière}
+
+\subsection{Intérieur}
+
+\begin{definition}
+Soit $A \subseteq E$.
+\begin{enumerate}
+    \item Un point $x_0 \in E$ est \textbf{intérieur} à $A$ s'il existe $\delta > 0$ tel que $B(x_0, \delta) \subseteq A$.
+    \item \textbf{Int$(A)$} (l'intérieur de $A$) : ensemble de tous les points intérieurs de $A$.
+\end{enumerate}
+Autre notation : $\overset{\circ}{A}$.
+\end{definition}
+
+\begin{proposition}
+Int$(A)$ est le plus grand ouvert inclus dans $A$. De manière équivalente, Int$(A)$ est la réunion de tous les ouverts inclus dans $A$.
+\end{proposition}
+
+\begin{proof}
+\begin{enumerate}
+    \item \textbf{Int$(A) \subseteq A$ : évident}. Par définition, tous les points de Int$(A)$ sont dans $A$.
+    \item \textbf{Int$(A)$ est ouvert}. Soit $x_0 \in \text{Int}(A)$. Il existe $\delta_0 > 0$ tel que $B(x_0, \delta_0) \subseteq A$. Pour montrer que Int$(A)$ est ouvert, il faut montrer que pour tout $x \in \text{Int}(A)$, il existe $\delta > 0$ tel que $B(x, \delta) \subseteq \text{Int}(A)$.
+
+    Soit $x \in \text{Int}(A)$. Puisque $x \in \text{Int}(A)$, il existe $\delta_0 > 0$ tel que $B(x, \delta_0) \subseteq A$.
+    Pour montrer que $x$ est un point intérieur de $\text{Int}(A)$, nous devons trouver un $\delta > 0$ tel que $B(x, \delta) \subseteq \text{Int}(A)$.
+    Choisissons $\delta = \delta_0/2$. Considérons $y \in B(x, \delta)$. Alors $d(y, x) < \delta_0/2$.
+    Pour montrer que $y \in \text{Int}(A)$, nous devons trouver $\delta' > 0$ tel que $B(y, \delta') \subseteq A$.
+    Prenons $\delta' = \delta_0/2$. Si $z \in B(y, \delta')$, alors $d(z, y) < \delta_0/2$.
+    Par l'inégalité triangulaire, $d(z, x) \leq d(z, y) + d(y, x) < \delta_0/2 + \delta_0/2 = \delta_0$.
+    Donc $z \in B(x, \delta_0) \subseteq A$. Ainsi, $B(y, \delta') \subseteq A$, ce qui signifie que $y \in \text{Int}(A)$.
+    Par conséquent, $B(x, \delta) \subseteq \text{Int}(A)$. Donc Int$(A)$ est ouvert.
+
+    \item Si $U$ est ouvert et $U \subseteq A$ alors $U \subseteq \text{Int}(A)$ ?
+
+    Soit $U$ un ouvert tel que $U \subseteq A$. Pour tout $x_0 \in U$, puisque $U$ est ouvert, il existe $\delta > 0$ tel que $B(x_0, \delta) \subseteq U$. Comme $U \subseteq A$, on a $B(x_0, \delta) \subseteq A$. Par définition, cela signifie que $x_0$ est un point intérieur de $A$, donc $x_0 \in \text{Int}(A)$. Par conséquent, $U \subseteq \text{Int}(A)$.
+
+
+\end{enumerate}
+\end{proof}
+
+
+\subsection{Adhérence}
+
+\begin{definition}
+Soit $A \subseteq E$, $x_0 \in E$. $x_0$ est \textbf{adhérent} à $A$ si $\forall \delta > 0$, $B(x_0, \delta) \cap A \neq \emptyset$. (Équivalent à $d(x_0, A) = 0$).
+
+\textbf{Adh$(A)$} (adhérence ou fermeture de $A$) = ensemble des points adhérents à $A$.
+
+Notée aussi $\overline{A}$.
+\end{definition}
+
+$d(x_0, A) = \inf_{x \in A} d(x_0, x)$.
+
+$d(x_0, A) = 0 \iff x_0 \in \text{Adh}(A)$.
+
+$\forall \delta > 0$, $\exists x \in A$ t.q. $d(x_0, x) < \delta$.
+$\forall \delta > 0$, $\exists x \in A$ t.q. $d(x_0, x) \leq \delta$.
+$\forall \delta > 0$, donc $d(x_0, A) = 0$.
+
+\begin{proposition}
+Adh$(A)$ est le plus petit fermé qui contient $A$ (l'intersection de tous les fermés qui contiennent $A$).
+\end{proposition}
+
+\begin{proof}
+\begin{enumerate}
+    \item $A \subseteq \text{Adh}(A)$ : clair. Si $x \in A$, alors pour tout $\delta > 0$, $B(x, \delta) \cap A \neq \emptyset$ car $x \in B(x, \delta) \cap A$. Donc $x \in \text{Adh}(A)$.
+    \item Adh$(A)$ est fermé. Il faut montrer que $E \setminus \text{Adh}(A)$ est ouvert.
+
+    $x_0 \in \text{Adh}(A) \iff \forall \delta > 0$, $B(x_0, \delta) \cap A \neq \emptyset$.
+    $x_0 \notin \text{Adh}(A) \iff \exists \delta_0 > 0$ t.q. $B(x_0, \delta_0) \cap A = \emptyset$.
+    $\iff \exists \delta_0 > 0$ t.q. $B(x_0, \delta_0) \subseteq E \setminus A$.
+    $\implies x_0 \in \text{Int}(E \setminus A)$.
+
+    Donc $E \setminus \text{Adh}(A) \subseteq \text{Int}(E \setminus A)$.
+
+    Réciproquement, si $x_0 \in \text{Int}(E \setminus A)$, alors il existe $\delta_0 > 0$ tel que $B(x_0, \delta_0) \subseteq E \setminus A$. Donc $B(x_0, \delta_0) \cap A = \emptyset$. Ainsi $x_0 \notin \text{Adh}(A)$, et donc $x_0 \in E \setminus \text{Adh}(A)$.
+
+    $E \setminus \text{Adh}(A) = \text{Int}(E \setminus A)$.
+
+    Comme $\text{Int}(E \setminus A)$ est ouvert, son complémentaire $E \setminus \text{Int}(E \setminus A) = \text{Adh}(A)$ est fermé.
+
+    Adh$(A) = E \setminus \text{Int}(E \setminus A)$.
+\end{enumerate}
+\end{proof}
+
+
+\subsection{Frontière}
+
+\begin{definition}
+Soit $A \subseteq E$, la \textbf{frontière} de $A$ (ou bord de $A$) notée Fr$(A)$ ou $\partial A$, c'est $\text{Adh}(A) \cap \text{Adh}(E \setminus A)$.
+
+$x_0 \in \text{Fr}(A) \iff d(x_0, A) = 0$ et $d(x_0, E \setminus A) = 0$.
+
+$\forall \delta > 0$, $B(x_0, \delta)$ intersecte $A$ et aussi $E \setminus A$.
+\end{definition}
+
+\begin{example}
+\textbf{Exemples dans $\mathbb{R}$}
+Int$(\mathbb{Q}) = \emptyset$.
+Int$(\mathbb{R} \setminus \mathbb{Q}) = \emptyset$.
+
+Adh$(\mathbb{Q}) = \mathbb{R}$.
+Adh$(\mathbb{R} \setminus \mathbb{Q}) = \mathbb{R}$.
+
+Fr$(\mathbb{Q}) = \mathbb{R}$.
+Fr$(\mathbb{R} \setminus \mathbb{Q}) = \mathbb{R}$.
+\end{example}
+
+Parfois $B_f(x_0, r)$ notée $\overline{B}(x_0, r)$.
+
+\begin{example}
+$E = \{a, b, c\}$.
+On pose $d(a, a) = d(b, b) = d(c, c) = 0$.
+$d(a, b) = d(b, a) = d(b, c) = d(c, b) = 1$.
+$d(a, c) = d(c, a) = 2$.
+
+$B(a, 2) = \{a, b\} = \text{Adh}(B(a, 2))$. No it should be $B(a,2) = \{y \in E : d(a,y) < 2\} = \{a, b\}$.  Adh$(B(a, 2)) = \text{Adh}(\{a,b\})$. Points adherent to $\{a,b\}$ are points $x$ such that for any $\delta>0$, $B(x,\delta) \cap \{a,b\} \ne \emptyset$.
+For $a$, $B(a, \delta) \cap \{a,b\} \ne \emptyset$ for any $\delta > 0$. Same for $b$. For $c$, $B(c, 1) = \{c\}$, $B(c, 1) \cap \{a,b\} = \emptyset$. So $\text{Adh}(\{a,b\}) = \{a,b\}$.
+$B_f(a, 2) = \{y \in E : d(a,y) \leq 2\} = \{a, b, c\} = E$.
+\end{example}
+
+
+\begin{proposition}
+\begin{enumerate}
+    \item Int$(A) \subseteq A \subseteq \text{Adh}(A)$.
+    \item $E = \text{Int}(A) \cup \text{Fr}(A) \cup \text{Int}(E \setminus A)$ (union disjointe).
+    \item $E \setminus \text{Int}(A) = \text{Adh}(E \setminus A)$.
+    \item $E \setminus \text{Adh}(A) = \text{Int}(E \setminus A)$.
+    \item Fr$(A) = \text{Adh}(A) \setminus \text{Int}(A)$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proposition}
+\begin{enumerate}
+    \item $A$ ouvert $\iff A = \text{Int}(A)$.
+    \item $A$ fermé $\iff A = \text{Adh}(A)$.
+    \item $x \in \text{Adh}(A) \iff d(x, A) = 0$.
+    \item $x \in \text{Int}(A) \iff d(x, E \setminus A) > 0$.
+\end{enumerate}
+\end{proposition}
+
+\section{Ensembles Denses}
+
+\begin{definition}
+Soit $A \subseteq B \subseteq E$. On dit que $A$ est \textbf{dense} dans $B$ si $B \subseteq \text{Adh}(A)$.
+\end{definition}
+
+Soit $x_0 \in B$, $\forall \epsilon > 0$, $\exists x \in A$ t.q. $d(x_0, x) < \epsilon$.
+
+\begin{example}
+$\mathbb{Q}^2 = \{(x, y) : x, y \in \mathbb{Q}\}$ dense dans $\mathbb{R}^2$.
+\end{example}
+
+
+\section{Suites dans un Espace Métrique}
+
+\begin{definition}
+Soit $E$ un ensemble. Une \textbf{suite} dans $E$ (notée $(u_n)_{n \in \mathbb{N}}$) c'est une fonction $u : \mathbb{N} \to E$ où $n \mapsto u(n)$.
+On note $u_n$ le $n$-ième terme de la suite $(u_n)_{n \in \mathbb{N}}$.
+
+Si $E = \mathbb{R}^d$.
+$X_n = (x_{1,n}, \dots, x_{d,n})$ où $(x_{i,n})_{n \in \mathbb{N}}$ suites dans $\mathbb{R}$.
+\end{definition}
+
+\begin{definition}
+Soit $(X_n)_{n \in \mathbb{N}}$ une suite dans $E$ et $x \in E$. On dit que $\lim_{n \to \infty} X_n = x$ si :
+$(\forall \epsilon > 0), (\exists N \in \mathbb{N})$ t.q. si $n \geq N \implies d(X_n, x) < \epsilon$.
+\end{definition}
+
+\textbf{Suite bornée} : $(X_n)_{n \in \mathbb{N}}$ est \textbf{bornée} si $\{X_n : n \in \mathbb{N}\} \subseteq E$ est un ensemble borné.
+
+\begin{remark}
+Dans $\mathbb{R}^d$ muni de $d_2$.
+$X_n = (x_{1, n}, \dots, x_{d, n})$.
+$X = (x_1, \dots, x_d)$.
+$\lim_{n \to \infty} X_n = X \iff \lim_{n \to \infty} x_{i, n} = x_i$, $1 \leq i \leq d$.
+\end{remark}
+
+\begin{proposition}
+La limite d'une suite convergente est unique.
+\end{proposition}
+
+\begin{proof}
+Soit $X_n \xrightarrow[n \to \infty]{} x$ et $X_n \xrightarrow[n \to \infty]{} x'$.
+$d(x, x') \leq d(x, X_n) + d(X_n, x')$.
+$\xrightarrow[n \to \infty]{} 0$.
+
+$\implies d(x, x') = 0 \implies x = x'$.
+\end{proof}
+
+\begin{proposition}[Lien avec l'adhérence]
+\begin{enumerate}
+    \item $x \in \text{Adh}(A)$ ssi il existe une suite $(X_n)$ d'éléments de $A$ t.q. $\lim_{n \to \infty} X_n = x$.
+    \item $A$ est fermé ssi pour toute suite $(X_n)$ d'éléments de $A$ qui converge vers $x \in E$, on a $x \in A$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+\begin{enumerate}
+    \item "$\implies$" : Soit $x \in \text{Adh}(A)$.
+
+    Avec $(X_n)$, $X_n \in A$ et $\lim_{n \to \infty} X_n = x$.
+
+    J'ai $\forall \epsilon > 0$, $\exists x_\epsilon \in A$ t.q. $d(x, x_\epsilon) < \epsilon$.
+    donc $\inf_{y \in A} d(x, y) = 0 = d(x, A)$.
+    $d(x, A) = 0 \implies x \in \text{Adh}(A)$.
+
+    "$\implies$" soit $x \in \text{Adh}(A)$.
+    $\implies d(x, A) = 0$.
+    $\implies \forall \epsilon > 0$, $\exists x_\epsilon \in A$ t.q. $d(x, x_\epsilon) < \epsilon$.
+    Prendre $\epsilon = 1/n$. Je pose $u_n = x_{1/n}$.
+    $u_n \in A$. $d(x, u_n) \leq 1/n$. Donc $\lim_{n \to \infty} u_n = x$.
+
+    \item "$\implies$" soit $A$ fermé donc $A = \text{Adh}(A)$.
+
+    Soit $(X_n)$ suite dans $A$ qui converge vers $x$.
+    $x \in \text{Adh}(A) = A$.
+    $x \in \text{Adh}(A) \implies x \in A$.
+
+    "$\Longleftarrow$" Réciproquement.
+    Si toute suite dans $A$ qui converge vers $x$, $x \in A$ (donc $A$ fermé).
+    $A \subseteq \text{Adh}(A)$, j'ai $A = \text{Adh}(A)$ (donc $A$ fermé).
+    Suites de Cauchy.
+\end{enumerate}
+\end{proof}
+
+
+\subsection{Suites de Cauchy}
+\begin{definition}
+Une suite $(X_n)$ est de \textbf{Cauchy} si :
+$\forall \epsilon > 0$, $\exists N \in \mathbb{N}$ tel que $d(X_p, X_n) < \epsilon$ pour tous $n, p \geq N$.
+\end{definition}\chapter{CM4}
+\sloppy
+
+\section{Suites de Cauchy et Complétude}
+
+\begin{definition}[Suite de Cauchy]
+Une suite $(x_n)_{n \in \mathbb{N}}$ dans un espace métrique $E$ est dite suite de Cauchy si pour tout $\varepsilon > 0$, il existe $N \in \mathbb{N}$ tel que pour tous $n, p \geq N$, on a $d(x_p, x_n) \leq \varepsilon$.
+\end{definition}
+
+\begin{proposition}
+Toute suite convergente est une suite de Cauchy.
+\end{proposition}
+\begin{proof}
+Supposons que $\lim_{n \to \infty} x_n = x$. Pour $\varepsilon > 0$, on peut trouver $N \in \mathbb{N}$ tel que $d(x, x_n) \leq \varepsilon/2$ pour tout $n \geq N$. Alors pour tous $n, p \geq N$, on a
+\begin{align*}
+d(x_n, x_p) &\leq d(x_n, x) + d(x, x_p) \\
+&\leq \varepsilon/2 + \varepsilon/2 = \varepsilon.
+\end{align*}
+Ainsi $(x_n)_{n \in \mathbb{N}}$ est une suite de Cauchy.
+\end{proof}
+
+\begin{proposition}
+Toute suite de Cauchy est bornée.
+\end{proposition}
+\begin{proof}
+Soit $(x_n)_{n \in \mathbb{N}}$ une suite de Cauchy. Par définition (en prenant $\varepsilon = 1$), il existe $N$ tel que $d(x_n, x_p) \leq 1$ pour $n, p \geq N$. En particulier $d(x_n, x_N) \leq 1$ pour $n \geq N$. On a donc pour tout $n \in \mathbb{N}$,
+$$d(x_n, x_N) \leq \max( \{d(x_1, x_N), \dots, d(x_{N-1}, x_N)\} \cup \{1\}) =: r_0.$$
+Ainsi $x_n \in B(x_N, r_0)$ pour tout $n \in \mathbb{N}$.
+\end{proof}
+
+\begin{definition}[Espace complet]
+Un espace métrique $(E, d)$ est dit complet si toute suite de Cauchy dans $E$ est convergente.
+\end{definition}
+
+\begin{theorem}
+$\mathbb{R}^d$ muni de la distance canonique est complet.
+\end{theorem}
+
+\section{Intérieur et Adhérence}
+
+\begin{definition}[Intérieur]
+Soit $A \subset E$. Un point $x \in E$ est intérieur à $A$ s'il existe $\delta > 0$ tel que $B(x, \delta) \subset A$. L'ensemble des points intérieurs à $A$ se note $\mathrm{Int}(A)$ et s'appelle l'intérieur de $A$.
+\end{definition}
+
+\begin{proposition}
+$\mathrm{Int}(A)$ est le plus grand ouvert inclus dans $A$, ou de manière équivalente la réunion de tous les ouverts inclus dans $A$.
+\end{proposition}
+
+\begin{definition}[Adhérence]
+Soit $A \subset E$. Un point $x \in E$ est adhérent à $A$ si $B(x, r) \cap A \neq \emptyset$ pour tout $r > 0$. L'ensemble des points adhérents à $A$ se note $\mathrm{Adh}(A)$ et s'appelle l'adhérence ou la fermeture de $A$.
+\end{definition}
+
+\begin{proposition}
+$\mathrm{Adh}(A)$ est le plus petit fermé contenant $A$, ou de manière équivalente l'intersection de tous les fermés contenant $A$.
+\end{proposition}
+
+\begin{proposition}
+$x \in \mathrm{Adh}(A)$ si et seulement s'il existe une suite $(x_n)_{n \in \mathbb{N}}$ d'éléments de $A$ telle que $x = \lim_{n \to \infty} x_n$.
+\end{proposition}
+
+\begin{example}
+Soit $A = \{(x,y) \in \mathbb{R}^2 : 2x+3y < 4\}$. Déterminer $\mathrm{Int}(A)$ et $\mathrm{Adh}(A)$.
+\begin{itemize}
+    \item $\mathrm{Int}(A) = A = \{(x,y) \in \mathbb{R}^2 : 2x+3y < 4\}$. $A$ est ouvert.
+    \item $\mathrm{Adh}(A) = C = \{(x,y) \in \mathbb{R}^2 : 2x+3y \leq 4\}$. $C$ est fermé et contient $A$.
+\end{itemize}
+\end{example}
+
+\begin{example}
+Soit $A = \{(x,y) \in \mathbb{R}^2 : x > 0, y = \sin(1/x)\}$. Déterminer $\mathrm{Adh}(A)$ et $\mathrm{Int}(A)$.
+\begin{itemize}
+    \item $\mathrm{Int}(A) = \emptyset$. Car $\mathrm{Int}(A)$ est un ouvert inclus dans $A$. Or $A$ ne contient aucune boule ouverte.
+    \item $\mathrm{Adh}(A) = A \cup \{(0,y) : y \in [-1, 1]\}$.
+\end{itemize}
+\end{example}
+
+\section{Exercices Résolus}
+
+\begin{example}
+Soit $A = \{(x,y) \in \mathbb{R}^2 : |x| < 1, |y| < 1\}$. Déterminer $\mathrm{Int}(A)$ et $\mathrm{Adh}(A)$.
+\end{example}
+
+\begin{solution}
+\begin{enumerate}
+    \item On dessine $A$, c'est un carré ouvert.
+    \item On pense que $\mathrm{Int}(A) = B = A = \{(x,y) \in \mathbb{R}^2 : |x| < 1, |y| < 1\}$ et $\mathrm{Adh}(A) = C = \{(x,y) \in \mathbb{R}^2 : |x| \leq 1, |y| \leq 1\}$.
+    \item Montrons que $B = \mathrm{Int}(A)$.
+    \begin{itemize}
+        \item $B$ est ouvert et $B \subset A$. Vrai par définition de $B$.
+        \item Soit $X \in A \setminus B = \emptyset$. Donc il n'y a pas de points de $A$ qui ne sont pas dans $B$. Ainsi $B = \mathrm{Int}(A)$.
+    \end{itemize}
+    \item Montrons que $C = \mathrm{Adh}(A)$.
+    \begin{itemize}
+        \item $C$ est fermé et $A \subset C$. Vrai par définition de $C$.
+        \item Montrons que $C \subset \mathrm{Adh}(A)$. Pour chaque $X \in C$, on cherche une suite $(X_n)$ avec $X_n \in A$ et $\lim X_n = X$. Soit $X = (x, y) \in C$, i.e., $|x| \leq 1, |y| \leq 1$. On prend $X_n = (x - 1/n, y - 1/n)$ (si $x = 1$, on prend $x - 1/n$, similarly for $y$). Plus précisément, soit $X_n = (x_n, y_n)$ avec $x_n = x - \frac{1}{n} \text{sign}(x)$ si $x \neq 0$ et $x_n = -1/n$ si $x = 0$, et $y_n = y - \frac{1}{n} \text{sign}(y)$ si $y \neq 0$ et $y_n = -1/n$ si $y = 0$. Alors $X_n \in A$ et $\lim X_n = X$.
+    \end{itemize}
+\end{enumerate}
+\end{solution}
+
+\begin{example}
+Soit $A = \{(x,y) \in \mathbb{R}^2 : x > 0, y = \sin(1/x)\}$. Déterminer $\mathrm{Adh}(A)$ et $\mathrm{Int}(A)$.
+\end{example}
+
+\begin{solution}
+\begin{enumerate}
+    \item On dessine $A$. C'est le graphe de $\sin(1/x)$ pour $x > 0$.
+    \item On pense que $\mathrm{Int}(A) = \emptyset$ et $\mathrm{Adh}(A) = A \cup \{(0,y) : y \in [-1, 1]\}$. Soit $C = A \cup \{(0,y) : y \in [-1, 1]\}$.
+    \item Montrons que $\mathrm{Int}(A) = \emptyset$. Si $\mathrm{Int}(A) \neq \emptyset$, alors $\mathrm{Int}(A)$ est un ouvert non vide inclus dans $A$. Donc $\mathrm{Int}(A)$ contient une boule $B(X_0, r) \subset A$. Mais $A$ est le graphe d'une fonction, il n'y a pas de boule dans $A$. Donc $\mathrm{Int}(A) = \emptyset$.
+    \item Montrons que $\mathrm{Adh}(A) = C = A \cup \{(0,y) : y \in [-1, 1]\}$.
+    \begin{itemize}
+        \item $C$ est fermé et $A \subset C$. $A$ n'est pas fermé. $C$ est fermé, car si $(X_n) \in C$ et $X_n \to X$, alors $X \in C$. Si $X_n = (x_n, y_n) \in A$, alors $x_n > 0, y_n = \sin(1/x_n)$. Si $X_n \to X = (x, y)$, alors $x_n \to x, y_n \to y$. Si $x > 0$, alors $X \in A \subset C$. Si $x = 0$, on ne peut pas dire que $y = \sin(1/x)$. Mais on sait que $-1 \leq \sin(1/x_n) \leq 1$, donc $-1 \leq y_n \leq 1$, donc $-1 \leq y \leq 1$. Donc si $x = 0$, $X = (0, y)$ avec $y \in [-1, 1]$, donc $X \in C$.
+        \item Montrons que $C \subset \mathrm{Adh}(A)$. Pour $X \in C$, si $X \in A$, alors $X \in \mathrm{Adh}(A)$. Si $X \in C \setminus A = \{(0,y) : y \in [-1, 1]\}$, i.e., $X = (0, y)$ avec $y \in [-1, 1]$. On doit montrer que $X \in \mathrm{Adh}(A)$. On cherche une suite $X_n \in A$ avec $X_n \to X$. On prend $X_n = (\frac{1}{n \pi + \arcsin(y)}, \sin(n \pi + \arcsin(y))) = (\frac{1}{n \pi + \arcsin(y)}, y)$. Alors $X_n \in A$ et $X_n \to (0, y) = X$. Donc $X \in \mathrm{Adh}(A)$.
+    \end{itemize}
+\end{enumerate}
+\end{solution}\chapter{CM5}
+\sloppy
+
+\section{Compacité}
+
+\subsection{Définitions clés}
+
+\begin{definition}[Recouvrement ouvert]
+Soit $F \subset E$. Un recouvrement ouvert de $F$ est une collection $(U_i)_{i \in I}$ où $U_i$ sont des ouverts de $E$ et $F \subset \bigcup_{i \in I} U_i$.
+\end{definition}
+
+\begin{definition}[Ensemble compact]
+$K \subset E$ est compact si de tout recouvrement ouvert $(U_i)_{i \in I}$ de $K$, on peut extraire un sous-recouvrement fini, c'est-à-dire qu'il existe un sous-ensemble fini $J \subset I$ tel que $K \subset \bigcup_{i \in J} U_i$.
+\end{definition}
+
+\begin{theorem}[Caractérisation séquentielle de la compacité]
+$K \subset E$ est compact si et seulement si toute suite d'éléments de $K$ admet une sous-suite qui converge vers un élément de $K$.
+\end{theorem}
+
+\subsection{Exemples et contre-exemples}
+
+\begin{example}
+$F = \mathbb{R}^2$ n'est pas compact. Considérons le recouvrement ouvert $U_x = B(x, 1/2)$ pour $x \in \mathbb{R}^2$. Alors $\mathbb{R}^2 = \bigcup_{x \in \mathbb{R}^2} U_x$. Cependant, on ne peut pas extraire un sous-recouvrement fini.
+\end{example}
+
+\begin{example}
+Soit $F = \{(x, y) \in \mathbb{R}^2 \mid x > 0, 0 \leq -\frac{1}{x} \leq y \leq \frac{1}{x} \}$. $F$ n'est pas compact. Considérons la suite $u_n = (n, 0) \in F$. Toute sous-suite de $(u_n)$ est non bornée, donc sans sous-suite convergente dans $F$.
+\end{example}
+
+\section{Propriétés des ensembles compacts}
+
+\begin{proposition}
+Tout compact $K \subset E$ est borné et fermé.
+\end{proposition}
+
+\begin{proposition}
+Si $K$ est compact et $F$ est fermé, alors $K \cap F$ est compact.
+\end{proposition}
+
+\begin{proposition}
+Si $K$ est compact, toute suite de Cauchy dans $K$ converge dans $K$.
+\end{proposition}
+
+\subsection{Preuves des propriétés}
+
+\begin{proof}[Preuve qu'un compact est borné]
+Soit $K$ compact. Pour $x \in K$, considérons $U_x = B(x, 1)$. Alors $(U_x)_{x \in K}$ est un recouvrement ouvert de $K$. Puisque $K$ est compact, il existe un sous-recouvrement fini $U_{x_1}, \dots, U_{x_n}$ tel que $K \subset \bigcup_{i=1}^n U_{x_i}$. Soit $R = \max_{1 \leq i \leq n} \|x_i\| + 1$. Alors pour tout $x \in K$, il existe $i$ tel que $x \in U_{x_i} = B(x_i, 1)$, donc $d(x, x_i) < 1$. Par l'inégalité triangulaire, $\|x\| \leq \|x - x_i\| + \|x_i\| < 1 + \|x_i\| \leq R$. Ainsi, $K \subset B(0, R)$, et $K$ est borné.
+\end{proof}
+
+\begin{proof}[Preuve qu'un compact est fermé]
+Soit $K$ compact et montrons que $K$ est fermé. Montrons que $E \setminus K$ est ouvert. Soit $x \notin K$. Pour tout $y \in K$, il existe $r_y > 0$ tel que $B(x, r_y) \cap B(y, r_y) = \emptyset$. Considérons le recouvrement ouvert de $K$ donné par $(B(y, r_y))_{y \in K}$. Il existe un sous-recouvrement fini $B(y_1, r_{y_1}), \dots, B(y_n, r_{y_n})$ tel que $K \subset \bigcup_{i=1}^n B(y_i, r_{y_i})$. Soit $r = \min_{1 \leq i \leq n} r_{y_i} > 0$. Considérons $B(x, r)$. Pour tout $z \in B(x, r)$, et pour tout $i$, $B(z, r) \cap B(y_i, r_{y_i}) = \emptyset$. Donc $B(x, r) \cap K = \emptyset$, et $B(x, r) \subset E \setminus K$. Ainsi $E \setminus K$ est ouvert, et $K$ est fermé.
+\end{proof}
+
+\begin{proof}[Preuve que K compact et F fermé $\implies$ K $\cap$ F compact]
+Soit $K$ compact et $F$ fermé. Considérons un recouvrement ouvert $(U_i)_{i \in I}$ de $K \cap F$. Alors $(U_i)_{i \in I} \cup (E \setminus F)$ est un recouvrement ouvert de $K$. Puisque $K$ est compact, il existe un sous-recouvrement fini $U_{i_1}, \dots, U_{i_n}, E \setminus F$ tel que $K \subset U_{i_1} \cup \dots \cup U_{i_n} \cup (E \setminus F)$. Alors $K \cap F \subset (U_{i_1} \cup \dots \cup U_{i_n} \cup (E \setminus F)) \cap F = (U_{i_1} \cap F) \cup \dots \cup (U_{i_n} \cap F) \cup ((E \setminus F) \cap F) = (U_{i_1} \cap F) \cup \dots \cup (U_{i_n} \cap F) \subset U_{i_1} \cup \dots \cup U_{i_n}$. Ainsi, $K \cap F$ est compact.
+\end{proof}
+
+\begin{proof}[Preuve que si K est compact, toute suite de Cauchy dans K converge dans K]
+Soit $(u_n)$ une suite de Cauchy dans $K$ compact. Puisque $K$ est compact, il existe une sous-suite $(u_{\phi(n)})$ qui converge vers une limite $l \in K$. Puisque $(u_n)$ est de Cauchy et qu'une sous-suite converge vers $l$, la suite $(u_n)$ converge vers $l$. Donc toute suite de Cauchy dans $K$ converge dans $K$.
+\end{proof}
+
+\begin{proof}[Preuve par contradiction qu'un compact est borné]
+Supposons que $K$ n'est pas borné. On fixe $a \in E$. Pour tout $n \in \mathbb{N}$, comme $K$ n'est pas borné, il existe $x_n \in K$ tel que $d(a, x_n) > n$. La suite $(x_n)$ n'est pas bornée (car $d(a, x_n) \to +\infty$), donc $(x_n)$ ne possède pas de sous-suite convergente. Ceci contredit le fait que $K$ est compact (par caractérisation séquentielle). Donc $K$ est borné.
+\end{proof}
+
+\section{Compacts de $\mathbb{R}^n$}
+
+\subsection{Théorème de Borel-Lebesgue}
+
+\begin{theorem}[Théorème de Borel-Lebesgue]
+Dans $\mathbb{R}^n$ avec la distance usuelle, $K \subset \mathbb{R}^n$ est compact si et seulement si $K$ est fermé et borné.
+\end{theorem}
+
+\subsection{Compacité des boules fermées}
+
+\begin{proposition}
+Dans $\mathbb{R}^n$ avec la distance usuelle, les boules fermées $B_f(x_0, r)$ sont compactes.
+\end{proposition}
+
+\subsection{Preuve de la compacité des boules fermées}
+
+\begin{proof}
+Pour $n=1$, montrons que $[a, b]$ est compact. Soit $(U_i)_{i \in I}$ un recouvrement ouvert de $[a, b]$. Soit $\mathcal{U} = (U_i)_{i \in I}$.
+Soit $E = \{x \in [a, b] \mid [a, x] \text{ est recouvert par un nombre fini de } U_i \}$.
+$E$ est non vide car $a \in E$. Montrons que $E$ est borné.
+Soit $c = \sup E$. Supposons que $c < b$. Puisque $c \in [a, b]$, il existe $U_{i_0} \in \mathcal{U}$ tel que $c \in U_{i_0}$. Comme $U_{i_0}$ est ouvert, il existe $\delta > 0$ tel que $]c - \delta, c + \delta[ \subset U_{i_0}$.
+Puisque $c = \sup E$, il existe $x \in E$ tel que $c - \delta < x \leq c$. Par définition de $E$, $[a, x]$ est recouvert par un nombre fini de $U_i$.
+Donc $[a, x] \cup [x, c + \delta/2] = [a, c + \delta/2]$ est recouvert par un nombre fini de $U_i$ (en ajoutant $U_{i_0}$). Donc $c + \delta/2 \in E$, ce qui contredit $c = \sup E$. Donc $c = b$.
+Montrons que $b \in E$. On choisit $U_{i_1}$ tel que $b \in U_{i_1}$ et $\delta > 0$ tel que $]b - \delta, b + \delta[ \subset U_{i_1}$. On choisit $x \in ]b - \delta, b] \cap E$. Alors $[a, x]$ est recouvert par un nombre fini de $U_i$. Donc $[a, x] \cup [x, b] = [a, b]$ est recouvert par un nombre fini de $U_i$ (en ajoutant $U_{i_1}$). Donc $[a, b]$ est compact.
+\end{proof}
+
+\section{Limites et continuité}
+
+\subsection{Définition des limites dans les espaces métriques}
+
+\begin{definition}[Limite]
+Soient $(E_1, d_1)$ et $(E_2, d_2)$ deux espaces métriques, $x_0 \in E_1$, $l \in E_2$ et $F : E_1 \to E_2$ une application. On dit que $\lim_{x \to x_0} F(x) = l$ si pour tout $\epsilon > 0$, il existe $\delta > 0$ tel que pour tout $x \in E_1$ tel que $d_1(x, x_0) < \delta$, on a $d_2(F(x), l) < \epsilon$.
+\end{definition}
+
+\subsection{Définition de la continuité}
+
+\begin{definition}[Continuité en un point]
+On dit que $F$ est continue en $x_0$ si $\lim_{x \to x_0} F(x) = F(x_0)$.
+\end{definition}
+
+\begin{definition}[Continuité sur un ensemble]
+On dit que $F$ est continue (sur $E_1$) si $F$ est continue en tout point $x_0 \in E_1$.
+\end{definition}
+
+\begin{proposition}
+$F$ est continue sur $E_1$ si et seulement si elle est continue en tout point de $E_1$.
+\end{proposition}
+
+\section{Propriétés équivalentes de la continuité}
+
+\begin{proposition}[Propriétés équivalentes de la continuité]
+Soient $(E_1, d_1)$ et $(E_2, d_2)$ deux espaces métriques et $F : E_1 \to E_2$ une application. Les propriétés suivantes sont équivalentes :
+\begin{enumerate}
+    \item $F$ est continue.
+    \item Pour tout ouvert $U \subset E_2$, $F^{-1}(U)$ est ouvert dans $E_1$.
+    \item Pour tout fermé $F \subset E_2$, $F^{-1}(F)$ est fermé dans $E_1$.
+    \item Pour toute suite $(x_n)_{n \in \mathbb{N}}$ de $E_1$ avec $\lim_{n \to \infty} x_n = x \in E_1$, on a $\lim_{n \to \infty} F(x_n) = F(x)$.
+\end{enumerate}
+\end{proposition}
+
+\subsection{Preuves des équivalences}
+
+\begin{proof}
+\begin{enumerate}
+    \item $(1) \implies (2)$ : Soit $U \subset E_2$ ouvert et $x_0 \in F^{-1}(U)$. Alors $y_0 = F(x_0) \in U$. Comme $U$ est ouvert, il existe $\epsilon > 0$ tel que $B(y_0, \epsilon) \subset U$. Comme $F$ est continue en $x_0$, il existe $\delta > 0$ tel que si $d_1(x, x_0) < \delta$, alors $d_2(F(x), y_0) < \epsilon$. Donc si $x \in B(x_0, \delta)$, alors $F(x) \in B(y_0, \epsilon) \subset U$, donc $x \in F^{-1}(U)$. Ainsi $B(x_0, \delta) \subset F^{-1}(U)$, et $F^{-1}(U)$ est ouvert.
+
+    \item $(2) \implies (3)$ : Par passage aux complémentaires.
+
+    \item $(3) \implies (4)$ : Soit $(x_n)$ une suite dans $E_1$ avec $\lim_{n \to \infty} x_n = x \in E_1$. Supposons que $(F(x_n))$ ne converge pas vers $F(x)$. Alors il existe $\epsilon_0 > 0$ tel que pour tout $n \in \mathbb{N}$, il existe $p(n) > n$ avec $d_2(F(x_{p(n)}), F(x)) \geq \epsilon_0$. Soit $y_n = x_{p(n)}$ et $U = E_2 \setminus B(F(x), \epsilon_0)$. $U$ est fermé, $F(y_n) \in U$, donc $y_n \in F^{-1}(U)$, qui est fermé par propriété (3). Comme $(y_n)$ est une sous-suite de $(x_n)$ qui converge vers $x$, on a $\lim_{n \to \infty} y_n = x$. Puisque $F^{-1}(U)$ est fermé, on a $x \in F^{-1}(U)$. Donc $F(x) \in U = E_2 \setminus B(F(x), \epsilon_0)$, ce qui signifie $d_2(F(x), F(x)) \geq \epsilon_0$, ce qui est faux.
+
+    \item $(4) \implies (1)$ : Supposons que $F$ n'est pas continue en $x_0 \in E_1$. Alors il existe $\epsilon_0 > 0$ tel que pour tout $\delta > 0$, il existe $x_\delta \in E_1$ avec $d_1(x_\delta, x_0) < \delta$ et $d_2(F(x_\delta), F(x_0)) \geq \epsilon_0$. En prenant $\delta = 1/n$, on obtient une suite $(x_n)_{n \geq 1}$ telle que $\lim_{n \to \infty} x_n = x_0$ et $d_2(F(x_n), F(x_0)) \geq \epsilon_0$ pour tout $n$. Ceci contredit (4).
+\end{enumerate}
+\end{proof}
+
+\subsection{Exemple de fonction continue}
+
+\begin{example}
+Considérons $F : \mathbb{R}^2 \to \mathbb{R}$, $F(x, y) = x \sin(y) - e^x$. Les fonctions coordonnées $x$ et $y$, et les fonctions $\sin(y)$ et $e^x$ sont continues. Par composition et opérations algébriques, $F(x, y) = x \sin(y) - e^x$ est continue.
+\end{example}
+
+\section{Fonctions de plusieurs variables}
+
+\subsection{Cadre $\mathbb{R}^n \to \mathbb{R}^p$}
+
+Considérons des fonctions de $\mathbb{R}^n$ à valeurs dans $\mathbb{R}^p$. Le cadre est $\mathbb{R}^n$ pour la variable et $\mathbb{R}^p$ pour la valeur.
+
+Soit $D \subset \mathbb{R}^n$ le domaine de définition. On considère des applications $F : D \to \mathbb{R}^p$.
+
+\subsection{Continuité et composantes}
+
+\begin{proposition}
+$F : D \to \mathbb{R}^p$ est continue si et seulement si chaque composante $F_i : D \to \mathbb{R}$ est continue, où $F(x_1, \dots, x_n) = (F_1(x_1, \dots, x_n), \dots, F_p(x_1, \dots, x_n))$.
+\end{proposition}
+
+\subsection{Fonctions coordonnées}
+
+Les fonctions coordonnées $(x_i)$ sont continues. Ce sont les $F_i$ pour $F(x) = x$ (l'identité).\chapter{CM6}
+\sloppy
+
+\section{Continuité}
+
+\subsection{Définition de la continuité}
+
+\begin{definition}
+Soit $D \subset \mathbb{R}^d$, $f: D \rightarrow \mathbb{R}$ et $x_0 \in D$.
+On dit que $f$ est continue en $x_0$ si
+\[
+\lim_{x \rightarrow x_0} f(x) = f(x_0).
+\]
+Plus précisément, pour tout $\epsilon > 0$, il existe $\alpha > 0$ tel que pour tout $x \in D$ avec $\|x - x_0\| \leq \alpha$, on a $|f(x) - f(x_0)| \leq \epsilon$.
+\end{definition}
+
+\subsection{Opérations sur les fonctions continues}
+Si $f, g: D \rightarrow \mathbb{R}$ sont continues sur $D$, alors:
+\begin{itemize}
+    \item $f + g$ est continue sur $D$.
+    \item $f \cdot g$ est continue sur $D$.
+    \item Si $g(x) \neq 0$ pour tout $x \in D$, alors $\frac{f}{g}$ est continue sur $D$.
+    \item Si $\varphi: I \rightarrow \mathbb{R}$ est continue sur $I \subset \mathbb{R}$ et $f(D) \subset I$, alors $\varphi \circ f$ est continue sur $D$.
+\end{itemize}
+
+\subsection{Continuité et compacité}
+
+\begin{theorem}
+Soit $K \subset \mathbb{R}^d$ un compact et $f: K \rightarrow \mathbb{R}^p$ une application continue.
+Alors $f(K)$ est compact dans $\mathbb{R}^p$.
+\end{theorem}
+
+\begin{proposition}
+Si $f: K \rightarrow \mathbb{R}$ est continue et $K \subset \mathbb{R}^d$ est compact, alors $f$ est bornée et atteint ses bornes.
+\end{proposition}
+
+\subsection{Continuité uniforme}
+\begin{definition}
+Une fonction $f: D \rightarrow \mathbb{R}^p$ est uniformément continue sur $D$ si pour tout $\epsilon > 0$, il existe $\alpha > 0$ tel que pour tout $x, y \in D$ avec $\|x - y\| \leq \alpha$, on a $\|f(x) - f(y)\| \leq \epsilon$.
+\end{definition}
+
+\subsection{Lien avec la compacité}
+
+\begin{theorem}
+Soit $F: \mathbb{R}^n \rightarrow \mathbb{R}^p$ continue et $K \subset \mathbb{R}^n$ compact. Alors $F(K)$ est compact dans $\mathbb{R}^p$.
+\end{theorem}
+
+\begin{remark}
+Alors $F(K)$ compact dans $\mathbb{R}^p$ donc borné et atteint ses bornes.
+\end{remark}
+
+\subsection{Continuité partielle}
+
+\begin{definition}
+Soit $D \subset \mathbb{R}^n$ ouvert et $f: D \rightarrow \mathbb{R}$. On dit que $f$ est partiellement continue en $a = (a_1, \ldots, a_n) \in D$ si les fonctions partielles $f_i(t) = f(a_1, \ldots, a_{i-1}, t, a_{i+1}, \ldots, a_n)$ sont continues en $a_i$ pour tout $1 \leq i \leq n$.
+On dit que $f$ est partiellement continue sur $D$ si $f$ est partiellement continue en tout point de $D$.
+\end{definition}
+
+\paragraph{\textbf{Non continuité et continuité partielle:}}
+Considérons la fonction $f: \mathbb{R}^2 \rightarrow \mathbb{R}$ définie par
+\[
+f(x_1, x_2) = \begin{cases}
+\frac{x_1 x_2}{x_1^2 + x_2^2} & \text{si } (x_1, x_2) \neq (0, 0) \\
+0 & \text{si } (x_1, x_2) = (0, 0)
+\end{cases}
+\]
+\begin{itemize}
+    \item $f$ est continue sur $\mathbb{R}^2 \setminus \{(0, 0)\}$.
+    \item $f$ est partiellement continue en $(0, 0)$. En effet, les fonctions partielles sont
+    \begin{itemize}
+        \item $f(x_1, 0) = \frac{x_1 \cdot 0}{x_1^2 + 0^2} = 0$ si $x_1 \neq 0$ et $f(0, 0) = 0$. Donc $f(x_1, 0) = 0$ pour tout $x_1 \in \mathbb{R}$.
+        \item $f(0, x_2) = \frac{0 \cdot x_2}{0^2 + x_2^2} = 0$ si $x_2 \neq 0$ et $f(0, 0) = 0$. Donc $f(0, x_2) = 0$ pour tout $x_2 \in \mathbb{R}$.
+    \end{itemize}
+    Les fonctions partielles sont constantes nulles, donc continues en $0$.
+    \item $f$ n'est pas continue en $(0, 0)$.
+    En coordonnées polaires $x_1 = r \cos \theta$, $x_2 = r \sin \theta$, pour $(x_1, x_2) \neq (0, 0)$, on a
+    \[
+    f(r \cos \theta, r \sin \theta) = \frac{r \cos \theta \cdot r \sin \theta}{r^2 \cos^2 \theta + r^2 \sin^2 \theta} = \frac{r^2 \cos \theta \sin \theta}{r^2} = \cos \theta \sin \theta.
+    \]
+    Si $\theta$ est constant, alors $\lim_{r \rightarrow 0} f(r \cos \theta, r \sin \theta) = \cos \theta \sin \theta$ dépend de $\theta$. Par exemple:
+    \begin{itemize}
+        \item si $\theta = 0$, $\lim_{r \rightarrow 0} f(r \cos 0, r \sin 0) = 0$.
+        \item si $\theta = \pi/4$, $\lim_{r \rightarrow 0} f(r \cos (\pi/4), r \sin (\pi/4)) = \cos (\pi/4) \sin (\pi/4) = \frac{1}{2}$.
+    \end{itemize}
+    La limite $\lim_{(x_1, x_2) \rightarrow (0, 0)} f(x_1, x_2)$ n'existe pas.
+\end{itemize}
+
+\begin{verbatim}
+```python
+#save_to: discont_ex.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots()
+
+ax.set_aspect('equal')
+
+ax.spines['left'].set_position('zero')
+ax.spines['bottom'].set_position('zero')
+ax.spines['right'].set_color('none')
+ax.spines['top'].set_color('none')
+
+ax.xaxis.set_ticks_position('bottom')
+ax.yaxis.set_ticks_position('left')
+
+x = np.linspace(-1, 1, 400)
+y = x**2
+ax.plot(x, y, 'r', linewidth=2)
+
+circle = patches.Circle((0, 0), radius=0.1, facecolor='white', edgecolor='black', linewidth=1.5, zorder=3)
+ax.add_patch(circle)
+
+
+ax.set_xlabel('$x_1$', loc='right')
+ax.set_ylabel('$x_2$', loc='top')
+ax.set_xticks([1])
+ax.set_yticks([1])
+ax.set_xlim([-0.5, 1.5])
+ax.set_ylim([-0.5, 1.5])
+ax.text(1.05, 0, '$x_1$')
+ax.text(0, 1.05, '$x_2$')
+ax.text(0.5, 0.5, '$f=1$')
+ax.text(0.5, -0.1, '$f=0$')
+
+
+plt.savefig('discont_ex.png')
+```
+\end{verbatim}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.5\textwidth]{discont_ex.png}
+\caption{Discontinuité en $(0,0)$}
+\label{fig:discont_ex}
+\end{figure}
+
+
+\begin{remark}
+La continuité implique la continuité partielle. La réciproque est fausse.
+\end{remark}
+
+\section{Dérivation des fonctions de plusieurs variables}
+
+\subsection{Dérivabilité selon une direction}
+
+\begin{definition}
+Soit $D \subset \mathbb{R}^n$ un ouvert, $f: D \rightarrow \mathbb{R}$ et $x_0 \in D$, $u \in \mathbb{R}^n$. On dit que $f$ est dérivable au point $x_0$ dans la direction $u$ si la fonction $g(t) = f(x_0 + tu)$ est dérivable en $t = 0$.
+\end{definition}
+
+\subsection{Dérivées partielles}
+
+\begin{definition}
+On dit que $f$ admet des dérivées partielles en $x_0$ si $f$ est dérivable en $x_0$ dans les directions de la base canonique $e_1, \ldots, e_n$. On pose
+\[
+\frac{\partial f}{\partial x_i}(x_0) = \frac{d}{dt} f(x_0 + te_i) \Big|_{t=0}.
+\]
+\end{definition}
+
+\paragraph{\textbf{Notation:}}
+\[
+\frac{\partial f}{\partial x_i}(x_0) = \partial_i f(x_0) = D_i f(x_0).
+\]
+
+\subsection{Différentiabilité}
+
+\begin{definition}
+Soit $D \subset \mathbb{R}^n$ un ouvert et $f: D \rightarrow \mathbb{R}$. On dit que $f$ est différentiable en $x_0 \in D$ s'il existe une application linéaire $L: \mathbb{R}^n \rightarrow \mathbb{R}$ telle que
+\[
+f(x_0 + h) = f(x_0) + L(h) + \|h\| \epsilon(h)
+\]
+avec $\lim_{h \rightarrow 0} \epsilon(h) = 0$.
+On note $L = df(x_0) = Df(x_0)$.
+\end{definition}
+
+\begin{remark}
+L'application linéaire $L$ est unique.
+\end{remark}
+
+\paragraph{\textbf{Gradient:}} L'application linéaire $L$ est de la forme $L(h) = \nabla f(x_0) \cdot h$ où $\nabla f(x_0)$ est le gradient de $f$ en $x_0$.
+
+\begin{lemma}
+Si $f$ est différentiable en $x_0$, alors $f$ est continue en $x_0$ et $f$ est dérivable dans toutes les directions en $x_0$ et
+\[
+\nabla f(x_0) = \begin{pmatrix}
+\frac{\partial f}{\partial x_1}(x_0) \\
+\vdots \\
+\frac{\partial f}{\partial x_n}(x_0)
+\end{pmatrix}.
+\]
+\end{lemma}
+
+\subsection{Plan tangent}
+Soit $S = \{(x, y, z) \in \mathbb{R}^3 : F(x, y, z) = 0\}$ une surface dans $\mathbb{R}^3$ et $x_0 \in S$.
+Le plan tangent à $S$ en $x_0$ est donné par l'équation
+\[
+\nabla F(x_0) \cdot (x - x_0) = 0
+\]
+si $\nabla F(x_0) \neq 0$.
+
+\subsection{Fonctions de classe $C^1$}
+\begin{definition}
+On dit que $f$ est de classe $C^1$ sur $D$ si $f$ est différentiable en tout point de $D$ et les fonctions $x \mapsto \frac{\partial f}{\partial x_i}(x)$ sont continues sur $D$ pour tout $1 \leq i \leq n$.
+\end{definition}
+
+\begin{theorem}
+Si $f$ est de classe $C^1$ sur $D$, alors $f$ est différentiable sur $D$.
+\end{theorem}
+
+\begin{remark}
+La réciproque est fausse. Une fonction peut être différentiable sans être $C^1$.
+\end{remark}\end{document}
