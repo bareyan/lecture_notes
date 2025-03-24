@@ -1,0 +1,269 @@
+```latex
+\documentclass{article}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{listings}
+\usepackage{verbatim} % Required for verbatim environment
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Example}
+
+\usepackage[margin=1in]{geometry}
+
+\begin{document}
+\sloppy
+
+\section{Introduction}
+
+En analyse numérique, l'intégration numérique est l'ensemble des algorithmes utilisés pour calculer la valeur numérique d'une intégrale définie. Elle est souvent nécessaire lorsque le calcul analytique de l'intégrale est impossible ou trop complexe, ou lorsque la fonction à intégrer n'est connue qu'en certains points (données expérimentales par exemple).
+
+Le principe général des méthodes de quadrature est d'approximer l'intégrale d'une fonction $f(x)$ sur un intervalle $[\alpha, \beta]$ par une somme pondérée des valeurs de la fonction en certains points $x_i$, appelés nœuds, multipliées par des coefficients $w_i$, appelés poids.  Mathématiquement, on cherche à approcher :
+\[
+I(f) = \int_{\alpha}^{\beta} f(x) dx \approx I_c(f) = \sum_{i=0}^{n} w_i f(x_i)
+\]
+où $x_i$ sont les nœuds et $w_i$ sont les poids de la méthode de quadrature. L'objectif est de choisir les nœuds et les poids de manière à minimiser l'erreur d'approximation $E(f) = I(f) - I_c(f)$.
+
+\section{Méthodes de Newton-Cotes}
+
+\subsection{Définition et formule générale}
+
+\begin{definition}[Méthodes de Newton-Cotes]
+Les méthodes de Newton-Cotes sont une famille de méthodes de quadrature où les nœuds $x_i$ sont équirépartis sur l'intervalle d'intégration $[\alpha, \beta]$. Plus précisément, on utilise le polynôme d'interpolation de Lagrange d'ordre $K$, associé à $K+1$ points d'appui équidistants $x_i$ sur $[\alpha, \beta]$.
+On définit les points $x_i$ par :
+\[
+x_i = \alpha + i h, \quad i = 0, \dots, K
+\]
+où $h = \frac{\beta - \alpha}{K}$ est le pas de discrétisation.
+\end{definition}
+
+La formule de quadrature de Newton-Cotes s'écrit alors :
+\[
+\int_{\alpha}^{\beta} f(x) dx \approx \sum_{i=0}^{K} \omega_i^{(K)} f(x_i)
+\]
+où les poids $\omega_i^{(K)}$ sont donnés par :
+\[
+\omega_i^{(K)} = \int_{\alpha}^{\beta} \mathcal{L}_i^{(K)}(x) dx
+\]
+et $\mathcal{L}_i^{(K)}(x)$ est le $i$-ème polynôme de base de Lagrange d'ordre $K$ associé aux points $x_0, x_1, \dots, x_K$. On a l'expression explicite pour les poids :
+\[
+\omega_i^{(K)} = \int_{\alpha}^{\beta} \prod_{\substack{j=0 \\ j \neq i}}^{K} \frac{x-x_j}{x_i-x_j} dx
+\]
+
+\subsection{Cas particuliers}
+
+Les méthodes de Newton-Cotes portent des noms spécifiques pour les petites valeurs de $K$.
+
+\subsubsection{Formule des trapèzes ($K=1$)}
+
+Pour $K=1$, on a la formule des trapèzes. Les points sont $x_0 = \alpha$ et $x_1 = \beta$. Les poids sont :
+\[
+\omega_0^{(1)} = \int_{\alpha}^{\beta} \frac{x-x_1}{x_0-x_1} dx = \frac{1}{x_0-x_1} \int_{\alpha}^{\beta} (x-\beta) dx = \frac{1}{\alpha-\beta} \left[ \frac{x^2}{2} - \beta x \right]_{\alpha}^{\beta} = \frac{1}{\alpha-\beta} \left( (\frac{\beta^2}{2} - \beta^2) - (\frac{\alpha^2}{2} - \beta \alpha) \right) = \frac{\beta - \alpha}{2}
+\]
+\[
+\omega_1^{(1)} = \int_{\alpha}^{\beta} \frac{x-x_0}{x_1-x_0} dx = \frac{1}{x_1-x_0} \int_{\alpha}^{\beta} (x-\alpha) dx = \frac{1}{\beta-\alpha} \left[ \frac{x^2}{2} - \alpha x \right]_{\alpha}^{\beta} = \frac{1}{\beta-\alpha} \left( (\frac{\beta^2}{2} - \alpha \beta) - (\frac{\alpha^2}{2} - \alpha^2) \right) = \frac{\beta - \alpha}{2}
+\]
+Ainsi, la formule des trapèzes est :
+\[
+\int_{\alpha}^{\beta} f(x) dx \approx \frac{\beta - \alpha}{2} [f(\alpha) + f(\beta)]
+\]
+
+\subsubsection{Formule de Simpson ($K=2$)}
+
+Pour $K=2$, on a la formule de Simpson. Les points sont $x_0 = \alpha$, $x_1 = \frac{\alpha + \beta}{2}$, $x_2 = \beta$. La formule de Simpson est :
+\[
+\int_{\alpha}^{\beta} f(x) dx \approx \frac{\beta - \alpha}{6} \left[ f(\alpha) + 4 f\left(\frac{\alpha + \beta}{2}\right) + f(\beta) \right]
+\]
+
+\subsubsection{Formule de Boole-Villarceau ($K=4$)}
+
+Pour $K=4$, on a la formule de Boole-Villarceau :
+\[
+\int_{\alpha}^{\beta} f(x) dx \approx \frac{\beta - \alpha}{90} \left[ 7f(x_0) + 32f(x_1) + 12f(x_2) + 32f(x_3) + 7f(x_4) \right]
+\]
+où $x_i = \alpha + i \frac{\beta-\alpha}{4}$ pour $i=0, \dots, 4$.
+
+\subsubsection{Formule de Hardy ($K=6$)}
+
+Pour $K=6$, on a la formule de Hardy :
+\[
+\int_{\alpha}^{\beta} f(x) dx \approx \frac{\beta - \alpha}{840} \left[ 41f(x_0) + 216f(x_1) + 27f(x_2) + 272f(x_3) + 27f(x_4) + 216f(x_5) + 41f(x_6) \right]
+\]
+où $x_i = \alpha + i \frac{\beta-\alpha}{6}$ pour $i=0, \dots, 6$.
+
+\subsection{Sensibilité aux erreurs d'arrondi}
+
+Pour $K$ élevé ($K \geq 8$), les poids $\omega_i^{(K)}$ peuvent prendre des valeurs négatives. Ceci rend les formules sensibles aux erreurs d'arrondi, car des erreurs sur les valeurs de $f(x_i)$ peuvent être amplifiées par des poids de signes opposés.  Il est donc généralement déconseillé d'utiliser les formules de Newton-Cotes d'ordre élevé en pratique.
+
+\section{Théorème de Peano et estimation de l'erreur}
+
+\begin{theorem}[Théorème de Peano]
+Soit $I_c(f) = \sum_{i=0}^{n} \omega_i f(x_i)$ une formule de quadrature d'ordre $p$, c'est-à-dire exacte pour les polynômes de degré inférieur ou égal à $p$. Alors, pour toute fonction $f \in C^{p+1}[\alpha, \beta]$, l'erreur d'intégration $E(f) = I(f) - I_c(f)$ peut s'écrire :
+\[
+E(f) = \int_{\alpha}^{\beta} K(t) f^{(p+1)}(t) dt
+\]
+où le noyau de Peano $K(t)$ est donné par :
+\[
+K(t) = \frac{1}{p!} E_x[(x-t)_+^p] = \frac{1}{p!} \left[ \int_{\alpha}^{\beta} (x-t)_+^p dx - \sum_{i=0}^{n} \omega_i (x_i-t)_+^p \right]
+\]
+avec $(x-t)_+ = \max(0, x-t)$.
+\end{theorem}
+
+\begin{remark}
+Lorsque le noyau de Peano $K(t)$ est de signe constant sur $[\alpha, \beta]$, il existe $\xi \in [\alpha, \beta]$ tel que :
+\[
+E(f) = f^{(p+1)}(\xi) \int_{\alpha}^{\beta} K(t) dt
+\]
+De plus, on a la relation :
+\[
+\int_{\alpha}^{\beta} K(t) dt = E\left(\frac{x^{p+1}}{(p+1)!}\right) = I\left(\frac{x^{p+1}}{(p+1)!}\right) - I_c\left(\frac{x^{p+1}}{(p+1)!}\right)
+\]
+Dans le cas des méthodes de Newton-Cotes d'ordre $K$, le noyau de Peano est de signe constant si $K$ est pair, et de signe non constant si $K$ est impair.
+\end{remark}
+
+\section{Formules de Gauss-Legendre}
+
+\subsection{Construction de la formule de quadrature}
+
+Les formules de Gauss-Legendre sont des méthodes de quadrature où les nœuds $x_i$ ne sont pas fixés à l'avance, mais sont choisis de manière à maximiser l'ordre de la méthode.  On cherche à construire une formule de quadrature à $n$ points :
+\[
+\int_{\alpha}^{\beta} f(x) dx \approx \sum_{i=1}^{n} \omega_i f(x_i)
+\]
+qui soit exacte pour les polynômes de degré le plus élevé possible. On a $2n$ degrés de liberté (n nœuds et n poids). On peut donc espérer atteindre l'ordre $2n-1$.  Il existe un choix optimal des nœuds $x_i$ qui permet d'atteindre cet ordre.
+
+Les nœuds des formules de Gauss-Legendre sur l'intervalle $[-1, 1]$ sont les racines du polynôme de Legendre $P_n(x)$ de degré $n$. Les polynômes de Legendre sont orthogonaux sur $[-1, 1]$ par rapport au produit scalaire :
+\[
+\langle P, Q \rangle = \int_{-1}^{1} P(x) Q(x) dx
+\]
+et peuvent être définis par la relation de récurrence :
+\[
+L_0(x) = 1, \quad L_1(x) = x
+\]
+\[
+L_{n+1}(x) = \frac{1}{n+1} \left[ (2n+1) x L_n(x) - n L_{n-1}(x) \right], \quad n \geq 1
+\]
+
+\subsection{Exemples}
+
+\subsubsection{Formule de Gauss-Legendre à 2 points}
+
+On cherche une formule à 2 points :
+\[
+\int_{-1}^{1} f(x) dx \approx \omega_1 f(x_1) + \omega_2 f(x_2)
+\]
+On impose l'exactitude pour les polynômes de degré $0, 1, 2, 3$.
+\begin{align*}
+\int_{-1}^{1} 1 dx &= 2 = \omega_1 + \omega_2 \\
+\int_{-1}^{1} x dx &= 0 = \omega_1 x_1 + \omega_2 x_2 \\
+\int_{-1}^{1} x^2 dx &= \frac{2}{3} = \omega_1 x_1^2 + \omega_2 x_2^2 \\
+\int_{-1}^{1} x^3 dx &= 0 = \omega_1 x_1^3 + \omega_2 x_2^3
+\end{align*}
+De la première équation, $\omega_2 = 2 - \omega_1$. De la deuxième, si $x_1 \neq x_2$, $\omega_1 x_1 = - \omega_2 x_2 = - (2-\omega_1) x_2 = \omega_1 x_2 - 2x_2$, donc $\omega_1 (x_1 - x_2) = -2x_2$, et $\omega_1 = \frac{-2x_2}{x_1 - x_2} = \frac{2x_2}{x_2 - x_1}$.
+Si on prend $x_1 = -x_2$, alors de la deuxième équation, $0 = \omega_1 x_1 + \omega_2 (-x_1) = (\omega_1 - \omega_2) x_1$. Si $x_1 \neq 0$, alors $\omega_1 = \omega_2$.  Avec $\omega_1 + \omega_2 = 2$, on obtient $\omega_1 = \omega_2 = 1$.
+La troisième équation devient $\frac{2}{3} = x_1^2 + x_2^2 = 2 x_1^2$ si $x_2 = -x_1$. Donc $x_1^2 = \frac{1}{3}$, et $x_1 = \pm \frac{1}{\sqrt{3}}$. Prenons $x_1 = -\frac{1}{\sqrt{3}}$ et $x_2 = \frac{1}{\sqrt{3}}$. Vérifions la quatrième équation : $\omega_1 x_1^3 + \omega_2 x_2^3 = 1 \cdot (-\frac{1}{\sqrt{3}})^3 + 1 \cdot (\frac{1}{\sqrt{3}})^3 = -\frac{1}{3\sqrt{3}} + \frac{1}{3\sqrt{3}} = 0$.
+
+Ainsi, la formule de Gauss-Legendre à 2 points est :
+\[
+\int_{-1}^{1} f(x) dx \approx f\left(-\frac{1}{\sqrt{3}}\right) + f\left(\frac{1}{\sqrt{3}}\right)
+\]
+Elle est exacte pour les polynômes de degré $3 = 2 \times 2 - 1$.
+
+\subsubsection{Formule de Gauss-Legendre à 3 points}
+
+On cherche une formule à 3 points :
+\[
+\int_{-1}^{1} f(x) dx \approx \omega_1 f(x_1) + \omega_2 f(x_2) + \omega_3 f(x_3)
+\]
+On impose l'exactitude pour les polynômes de degré $0, 1, 2, 3, 4, 5$.  Les nœuds $x_1, x_2, x_3$ sont les racines du polynôme de Legendre $L_3(x) = \frac{1}{2} (5x^3 - 3x)$. Les racines sont $x=0$ et $5x^2 - 3 = 0$, donc $x = \pm \sqrt{\frac{3}{5}}$.
+Prenons $x_1 = -\sqrt{\frac{3}{5}}$, $x_2 = 0$, $x_3 = \sqrt{\frac{3}{5}}$.  Par symétrie, on peut s'attendre à $\omega_1 = \omega_3$.
+\begin{align*}
+\int_{-1}^{1} 1 dx &= 2 = \omega_1 + \omega_2 + \omega_3 = 2\omega_1 + \omega_2 \\
+\int_{-1}^{1} x^2 dx &= \frac{2}{3} = \omega_1 x_1^2 + \omega_2 x_2^2 + \omega_3 x_3^2 = \omega_1 \frac{3}{5} + 0 + \omega_3 \frac{3}{5} = 2\omega_1 \frac{3}{5}
+\end{align*}
+De la deuxième équation, $2\omega_1 \frac{3}{5} = \frac{2}{3}$, donc $\omega_1 = \frac{5}{9}$. Alors $\omega_3 = \omega_1 = \frac{5}{9}$.  Et de la première équation, $\omega_2 = 2 - 2\omega_1 = 2 - 2 \frac{5}{9} = 2 - \frac{10}{9} = \frac{18-10}{9} = \frac{8}{9}$.
+
+Ainsi, la formule de Gauss-Legendre à 3 points est :
+\[
+\int_{-1}^{1} f(x) dx \approx \frac{5}{9} f\left(-\sqrt{\frac{3}{5}}\right) + \frac{8}{9} f(0) + \frac{5}{9} f\left(\sqrt{\frac{3}{5}}\right)
+\]
+Elle est exacte pour les polynômes de degré $5 = 2 \times 3 - 1$.
+
+\subsection{Propriété d'exactitude}
+
+\begin{proposition}
+La formule de quadrature de Gauss-Legendre à $n$ points est exacte pour les polynômes de degré inférieur ou égal à $2n-1$.  De plus, c'est la formule de quadrature à $n$ points qui a l'ordre le plus élevé possible.
+\end{proposition}
+
+\section{Visualisation des méthodes de quadrature}
+
+Pour illustrer les méthodes de quadrature, considérons l'intégrale de la fonction $f(x) = \sin(x)$ sur l'intervalle $[0, \pi]$. Nous allons visualiser l'approximation de cette intégrale en utilisant la méthode des trapèzes et la méthode de Simpson.
+
+\begin{verbatim}
+#save_to: quadrature_methods.png
+import numpy as np
+import matplotlib.pyplot as plt
+
+def f(x):
+    return np.sin(x)
+
+alpha = 0
+beta = np.pi
+x = np.linspace(alpha, beta, 100)
+y = f(x)
+
+# Trapèze rule
+x_trap = np.array([alpha, beta])
+y_trap = f(x_trap)
+
+# Simpson's rule
+x_simp = np.array([alpha, (alpha + beta) / 2, beta])
+y_simp = f(x_simp)
+
+fig, ax = plt.subplots(figsize=(8, 6))
+ax.plot(x, y, label='$f(x) = \sin(x)$')
+
+# Trapèze approximation
+ax.plot(x_trap, y_trap, 'g-o', label='Trapèze')
+ax.fill_between(x_trap, y_trap, color='green', alpha=0.2)
+
+
+# Simpson approximation - using parabola (for visual purpose, not exact simpson parabola)
+x_simp_dense = np.linspace(alpha, beta, 100)
+p = np.polyfit(x_simp, y_simp, 2)
+y_simp_poly = np.polyval(p, x_simp_dense)
+ax.plot(x_simp_dense, y_simp_poly, 'r--', label='Simpson')
+ax.fill_between(x_simp_dense, y_simp_poly, color='red', alpha=0.2)
+ax.plot(x_simp, y_simp, 'r-o')
+
+
+ax.set_xlim([alpha - 0.1, beta + 0.1])
+ax.set_ylim([0, 1.1])
+ax.set_xlabel('x')
+ax.set_ylabel('f(x)')
+ax.set_title('Méthodes de Quadrature : Trapèze et Simpson')
+ax.legend()
+ax.grid(True)
+plt.savefig('quadrature_methods.png')
+plt.close()
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[ max width=\textwidth,
+    max height=0.4\textheight,
+    keepaspectratio]{quadrature_methods.png}
+    \caption{Visualisation des méthodes du trapèze et de Simpson pour l'intégration numérique de $f(x) = \sin(x)$ sur $[0, \pi]$.}
+    \label{fig:quadrature_methods}
+\end{figure}
+
+
+\end{document}
+```
