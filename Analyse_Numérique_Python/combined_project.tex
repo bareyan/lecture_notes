@@ -1,0 +1,1685 @@
+\documentclass[oneside]{book}
+\usepackage{amssymb,amsmath,amsthm, thmtools}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage[Sonny]{fncychap}
+\usetikzlibrary{arrows}
+\usepackage{listings}
+\usepackage[margin=1in]{geometry}
+\usetikzlibrary{shapes.geometric}
+\usepackage[export]{adjustbox}
+\usepackage[utf8]{inputenc}
+\pgfplotsset{compat=1.16}
+
+\definecolor{GoodGreen}{rgb}{0.0667, 0.2078, 0.2157}
+\definecolor{GreenBackground}{rgb}{0.5176, 0.6902, 0.5098}
+\definecolor{DarkPurple}{rgb}{0.4157, 0.1804, 0.2078}
+\definecolor{RedBackground}{rgb}{0.9490, 0.7333, 0.7529}
+\definecolor{OxfordBlue}{rgb}{0.0, 0.1333, 0.2667}
+\definecolor{BlueBackground}{rgb}{0.4471, 0.6314, 0.8980}
+
+\definecolor{Gold}{rgb}{0.9176, 0.6667, 0.0784} % Define the color
+
+
+
+\declaretheoremstyle[
+    headfont=\bfseries\sffamily\color{GoodGreen}, bodyfont=\normalfont,
+    mdframed={
+        linewidth=2pt,
+        rightline=false, topline=false, bottomline=false,
+        linecolor=GoodGreen, backgroundcolor=GreenBackground!30!white,
+    }
+]{thmgreenbox}
+
+\declaretheoremstyle[
+    headfont=\bfseries\sffamily\color{OxfordBlue}, bodyfont=\normalfont,
+    mdframed={
+        linewidth=2pt,
+        rightline=false, topline=false, bottomline=false,
+        linecolor=OxfordBlue, backgroundcolor=BlueBackground!15
+    }
+]{thmblueline}
+
+\declaretheoremstyle[
+    headfont=\bfseries\sffamily\color{DarkPurple}, bodyfont=\normalfont,
+    mdframed={
+        linewidth=2pt,
+        rightline=false, topline=false, bottomline=false,
+        linecolor=DarkPurple, backgroundcolor=RedBackground!40,
+    }
+]{thmredbox}
+
+\declaretheoremstyle[
+     headfont=\bfseries\sffamily\color{Gold}, bodyfont=\normalfont,
+    mdframed={
+        linewidth=2pt,
+        rightline=false, topline=false, bottomline=false,
+        linecolor=Gold, backgroundcolor=Gold!10
+    }
+]{rmrk}
+
+
+\declaretheoremstyle[
+    headfont=\bfseries\sffamily\color{OxfordBlue}, bodyfont=\normalfont,
+    % unnumbered=true,
+    mdframed={
+        linewidth=2pt,
+        rightline=false, topline=false, bottomline=false,
+        linecolor=OxfordBlue,backgroundcolor=BlueBackground!15
+    },
+    qed=\qedsymbol
+]{thmproofbox}
+
+% Consistent theorem styling:
+\declaretheorem[numberwithin=chapter, style=thmgreenbox, name=Definition]{definition}
+\declaretheorem[sibling=definition, style=thmredbox, name=Theorem]{theorem}
+\declaretheorem[sibling=definition, style=thmredbox, name=Lemma]{lemma}
+\declaretheorem[sibling=definition, style=thmredbox, name=Proposition]{proposition}
+\declaretheorem[sibling=definition, style=rmrk, name=Remark]{remark}
+\declaretheorem[sibling=definition, style=thmblueline, name=Example]{example}
+\declaretheorem[unnumbered=true, style=thmproofbox, name=Solution]{solution}
+\declaretheorem[unnumbered=true, style=thmproofbox, name=Preuve]{prf}
+
+
+\renewcommand{\proof}{
+\begin{prf}}
+\renewcommand{\endproof}{\end{prf}}
+
+\begin{document}
+\sloppy
+\chapter{}
+\sloppy
+
+\section{Modèles Discrets}
+
+Les modèles discrets considèrent que les changements de population se produisent à intervalles de temps distincts.
+
+\subsection{Equation Générale des Modèles Discrets}
+
+Considérons $N(t)$ comme la population d'individus à l'instant $t$. L'équation générale d'un modèle discret est donnée par la variation de la population entre deux instants discrets $t$ et $t + \Delta t$:
+\[
+N(t + \Delta t) - N(t) = \text{nombre de naissances} - \text{nombre de décès} + \text{nombre d'immigrations} - \text{nombre d'émigrations}
+\]
+En termes de taux, nous pouvons écrire:
+\[
+N(t + \Delta t) - N(t) = n - m + i - e
+\]
+où:
+\begin{itemize}
+    \item $n$ représente le nombre de naissances pendant l'intervalle $\Delta t$.
+    \item $m$ représente le nombre de décès pendant l'intervalle $\Delta t$.
+    \item $i$ représente le nombre d'immigrations pendant l'intervalle $\Delta t$.
+    \item $e$ représente le nombre d'émigrations pendant l'intervalle $\Delta t$.
+\end{itemize}
+
+\subsection{Modèle de Croissance Géométrique}
+
+Le modèle de croissance géométrique est un modèle discret simple qui décrit la croissance d'une population dans des conditions idéales, où les ressources sont illimitées.
+
+\subsubsection{Hypothèses}
+
+\begin{itemize}
+    \item \textbf{Solde migratoire nul}: On suppose que le nombre d'immigrations est égal au nombre d'émigrations, donc $i - e = 0$.
+    \item \textbf{Croissance proportionnelle à la taille de la population}: Le nombre de naissances est proportionnel à la taille de la population, avec un taux de natalité $\lambda$, et le nombre de décès est proportionnel à la taille de la population, avec un taux de mortalité $\mu$. Ainsi, pendant l'intervalle $\Delta t$:
+    \begin{itemize}
+        \item Nombre de naissances: $n = \lambda \Delta t N(t)$
+        \item Nombre de décès: $m = \mu \Delta t N(t)$
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Équation et Solution}
+
+En posant $N_n = N(t_n)$ où $t_n = n \Delta t$, l'équation du modèle devient:
+\[
+N_{n+1} - N_n = \lambda \Delta t N_n - \mu \Delta t N_n
+\]
+Soit en posant $z = \lambda - \mu$, le taux de croissance:
+\[
+N_{n+1} - N_n = z \Delta t N_n
+\]
+\[
+N_{n+1} = N_n + z \Delta t N_n = (1 + z \Delta t) N_n
+\]
+En définissant le taux de croissance par unité de temps $c = z \Delta t$, on a:
+\[
+N_{n+1} = (1 + c) N_n
+\]
+La solution de cette équation de récurrence, avec condition initiale $N_0$ (taille initiale de la population), est:
+\[
+N_n = (1 + c)^n N_0 = (1 + z \Delta t)^n N_0
+\]
+
+\subsubsection{Visualisation}
+
+\begin{verbatim}
+
+#save_to: geometric_model_visualization.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+delta_t = 1
+n_values = np.arange(0, 10)
+N0 = 10
+
+fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+
+# Cas 1: z > 0 (natalité > mortalité)
+z_pos = 0.1
+c_pos = z_pos * delta_t
+N_pos = N0 * (1 + c_pos)**n_values
+axes[0].plot(n_values, N_pos, marker='o', linestyle='-')
+axes[0].set_title('$z > 0$ \n natalité supérieure \n à mortalité')
+axes[0].set_xlabel('n')
+axes[0].set_ylabel('$N_n$')
+axes[0].axhline(N0, color='r', linestyle='--', label='$N_0$')
+axes[0].legend()
+
+
+# Cas 2: z = 0 (natalité = mortalité)
+z_eq = 0
+c_eq = z_eq * delta_t
+N_eq = N0 * (1 + c_eq)**n_values
+axes[1].plot(n_values, N_eq, marker='o', linestyle='-')
+axes[1].set_title('$z = 0$ \n natalité \n égale à \n mortalité')
+axes[1].set_xlabel('n')
+axes[1].set_ylabel('$N_n$')
+axes[1].axhline(N0, color='r', linestyle='--', label='$N_0$')
+axes[1].legend()
+
+# Cas 3: z < 0 (natalité < mortalité)
+z_neg = -0.1
+c_neg = z_neg * delta_t
+N_neg = N0 * (1 + c_neg)**n_values
+axes[2].plot(n_values, N_neg, marker='o', linestyle='-')
+axes[2].set_title('$z < 0$ \n natalité \n inférieure \n à la \n mortalité')
+axes[2].set_xlabel('n')
+axes[2].set_ylabel('$N_n$')
+axes[2].axhline(N0, color='r', linestyle='--', label='$N_0$')
+axes[2].legend()
+
+
+plt.tight_layout()
+plt.savefig('geometric_model_visualization.png')
+\end{verbatim}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{geometric_model_visualization.png}
+    \caption{Visualisation du modèle de croissance géométrique pour différents taux de croissance $z$.}
+    \label{fig:geometric_model_visualization}
+\end{figure}
+
+
+\subsubsection{Propriétés du Modèle Géométrique}
+
+\begin{itemize}
+    \item \textbf{Tendance à l'infini pour $z > 0$}: Lorsque $z = \lambda - \mu > 0$, la population croît exponentiellement et tend vers l'infini lorsque $n \to \infty$. La solution $N(t) = N_0 e^{zt}$ est une approximation continue pour de petits $\Delta t$.
+    \item \textbf{Croissance indéfinie pour $z > 0$}: Si $z > 0$, la population croît indéfiniment.
+    \item \textbf{Extinction pour $z < 0$}: Si $z < 0$, la population décroît exponentiellement et tend vers l'extinction.
+    \item \textbf{Population constante pour $z = 0$}: Si $z = 0$, la population reste constante au fil du temps, $N_n = N_0$ pour tout $n$.
+\end{itemize}
+
+\subsubsection{Inconvénients du Modèle Géométrique}
+
+\begin{itemize}
+    \item \textbf{Croissance infinie irréaliste}: Une croissance infinie n'est pas réaliste dans le monde réel car les ressources sont limitées.
+    \item \textbf{Approximation de partie entière}: Pour être rigoureux, on devrait écrire $E(\lambda \Delta t N_n)$ et $E(\mu \Delta t N_n)$ pour tenir compte du fait que le nombre d'individus doit être un entier, où $E(x)$ désigne la partie entière de $x$.
+\end{itemize}
+
+\subsection{Modèle de croissance logistique discret}
+Le modèle de croissance logistique discret sera traité dans un exercice ultérieur.
+
+\section{Modèles Continus}
+
+Les modèles continus considèrent que les changements de population se produisent de manière continue dans le temps.
+
+\subsection{Motivation pour les Modèles Continus}
+
+\begin{remark}
+L'utilisation de modèles continus est motivée par le fait que l'observation des populations sur des intervalles de temps très courts ($\Delta t$ proche de 0) fournit beaucoup plus d'informations sur la dynamique de la population.
+\end{remark}
+
+
+\subsection{Modèle de Malthus}
+
+Le modèle de Malthus est le modèle continu le plus simple de croissance de population. Il est obtenu en passant à la limite du modèle géométrique lorsque $\Delta t \to 0$.
+
+\subsubsection{Hypothèses}
+
+\begin{itemize}
+    \item \textbf{Solde migratoire nul}: Comme pour le modèle géométrique, on suppose un solde migratoire nul.
+    \item \textbf{Vitesses de natalité et de mortalité proportionnelles à la population}: On suppose que la vitesse de natalité et la vitesse de mortalité sont proportionnelles à la taille de la population à l'instant $t$.
+    \begin{itemize}
+        \item Vitesse de natalité: $n(t) = \lambda N(t)$
+        \item Vitesse de mortalité: $m(t) = \mu N(t)$
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Équation et Solution}
+\begin{proposition}
+En reprenant l'équation de variation et en considérant les vitesses instantanées, l'équation différentielle du modèle de Malthus est:
+\[
+N'(t) = \lim_{\Delta t \to 0} \frac{N(t + \Delta t) - N(t)}{\Delta t} = n(t) - m(t) = \lambda N(t) - \mu N(t)
+\]
+Soit:
+\[
+N'(t) = (\lambda - \mu) N(t)
+\]
+En posant $z = \lambda - \mu$, on obtient:
+\[
+N'(t) = z N(t)
+\]
+Avec la condition initiale $N(0) = N_0$, la solution de cette équation différentielle est:
+\[
+N(t) = N_0 e^{zt} = N_0 e^{(\lambda - \mu)t}
+\]
+\end{proposition}
+
+
+\subsubsection{Propriétés du Modèle de Malthus}
+\begin{itemize}
+    \item Similaire au modèle géométrique en termes de comportement qualitatif, mais décrit la croissance de manière continue.
+    \item \textbf{Croissance exponentielle pour $z > 0$}: Si $z = \lambda - \mu > 0$, la population croît exponentiellement.
+    \item \textbf{Population constante pour $z = 0$}: Si $z = \lambda - \mu = 0$, la population reste constante.
+    \item \textbf{Décroissance exponentielle pour $z < 0$}: Si $z = \lambda - \mu < 0$, la population décroît exponentiellement vers zéro.
+\end{itemize}
+
+\subsubsection{Inconvénients du Modèle de Malthus}
+
+\begin{itemize}
+    \item \textbf{Croissance exponentielle irréaliste}: Comme le modèle géométrique, le modèle de Malthus prédit une croissance exponentielle infinie, ce qui n'est pas réaliste à long terme en raison de la limitation des ressources.
+    \item \textbf{Ne prend pas en compte la limitation des ressources et l'interaction avec l'environnement}.
+\end{itemize}
+
+\subsection{Modèle de Verhulst (ou Logistique)}
+
+Le modèle de Verhulst est une amélioration du modèle de Malthus qui prend en compte la limitation des ressources.
+
+\subsubsection{Idée Centrale}
+\begin{definition}
+Limiter la croissance de la population à un seuil maximal $K$, appelé \textit{capacité biotique} ou \textit{capacité de charge} du milieu.
+\end{definition}
+
+\subsubsection{Hypothèses}
+
+\begin{itemize}
+    \item \textbf{Solde migratoire nul}.
+    \item \textbf{Taux de natalité fonction affine décroissante de la population}: Le taux de natalité diminue à mesure que la population approche de la capacité biotique $K$. On le modélise par une fonction affine décroissante: $\lambda = \lambda_0 (1 - \frac{N(t)}{K})$, où $\lambda_0$ est le taux de natalité maximal (lorsque $N(t)$ est très petit).
+    \item \textbf{Taux de mortalité fonction affine croissante de la population}: Le taux de mortalité augmente à mesure que la population approche de $K$. On le modélise par une fonction affine croissante: $\mu = \mu_0 (1 + \frac{N(t)}{K})$, où $\mu_0$ est le taux de mortalité minimal (lorsque $N(t)$ est très petit). Pour simplifier, on prend souvent $\mu$ constant. Dans les notes, il est considéré comme une fonction affine croissante $\mu = -\mu_1 (1 - \frac{N(t)}{K})$, ce qui implique que $\mu$ diminue quand $N(t)$ augmente, ce qui n'est pas biologiquement réaliste. On corrigera par $\mu = \mu_0 + \mu_1 \frac{N(t)}{K} = \mu_0 (1 + \frac{N(t)}{K})$ ou simplement $\mu$ constant.
+\end{itemize}
+En utilisant la version simplifiée avec $\mu$ constant et en posant $\lambda = \lambda_0 (1 - \frac{N(t)}{K})$, et $z_0 = \lambda_0 - \mu$, le taux de croissance intrinsèque maximal, on obtient:
+\[
+z = \lambda - \mu = \lambda_0 (1 - \frac{N(t)}{K}) - \mu = (\lambda_0 - \mu) - \frac{\lambda_0}{K} N(t) = z_0 - \frac{\lambda_0}{K} N(t)
+\]
+On approche souvent $\lambda_0 \approx z_0$, et on pose simplement $z \approx z_0 (1 - \frac{N(t)}{K})$.
+
+\subsubsection{Équation et Solution}
+\begin{proposition}
+L'équation différentielle du modèle de Verhulst est alors:
+\[
+N'(t) = z N(t) = z_0 \left(1 - \frac{N(t)}{K}\right) N(t)
+\]
+Avec condition initiale $N(0) = N_0$. La solution de cette équation différentielle est donnée par:
+\[
+N(t) = \frac{K}{1 + \left(\frac{K}{N_0} - 1\right) e^{-z_0 t}}
+\]
+\end{proposition}
+
+\subsubsection{Visualisation}
+
+\begin{verbatim}
+
+#save_to: verhulst_model_visualization.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+def verhulst_solution(t, N0, K, z0):
+    return K / (1 + (K / N0 - 1) * np.exp(-z0 * t))
+
+t_values = np.linspace(0, 10, 100)
+K = 50
+N0_values = [10, 60] # N0 < K and N0 > K
+z0_values = [0.5] # Example z0 value
+
+fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+
+# Cas 1: N0 < K
+N0 = N0_values[0]
+z0 = z0_values[0]
+N_t_below_K = verhulst_solution(t_values, N0, K, z0)
+axes[0].plot(t_values, N_t_below_K, label='$N_0 < K$')
+axes[0].axhline(K, color='r', linestyle='--', label='$K$')
+axes[0].axhline(N0, color='g', linestyle='--', label='$N_0$')
+axes[0].set_title('$N_0 < K$, $z_0 > 0$')
+axes[0].set_xlabel('t')
+axes[0].set_ylabel('N(t)')
+axes[0].legend()
+
+
+# Cas 2: N0 > K
+N0 = N0_values[1]
+z0 = z0_values[0]
+N_t_above_K = verhulst_solution(t_values, N0, K, z0)
+axes[1].plot(t_values, N_t_above_K, label='$N_0 > K$')
+axes[1].axhline(K, color='r', linestyle='--', label='$K$')
+axes[1].axhline(N0, color='g', linestyle='--', label='$N_0$')
+axes[1].set_title('$N_0 > K$, $z_0 > 0$')
+axes[1].set_xlabel('t')
+axes[1].set_ylabel('N(t)')
+axes[1].legend()
+
+
+plt.tight_layout()
+plt.savefig('verhulst_model_visualization.png')
+\end{verbatim}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{verhulst_model_visualization.png}
+    \caption{Visualisation du modèle de Verhulst pour différentes conditions initiales $N_0$ par rapport à la capacité biotique $K$.}
+    \label{fig:verhulst_model_visualization}
+\end{figure}
+
+
+\section{Conclusion}
+
+Nous avons exploré les modèles discrets (géométrique) et continus (Malthus et Verhulst) pour la modélisation de populations. Le modèle géométrique et le modèle de Malthus, bien que simples, présentent des limitations importantes, notamment la prédiction d'une croissance infinie. Le modèle de Verhulst améliore ces modèles en introduisant la notion de capacité biotique, offrant une description plus réaliste de la dynamique des populations en tenant compte de la limitation des ressources.\chapter{}
+\sloppy
+
+\section{Introduction: Notion de Champ de Vecteurs et EDO}
+
+\subsection{Généralités et Définitions}
+
+Nous allons étudier la notion de champ de vecteurs associé à une équation différentielle ordinaire (EDO).
+
+Les modèles continus de la dynamique des populations sont des exemples de problèmes de Cauchy pour les EDOs.
+
+Considérons une EDO du type :
+\begin{equation}
+\label{eq:edo_generale}
+y'(t) = f(t, y(t)), \quad t \in ]t_0, T[,
+\end{equation}
+avec la condition initiale :
+\begin{equation}
+\label{eq:condition_initiale}
+y(t_0) = y_0,
+\end{equation}
+où $y : ]t_0, T[ \rightarrow \mathbb{R}$ et $f : ]t_0, T[ \times \mathbb{R} \rightarrow \mathbb{R}$ est une fonction donnée, et $(t, x) \mapsto f(t, x)$.
+
+\section{Analyse Qualitative des Solutions d'EDO}
+
+Si l'on veut résoudre analytiquement une EDO, c'est-à-dire donner l'expression de $t \mapsto y(t)$, alors c'est terminé. Dans de nombreux cas, il suffit d'étudier la fonction $t \mapsto y(t)$.
+
+Si l'on ne sait pas déterminer la solution analytique, on peut suivre une approche en deux étapes pour comprendre les solutions :
+
+\begin{enumerate}
+    \item S'assurer de l'existence et de l'unicité de la solution, et de sa stabilité vis-à-vis des données du problème.
+    \item Puis analyser les propriétés qualitatives de cette solution par une simple analyse de $f(t, x)$. C'est ici qu'interviennent les champs de vecteurs.
+\end{enumerate}
+
+\section{Champ de Vecteurs: Définitions et Propriétés}
+
+\subsection{Vecteur Tangent à une Courbe Paramétrée}
+
+Considérons une courbe paramétrée $t \mapsto \begin{pmatrix} x(t) \\ y(t) \end{pmatrix} = \begin{pmatrix} t \\ g(t) \end{pmatrix}$. Le vecteur tangent $\vec{v}$ à cette courbe est donné par :
+\begin{align*}
+\vec{v} = \begin{pmatrix} x'(t) \\ y'(t) \end{pmatrix} = \begin{pmatrix} \frac{dx}{dt} \\ \frac{dy}{dt} \end{pmatrix} &= \begin{pmatrix} \frac{dx}{dt} \\ \frac{dy}{dx} \frac{dx}{dt} \end{pmatrix} = \frac{dx}{dt} \begin{pmatrix} 1 \\ \frac{dy}{dx} \end{pmatrix} \\
+&= \frac{1}{\frac{dt}{dx}} \begin{pmatrix} 1 \\ g'(x) \end{pmatrix} = \frac{1}{\dot{x}(t)} \begin{pmatrix} 1 \\ \dot{y}(t) \end{pmatrix} = \begin{pmatrix} 1 \\ \frac{\dot{y}(t)}{\dot{x}(t)} \end{pmatrix} =  \begin{pmatrix} 1 \\ \dot{y}(t) \end{pmatrix}
+\end{align*}
+Si $x(t) = t$, alors $\dot{x}(t) = 1$, et le vecteur tangent devient $\vec{v} = \begin{pmatrix} 1 \\ \dot{y}(t) \end{pmatrix}$.
+
+\subsection{Lien entre Solution d'EDO et Vecteurs Vitesse}
+
+\begin{proposition}
+$y$ est solution de l'EDO $y'(t) = f(t, y(t))$ si et seulement si les vecteurs vitesses de la courbe paramétrée $t \mapsto \begin{pmatrix} x(t) \\ y(t) \end{pmatrix} = \begin{pmatrix} t \\ y(t) \end{pmatrix}$ au point $t$ sont donnés par $u(t) = \begin{pmatrix} 1 \\ f(t, y(t)) \end{pmatrix}$.
+\end{proposition}
+
+\subsection{Définition d'un Champ de Vecteurs}
+
+\begin{definition}
+Soit $V : \mathbb{R}^2 \rightarrow \mathbb{R}^2$ un champ de vecteurs, défini par $(t, y) \mapsto V(t, y)$.
+Si ce champ de vecteurs est associé à l'EDO $y'(t) = f(t, y(t))$, alors $V(t, y) = \begin{pmatrix} 1 \\ f(t, y) \end{pmatrix}$.
+\end{definition}
+
+\section{Visualisation des Champs de Vecteurs (Implémentation Python)}
+
+\subsection{Principe}
+
+Pour dessiner un champ de vecteurs, à chaque point $P = (P_x, P_y)$, on trace le vecteur $V \in V(P) = (V_x, V_y)$. On choisit une constante positive pour représenter les vecteurs trop longs.
+
+\begin{figure}[H]
+    \centering
+    \begin{verbatim}
+    ```python
+#save_to: champ_vecteurs_schema.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots()
+
+# Point P
+Px, Py = 2, 2
+ax.plot(Px, Py, 'o', markersize=5, color='black')
+ax.text(Px + 0.1, Py, 'P', verticalalignment='center')
+
+# Vecteur V
+Vx, Vy = 1, 2
+ax.arrow(Px, Py, Vx, Vy, head_width=0.2, head_length=0.3, fc='blue', ec='blue')
+ax.text(Px + Vx/2 + 0.1, Py + Vy/2, 'V', color='blue', verticalalignment='center')
+
+# Axes
+ax.axhline(0, color='black', linewidth=0.5)
+ax.axvline(0, color='black', linewidth=0.5)
+ax.set_xlabel('x')
+ax.set_ylabel('y')
+ax.set_xlim(0, 5)
+ax.set_ylim(0, 5)
+ax.set_aspect('equal', adjustable='box')
+plt.savefig('champ_vecteurs_schema.png')
+    ```
+    \end{verbatim}
+    \caption{Schéma de principe pour le dessin d'un champ de vecteurs.}
+    \label{fig:champ_vecteurs_schema}
+\end{figure}
+
+\subsection{Utilisation de \texttt{quiver} de Python}
+
+Pour implémenter le dessin de champs de vecteurs en Python, on utilise la fonction \texttt{quiver} de \texttt{matplotlib.pyplot}. Les arguments principaux sont : \texttt{plt.quiver(Px, Py, Vx, Vy, angles='xy', scale)}.
+
+\begin{verbatim}
+    ```python
+#save_to: quiver_example.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Exemple d'utilisation de quiver
+Px = np.array([1, 2, 1, 2])
+Py = np.array([1, 1, 2, 2])
+Vx = np.array([1, 0, 0, -1])
+Vy = np.array([0, 1, -1, 0])
+
+plt.quiver(Px, Py, Vx, Vy, angles='xy', scale_units='xy', scale=1)
+plt.xlim(0, 3)
+plt.ylim(0, 3)
+plt.gca().set_aspect('equal', adjustable='box')
+plt.title('Exemple quiver')
+plt.savefig('quiver_example.png')
+    ```
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{quiver_example.png}
+    \caption{Exemple d'utilisation de quiver}
+    \label{fig:quiver_example}
+\end{figure}
+
+
+\subsection{Contrôle de la Longueur des Vecteurs}
+
+On peut ajouter un paramètre pour contrôler la longueur des vecteurs.  Il est souvent nécessaire de normaliser les vecteurs pour une visualisation claire du champ de vecteurs.
+
+Pour normaliser les vecteurs $(V_x, V_y)$, on calcule d'abord la norme :
+\begin{equation}
+\text{norm} = \sqrt{V_x^2 + V_y^2}
+\end{equation}
+Puis on normalise chaque composante :
+\begin{align*}
+V_x &= V_x / \text{norm} \\
+V_y &= V_y / \text{norm}
+\end{align*}
+
+\section{Application: Recherche Approchée de Solutions (Python)}
+
+\subsection{Objectif}
+
+On cherche une solution approchée de l'EDO $y'(t) = f(t, y(t))$, pour $t \in [t_0, t_0 + T]$ avec $y(t_0) = y_0$, en utilisant Python. Pour cela, il suffit de dessiner en quelques points où aboutit cette solution.
+
+\subsection{Méthode Python}
+
+Définissons un exemple de champ de vecteur avec $f(t, y) = r \cdot y \cdot (1 - y/k)$.
+
+\begin{verbatim}
+    ```python
+#save_to: modele_verhulst.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+def f(t, y):
+    r = 1.0
+    k = 1.0
+    return r * y * (1 - y/k)
+
+# Grille de points
+lx = np.linspace(0, 5, 20) # tmin, tmax, N+1 (Reduced for spacing)
+ly = np.linspace(0, 5, 15) # ymin, ymax, M+1 (Reduced for spacing)
+T, Y = np.meshgrid(lx, ly)
+
+# Construction des vecteurs
+U = 1 + 0 * T
+V = f(T, Y)
+norm = np.sqrt(U**2 + V**2)
+U = U / norm
+V = V / norm
+
+# On place des points
+plt.scatter(T, Y, marker='+', alpha=0.5) # Reduced alpha for clarity
+
+# On place les vecteurs
+plt.quiver(T, Y, U, V, angles='xy', scale_units='xy', scale=5, width=0.005)
+plt.xlabel('t')
+plt.ylabel('y')
+plt.title('Champ de vecteurs - Modèle de Verhulst')
+plt.gca().set_aspect('equal', adjustable='box')
+plt.savefig('modele_verhulst.png')
+    ```
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{modele_verhulst.png}
+    \caption{Champ de vecteurs pour le modèle de Verhulst.}
+    \label{fig:modele_verhulst}
+\end{figure}
+
+
+\section{Exploitation des Champs de Vecteurs pour Comprendre l'Allure des Solutions}
+
+Si l'on connaît les valeurs minimales et maximales de la solution, on peut avoir une idée de l'allure de la solution en observant le champ de vecteurs. Par exemple, si les vecteurs pointent vers le haut dans une certaine région, et vers le bas dans une autre, on peut déduire le comportement qualitatif des solutions dans ces régions.\chapter{}
+\sloppy
+
+\section{Analyse de la convergence}
+
+On va essayer de construire des polynômes qui passent par un ensemble (nuage) de points donnés.
+
+Si ces points sont les valeurs d'une fonction, on aimerait :
+\begin{itemize}
+    \item avoir un polynôme construit et d'autant plus proche de la fonction que le nombre de points est grand.
+\end{itemize}
+
+C'est-à-dire, est-ce que la suite des "meilleurs" polynômes tend vers la fonction lorsque le nombre de points tend vers l'infini?
+
+\textbf{Question :} Comment quantifier cette convergence? C'est-à-dire à quelle vitesse (ordre) cette convergence a lieu.
+
+\subsection{Approches}
+
+\begin{itemize}
+    \item \textbf{Approche 1 :} Approximation linéaire
+    \begin{itemize}
+        \item Moindre carré de degré 1
+    \end{itemize}
+    \item \textbf{Approche 2 :} Polynôme d'ordre 1
+    \begin{itemize}
+        \item Interpolation polynomiale (Lagrange)
+    \end{itemize}
+    \item \textbf{Approche 3 :} Autres approches
+    \begin{itemize}
+        \item Splines, ondelettes, etc.
+    \end{itemize}
+\end{itemize}
+
+
+\subsection{Valeur approchée par itération}
+
+\subsubsection{Définition de convergence}
+\begin{definition}
+Soit $(x_n)_{n \in \mathbb{N}} \subset \mathbb{R}^d$ une suite qui converge vers $x^* \in \mathbb{R}^d$, pour une norme $\|\cdot\|$ de $\mathbb{R}^d$.
+\end{definition}
+
+\subsubsection{Vitesse (ordre) de convergence}
+
+\begin{itemize}
+    \item \textbf{Convergence linéaire (ordre 1)}: Si $K_1 = \lim\limits_{n \to +\infty} \dfrac{\|x_{n+1}-x^*\|}{\|x_n-x^*\|}$ existe et $K_1 \in [0, 1[$, on dit que la suite converge \textbf{linéairement} vers $x^*$, ou que la convergence est d'ordre 1.
+\end{itemize}
+
+\begin{itemize}
+    \item \textbf{Convergence quadratique (ordre 2)}: Si $K_1 = 0$, $K_2 = \lim\limits_{n \to +\infty} \dfrac{\|x_{n+1}-x^*\|}{\|x_n-x^*\|^2}$ existe et non nul, on dit que la suite converge \textbf{quadratiquement} vers $x^*$, ou que la convergence est d'ordre 2.
+\end{itemize}
+
+\begin{itemize}
+    \item \textbf{Convergence d'ordre q}: Si $K_q = \lim\limits_{n \to +\infty} \dfrac{\|x_{n+1}-x^*\|}{\|x_n-x^*\|^q}$ existe et $\neq 0$, la convergence est d'ordre $q$.
+\end{itemize}
+
+\begin{remark}
+La constante $K_1$ est appelée constante asymptotique d'erreur pour la convergence linéaire.
+\end{remark}
+
+\subsubsection{Exemples}
+
+\begin{example}
+Soit $x_n = (0.2)^n$.
+On a $\lim\limits_{n \to +\infty} x_n = 0$. La convergence est vers $x^* = 0$.
+
+\begin{align*}
+\lim\limits_{n \to +\infty} \dfrac{\|x_{n+1}-x^*\|}{\|x_n-x^*\|} &= \lim\limits_{n \to +\infty} \dfrac{(0.2)^{n+1}}{(0.2)^n} = 0.2 \in [0, 1[
+\end{align*}
+D'où, $x_n$ converge à l'ordre 1.
+Sa constante asymptotique est $K_1 = 0.2$.
+\end{example}
+
+\begin{example}
+Soit $y_n = (0.2)^{2^n}$.
+\begin{align*}
+y_{n+1} &= (0.2)^{2^{n+1}} = (0.2)^{2^n \cdot 2} = ((0.2)^{2^n})^2 = (y_n)^2
+\end{align*}
+\begin{align*}
+\lim\limits_{n \to +\infty} \dfrac{\|y_{n+1}-x^*\|}{\|y_n-x^*\|^2} &= \lim\limits_{n \to +\infty} \dfrac{y_{n+1}}{(y_n)^2} = \lim\limits_{n \to +\infty} \dfrac{(y_n)^2}{(y_n)^2} = 1
+\end{align*}
+D'où, convergence d'ordre 2, de constante $K_2 = 1$.
+\end{example}
+
+\subsubsection{Définition formelle de la convergence d'ordre q}
+
+\begin{definition}
+On dit que $x_n$ converge vers $x^*$ à l'ordre $q$ s'il existe un entier $N \in \mathbb{N}$ et des constantes $A, B \in \mathbb{R}$ telles que pour tout $n > N$,
+$$ 0 < A \leq \dfrac{\|x_{n+1}-x^*\|}{\|x_n-x^*\|^q} \leq B < +\infty $$
+\end{definition}
+
+\begin{remark}
+La convergence est au moins d'ordre $q$ si seulement on a
+$$ \limsup\limits_{n \to +\infty} \dfrac{\|x_{n+1}-x^*\|}{\|x_n-x^*\|^q} < +\infty $$
+\end{remark}
+
+\subsection{Interprétation pratique de la vitesse de convergence}
+
+\subsubsection{Nombre de chiffres significatifs}
+\begin{remark}
+Si $|x_n - x^*| = 4 \cdot 10^{-8} = 0.\underbrace{00000004}_{\text{8 digits}}$,
+on dit que $x_n$ et $x^*$ ont 8 chiffres exacts après la virgule.
+\end{remark}
+
+\begin{align*}
+\log_{10} |x_n - x^*| &= \log_{10} (4 \cdot 10^{-8}) = \log_{10} 4 - 8 \approx -8
+\end{align*}
+On pose $d_n = -\log_{10} |x_n - x^*|$. $d_n$ mesure approximativement le nombre de chiffres décimaux exacts entre $x_n$ et $x^*$.
+
+\begin{align*}
+\lim\limits_{n \to +\infty} \dfrac{\|x_{n+1}-x^*\|}{\|x_n-x^*\|^q} = K_q \Rightarrow \|x_{n+1}-x^*\| \approx K_q \|x_n-x^*\|^q
+\end{align*}
+\begin{align*}
+\log_{10} \|x_{n+1}-x^*\| &\approx \log_{10} (K_q \|x_n-x^*\|^q) \\
+&= \log_{10} K_q + q \log_{10} \|x_n-x^*\|
+\end{align*}
+\begin{align*}
+-d_{n+1} &\approx \log_{10} K_q + q (-d_n) \\
+d_{n+1} &\approx q d_n - \log_{10} K_q
+\end{align*}
+Si $q=1$, $d_{n+1} \approx d_n - \log_{10} K_1$. À chaque itération, on gagne environ $-\log_{10} K_1$ chiffres significatifs.
+
+Si $q > 1$, $d_{n+1} \approx q d_n$. Le nombre de chiffres significatifs est approximativement multiplié par $q$ à chaque itération.
+
+\subsection{Nombre d'itérations pour gagner un chiffre en convergence linéaire}
+
+\begin{proposition}
+Si $x_n$ converge à l'ordre 1 vers $x^*$ avec une constante asymptotique $K_1$. Alors, le nombre d'itérations nécessaires pour gagner un chiffre significatif est approximativement $-\dfrac{1}{\log_{10}(K_1)}$.
+\end{proposition}
+
+\begin{proof}
+Soit $m$ le nombre d'itérations pour gagner 1 chiffre significatif.
+Pour une convergence linéaire, $d_{n+1} \approx d_n - \log_{10} K_1$. En partant de $d_n$, après $m$ itérations, on aura:
+$$ d_{n+m} \approx d_n -m \log_{10} K_1 $$
+On souhaite gagner 1 chiffre significatif, donc $d_{n+m} \approx d_n + 1$.
+$$ d_n + 1 = d_n - m \log_{10} K_1 \Leftrightarrow 1 = - m \log_{10} K_1 \Leftrightarrow m = - \dfrac{1}{\log_{10} K_1} $$
+\end{proof}
+
+
+\subsection{Linéarisation pour estimation graphique de q}
+\begin{align*}
+\dfrac{\|x_{n+1}-x^*\|}{\|x_n-x^*\|^q} &\approx K_q \\
+\log_{10} \|x_{n+1}-x^*\| &\approx \log_{10} (K_q \|x_n-x^*\|^q) \\
+\log_{10} \|x_{n+1}-x^*\| &\approx \underbrace{q \log_{10} \|x_n-x^*\|}_{x} + \underbrace{\log_{10} K_q}_{b}
+\end{align*}
+C'est de la forme $y = qx + b$, où $y = \log_{10} \|x_{n+1}-x^*\|$, $x = \log_{10} \|x_n-x^*\|$, $q$ est la pente et $b = \log_{10} K_q$ est l'ordonnée à l'origine.
+
+\subsection{Procédure pour déterminer q graphiquement}
+\begin{enumerate}
+    \item Calculer les erreurs $\|x_n - x^*\|$ et $\|x_{n+1} - x^*\|$ pour les itérations disponibles.
+    \item Calculer les logarithmes (base 10) de ces erreurs: $\log_{10} \|x_n-x^*\|$ et $\log_{10} \|x_{n+1}-x^*\|$.
+    \item Tracer le nuage de points $(\log_{10} \|x_n-x^*\|, \log_{10} \|x_{n+1}-x^*\|)$.
+    \item Estimer graphiquement ou par régression linéaire la pente $q$ de la droite qui approxime au mieux ce nuage de points. Cette pente $q$ est une estimation de l'ordre de convergence.
+\end{enumerate}
+
+\begin{verbatim}
+```python
+#save_to: convergence_plot.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+# Exemple de code Python pour illustrer la méthode graphique
+xn = np.array([0.5**(i) for i in range(1, 11)]) # Example sequence xn converging to 0
+x_star = 0 # Limit x*
+errors_n = np.abs(xn - x_star)
+errors_n_plus_1 = np.abs(xn[1:] - x_star)
+
+log_errors_n = np.log10(errors_n[:-1])
+log_errors_n_plus_1 = np.log10(errors_n_plus_1)
+
+
+# Plot
+plt.figure(figsize=(8, 6))
+plt.scatter(log_errors_n, log_errors_n_plus_1, label="Nuage de points $(\log_{10} \|x_n - x^*\|, \log_{10} \|x_{n+1} - x^*\|)$")
+
+# Linear Regression (for slope approximation)
+ab = np.polyfit(log_errors_n, log_errors_n_plus_1, 1) # Fit a line (degree 1 polynomial)
+y_fit = ab[0] * log_errors_n + ab[1]
+plt.plot(log_errors_n, y_fit, color='red', linestyle='--', label=f'Droite de régression linéaire:\n$y = {ab[0]:.2f}x + {ab[1]:.2f}$ (pente $q \approx {ab[0]:.2f}$)')
+
+
+plt.xlabel("$\log_{10} \|x_n - x^*\|$", fontsize=12)
+plt.ylabel("$\log_{10} \|x_{n+1} - x^*\|$", fontsize=12)
+plt.title("Estimation graphique de l'ordre de convergence $q$", fontsize=14)
+plt.legend()
+plt.grid(True)
+plt.savefig('convergence_plot.png')
+```
+\end{verbatim}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\linewidth]{convergence_plot.png}
+    \caption{Estimation graphique de l'ordre de convergence $q$}
+    \label{fig:convergence_order_estimation}
+\end{figure}
+
+
+\section{Python code pour l'estimation de la convergence (exemple)}
+
+\begin{lstlisting}[language=Python, caption=Code Python pour l'estimation de la convergence, label=lst:convergence_code]
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+# Exemple de suite xn (remplacez avec votre suite)
+xn = np.array([0.7**(i) for i in range(1, 20)])
+x_star = 0 # Valeur limite de la suite
+
+errors_n = np.abs(xn - x_star) # Erreur absolue |xn - x*|
+log_errors_n = np.log10(errors_n) # Logarithme base 10 des erreurs
+
+ex = log_errors_n[:-1] # $\log_{10} \|x_n - x^*\|$
+ey = log_errors_n[1:]  # $\log_{10} \|x_{n+1} - x^*\|$
+
+plt.figure(figsize=(8, 6))
+plt.scatter(ex, ey, label="Nuage de points")
+
+ab = np.polyfit(ex, ey, 1) # Regression lineaire (y = ax + b)
+y_fit = ab[0]*ex + ab[1]
+plt.plot(ex, y_fit, color='red', linestyle='--', label=f"Droite de régression: $y = {ab[0]:.2f}x + {ab[1]:.2f}$")
+
+
+plt.xlabel("$\log_{10} \|x_n - x^*\|$", fontsize=12)
+plt.ylabel("$\log_{10} \|x_{n+1} - x^*\|$", fontsize=12)
+plt.title("Estimation graphique de l'ordre de convergence $q$", fontsize=14)
+plt.legend()
+plt.grid(True)
+plt.show() # Affiche le graphique (pour execution hors LaTeX)
+\end{lstlisting}\chapter{}
+\sloppy
+
+\section{Introduction à l'interpolation}
+
+\subsection{Définition}
+
+\begin{definition}
+Soit un nuage de points (exemple: un ensemble discret de points du graphe d'une fonction). Interpréter ce nuage de points correspond à chercher un polynôme de degré $N-1$ qui passe par chacun de ces points.
+\end{definition}
+
+\begin{itemize}
+    \item Comment le construire ?
+    \item $P_{N-1} \in \mathbb{P}_{N-1}[x]$
+    \item $P_{N-1}(x_i) = y_i$
+\end{itemize}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\linewidth]{interpolation_graph.png}
+    \caption{Illustration de l'interpolation polynomiale.}
+    \label{fig:interpolation_graph}
+\end{figure}
+
+\begin{verbatim}
+```python
+#save_to: interpolation_graph.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+x = np.array([0, 1, 2, 3, 4, 5])
+y = np.array([1, 2, 1.5, 3, 2.5, 4])
+
+plt.figure(figsize=(8, 6))
+plt.plot(x, y, 'o', label='Points de données')
+
+# Polynomial Interpolation
+poly_coeffs = np.polyfit(x, y, len(x) - 1) # Fit a polynomial of degree N-1
+poly = np.poly1d(poly_coeffs)
+x_interp = np.linspace(0, 5, 100)
+y_interp = poly(x_interp)
+plt.plot(x_interp, y_interp, '-', label='Interpolation polynomiale (degré N-1)')
+
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Interpolation Polynomiale (Exemple)')
+plt.legend()
+plt.grid(True)
+plt.savefig('interpolation_graph.png')
+plt.close()
+```
+\end{verbatim}
+
+
+\subsection{Motivations}
+
+\begin{itemize}
+    \item La solution d'un problème est fournie par une formule représentative : noyau de la chaleur (ex: convolution) et on cherche la solution en un nombre de points.
+    $\implies$ on approche alors la fonction par un polynôme i.e. chercher le polynôme de degré ``bas'' proche de la fonction.
+    \item La solution d'un problème n'est connue qu'à travers ses valeurs en un nombre fini de points et on souhaite l'évaluer partout.
+    $\implies$ Interpolation.
+    \item On peut utiliser l'interpolation dans :
+    \begin{itemize}
+        \item la résolution numérique
+        \item la résolution numérique des Équations Différentielles Ordinaires (EDO)
+        \item la visualisation scientifique
+    \end{itemize}
+\end{itemize}
+
+\begin{definition}
+Un tel polynôme est appelé \textbf{polynôme interpolateur de Lagrange} de degré $N-1$ de ces points.
+\end{definition}
+
+\subsection{Exemples d'interpolation}
+
+\subsubsection{Théorème: Polynôme interpolateur de degré 1}
+
+\begin{theorem}
+Soient $(x_1, y_1)$ et $(x_2, y_2)$ deux points distincts de $\mathbb{R}^2$.
+Il existe une unique droite $D$ passant par ces deux points.
+\[
+(x, y) \in D \iff (x-x_1)(y_2-y_1) - (y-y_1)(x_2-x_1) = 0
+\]
+Si de plus, $x_1 \neq x_2$, il existe un unique polynôme de degré 1 (i.e., $P \in \mathbb{P}_1[x]$) tel que $y = P(x)$.
+
+avec
+\[
+P_1(x) = \frac{(x-x_2)}{(x_1-x_2)} y_1 + \frac{(x-x_1)}{(x_2-x_1)} y_2
+\]
+pour des abscisses $x_1, x_2$ distinctes.
+\end{theorem}
+
+\begin{example}
+Montrons que $M(x,y)$ est sur la droite $(M_1M_2)$ si et seulement si les vecteurs $\overrightarrow{M_1M}$ et $\overrightarrow{M_1M_2}$ sont colinéaires.
+Soient $M_1(x_1, y_1)$, $M_2(x_2, y_2)$ et $M(x,y)$.
+\[
+M \in (M_1M_2) \Leftrightarrow \overrightarrow{M_1M} // \overrightarrow{M_1M_2}
+\]
+\[
+\Leftrightarrow \det(\overrightarrow{M_1M}, \overrightarrow{M_1M_2}) = 0
+\]
+\[
+\Leftrightarrow \begin{vmatrix} x-x_1 & x_2-x_1 \\ y-y_1 & y_2-y_1 \end{vmatrix} = 0
+\]
+\[
+\Leftrightarrow (x-x_1)(y_2-y_1) - (x_2-x_1)(y-y_1) = 0
+\]
+Si $x_1 \neq x_2$, alors on peut réécrire l'équation de la droite sous la forme $y=ax+b$:
+\[
+\implies y-y_1 = \frac{(y_2-y_1)}{(x_2-x_1)} (x-x_1)
+\]
+\[
+\Leftrightarrow y = P_1(x)
+\]
+\end{example}
+
+\begin{remark}
+On a l'écriture équivalente de $P_1$ :
+\[
+P_1(x) = \frac{x-x_2}{x_1-x_2} y_1 + \frac{x-x_1}{x_2-x_1} y_2 = \frac{y_1-y_2}{x_1-x_2} x + \frac{x_2y_1-x_1y_2}{x_2-x_1} = a_1 x + a_0
+\]
+c'est l'écriture dans la base $(1, x)$ de $\mathbb{P}_1[x]$ (base canonique).
+\end{remark}
+
+\begin{itemize}
+    \item $P_1(x) = \frac{x-x_2}{x_1-x_2} y_1 + \frac{x-x_1}{x_2-x_1} y_2$
+    \[
+    = \underbrace{\frac{x-x_2}{x_1-x_2}}_{\ell_1(x)} y_1 + \underbrace{\frac{x-x_1}{x_2-x_1}}_{\ell_2(x)} y_2
+    \]
+    C'est l'écriture dans la base $(\ell_1, \ell_2)$ de $\mathbb{P}_1[x]$ (base de Lagrange).
+\end{itemize}
+
+\begin{remark}
+$\ell_1(x_1) = 1, \ell_1(x_2) = 0$
+
+$\ell_2(x_1) = 0, \ell_2(x_2) = 1$
+\end{remark}
+
+\begin{itemize}
+    \item $P_1(x) = y_1 + \frac{y_2-y_1}{x_2-x_1} (x-x_1)$
+    C'est l'écriture dans la base $(1, x-x_1)$ de $\mathbb{P}_1[x]$ (base de Newton).
+\end{itemize}
+
+
+\subsubsection{Exemple: méthode de calcul employée}
+
+Chercher le polynôme interpolateur de Lagrange aux points $(x_1, y_1), (x_2, y_2), (x_3, y_3)$.
+
+\paragraph{Méthode 1.} $(x_1 \neq x_2, x_2 \neq x_3, x_1 \neq x_3)$
+
+$P_2$ sera un polynôme de degré 2 :
+\[
+P_2(x) = a_0 + a_1 x + a_2 x^2
+\]
+Comme $P_2(x_i) = y_i$, pour $i=1, 2, 3$, on a le système d'équations linéaires:
+\[
+\begin{cases}
+P_2(x_1) = y_1 \\
+P_2(x_2) = y_2 \\
+P_2(x_3) = y_3
+\end{cases}
+\implies
+\begin{cases}
+a_0 + a_1 x_1 + a_2 x_1^2 = y_1 \\
+a_0 + a_1 x_2 + a_2 x_2^2 = y_2 \\
+a_0 + a_1 x_3 + a_2 x_3^2 = y_3
+\end{cases}
+\]
+Matriciellement :
+\[
+\begin{pmatrix}
+1 & x_1 & x_1^2 \\
+1 & x_2 & x_2^2 \\
+1 & x_3 & x_3^2
+\end{pmatrix}
+\begin{pmatrix} a_0 \\ a_1 \\ a_2 \end{pmatrix} = \begin{pmatrix} y_1 \\ y_2 \\ y_3 \end{pmatrix}
+\implies
+\begin{pmatrix} a_0 \\ a_1 \\ a_2 \end{pmatrix} = \underbrace{ \begin{pmatrix}
+1 & x_1 & x_1^2 \\
+1 & x_2 & x_2^2 \\
+1 & x_3 & x_3^2
+\end{pmatrix}^{-1} }_{H^{-1}} \begin{pmatrix} y_1 \\ y_2 \\ y_3 \end{pmatrix}
+\]
+Matrice de Vandermonde mal-conditionnée mais facile à construire.
+
+\begin{remark}
+Pour 2 points :
+\[
+H = \begin{pmatrix} 1 & x_1 \\ 1 & x_2 \end{pmatrix}
+\implies
+H^{-1} = \frac{1}{x_2-x_1} \begin{pmatrix} x_2 & -x_1 \\ -1 & 1 \end{pmatrix}
+\]
+si $x_1 \neq x_2$.
+\end{remark}
+
+\paragraph{Méthode 2. Base de Newton}
+
+\[
+P_2(x) = a_0 + a_1 (x-x_1) + a_2 (x-x_1)(x-x_2)
+\]
+\[
+\begin{cases}
+P_2(x_1) = y_1 \implies a_0 = y_1 \\
+P_2(x_2) = y_2 \implies a_0 + a_1 (x_2-x_1) = y_2 \\
+P_2(x_3) = y_3 \implies a_0 + a_1 (x_3-x_1) + a_2 (x_3-x_1)(x_3-x_2) = y_3
+\end{cases}
+\]
+\[
+\implies
+\begin{cases}
+a_0 = y_1 \\
+a_1 = \frac{y_2-y_1}{x_2-x_1} \\
+a_2 = \frac{y_3 - y_1 - \frac{y_2-y_1}{x_2-x_1} (x_3-x_1)}{(x_3-x_1)(x_3-x_2)} = \frac{\frac{y_3-y_1}{x_3-x_1} - \frac{y_2-y_1}{x_2-x_1}}{(x_3-x_2)} = \frac{\frac{y_3-y_1}{x_3-x_1} - \frac{y_2-y_1}{x_2-x_1}}{x_3-x_2}
+\end{cases}
+\]
+Cette construction est différentielle et facile à mettre à jour quand on rajoute un point supplémentaire (on rajoute uniquement une ligne).
+
+\textbf{On a donc :}
+\[
+a_0 = y_1, \quad a_1 = \frac{y_2-y_1}{x_2-x_1}, \quad a_2 = \frac{\frac{y_3-y_1}{x_3-x_1} - \frac{y_2-y_1}{x_2-x_1}}{x_3-x_2}
+\]
+
+Le polynôme $P_2$ s'écrit donc :
+\[
+P_2(x) = y_1 + \frac{y_2-y_1}{x_2-x_1} (x-x_1) + \frac{\frac{y_3-y_1}{x_3-x_1} - \frac{y_2-y_1}{x_2-x_1}}{x_3-x_2} (x-x_1)(x-x_2)
+\]
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+         & $a_0$ & $a_1$ & $a_2$ \\
+        \hline
+        $x_1$ & $y_1$ & &  \\
+        \hline
+        $x_2$ & $y_1$ & $\frac{y_2-y_1}{x_2-x_1}$ &  \\
+        \hline
+        $x_3$ & $y_1$ & $\frac{y_2-y_1}{x_2-x_1}$ & $\frac{\frac{y_3-y_1}{x_3-x_1} - \frac{y_2-y_1}{x_2-x_1}}{x_3-x_2}$ \\
+        \hline
+    \end{tabular}
+    \caption{Tableau des coefficients pour la base de Newton.}
+    \label{tab:newton_coeffs}
+\end{table}
+Construction facile et différentielle par différences divisées : ajout d'un terme.
+
+\paragraph{Méthode 3. Base de Lagrange}
+
+\[
+P_2(x) = \frac{(x-x_2)(x-x_3)}{(x_1-x_2)(x_1-x_3)} y_1 + \frac{(x-x_1)(x-x_3)}{(x_2-x_1)(x_2-x_3)} y_2 + \frac{(x-x_1)(x-x_2)}{(x_3-x_1)(x_3-x_2)} y_3
+\]
+\[
+P_2(x) = \sum_{i=1}^3 \left( \prod_{\substack{j=1 \\ j \neq i}}^3 \frac{x-x_j}{x_i-x_j} \right) y_i
+\]
+\[
+= \ell_1(x) y_1 + \ell_2(x) y_2 + \ell_3(x) y_3
+\]
+
+\begin{remark}
+Pour deux points $(x_1, y_1)$ et $(x_2, y_2)$, le polynôme interpolateur de Lagrange de degré 1 est :
+\[
+P_1(x) = \frac{x-x_2}{x_1-x_2} y_1 + \frac{x-x_1}{x_2-x_1} y_2
+\]
+\end{remark}
+
+\section{Polynôme interpolateur de Lagrange}
+
+\subsection{Définitions et propriétés}
+
+\subsubsection{Théorème: Existence et unicité}
+
+\begin{theorem}[Existence et unicité]
+Soient $x_1, \dots, x_n$ des réels deux à deux distincts et $y_1, \dots, y_n$ des réels quelconques.
+Il existe un unique polynôme $P \in \mathbb{P}_{n-1}[x]$ (i.e. de degré au plus $n-1$) tel que $P(x_i) = y_i, \forall i = 1, \dots, n$.
+
+On dit que $P$ est le \textbf{polynôme interpolateur de Lagrange} aux points $(x_1, y_1), \dots, (x_n, y_n)$.
+\end{theorem}
+
+\textbf{Preuve:}
+Soit l'application linéaire $\Phi : \mathbb{P}_{n-1}[x] \to \mathbb{R}^n$ définie par
+\[
+P \mapsto \begin{pmatrix} P(x_1) \\ \vdots \\ P(x_n) \end{pmatrix}
+\]
+Montrons que $\Phi$ est injective.
+Si $\Phi(P) = 0$, alors $P(x_i) = 0$ pour tout $i=1, \dots, n$. Donc $P$ a $n$ racines distinctes $x_1, \dots, x_n$.
+Comme $P$ est un polynôme de degré au plus $n-1$ avec $n$ racines, il s'ensuit que $P \equiv 0$.
+Donc $\Phi$ est injective.
+
+Comme $\mathbb{P}_{n-1}[x]$ et $\mathbb{R}^n$ sont deux espaces vectoriels de même dimension $n$, une application linéaire injective est aussi bijective, donc un isomorphisme d'espaces vectoriels. La bijectivité de $\Phi$ assure l'existence et l'unicité du polynôme interpolateur.
+
+\begin{definition}
+Si $f$ est une fonction continue sur $[a,b] \to \mathbb{R}$, et $x_1, \dots, x_n \in [a,b]$ sont $n$ points deux à deux distincts, alors l'unique polynôme $P \in \mathbb{P}_{n-1}[x]$ tel que $P(x_i) = f(x_i)$, pour $i=1, \dots, n$ est appelé \textbf{polynôme d'interpolation de Lagrange} de $f$ aux points $x_1, \dots, x_n$.
+\end{definition}
+
+\subsection{Estimation de l'erreur d'interpolation}
+
+\subsubsection{Théorème: Erreur d'interpolation}
+
+\begin{theorem}[Erreur d'interpolation]
+Soient $a < b$, $f: [a,b] \to \mathbb{R}$ une fonction continue, et $x_1, \dots, x_n$ $n$ points deux à deux distincts dans $[a,b]$.
+Soit $P_n$ le polynôme d'interpolation de Lagrange de $f$ aux points $x_i$.
+Si $f$ est de classe $\mathcal{C}^n$ sur $[a,b]$, alors pour tout $x \in [a,b]$, il existe $\xi \in [a,b]$ tel que :
+\[
+f(x) - P_n(x) = \frac{f^{(n)}(\xi)}{n!} \underbrace{\omega_n(x)}_{= \prod_{i=1}^n (x-x_i)}
+\]
+où $\omega_n(x) = (x-x_1) \cdots (x-x_n)$.
+\end{theorem}
+
+\textbf{Corollaire:}
+Si $|f^{(n)}(x)|$ est bornée par $M$ sur $[a,b]$ pour tout $x \in [a,b]$, alors $\forall x \in [a,b]$,
+\[
+|f(x) - P_n(x)| \le \frac{M}{n!} |\omega_n(x)| \le \frac{M}{n!} (b-a)^n
+\]
+
+\textbf{Preuve: (à faire)}
+
+\subsection{Implémentation avec Python}
+
+\begin{lstlisting}[language=Python]
+from scipy.interpolate import lagrange
+
+x = np.array([1, 2, 3]) #à remplacer par les valeurs de x_1, x_2, x_3
+y = np.array([2, 3, 1]) #à remplacer par les valeurs de y_1, y_2, y_3
+p = lagrange(x,y)
+print(p) # affiche le polynôme
+print(p(2.5)) # évalue le polynôme en x=2.5
+\end{lstlisting}
+
+\section{Construction des polynômes d'interpolation de Lagrange}
+
+\subsection{Interpolation dans la base canonique (Vandermonde)}
+
+\subsubsection{Construction}
+
+Soit $P(x) = \sum_{i=0}^{n-1} a_i x^i \in \mathbb{P}_{n-1}[x]$.
+On cherche les coefficients $a_0, \dots, a_{n-1}$ tels que $P(x_k) = y_k$ pour $k=1, \dots, n$.
+\[
+\sum_{i=0}^{n-1} a_i x_k^i = y_k, \quad k=1, \dots, n
+\]
+Ce qui conduit au système linéaire matriciel suivant :
+\[
+\begin{pmatrix}
+1 & x_1 & x_1^2 & \cdots & x_1^{n-1} \\
+1 & x_2 & x_2^2 & \cdots & x_2^{n-1} \\
+\vdots & \vdots & \vdots & \ddots & \vdots \\
+1 & x_n & x_n^2 & \cdots & x_n^{n-1}
+\end{pmatrix}
+\begin{pmatrix} a_0 \\ a_1 \\ \vdots \\ a_{n-1} \end{pmatrix} = \begin{pmatrix} y_1 \\ y_2 \\ \vdots \\ y_n \end{pmatrix}
+\]
+\[
+V(x_1, \dots, x_n) \mathbf{a} = \mathbf{y}
+\]
+où $V(x_1, \dots, x_n)$ est la matrice de Vandermonde.
+
+C'est une matrice pleine, souvent mal conditionnée, mais facile à construire.
+
+\begin{lstlisting}[language=Python]
+def VDM_Mat(x):
+    n = len(x)
+    V = np.zeros((n, n))
+    for i in range(n):
+        for j in range(n):
+            V[i, j] = x[i]**j
+    return V
+
+def VDM_Poly(x,y):
+    M = VDM_Mat(x)
+    a = np.linalg.solve(M, y)
+    return a
+\end{lstlisting}
+
+\subsection{Evaluation efficace : Algorithme de Horner}
+
+\subsubsection{Proposition: Algorithme de Horner}
+
+\begin{proposition}
+Soit $P(x) = a_0 x^n + a_1 x^{n-1} + \dots + a_{n-1} x + a_n$ un polynôme.
+On définit la suite $(q_k)_{k=0}^n$ par :
+\[
+\begin{cases}
+q_0 = a_0 \\
+q_k = q_{k-1} x + a_k, \quad k=1, \dots, n
+\end{cases}
+\]
+Alors $q_n = P(x)$.
+\end{proposition}
+
+\textbf{Exemple: } $P(x) = x^2 + 2x + 1 = (x+1)^2$
+
+Pour évaluer $P(2)$:
+$q_0 = a_0 = 1$
+$q_1 = q_0 \times 2 + a_1 = 1 \times 2 + 2 = 4$
+$q_2 = q_1 \times 2 + a_2 = 4 \times 2 + 1 = 9 = P(2) = 2^2 + 2 \times 2 + 1 = 9$
+
+\begin{lstlisting}[language=Python]
+def Horner(P, xx):
+    y = 0
+    for a in P:
+        y = y*xx + a
+    return y
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python]
+def IntVal_VDM (x, y, xx):
+    a = VDM_Poly(x,y)
+    YY = Horner(a[::-1], xx) # reverse a pour correspondre à l'ordre des coefficients dans Horner
+    return YY
+\end{lstlisting}
+
+
+\subsection{Interpolation dans la base duale: Formule de Lagrange et points barycentriques}
+
+\subsubsection{Construction}
+
+L'idée est de prendre pour base de $\mathbb{P}_{n-1}[x]$ l'image réciproque de la base canonique de $\mathbb{R}^n$ par l'application $\Phi$ définie dans le théorème d'existence et unicité.
+On cherche donc une base $\{\mathcal{L}_j\}_{j=1}^n$ de $\mathbb{P}_{n-1}[x]$ telle que
+\[
+\mathcal{L}_j(x_i) = \begin{cases} 1 & \text{si } i = j \\ 0 & \text{si } i \neq j \end{cases}
+\]
+On construit les polynômes de Lagrange $\mathcal{L}_j(x)$ comme suit :
+\[
+\mathcal{L}_j(x) = \prod_{\substack{i=1 \\ i \neq j}}^n \frac{x-x_i}{x_j-x_i} = \frac{\prod_{i \neq j} (x-x_i)}{\prod_{i \neq j} (x_j-x_i)}
+\]
+Le polynôme interpolateur de Lagrange s'écrit alors :
+\[
+P(x) = \sum_{j=1}^n y_j \mathcal{L}_j(x)
+\]\chapter{}
+\sloppy
+
+\section{Introduction à l'interpolation polynomiale}
+
+L'interpolation polynomiale est une technique fondamentale en analyse numérique qui consiste à trouver un polynôme qui passe par un ensemble donné de points. Plus précisément, étant donnés $n+1$ points $(x_0, y_0), (x_1, y_1), \dots, (x_n, y_n)$ où les $x_i$ sont distincts, l'interpolation polynomiale cherche à construire un polynôme $P(x)$ de degré au plus $n$ tel que $P(x_i) = y_i$ pour $i = 0, 1, \dots, n$. Ce polynôme $P(x)$ est appelé le polynôme d'interpolation.
+
+L'interpolation polynomiale a de nombreuses applications dans divers domaines tels que l'approximation de fonctions, l'intégration numérique, la résolution d'équations différentielles et le traitement de données expérimentales.  Différentes méthodes existent pour construire ce polynôme d'interpolation, chacune ayant ses avantages et ses inconvénients en termes de complexité, de stabilité et de facilité d'implémentation. Nous allons explorer ici les méthodes de Lagrange et de Newton.
+
+\section{Interpolation de Lagrange}
+
+\subsection{Formule de Lagrange}
+
+La formule d'interpolation de Lagrange est une manière explicite d'écrire le polynôme d'interpolation. Elle repose sur l'utilisation des polynômes de base de Lagrange.
+
+\begin{definition}[Polynômes de base de Lagrange]
+Soient $x_0, x_1, \dots, x_n$ des points distincts. Le polynôme nodal $\omega_{n+1}(x)$ est défini par :
+\[
+\omega_{n+1}(x) = \prod_{i=0}^{n} (x - x_i)
+\]
+et les polynômes de base de Lagrange $l_i(x)$ associés aux points $x_0, x_1, \dots, x_n$ sont définis par :
+\[
+l_i(x) = \prod_{\substack{j=0 \\ j \neq i}}^{n} \frac{x - x_j}{x_i - x_j} = \frac{\omega_{n+1}(x)}{(x-x_i)\omega'_{n+1}(x_i)}
+\]
+pour $i = 0, 1, \dots, n$.
+\end{definition}
+
+On remarque que les polynômes de base de Lagrange vérifient la propriété suivante :
+\[
+l_i(x_j) = \delta_{ij} = \begin{cases} 1 & \text{si } i = j \\ 0 & \text{si } i \neq j \end{cases}
+\]
+
+\begin{proposition}[Formule d'interpolation de Lagrange]
+Le polynôme d'interpolation de Lagrange $P(x)$ de degré au plus $n$ qui interpole les points $(x_0, y_0), (x_1, y_1), \dots, (x_n, y_n)$ est donné par :
+\[
+P(x) = \sum_{i=0}^{n} y_i l_i(x)
+\]
+\end{proposition}
+
+\begin{proof}
+Pour vérifier que $P(x)$ est bien le polynôme d'interpolation, il suffit de montrer que $P(x_j) = y_j$ pour tout $j = 0, 1, \dots, n$.
+\[
+P(x_j) = \sum_{i=0}^{n} y_i l_i(x_j) = \sum_{i=0}^{n} y_i \delta_{ij} = y_j
+\]
+De plus, chaque $l_i(x)$ est un polynôme de degré $n$, donc $P(x)$ est un polynôme de degré au plus $n$.
+\end{proof}
+
+\subsection{Exemple}
+[Insérer un exemple si disponible dans les notes manuscrites, sinon, un exemple simple peut être construit ici.]
+
+\section{Erreur d'interpolation}
+
+\subsection{Formule de l'erreur d'interpolation}
+
+L'erreur d'interpolation mesure la différence entre la fonction $f(x)$ que l'on cherche à interpoler et le polynôme d'interpolation $P(x)$.
+
+\begin{proposition}[Formule de l'erreur d'interpolation]
+Soit $f \in C^{n+1}([a, b])$ et $P(x)$ le polynôme d'interpolation de Lagrange de degré au plus $n$ interpolant $f$ aux points $x_0, x_1, \dots, x_n \in [a, b]$. Alors, pour tout $x \in [a, b]$, il existe un point $\xi_x \in [a, b]$ tel que :
+\[
+f(x) - P(x) = \frac{f^{(n+1)}(\xi_x)}{(n+1)!} \omega_{n+1}(x) = \frac{f^{(n+1)}(\xi_x)}{(n+1)!} \prod_{i=0}^{n} (x - x_i)
+\]
+\end{proposition}
+
+\subsection{Analyse de l'erreur}
+
+La formule de l'erreur montre que l'erreur d'interpolation dépend de deux facteurs principaux :
+
+\begin{itemize}
+    \item La dérivée $(n+1)$-ième de la fonction $f$, $f^{(n+1)}(\xi_x)$. Si la dérivée $(n+1)$-ième de $f$ est petite sur $[a, b]$, alors l'erreur d'interpolation sera petite.
+    \item Le polynôme nodal $\omega_{n+1}(x) = \prod_{i=0}^{n} (x - x_i)$. La distribution des points d'interpolation $x_0, x_1, \dots, x_n$ influence la magnitude de $\omega_{n+1}(x)$. Choisir des points d'interpolation de manière à minimiser $|\omega_{n+1}(x)|$ sur $[a, b]$ peut réduire l'erreur d'interpolation. Par exemple, les points de Chebyshev sont connus pour minimiser la norme infinie de $\omega_{n+1}(x)$ sur $[-1, 1]$.
+\end{itemize}
+
+\subsection{Convergence}
+
+Pour assurer la convergence de l'interpolation polynomiale, c'est-à-dire que $P_n(x) \to f(x)$ lorsque $n \to \infty$, il ne suffit pas d'augmenter le degré du polynôme d'interpolation en utilisant des points équidistants. Le phénomène de Runge montre que pour certaines fonctions, l'interpolation polynomiale avec des points équidistants peut diverger entre les nœuds, même si la fonction est analytique.  Cependant, si on choisit judicieusement les points d'interpolation, comme les points de Chebyshev, et si la fonction $f$ est suffisamment régulière, on peut garantir la convergence de l'interpolation polynomiale.
+
+\section{Interpolation de Newton}
+
+\subsection{Différences divisées}
+
+La méthode de Newton utilise les différences divisées pour construire le polynôme d'interpolation.
+
+\begin{definition}[Différences divisées]
+Les différences divisées d'ordre zéro sont définies par $f[x_i] = f(x_i)$. Les différences divisées d'ordre supérieur sont définies par la formule de récurrence :
+\[
+f[x_i, x_{i+1}, \dots, x_{i+k}] = \frac{f[x_{i+1}, \dots, x_{i+k}] - f[x_i, \dots, x_{i+k-1}]}{x_{i+k} - x_i}
+\]
+\end{definition}
+
+\begin{proposition}[Formule d'interpolation de Newton]
+Le polynôme d'interpolation de Newton de degré au plus $n$ s'écrit :
+\[
+P(x) = f[x_0] + f[x_0, x_1](x - x_0) + f[x_0, x_1, x_2](x - x_0)(x - x_1) + \dots + f[x_0, x_1, \dots, x_n] \prod_{i=0}^{n-1} (x - x_i)
+\]
+que l'on peut écrire sous la forme :
+\[
+P(x) = \sum_{k=0}^{n} f[x_0, x_1, \dots, x_k] \prod_{i=0}^{k-1} (x - x_i)
+\]
+avec $\prod_{i=0}^{-1} (x - x_i) = 1$.
+\end{proposition}
+
+\subsection{Algorithme de calcul des différences divisées}
+
+Les différences divisées peuvent être organisées dans un tableau triangulaire.
+
+\begin{verbatim}
+Python: Calcul des différences divisées
+#save_to: diff_div.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+def DifferencesDivisees(x,y):
+    n = len(x)
+    d = np.zeros([n, n])
+    for i in range(n):
+        d[i, 0] = y[i]
+    for j in range(1, n):
+        for i in range(n - j):
+            d[i, j] = (d[i+1, j-1] - d[i, j-1]) / (x[i+j] - x[i])
+    return d
+
+# Example usage (not plotting, so no savefig needed for this function definition)
+# x_example = np.array([1, 2, 3, 4])
+# y_example = np.array([2, 3, 5, 8])
+# diff_table = DifferencesDivisees(x_example, y_example)
+# print(diff_table)
+
+\end{verbatim}
+\begin{lstlisting}[language=Python, caption=Calcul des différences divisées, label=code:diff_div_python]
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+def DifferencesDivisees(x,y):
+    n = len(x)
+    d = np.zeros([n, n])
+    for i in range(n):
+        d[i, 0] = y[i]
+    for j in range(1, n):
+        for i in range(n - j):
+            d[i, j] = (d[i+1, j-1] - d[i, j-1]) / (x[i+j] - x[i])
+    return d
+\end{lstlisting}
+\begin{remark}
+La fonction \texttt{DifferencesDivisees(x,y)} prend en entrée les abscisses \texttt{x} et les ordonnées \texttt{y} des points d'interpolation et retourne une matrice \texttt{d} contenant les différences divisées. La diagonale supérieure de cette matrice contient les coefficients $f[x_0], f[x_0, x_1], \dots, f[x_0, x_1, \dots, x_n]$ nécessaires pour la formule d'interpolation de Newton.
+\end{remark}
+
+\subsection{Évaluation du polynôme de Newton : Formule de Horner-Newton}
+
+Pour évaluer efficacement le polynôme de Newton, on utilise la formule de Horner-Newton.
+
+\begin{verbatim}
+Python: Évaluation du polynôme de Newton (Horner-Newton)
+#save_to: horner_newton.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+def HornerNewton(a,x,xx):
+    n = len(a)
+    yy = a[n-1]
+    for i in range(n-2, -1, -1):
+        yy = a[i] + (xx - x[i]) * yy
+    return yy
+
+# Example Usage (No plot to save)
+# coefficients = np.array([2, 1, -0.5, 1/6]) # Example coefficients from divided differences
+# x_points = np.array([1, 2, 3, 4]) # Original x points
+# x_eval = 2.5
+# polynomial_value = HornerNewton(coefficients, x_points, x_eval)
+# print(f"Polynomial value at {x_eval}: {polynomial_value}")
+
+\end{verbatim}
+
+\begin{lstlisting}[language=Python, caption=Évaluation du polynôme de Newton (Horner-Newton), label=code:horner_newton_python]
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+def HornerNewton(a,x,xx):
+    n = len(a)
+    yy = a[n-1]
+    for i in range(n-2, -1, -1):
+        yy = a[i] + (xx - x[i]) * yy
+    return yy
+\end{lstlisting}
+
+\begin{remark}
+La fonction \texttt{HornerNewton(a,x,xx)} prend en entrée le vecteur des coefficients des différences divisées \texttt{a} (diagonale de la matrice retournée par \texttt{DifferencesDivisees}), le vecteur des abscisses \texttt{x} des points d'interpolation, et un point \texttt{xx} où l'on souhaite évaluer le polynôme. Elle retourne la valeur du polynôme de Newton évalué en \texttt{xx}. Cette méthode est plus efficace pour évaluer le polynôme que l'évaluation directe de la formule de Newton.
+\end{remark}
+
+
+\section{Comparaison des méthodes et complexité}
+
+\subsection{Complexité}
+
+\begin{itemize}
+    \item \textbf{Interpolation de Lagrange}: Le calcul des polynômes de base de Lagrange $l_i(x)$ et l'évaluation du polynôme d'interpolation de Lagrange nécessitent $\mathcal{O}(n^2)$ opérations pour un point donné $x$. Si l'on souhaite obtenir la forme développée du polynôme, la complexité est plus élevée.
+    \item \textbf{Interpolation de Newton}: Le calcul des différences divisées nécessite $\mathcal{O}(n^2)$ opérations. L'évaluation du polynôme de Newton en utilisant la formule de Horner-Newton nécessite $\mathcal{O}(n)$ opérations par point. C'est une méthode efficace pour évaluer le polynôme une fois les différences divisées calculées.
+\end{itemize}
+
+\subsection{Optimisation et ajout de points}
+
+\begin{itemize}
+    \item \textbf{Formule de Horner pour Newton}: La formule de Horner-Newton est cruciale pour l'efficacité de l'évaluation du polynôme de Newton. Elle réduit la complexité de l'évaluation à $\mathcal{O}(n)$ une fois les coefficients (différences divisées) sont connus.
+    \item \textbf{Ajout d'un nouveau point}:
+    \begin{itemize}
+        \item \textit{Lagrange}: L'ajout d'un nouveau point d'interpolation nécessite de recalculer tous les polynômes de base de Lagrange et de refaire la somme. Cela peut être coûteux.
+        \item \textit{Newton}:  Si on ajoute un nouveau point $(x_{n+1}, y_{n+1})$, on peut facilement étendre le polynôme d'interpolation de Newton en calculant une différence divisée supplémentaire $f[x_0, x_1, \dots, x_{n+1}]$ et en ajoutant un terme à la formule existante. Les différences divisées déjà calculées restent valides. C'est un avantage majeur de la méthode de Newton.
+    \end{itemize}
+\end{itemize}
+
+\section{Conclusion}
+
+L'interpolation polynomiale est un outil puissant pour approximer des fonctions et traiter des données. Les méthodes de Lagrange et Newton offrent différentes approches pour construire et évaluer le polynôme d'interpolation. La méthode de Lagrange donne une formule explicite mais est moins pratique pour les calculs et l'ajout de nouveaux points. La méthode de Newton, basée sur les différences divisées, est efficace pour l'évaluation grâce à la formule de Horner-Newton et permet d'ajouter facilement de nouveaux points d'interpolation. Le choix de la méthode dépend du contexte et des besoins spécifiques de l'application.\chapter{}
+\sloppy
+
+\section{Polynômes de Tchebychev}
+
+\subsection{Définition}
+
+On définit les polynômes de Tchebychev par récurrence :
+\begin{itemize}
+    \item $T_0(x) = 1$
+    \item $T_1(x) = x$
+    \item $T_{n+1}(x) = 2xT_n(x) - T_{n-1}(x), \quad n \geq 1$
+\end{itemize}
+Les premiers polynômes de Tchebychev sont donc :
+\begin{itemize}
+    \item $T_0(x) = 1$
+    \item $T_1(x) = x$
+    \item $T_2(x) = 2xT_1(x) - T_0(x) = 2x^2 - 1$
+    \item $T_3(x) = 2xT_2(x) - T_1(x) = 2x(2x^2 - 1) - x = 4x^3 - 3x$
+\end{itemize}
+
+\subsection{Expression trigonométrique}
+
+On a aussi l'expression trigonométrique suivante pour les polynômes de Tchebychev :
+\[
+T_n(x) = \cos(n \arccos(x)), \quad x \in [-1, 1]
+\]
+On vérifie pour $n=0, 1, 2$ :
+\begin{itemize}
+    \item $T_0(x) = \cos(0 \arccos(x)) = \cos(0) = 1$
+    \item $T_1(x) = \cos(1 \arccos(x)) = \cos(\arccos(x)) = x$
+    \item $T_2(x) = \cos(2 \arccos(x)) = 2\cos^2(\arccos(x)) - 1 = 2x^2 - 1$
+\end{itemize}
+Pour vérifier la relation de récurrence, posons $\theta = \arccos(x)$, donc $x = \cos(\theta)$. Alors
+\begin{align*}
+2xT_n(x) - T_{n-1}(x) &= 2\cos(\theta)\cos(n\theta) - \cos((n-1)\theta) \\
+&= \cos((n+1)\theta) + \cos((n-1)\theta) - \cos((n-1)\theta) \\
+&= \cos((n+1)\theta) \\
+&= T_{n+1}(x)
+\end{align*}
+On a utilisé la formule trigonométrique : $\cos(a)\cos(b) = \frac{1}{2} [\cos(a+b) + \cos(a-b)]$.
+
+\subsection{Propriétés}
+
+\begin{enumerate}
+    \item \textbf{Racines de $T_n(x)$}:
+    $T_n(x) = 0 \Leftrightarrow \cos(n \arccos(x)) = 0$.
+    Posons $x = \cos(\theta)$. Alors $\cos(n\theta) = 0 \Leftrightarrow n\theta = \frac{\pi}{2} + k\pi, k \in \mathbb{Z}$.
+    Donc $\theta = \frac{\pi}{2n} + k\frac{\pi}{n}$.
+    Pour avoir $n$ racines distinctes dans $[-1, 1]$, on prend $k = 0, 1, \dots, n-1$.
+    \[
+    x_k = \cos\left(\frac{\pi}{2n} + k\frac{\pi}{n}\right), \quad k = 0, 1, \dots, n-1
+    \]
+    sont les $n$ racines de $T_n(x)$ dans $[-1, 1]$.
+
+    \item $|T_n(x)| \leq 1$ pour $x \in [-1, 1]$.
+    En effet, pour $x \in [-1, 1]$, $T_n(x) = \cos(n \arccos(x))$, et $|\cos(\cdot)| \leq 1$.
+    De plus, $T_n(\cos(\frac{k\pi}{n})) = \cos(k\pi) = (-1)^k$.
+    Donc $\max_{x \in [-1, 1]} |T_n(x)| = 1$ atteint en $x_k' = \cos(\frac{k\pi}{n})$, $k = 0, \dots, n$.
+
+    \item \textbf{Orthogonalité}:
+    Les polynômes de Tchebychev sont orthogonaux pour le produit scalaire :
+    \[
+    \langle f, g \rangle = \int_{-1}^{1} \frac{f(x)g(x)}{\sqrt{1-x^2}} dx
+    \]
+    En effet, posons $x = \cos(\theta)$, $dx = -\sin(\theta) d\theta$, $\sqrt{1-x^2} = \sin(\theta)$.
+    \[
+    \int_{-1}^{1} \frac{T_n(x)T_m(x)}{\sqrt{1-x^2}} dx = \int_{\pi}^{0} \frac{\cos(n\theta)\cos(m\theta)}{\sin(\theta)} (-\sin(\theta)) d\theta = \int_{0}^{\pi} \cos(n\theta)\cos(m\theta) d\theta
+    \]
+    On sait que $\int_{0}^{\pi} \cos(n\theta)\cos(m\theta) d\theta = 0$ si $n \neq m$, et $\int_{0}^{\pi} \cos^2(n\theta) d\theta = \frac{\pi}{2}$ si $n \neq 0$, et $\int_{0}^{\pi} \cos^2(0) d\theta = \pi$.
+    Donc
+    \[
+    \int_{-1}^{1} \frac{T_n(x)T_m(x)}{\sqrt{1-x^2}} dx =
+    \begin{cases}
+        0 & \text{si } n \neq m \\
+        \pi & \text{si } n = m = 0 \\
+        \frac{\pi}{2} & \text{si } n = m \neq 0
+    \end{cases}
+    \]
+\end{enumerate}
+
+\subsection{Application : Polynôme de meilleure approximation uniforme}
+
+\begin{proposition}
+Soit $P$ un polynôme de degré $n$ avec coefficient dominant égal à $1$, alors
+\[
+\max_{x \in [-1, 1]} |P(x)| \geq \max_{x \in [-1, 1]} \left|\frac{1}{2^{n-1}}T_n(x)\right| = \frac{1}{2^{n-1}}
+\]
+De plus, il y a égalité si et seulement si $P(x) = \frac{1}{2^{n-1}}T_n(x)$.
+On dit que $\frac{1}{2^{n-1}}T_n(x)$ est le polynôme de Tchebychev normalisé.
+\end{proposition}
+
+\begin{corollary}
+Soient $x_0, \dots, x_n$ des points 2 à 2 distincts de $[-1, 1]$.
+On a :
+\[
+\max_{x \in [-1, 1]} \prod_{i=0}^{n} |x - x_i| \geq \max_{x \in [-1, 1]} \prod_{i=1}^{n} |x - x_i^*|
+\]
+avec $x_i^*$ les racines de $T_{n+1}(x)$ translatées et dilatées sur $[-1, 1]$ (racines de Tchebychev).
+\[
+x_k^* = \cos\left(\frac{\pi}{2(n+1)} + \frac{k\pi}{n+1}\right), \quad k = 0, \dots, n
+\]
+sont les racines de $T_{n+1}$.
+
+\end{corollary}
+
+\subsection{Application à l'interpolation polynomiale}
+
+Soient $x_0, \dots, x_n$ $n+1$ points 2 à 2 distincts, $f$ une fonction $n+1$ fois continûment dérivable.
+Soit $P_n(x)$ le polynôme d'interpolation de Lagrange de $f$ aux points $x_i$.
+Alors l'erreur d'interpolation est donnée par :
+\[
+f(x) - P_n(x) = \frac{f^{(n+1)}(\xi_x)}{(n+1)!} \prod_{i=0}^{n} (x - x_i), \quad \xi_x \in [\min(x, x_i), \max(x, x_i)]
+\]
+Donc
+\[
+|f(x) - P_n(x)| \leq \frac{\max_{\xi \in [a, b]} |f^{(n+1)}(\xi)|}{(n+1)!} \max_{x \in [a, b]} \prod_{i=0}^{n} |x - x_i|
+\]
+Pour minimiser l'erreur d'interpolation, il faut minimiser $\max_{x \in [a, b]} \prod_{i=0}^{n} |x - x_i|$.
+D'après le corollaire précédent, les points de Tchebychev minimisent ce terme (à translation et dilatation près pour adapter l'intervalle $[-1, 1]$ à $[a, b]$).
+
+\section{Intégration numérique}
+
+\subsection{Motivation et concept général}
+
+On cherche à approcher numériquement l'intégrale d'une fonction $f$ sur un intervalle $[a, b]$ :
+\[
+I(f) = \int_{a}^{b} f(x) dx
+\]
+On approche $I(f)$ par une somme pondérée de valeurs de $f$ en certains points $x_i \in [a, b]$ :
+\[
+Q_n(f) = \sum_{i=0}^{n} \omega_i f(x_i)
+\]
+où $x_i$ sont les \textbf{nœuds} de quadrature et $\omega_i$ sont les \textbf{poids} de quadrature.
+On cherche à construire des formules de quadrature $Q_n(f)$ qui soient exactes pour les polynômes de degré le plus élevé possible.
+
+\begin{definition}
+On dit qu'une formule de quadrature $Q_n(f) = \sum_{i=0}^{n} \omega_i f(x_i)$ est de degré de précision $r$ si elle est exacte pour tous les polynômes de degré $\leq r$, et n'est pas exacte pour au moins un polynôme de degré $r+1$.
+C'est-à-dire :
+\begin{itemize}
+    \item $\forall P \in \mathbb{P}_r, \quad Q_n(P) = I(P) = \int_{a}^{b} P(x) dx$
+    \item $\exists P \in \mathbb{P}_{r+1}, \quad Q_n(P) \neq I(P) = \int_{a}^{b} P(x) dx$
+\end{itemize}
+\end{definition}
+
+\subsection{Construction des formules de quadrature}
+
+Idée : utiliser l'interpolation polynomiale.
+Soient $x_0, \dots, x_n$ $n+1$ points distincts dans $[a, b]$.
+Soit $P_n(x)$ le polynôme d'interpolation de Lagrange de $f$ aux points $x_i$.
+On approche $I(f)$ par $I(P_n) = \int_{a}^{b} P_n(x) dx$.
+On sait que $P_n(x) = \sum_{i=0}^{n} f(x_i) L_i(x)$ où $L_i(x)$ sont les polynômes de Lagrange :
+\[
+L_i(x) = \prod_{j=0, j\neq i}^{n} \frac{x - x_j}{x_i - x_j}
+\]
+Donc
+\[
+Q_n(f) = I(P_n) = \int_{a}^{b} P_n(x) dx = \int_{a}^{b} \sum_{i=0}^{n} f(x_i) L_i(x) dx = \sum_{i=0}^{n} f(x_i) \int_{a}^{b} L_i(x) dx
+\]
+On pose $\omega_i = \int_{a}^{b} L_i(x) dx$.
+Alors $Q_n(f) = \sum_{i=0}^{n} \omega_i f(x_i)$ est une formule de quadrature.
+
+\begin{proposition}
+La formule de quadrature $Q_n(f)$ construite à partir de l'interpolation de Lagrange aux points $x_0, \dots, x_n$ est de degré de précision au moins $n$.
+\end{proposition}
+\begin{proof}
+Si $P \in \mathbb{P}_n$, alors $P_n(x) = P(x)$ (le polynôme d'interpolation d'un polynôme de degré $\leq n$ est lui-même).
+Donc $Q_n(P) = \int_{a}^{b} P_n(x) dx = \int_{a}^{b} P(x) dx = I(P)$.
+Donc $Q_n$ est exacte pour les polynômes de degré $\leq n$.
+\end{proof}
+
+\subsection{Exemples}
+
+\begin{example}[Formule du point milieu]
+$n = 0$, un seul point $x_0 = \frac{a+b}{2}$ (milieu de l'intervalle).
+$L_0(x) = 1$. $\omega_0 = \int_{a}^{b} L_0(x) dx = \int_{a}^{b} 1 dx = b - a$.
+$Q_0(f) = (b - a) f\left(\frac{a+b}{2}\right)$.
+Degré de précision : 1. Exacte pour les polynômes de degré $\leq 1$.
+Exemple : $\int_{0}^{1} x dx = \frac{1}{2}$. $Q_0(x) = (1-0) \times \frac{0+1}{2} = \frac{1}{2}$. Exact.
+$\int_{0}^{1} x^2 dx = \frac{1}{3}$. $Q_0(x^2) = (1-0) \times \left(\frac{0+1}{2}\right)^2 = \frac{1}{4} \neq \frac{1}{3}$. Non exacte pour degré 2.
+
+\end{example}
+
+\begin{example}[Formule des trapèzes]
+$n = 1$, deux points $x_0 = a$, $x_1 = b$.
+$L_0(x) = \frac{x - x_1}{x_0 - x_1} = \frac{x - b}{a - b}$, $L_1(x) = \frac{x - x_0}{x_1 - x_0} = \frac{x - a}{b - a}$.
+$\omega_0 = \int_{a}^{b} \frac{x - b}{a - b} dx = \frac{1}{a - b} \left[\frac{x^2}{2} - bx\right]_{a}^{b} = \frac{1}{a - b} \left[ \left(\frac{b^2}{2} - b^2\right) - \left(\frac{a^2}{2} - ba\right) \right] = \frac{1}{a - b} \left[ -\frac{b^2}{2} - \frac{a^2}{2} + ba \right] = \frac{b - a}{2}$.
+$\omega_1 = \int_{a}^{b} \frac{x - a}{b - a} dx = \frac{1}{b - a} \left[\frac{x^2}{2} - ax\right]_{a}^{b} = \frac{1}{b - a} \left[ \left(\frac{b^2}{2} - ab\right) - \left(\frac{a^2}{2} - a^2\right) \right] = \frac{1}{b - a} \left[ \frac{b^2}{2} - ab + \frac{a^2}{2} \right] = \frac{b - a}{2}$.
+$Q_1(f) = \frac{b - a}{2} [f(a) + f(b)]$.
+Degré de précision : 1. Exacte pour les polynômes de degré $\leq 1$.
+Exemple : $\int_{0}^{1} x^2 dx = \frac{1}{3}$. $Q_1(x^2) = \frac{1 - 0}{2} [0^2 + 1^2] = \frac{1}{2} \neq \frac{1}{3}$. Non exacte pour degré 2.
+\end{example}
+
+\subsection{Estimation de l'erreur}
+
+Soit $Q_n(f) = \sum_{i=0}^{n} \omega_i f(x_i)$ la formule de quadrature construite par interpolation de Lagrange aux points $x_0, \dots, x_n$.
+On sait que l'erreur d'interpolation est :
+\[
+f(x) - P_n(x) = \frac{f^{(n+1)}(\xi_x)}{(n+1)!} \prod_{i=0}^{n} (x - x_i)
+\]
+Donc l'erreur de quadrature est :
+\begin{align*}
+E_n(f) &= I(f) - Q_n(f) = \int_{a}^{b} f(x) dx - \int_{a}^{b} P_n(x) dx = \int_{a}^{b} [f(x) - P_n(x)] dx \\
+&= \int_{a}^{b} \frac{f^{(n+1)}(\xi_x)}{(n+1)!} \prod_{i=0}^{n} (x - x_i) dx = \frac{f^{(n+1)}(\xi)}{(n+1)!} \int_{a}^{b} \prod_{i=0}^{n} (x - x_i) dx
+\end{align*}
+Si on suppose que $f^{(n+1)}$ est continue, on peut utiliser la formule de la moyenne pour l'intégrale :
+\[
+E_n(f) = \frac{f^{(n+1)}(\xi)}{(n+1)!} \int_{a}^{b} \prod_{i=0}^{n} (x - x_i) dx, \quad \xi \in [a, b]
+\]
+où $\xi$ est une valeur intermédiaire dans $[a, b]$. En pratique, on borne l'erreur :
+\[
+|E_n(f)| \leq \frac{\max_{\xi \in [a, b]} |f^{(n+1)}(\xi)|}{(n+1)!} \int_{a}^{b} \prod_{i=0}^{n} |x - x_i| dx
+\]
+
+\begin{remark}
+Pour la formule du point milieu sur $[-1, 1]$, $x_0 = 0$, $n = 0$.
+$Q_0(f) = 2f(0)$. $\int_{-1}^{1} (x - x_0) dx = \int_{-1}^{1} x dx = 0$.
+Donc la formule d'erreur simple ne s'applique pas directement car $\int_{a}^{b} \prod_{i=0}^{n} (x - x_i) dx = 0$ dans certains cas (comme ici).
+Il faut une formule d'erreur plus précise.
+\end{remark}\end{document}
