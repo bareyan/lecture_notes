@@ -1,0 +1,399 @@
+```latex
+\documentclass{article}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{listings}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Example}
+
+\usepackage[margin=1in]{geometry}
+
+\begin{document}
+\sloppy
+
+\section{Introduction}
+This document presents the analysis of several game theory exercises, based on provided handwritten notes. The exercises cover topics including strategic form games, Nash equilibria (pure and mixed), dominant strategies, security strategies, and best responses.
+
+\section{Exercise 1: Auditor/Taxpayer Game}
+
+\subsection{Game Setup}
+This game involves an Auditor and a population of Taxpayers. The Auditor decides whether to Audit (A) or Not Audit (N). The Taxpayers decide whether to be Honest (H) or Cheat (C). We analyze two versions of this game presented in the notes.
+
+\subsubsection{Version 1 (Based on Image 2/3)}
+Let $p$ be the probability the Auditor chooses A, and $1-p$ the probability of choosing N.
+Let $q$ be the probability a Taxpayer chooses H, and $1-q$ the probability of choosing C.
+The payoff matrix is (Auditor, Taxpayer):
+\begin{center}
+\begin{tabular}{cc|c|c|}
+  & \multicolumn{1}{c}{} & \multicolumn{2}{c}{Taxpayer} \\
+  & \multicolumn{1}{c}{} & \multicolumn{1}{c}{H ($q$)} & \multicolumn{1}{c}{C ($1-q$)} \\ \cline{3-4}
+  Auditor & A ($p$) & (4, 0) & (16, -20) \\ \cline{3-4}
+  & N ($1-p$) & (8, 0) & (0, 8) \\ \cline{3-4}
+\end{tabular}
+\end{center}
+
+\paragraph{Pure Strategy Nash Equilibrium:}
+There are no pure strategy Nash equilibria. In any pure strategy profile, at least one player has an incentive to deviate.
+
+\paragraph{Mixed Strategy Nash Equilibrium:}
+To find the MSNE, we find the probabilities $p$ and $q$ that make each player indifferent between their pure strategies.
+
+\subparagraph{Auditor's Indifference:} The Auditor is indifferent between A and N if their expected payoffs are equal.
+\begin{align*} V_A(A, (q, 1-q)) &= V_A(N, (q, 1-q)) \\ 4q + 16(1-q) &= 8q + 0(1-q) \\ 4q + 16 - 16q &= 8q \\ 16 - 12q &= 8q \\ 20q &= 16 \\ q &= \frac{16}{20} = \frac{4}{5} \end{align*}
+The Auditor is indifferent if the Taxpayer chooses H with probability $q=4/5$.
+
+\subparagraph{Taxpayer's Indifference:} The Taxpayer is indifferent between H and C if their expected payoffs are equal.
+\begin{align*} V_T(H, (p, 1-p)) &= V_T(C, (p, 1-p)) \\ 0p + 0(1-p) &= (-20)p + 8(1-p) \\ 0 &= -20p + 8 - 8p \\ 0 &= 8 - 28p \\ 28p &= 8 \\ p &= \frac{8}{28} = \frac{2}{7} \end{align*}
+The Taxpayer is indifferent if the Auditor chooses A with probability $p=2/7$.
+
+The Mixed Strategy Nash Equilibrium is $(p^* = 2/7, q^* = 4/5)$.
+In this equilibrium, the probability of auditing is $2/7$, and the probability of cheating is $1-q = 1/5$.
+
+\subsubsection{Version 2 (Based on Image 6)}
+The setup is the same, but the payoffs are different, representing a higher penalty for cheating when audited.
+Payoff matrix (Auditor, Taxpayer):
+\begin{center}
+\begin{tabular}{cc|c|c|}
+  & \multicolumn{1}{c}{} & \multicolumn{2}{c}{Taxpayer} \\
+  & \multicolumn{1}{c}{} & \multicolumn{1}{c}{H ($q$)} & \multicolumn{1}{c}{C ($1-q$)} \\ \cline{3-4}
+  Auditor & A ($p$) & (4, 0) & (8, -40) \\ \cline{3-4}
+  & N ($1-p$) & (8, 0) & (0, 8) \\ \cline{3-4}
+\end{tabular}
+\end{center}
+
+\paragraph{Mixed Strategy Nash Equilibrium:}
+\subparagraph{Auditor's Indifference:}
+\begin{align*} V_A(A, (q, 1-q)) &= V_A(N, (q, 1-q)) \\ 4q + 8(1-q) &= 8q + 0(1-q) \\ 4q + 8 - 8q &= 8q \\ 8 - 4q &= 8q \\ 12q &= 8 \\ q &= \frac{8}{12} = \frac{2}{3} \end{align*}
+The Auditor is indifferent if the Taxpayer chooses H with probability $q=2/3$.
+
+\subparagraph{Taxpayer's Indifference:}
+\begin{align*} V_T(H, (p, 1-p)) &= V_T(C, (p, 1-p)) \\ 0p + 0(1-p) &= (-40)p + 8(1-p) \\ 0 &= -40p + 8 - 8p \\ 0 &= 8 - 48p \\ 48p &= 8 \\ p &= \frac{8}{48} = \frac{1}{6} \end{align*}
+The Taxpayer is indifferent if the Auditor chooses A with probability $p=1/6$.
+
+The Mixed Strategy Nash Equilibrium is $(p^* = 1/6, q^* = 2/3)$.
+In this equilibrium, the probability of auditing is $1/6$, and the probability of cheating is $1-q = 1/3$.
+
+\subsection{Best Response Analysis (Version 2)}
+
+\subsubsection{Auditor's Best Response $p(q)$}
+The Auditor compares $V_A(A) = 4q + 8(1-q) = 8-4q$ and $V_A(N) = 8q$.
+\begin{itemize}
+    \item If $q < 2/3$, $V_A(A) > V_A(N)$, so the best response is A ($p=1$).
+    \item If $q > 2/3$, $V_A(A) < V_A(N)$, so the best response is N ($p=0$).
+    \item If $q = 2/3$, $V_A(A) = V_A(N)$, so any $p \in [0,1]$ is a best response.
+\end{itemize}
+
+\subsubsection{Taxpayer's Best Response $q(p)$}
+The Taxpayer compares $V_T(H) = 0p + 0(1-p) = 0$ and $V_T(C) = -40p + 8(1-p) = 8-48p$.
+\begin{itemize}
+    \item If $p < 1/6$, $V_T(C) > V_T(H)$, so the best response is C ($1-q=1 \implies q=0$).
+    \item If $p > 1/6$, $V_T(C) < V_T(H)$, so the best response is H ($q=1$).
+    \item If $p = 1/6$, $V_T(C) = V_T(H)$, so any $q \in [0,1]$ is a best response.
+\end{itemize}
+
+\begin{verbatim}
+#save_to: auditor_br.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots()
+# Plot p(q)
+ax.plot([0, 2/3], [1, 1], 'b-', label='Auditor BR p(q)') # p=1 for q < 2/3
+ax.plot([2/3, 2/3], [0, 1], 'b-') # p in [0,1] for q = 2/3
+ax.plot([2/3, 1], [0, 0], 'b-',) # p=0 for q > 2/3
+ax.plot(2/3, 1, 'bo', markerfacecolor='blue') # Filled circle at endpoint
+ax.plot(2/3, 0, 'bo', markerfacecolor='blue') # Filled circle at endpoint
+
+ax.set_xlabel('Taxpayer Strategy q (Prob H)')
+ax.set_ylabel('Auditor Strategy p (Prob A)')
+ax.set_title('Auditor Best Response p(q)')
+ax.set_xlim(0, 1)
+ax.set_ylim(0, 1)
+ax.grid(True)
+plt.savefig('auditor_br.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.7\textwidth, keepaspectratio]{auditor_br.png}
+\caption{Auditor's Best Response $p(q)$ for Game Version 2.}
+\label{fig:auditor_br}
+\end{figure}
+
+\begin{verbatim}
+#save_to: taxpayer_br.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots()
+# Plot q(p)
+ax.plot([0, 1/6], [0, 0], 'r-', label='Taxpayer BR q(p)') # q=0 for p < 1/6
+ax.plot([1/6, 1/6], [0, 1], 'r-') # q in [0,1] for p = 1/6
+ax.plot([1/6, 1], [1, 1], 'r-',) # q=1 for p > 1/6
+ax.plot(1/6, 0, 'ro', markerfacecolor='red') # Filled circle at endpoint
+ax.plot(1/6, 1, 'ro', markerfacecolor='red') # Filled circle at endpoint
+
+ax.set_xlabel('Auditor Strategy p (Prob A)')
+ax.set_ylabel('Taxpayer Strategy q (Prob H)')
+ax.set_title('Taxpayer Best Response q(p)')
+ax.set_xlim(0, 1)
+ax.set_ylim(0, 1)
+ax.grid(True)
+plt.savefig('taxpayer_br.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.7\textwidth, keepaspectratio]{taxpayer_br.png}
+\caption{Taxpayer's Best Response $q(p)$ for Game Version 2.}
+\label{fig:taxpayer_br}
+\end{figure}
+
+\begin{verbatim}
+#save_to: br_combined.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots()
+# Plot p(q) - Auditor BR
+ax.plot([0, 2/3], [1, 1], 'b-', label='Auditor BR p(q)')
+ax.plot([2/3, 2/3], [0, 1], 'b-')
+ax.plot([2/3, 1], [0, 0], 'b-')
+ax.plot(2/3, 1, 'bo', markerfacecolor='blue')
+ax.plot(2/3, 0, 'bo', markerfacecolor='blue')
+
+# Plot q(p) - Taxpayer BR (flipped axes)
+ax.plot([0, 1/6], [0, 0], 'r-', label='Taxpayer BR q(p)') # p=1 -> q=1 (H) if p>1/6, corrected range and label
+ax.plot([1/6, 1/6], [0, 1], 'r-') # p=1/6 -> q in [0,1]
+ax.plot([1/6, 1], [1, 1], 'r-',) # p=0 -> q=0 (C) if p<1/6, corrected range and label
+ax.plot(1/6, 0, 'ro', markerfacecolor='red')
+ax.plot(1/6, 1, 'ro', markerfacecolor='red')
+
+# Plot MSNE
+ax.plot(1/6, 2/3, 'ko', markersize=8, label='MSNE (p=1/6, q=2/3)') # Corrected MSNE point order to (p, q)
+
+ax.set_xlabel('Taxpayer Strategy q (Prob H)')
+ax.set_ylabel('Auditor Strategy p (Prob A)')
+ax.set_title('Best Response Correspondences and MSNE')
+ax.set_xlim(0, 1)
+ax.set_ylim(0, 1)
+ax.legend()
+ax.grid(True)
+plt.savefig('br_combined.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.7\textwidth, keepaspectratio]{br_combined.png}
+\caption{Best Response Correspondences and MSNE for Game Version 2.}
+\label{fig:br_combined}
+\end{figure}
+
+
+\subsection{Comparison and Interpretation (Version 1 vs Version 2)}
+Comparing the MSNE from Version 1 $(p^*=2/7, q^*=4/5)$ to Version 2 $(p^*=1/6, q^*=2/3)$.
+\begin{itemize}
+    \item The penalty for cheating when audited increased from -20 to -40.
+    \item The equilibrium probability of auditing $p^*$ decreased from $2/7 \approx 0.286$ to $1/6 \approx 0.167$.
+    \item The equilibrium probability of being Honest $q^*$ decreased from $4/5 = 0.8$ to $2/3 \approx 0.667$.
+    \item The equilibrium probability of Cheating $1-q^*$ increased from $1/5 = 0.2$ to $1/3 \approx 0.333$.
+\end{itemize}
+The increased penalty leads to less auditing required in equilibrium. However, contrary to the intuition suggested in the notes that cheating would remain unchanged or decrease, the model predicts that cheating actually increases in equilibrium. The notes state "Reduced audits, unchanged cheating", which appears inconsistent with the calculated equilibria.
+
+\section{Exercise 2: Three Player Game}
+
+\subsection{Game Setup}
+Three players, 1, 2, and 3. Each player chooses between two actions: E and O.
+Let $\gamma$ be the probability Player 1 chooses E, $\beta$ the probability Player 2 chooses E, and $\alpha$ the probability Player 3 chooses E.
+The payoffs $(v_1, v_2, v_3)$ depend on the chosen actions:
+
+If Player 3 chooses E (with probability $\alpha$):
+\begin{center}
+\begin{tabular}{cc|c|c|}
+\multicolumn{2}{c}{ } & \multicolumn{2}{c}{Player 2} \\
+\multicolumn{2}{c}{ } & \multicolumn{1}{c}{E ($\beta$)} & \multicolumn{1}{c}{O ($1-\beta$)} \\ \cline{3-4}
+  Player 1 & E ($\gamma$) & (-12, -12, -12) & (13, 13, 0) \\ \cline{3-4}
+  & O ($1-\gamma$) & (13, 13, 0) & (0, 0, 88) \\ \cline{3-4}
+\end{tabular}
+\end{center}
+
+If Player 3 chooses O (with probability $1-\alpha$):
+\begin{center}
+\begin{tabular}{cc|c|c|}
+\multicolumn{2}{c}{ } & \multicolumn{2}{c}{Player 2} \\
+\multicolumn{2}{c}{ } & \multicolumn{1}{c}{E ($\beta$)} & \multicolumn{1}{c}{O ($1-\beta$)} \\ \cline{3-4}
+  Player 1 & E ($\gamma$) & (13, 0, 13) & (88, 0, 0) \\ \cline{3-4}
+  & O ($1-\gamma$) & (0, 88, 0) & (0, 0, 0) \\ \cline{3-4}
+\end{tabular}
+\end{center}
+
+\subsection{Best Response Calculation}
+Let $BR_i(s_j, s_k)$ be the set of best response actions for player $i$ given the actions $s_j, s_k$ of the other two players.
+\begin{itemize}
+    \item $BR_1(E, E) = \{O\}$ (Payoff 13 vs -12)
+    \item $BR_1(O, E) = \{E\}$ (Payoff 13 vs 0)
+    \item $BR_1(E, O) = \{E\}$ (Payoff 13 vs 0)
+    \item $BR_1(O, O) = \{E\}$ (Payoff 88 vs 0)
+\end{itemize}
+Due to symmetry, the best responses for Players 2 and 3 are analogous.
+\begin{itemize}
+    \item $BR_2(E, E) = \{O\}$, $BR_2(O, E) = \{E\}$, $BR_2(E, O) = \{E\}$, $BR_2(O, O) = \{E\}$
+    \item $BR_3(E, E) = \{O\}$, $BR_3(O, E) = \{E\}$, $BR_3(E, O) = \{E\}$, $BR_3(O, O) = \{E\}$
+\end{itemize}
+
+\subsection{Pure Strategy Nash Equilibria}
+A pure strategy profile $(s_1, s_2, s_3)$ is a Nash Equilibrium if each player's strategy is a best response to the other players' strategies. We check the 8 pure strategy profiles:
+\begin{itemize}
+    \item (E, E, E): P1 payoff -12. $BR_1(E, E) = \{O\}$. Not NE.
+    \item (E, E, O): P1 payoff 13. $E \in BR_1(E, O)=\{E\}$. P2 payoff 0. $E \notin BR_2(E, O)=\{E\}$. **Correction:** $BR_2(E,O) = \{E\}$. $E \in \{E\}$. P3 payoff 13. $O \in BR_3(E, E)=\{O\}$. Yes, (E, E, O) is a PSNE.
+    \item (E, O, E): P1 payoff 13. $E \in BR_1(O, E)=\{E\}$. P2 payoff 13. $O \in BR_2(E, E)=\{O\}$. P3 payoff 0. $E \in BR_3(E, O)=\{E\}$. Yes, (E, O, E) is a PSNE.
+    \item (O, E, E): P1 payoff 13. $O \in BR_1(E, E)=\{O\}$. P2 payoff 13. $E \in BR_2(O, E)=\{E\}$. P3 payoff 0. $E \in BR_3(O, E)=\{E\}$. Yes, (O, E, E) is a PSNE.
+    \item (E, O, O): P1 payoff 88. $E \in BR_1(O, O)=\{E\}$. P2 payoff 0. $O \notin BR_2(E, O)=\{E\}$. **Correction:** $BR_2(E,O) = \{E\}$. $O \notin \{E\}$. Not NE.
+    \item (O, E, O): P1 payoff 0. $O \in BR_1(E, O)=\{E\}$. Not NE.
+    \item (O, O, E): P1 payoff 0. $O \in BR_1(O, E)=\{E\}$. Not NE.
+    \item (O, O, O): P1 payoff 0. $O \in BR_1(O, O)=\{E\}$. Not NE.
+\end{itemize}
+There are three Pure Strategy Nash Equilibria: (E, E, O), (E, O, E), and (O, E, E).
+
+\subsection{Mixed Strategy Analysis}
+Let's find the symmetric mixed strategy Nash equilibrium where $\alpha = \beta = \gamma$. Player 1 must be indifferent between playing E and O.
+The expected payoff for Player 1, given P2 plays E with probability $\beta$ and P3 plays E with probability $\alpha$:
+\begin{align*} V_1(E, (\beta, \alpha)) &= \beta \alpha (-12) + \beta (1-\alpha) (13) + (1-\beta) \alpha (13) + (1-\beta) (1-\alpha) (88) \\ &= -12\beta\alpha + 13\beta - 13\beta\alpha + 13\alpha - 13\alpha\beta + 88(1-\alpha-\beta+\alpha\beta) \\ &= -12\beta\alpha + 13\beta - 13\beta\alpha + 13\alpha - 13\alpha\beta + 88 - 88\alpha - 88\beta + 88\alpha\beta \\ &= 88 - 75\beta - 75\alpha + 50\alpha\beta \end{align*}
+The expected payoff for Player 1 playing O is:
+\begin{align*} V_1(O, (\beta, \alpha)) &= \beta \alpha (13) + \beta (1-\alpha) (0) + (1-\beta) \alpha (0) + (1-\beta) (1-\alpha) (0) \\ &= 13\alpha\beta \end{align*}
+The notes incorrectly state $V_1(O, (\beta, \alpha)) = 0$. Following the calculation in the notes, Player 1 is indifferent if $V_1(E, (\beta, \alpha)) = V_1(O, (\beta, \alpha))$, which implies:
+\begin{align*} 88 - 75\beta - 75\alpha + 50\alpha\beta &= 13\alpha\beta \\ 37\alpha\beta - 75\alpha - 75\beta + 88 &= 0 \end{align*}
+Due to symmetry, in a symmetric MSNE where $\alpha = \beta = \gamma$, the condition for each player becomes:
+\begin{align*} 37\alpha^2 - 150\alpha + 88 &= 0 \end{align*}
+Solving the quadratic equation for $\alpha$:
+\begin{align*} \alpha &= \frac{-(-150) \pm \sqrt{(-150)^2 - 4(37)(88)}}{2(37)} \\ &= \frac{150 \pm \sqrt{22500 - 13024}}{74} \\ &= \frac{150 \pm \sqrt{9476}}{74} \\ &= \frac{150 \pm 2\sqrt{2369}}{74} \\ &= \frac{75 \pm \sqrt{2369}}{37} \end{align*}
+Numerically, $\sqrt{2369} \approx 48.67$.
+$\alpha_1 = \frac{75 + 48.67}{37} \approx \frac{123.67}{37} \approx 3.34$ (Invalid, $\alpha > 1$)
+$\alpha_2 = \frac{75 - 48.67}{37} \approx \frac{26.33}{37} \approx 0.712$
+
+Let's re-examine the equation in the notes. The notes made an error in equating $V_1(E, (\beta, \alpha)) = V_1(O, (\beta, \alpha))$. They wrote $50\alpha\beta - 75\beta - 75\alpha + 88 = 0$ which is incorrect.  The correct equation is $88 - 75\beta - 75\alpha + 50\alpha\beta = 13\alpha\beta$, leading to $37\alpha\beta - 75\alpha - 75\beta + 88 = 0$. If we follow the notes earlier erroneous simplification that $V_1(O, (\beta, \alpha)) = 0$, then we would indeed get $50\alpha\beta - 75\beta - 75\alpha + 88 = 0$ which leads to the quadratic in the notes, and the solution $\alpha = 4/5$.  Let's proceed with the corrected calculation.
+
+For symmetric MSNE $\alpha=\beta=\gamma$, we solved $37\alpha^2 - 150\alpha + 88 = 0$.
+The valid solution is $\alpha \approx 0.712$. Thus the symmetric MSNE is approximately $(\alpha^* \approx 0.712, \beta^* \approx 0.712, \gamma^* \approx 0.712)$.
+
+\subsection{Payoff in Symmetric MSNE}
+Using the correct $V_1(O, (\beta, \alpha)) = 13\alpha\beta$ and indifference $V_1(E, (\beta, \alpha)) = V_1(O, (\beta, \alpha)) = 13\alpha\beta$.
+With $\alpha = \beta = 0.712$, $V_1 = 13 \cdot (0.712)^2 \approx 13 \cdot 0.507 \approx 6.59$.
+If we use the notes incorrect equation which leads to $\alpha = 4/5 = 0.8$, and $V_1(O, (\beta, \alpha)) = 13\alpha\beta$. Then $V_1 = 13 \cdot (4/5)^2 = 13 \cdot (16/25) = 208/25 = 8.32$. The notes incorrectly state $V_1 = 0$.
+
+Let's recompute payoff with $\alpha=4/5$ and the correct $V_1(O, (\beta, \alpha)) = 13\alpha\beta$.
+$V_1(O, (4/5, 4/5)) = 13 \cdot (4/5) \cdot (4/5) = 208/25 = 8.32$.
+So in the symmetric MSNE with $\alpha = 4/5$ (from notes' incorrect derivation), the expected payoff should be $8.32$, not $0$ as in the notes.
+
+The notes' payoff calculation of $0$ is based on further errors, even when using $\alpha = 4/5$. The terms used in the summation are partially correct for $V_1(E, (\beta, \alpha))$, but they incorrectly assume $V_1(O, (\beta, \alpha)) = 0$ in the mixed strategy payoff.
+
+Based on the corrected indifference condition $37\alpha^2 - 150\alpha + 88 = 0$ and the solution $\alpha \approx 0.712$, the payoff is approximately $6.59$.  If we use the solution from the notes' incorrect derivation, $\alpha = 4/5$, the payoff is $8.32$.  The notes' claimed payoff of $0$ is inconsistent with both the correct and the incorrectly derived $\alpha=4/5$.
+
+
+\section{Exercise 3: Hawk/Dove Game (Constant Sum)}
+
+\subsection{Game Setup}
+A two-player game between Player 1 (row) and Player 2 (column, "Bell" in notes). Player 1 chooses Hawk (H) or Dove (D), corrected from L to D for standard Hawk-Dove game terminology and consistency with context. Player 2 chooses Dove (D) or Strategy (S), corrected from L to D for standard Hawk-Dove game terminology and consistency with context, and S represents Strategy which can be interpreted as Hawk.
+Let $p$ be the probability Player 1 chooses Hawk (H), and $q$ the probability Player 2 chooses Dove (D).
+Payoff matrix $(v_1, v_2)$:
+\begin{center}
+\begin{tabular}{cc|c|c|}
+  & \multicolumn{1}{c}{} & \multicolumn{2}{c}{Player 2} \\
+  & \multicolumn{1}{c}{} & \multicolumn{1}{c}{Dove (D) ($q$)} & \multicolumn{1}{c}{Strategy (S) ($1-q$)} \\ \cline{3-4}
+  Player 1 & Hawk (H) ($p$) & (50, 50) & (70, 30) \\ \cline{3-4}
+  & Dove (D) ($1-p$) & (20, 80) & (40, 60) \\ \cline{3-4}
+\end{tabular}
+\end{center}
+This is a constant-sum game because the payoffs sum to 100 in every cell.
+
+\subsection{Dominant Strategies}
+\begin{itemize}
+    \item For Player 1: Compare Hawk (H) vs Dove (D).
+        \begin{itemize}
+            \item If P2 plays Dove (D): Hawk (H) gives 50, Dove (D) gives 20. (H > D)
+            \item If P2 plays Strategy (S): Hawk (H) gives 70, Dove (D) gives 40. (H > D)
+        \end{itemize}
+        Hawk (H) strictly dominates Dove (D) for Player 1.
+    \item For Player 2: Compare Dove (D) vs Strategy (S).
+        \begin{itemize}
+            \item If P1 plays Hawk (H): Dove (D) gives 50, Strategy (S) gives 30. (D > S)
+            \item If P1 plays Dove (D): Dove (D) gives 80, Strategy (S) gives 60. (D > S)
+        \end{itemize}
+        Dove (D) strictly dominates Strategy (S) for Player 2.
+\end{itemize}
+(Note: The notes incorrectly state Dove (D) is dominant for both players, corrected to Dove (D) for Player 2 and Hawk (H) for Player 1 as per the analysis.)
+
+\subsection{Nash Equilibrium in Dominant Strategies}
+Since both players have a dominant strategy, the unique Nash Equilibrium is for both players to play their dominant strategy: (Hawk (H), Dove (D)). The payoffs are (50, 50).
+
+\subsection{Security Strategies (Maximin)}
+
+\paragraph{Player 1 Security Strategy ($m_1$):}
+Player 1 wants to maximize their minimum possible payoff. P1 chooses $p$ to maximize $\min(V_1(p, \text{Dove (D)}), V_1(p, \text{Strategy (S)}))$.
+\begin{align*} V_1(p, \text{Dove (D)}) &= p(50) + (1-p)(20) = 30p + 20 \\ V_1(p, \text{Strategy (S)}) &= p(70) + (1-p)(40) = 30p + 40 \\ \min(V_1(p, \text{Dove (D)}), V_1(p, \text{Strategy (S)})) &= \min(30p + 20, 30p + 40) = 30p + 20 \end{align*}
+Player 1 maximizes $30p+20$. This is maximized when $p=1$.
+$m_1 = \max_p (30p+20) = 30(1) + 20 = 50$.
+Player 1's security strategy is Hawk (H) ($p=1$).
+
+\paragraph{Player 2 Security Strategy ($m_2$):}
+Player 2 wants to maximize their minimum possible payoff. P2 chooses $q$ (probability of Dove (D)) to maximize $\min(V_2(\text{Hawk (H)}, q), V_2(\text{Dove (D)}, q))$.
+\begin{align*} V_2(\text{Hawk (H)}, q) &= q(50) + (1-q)(30) = 20q + 30 \\ V_2(\text{Dove (D)}, q) &= q(80) + (1-q)(60) = 20q + 60 \\ \min(V_2(\text{Hawk (H)}, q), V_2(\text{Dove (D)}, q)) &= \min(20q + 30, 20q + 60) = 20q + 30 \end{align*}
+Player 2 maximizes $20q+30$. This is maximized when $q=1$.
+$m_2 = \max_q (20q+30) = 20(1) + 30 = 50$.
+Player 2's security strategy is Dove (D) ($q=1$).
+(Note: The notes correctly calculate $m_2=50$ and identify Dove (D) as the security strategy for P2, but seem to misidentify P1's security strategy and dominant strategy, corrected to Hawk (H) as per analysis.)
+
+\subsection{Summary}
+\begin{itemize}
+    \item Player 1's dominant strategy is Hawk (H).
+    \item Player 2's dominant strategy is Dove (D).
+    \item The unique Nash Equilibrium is (Hawk (H), Dove (D)) with payoffs (50, 50).
+    \item Player 1's security strategy is Hawk (H) ($p=1$) with security level $m_1 = 50$.
+    \item Player 2's security strategy is Dove (D) ($q=1$) with security level $m_2 = 50$.
+\end{itemize}
+In this case, the dominant strategies are also the security strategies, and the Nash Equilibrium payoff profile $(50, 50)$ matches the security levels $(m_1, m_2)$. The notes correctly state that the maxmin payoff is the payoff of the dominant strategy for both players.
+
+\section{Key Concepts Highlighted}
+
+\begin{definition}[Dominant Strategy]
+A strategy $s_i^*$ for player $i$ is \textbf{strictly dominant} if player $i$'s payoff from playing $s_i^*$ is strictly greater than the payoff from playing any other strategy $s_i'$, regardless of the strategies chosen by the other players.
+\[v_i(s_i^*, s_{-i}) > v_i(s_i', s_{-i}) \quad \forall s_i' \neq s_i^*, \forall s_{-i}\]
+\end{definition}
+
+\begin{definition}[Security Strategy / Maximin Strategy]
+For a two-player game, the \textbf{security strategy} (or \textbf{maximin strategy}) for Player $i$ is the strategy (pure or mixed) that maximizes Player $i$'s minimum possible payoff, assuming the opponent acts to minimize Player $i$'s payoff.
+The corresponding payoff is the \textbf{security level} (or \textbf{maximin value}) $m_i$.
+\[m_i = \max_{s_i} \min_{s_{-i}} v_i(s_i, s_{-i})\]
+The notes describe this as choosing a strategy anticipating the worst case (minimum payoff) when the opponent chooses their best response (which might be their dominant strategy if they have one) to minimize your payoff.
+\end{definition}
+
+\begin{definition}[Nash Equilibrium]
+A strategy profile $(s_1^*, s_2^*, ..., s_n^*)$ is a \textbf{Nash Equilibrium (NE)} if no player can unilaterally deviate from their strategy and improve their payoff, given the strategies of the other players.
+\[v_i(s_i^*, s_{-i}^*) \ge v_i(s_i, s_{-i}^*) \quad \forall \text{strategies } s_i \text{ for player } i, \forall \text{players } i\]
+\begin{itemize}
+    \item \textbf{Pure Strategy Nash Equilibrium (PSNE):} An NE where all players choose a pure strategy.
+    \item \textbf{Mixed Strategy Nash Equilibrium (MSNE):} An NE where at least one player chooses a mixed strategy (randomizes over pure strategies). In an MSNE, each player playing a mixed strategy must be indifferent between the pure strategies they are randomizing over.
+\end{itemize}
+\end{definition}
+
+\begin{definition}[Best Response]
+Player $i$'s \textbf{best response} $BR_i(s_{-i})$ to the strategy profile $s_{-i}$ of the other players is the set of strategies $s_i^*$ for player $i$ that yield the highest payoff for player $i$, given $s_{-i}$.
+\[BR_i(s_{-i}) = \{ s_i^* \mid v_i(s_i^*, s_{-i}) \ge v_i(s_i, s_{-i}) \quad \forall \text{strategies } s_i \}\]
+A Nash Equilibrium is a profile of strategies where each player's strategy is a best response to the strategies of the others.
+\end{definition}
+
+\end{document}
+```
