@@ -1,0 +1,116 @@
+```latex
+\documentclass{article}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{listings}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Example}
+
+\usepackage[margin=1in]{geometry}
+
+\begin{document}
+\sloppy
+
+\section*{Game 3}
+
+The initial game matrix represents payoffs for Player H (Hayk) and Player B (Bell):
+
+\[
+\begin{array}{c|c|c|}
+\multicolumn{1}{c}{} & \multicolumn{1}{c}{L \text{ (q)}} & \multicolumn{1}{c}{S \text{ (1-q)}} \\ \cline{2-3}
+L \text{ (p)} & 50, 50 & 70, 30 \\ \cline{2-3}
+S \text{ (1-p)} & 20, 80 & 40, 60 \\ \cline{2-3}
+\end{array}
+\]
+Here, Player H chooses between strategies L and S with probabilities $p$ and $1-p$ respectively, and Player B chooses between strategies L and S with probabilities $q$ and $1-q$ respectively.
+
+\subsection*{a) Payoff Structure and Perspective}
+In this game, the sum of payoffs for Player H and Player B is always 100. We can analyze this game by focusing on each player's objective.  For Player H, the goal is to maximize their payoff, while for Player B, the goal is to maximize their own payoff.  Although the notes mention a transformation to view this from a zero-sum perspective for Hayk by subtracting Bell's payoff from 100, for analyzing security levels and dominant strategies, we can directly work with the given payoffs for each player.
+
+The notes initially present a transformation that subtracts 100 from Bell's payoffs, which results in:
+\[
+\begin{array}{c|c|c|}
+\multicolumn{1}{c}{} & \multicolumn{1}{c}{L} & \multicolumn{1}{c}{S} \\ \cline{2-3}
+H \quad L & 50, -50 & 70, -70 \\ \cline{2-3}
+\quad S & 20, -20 & 40, -60 \\ \cline{2-3}
+\end{array}
+\]
+This transformation is conceptually used to represent a zero-sum game from Hayk's perspective, where Bell's objective is seen as minimizing Hayk's payoff (hence negative values related to Hayk's payoffs are used for Bell's entries). However, for directly calculating security levels, we will use the original payoff matrix for each player separately.
+
+\subsection*{b) Security Level (Maximin Value) Calculation}
+
+\subsubsection*{Security Level for Player 1 (Hayk)}
+Hayk's security level (maximin value) is calculated as:
+\begin{align*} m_1 = \max_p \min_{s_2 \in \{L, S\}} V_1(p, s_2) \end{align*}
+where $V_1(p, s_2)$ is Hayk's expected payoff when Hayk plays L with probability $p$ and S with probability $1-p$, and Player B plays strategy $s_2$.
+
+If Player B plays L, Hayk's expected payoff is:
+\begin{align*} V_1(p, L) &= 50p + (1-p)20 \\ &= 50p + 20 - 20p \\ &= 30p + 20 \end{align*}
+If Player B plays S, Hayk's expected payoff is:
+\begin{align*} V_1(p, S) &= 70p + (1-p)40 \\ &= 70p + 40 - 40p \\ &= 30p + 40 \end{align*}
+For any probability $p \in [0, 1]$, $V_1(p, L) = 30p + 20 < 30p + 40 = V_1(p, S)$. Thus, the minimum payoff for Hayk, given a choice of $p$, is when Bell plays L:
+\begin{align*} \min \{ V_1(p, L), V_1(p, S) \} = V_1(p, L) = 30p + 20 \end{align*}
+Hayk aims to maximize this minimum payoff:
+\begin{align*} m_1 = \max_{p \in [0, 1]} (30p + 20) \end{align*}
+The maximum is achieved at $p=1$, giving $m_1 = 30(1) + 20 = 50$.
+The security strategy for Hayk is $p^*=1$, which means Hayk always plays strategy L.
+
+To verify, we check the best response condition. If Hayk plays L ($p=1$), Player B's best response $BR_2(1)$ is to choose between L and S based on their payoffs in the first row of the original matrix (when Hayk plays L). Bell's payoffs are 50 for playing L and 30 for playing S. Since Bell wants to maximize payoff, $BR_2(1) = \{L\}$.
+The payoff for Hayk when Hayk plays L and Bell plays L is $V_1(1, L) = 50$, which is equal to $m_1$.
+
+\subsubsection*{Security Level for Player 2 (Bell)}
+Bell's security level (maximin value) is calculated as:
+\begin{align*} m_2 = \max_q \min_{s_1 \in \{L, S\}} V_2(q, s_1) \end{align*}
+where $V_2(q, s_1)$ is Bell's expected payoff when Bell plays L with probability $q$ and S with probability $1-q$, and Player Hayk plays strategy $s_1$. We use Bell's payoffs from the original matrix.
+
+If Hayk plays L, Bell's expected payoff is:
+\begin{align*} V_2(q, L) &= 50q + 30(1-q) \\ &= 50q + 30 - 30q \\ &= 20q + 30 \end{align*}
+If Hayk plays S, Bell's expected payoff is:
+\begin{align*} V_2(q, S) &= 80q + 60(1-q) \\ &= 80q + 60 - 60q \\ &= 20q + 60 \end{align*}
+For any probability $q \in [0, 1]$, $V_2(q, L) = 20q + 30 < 20q + 60 = V_2(q, S)$. Thus, the minimum payoff for Bell, given a choice of $q$, is when Hayk plays L:
+\begin{align*} \min \{ V_2(q, L), V_2(q, S) \} = V_2(q, L) = 20q + 30 \end{align*}
+Bell maximizes this minimum payoff:
+\begin{align*} m_2 = \max_{q \in [0, 1]} (20q + 30) \end{align*}
+The maximum is achieved at $q=1$, giving $m_2 = 20(1) + 30 = 50$.
+The security strategy for Bell is $q^*=1$, which means Bell always plays strategy L.
+
+To verify, if Bell plays L ($q=1$), Hayk's best response $BR_1(1)$ is to choose between L and S based on Hayk's payoffs in the first column of the original matrix (when Bell plays L). Hayk's payoffs are 50 for playing L and 20 for playing S. Since Hayk wants to maximize payoff, $BR_1(1) = \{L\}$.
+The payoff for Bell when Bell plays L and Hayk plays L is $V_2(L,L) = 50$, which is equal to $m_2$.
+
+\subsubsection*{Summary of Security Levels}
+The security level for Player Hayk is 50, achieved by always playing strategy L. The security level for Player Bell is 50, achieved by always playing strategy L.
+
+\subsection*{c) Dominant Strategy Analysis}
+
+\subsubsection*{Dominant Strategy for Player 1 (Hayk)}
+We check if Player H has a dominant strategy.
+- If Player B plays L, Hayk's payoffs are 50 for playing L and 20 for playing S. Hayk prefers L since $50 > 20$.
+- If Player B plays S, Hayk's payoffs are 70 for playing L and 40 for playing S. Hayk prefers L since $70 > 40$.
+Since Player H prefers strategy L regardless of Player B's strategy, L is a dominant strategy for Player H.
+
+\subsubsection*{Dominant Strategy for Player 2 (Bell)}
+We check if Player B has a dominant strategy.
+- If Player H plays L, Bell's payoffs are 50 for playing L and 30 for playing S. Bell prefers L since $50 > 30$.
+- If Player H plays S, Bell's payoffs are 80 for playing L and 60 for playing S. Bell prefers L since $80 > 60$.
+Since Player B prefers strategy L regardless of Player H's strategy, L is a dominant strategy for Player B.
+
+\subsubsection*{Summary of Dominant Strategies}
+Strategy L is a dominant strategy for both Player H and Player B.
+
+\subsection*{d) Relationship between Security Level and Dominant Strategy}
+In this particular game, the security strategy for both players is the same as their dominant strategy, which is strategy L. Consequently, the maximin payoff (security level) for each player is achieved when both players play their dominant strategies.
+
+In general, for a player who does not have a dominant strategy, their security strategy is the best response to the opponent's strategy that minimizes their payoff. If the opponent has a dominant strategy, then the "worst case" scenario for a player is indeed when the opponent plays their dominant strategy (from the perspective of minimizing the first player's payoff in a zero-sum context, or simply affecting the outcome in a non-zero-sum game). The security strategy is then the best response to this anticipated "worst-case" strategy from the opponent. This best response ensures the player achieves their maximin payoff, which is their security level.
+
+\end{document}
+```
