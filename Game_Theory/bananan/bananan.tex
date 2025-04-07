@@ -1,0 +1,155 @@
+```latex
+\documentclass[11pt]{article}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{listings}
+\usepackage[utf8]{inputenc} % Required for Unicode emojis
+\usepackage{url} % Required for tinyurl
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Example}
+
+\usepackage[margin=1in]{geometry}
+
+\begin{document}
+\sloppy
+
+\section*{BananAnagrams}
+
+Bananagrams holds a special place in my ❤️, but BananAnagrams is the best game on 🌍!
+For an interactive spreadsheet version of this puzzle, please visit \url{tinyurl.com/banananagrams}
+
+\subsection*{Emoji Key}
+
+% Row 1: Using Unicode directly. Rendering depends on compiler/font setup.
+% Fallback could be text descriptions or symbols from packages like fontawesome if needed.
+\noindent 🦍 💪 🖼️ 👀 🔗 🧥 😈 🎮 🍇 <0xF0><0x9F><0x87><0xAE><0xF0><0x9F><0x87><0xB7> 🍖 🍋 🕊️ 🏄‍♀️ 🗿 🍺 \\ % Note: Flag rendering is complex. Using text IR for Iran. Using Moyai for potential hieroglyph.
+
+% Row 2:
+\noindent ✉️ <0xF0><0x9F><0x87><0xA8><0xF0><0x9F><0x87><0xB3> 👨‍✈️ 🍈 📟 🫛 🎱 🌧️ 🐑 ✈️ 🌮 🧐 👩‍🍳 \\ % Note: Using text CN for China. Pager used for calculator symbol. Beans for peas.
+
+\subsection*{Puzzle Grid}
+
+\begin{verbatim}
+#save_to: bananagrams_grid.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+import matplotlib.colors as mcolors
+
+# Grid dimensions
+rows, cols = 21, 21
+
+# Initialize grid data (0 = background, 1 = word cell)
+grid_data = np.zeros((rows, cols))
+
+# Coordinates of word cells (row, col) from top-left (0,0)
+word_cells = [
+    (2, 4), (2, 5), (2, 6), (2, 7),
+    (3, 4), (3, 6),
+    (4, 2), (4, 3), (4, 4), (4, 6), (4, 8), (4, 9), (4, 10), (4, 11),
+    (5, 2), (5, 6), (5, 8),
+    (6, 2), (6, 4), (6, 5), (6, 6), (6, 8),
+    (7, 2), (7, 4), (7, 8), (7, 10), (7, 11), (7, 12), (7, 13),
+    (8, 4), (8, 8), (8, 10),
+    (9, 4), (9, 6), (9, 7), (9, 8), (9, 10), (9, 15), (9, 16), (9, 17), (9, 18),
+    (10, 4), (10, 6), (10, 10), (10, 12), (10, 13), (10, 14), (10, 15), (10, 17),
+    (11, 4), (11, 6), (11, 10), (11, 12), (11, 15), (11, 17),
+    (12, 4), (12, 6), (12, 8), (12, 9), (12, 10), (12, 12), (12, 15), (12, 17), (12, 19), (12, 20),
+    (13, 6), (13, 8), (13, 12), (13, 15), (13, 17), (13, 19),
+    (14, 6), (14, 8), (14, 12), (14, 14), (14, 15), (14, 16), (14, 17), (14, 19),
+    (15, 6), (15, 8), (15, 12), (15, 14), (15, 19),
+    (16, 6), (16, 8), (16, 10), (16, 11), (16, 12), (16, 14), (16, 19),
+    (17, 8), (17, 10), (17, 14), (17, 16), (17, 17), (17, 18), (17, 19),
+    (18, 8), (18, 10), (18, 14), (18, 16),
+    (19, 8), (19, 10), (19, 11), (19, 12), (19, 13), (19, 14), (19, 16)
+]
+
+for r, c in word_cells:
+    grid_data[r, c] = 1 # Mark word cells as 1
+
+# Banana coordinates (row, col) from top-left (0,0)
+banana_coords = [
+    (2, 4), (4, 6), (7, 8), (7, 10), (10, 12), (11, 14), (14, 16), (15, 18)
+]
+
+# Create figure and axes
+fig, ax = plt.subplots(1, 1, figsize=(8, 8))
+ax.set_aspect('equal')
+
+# Define colors: Use white for background and draw borders manually
+cmap = mcolors.ListedColormap(['white', 'white'])
+
+# Display the grid using imshow
+ax.imshow(grid_data, cmap=cmap, origin='upper', extent=[0, cols, rows, 0])
+
+# Draw borders for the word cells
+for r in range(rows):
+    for c in range(cols):
+        if grid_data[r, c] == 1:
+            rect = patches.Rectangle((c, r), 1, 1, linewidth=1, edgecolor='black', facecolor='none')
+            ax.add_patch(rect)
+
+# Draw grid lines covering the whole area
+ax.set_xticks(np.arange(0, cols + 1, 1))
+ax.set_yticks(np.arange(0, rows + 1, 1))
+ax.set_xticklabels([])
+ax.set_yticklabels([])
+ax.tick_params(length=0) # Hide tick marks
+
+# Add grid lines using ax.grid
+ax.grid(True, which='major', axis='both', linestyle='-', color='grey', linewidth=0.5)
+
+# Set limits explicitly to ensure grid covers the whole area
+ax.set_xlim(0, cols)
+ax.set_ylim(rows, 0) # Set ylim to (rows, 0) for origin='upper'
+
+
+# Add bananas (using emoji)
+# Ensure your environment/LaTeX compiler supports rendering this Unicode character.
+# Common fonts supporting emojis include 'Segoe UI Emoji' (Windows), 'Apple Color Emoji' (macOS).
+# If the emoji doesn't render, replace banana_char with 'B' or another placeholder.
+banana_char = u"\U0001F34C" # Banana emoji Unicode
+
+# Optional: Specify a font known to support emojis if needed (might require system setup)
+# font_properties = {'family': 'Segoe UI Emoji', 'size': 14} # Example
+
+for r, c in banana_coords:
+     # Use default font, hoping it supports the emoji
+     ax.text(c + 0.5, r + 0.5, banana_char,
+             ha='center', va='center', fontsize=14, color='black')
+     # Example using specific font properties:
+     # ax.text(c + 0.5, r + 0.5, banana_char,
+     #         ha='center', va='center', color='black', fontdict=font_properties)
+
+
+# Remove axes spines for a cleaner look
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.spines['bottom'].set_visible(False)
+ax.spines['left'].set_visible(False)
+
+# Save the figure tightly
+plt.savefig('bananagrams_grid.png', bbox_inches='tight', pad_inches=0)
+
+\end{verbatim}
+
+\begin{figure}[H] % Use H for 'here', requires float package
+\centering
+\includegraphics[max width=\textwidth, max height=0.7\textheight, keepaspectratio]{bananagrams_grid.png}
+\caption{BananAnagrams Puzzle Grid.}
+\label{fig:bananagrams_grid}
+\end{figure}
+
+
+\end{document}
+```
