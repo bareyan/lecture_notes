@@ -1,0 +1,293 @@
+```latex
+\documentclass{article}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{array}
+\usepackage{listings}
+
+\newtheorem{theorem}{Théorème}
+\newtheorem{lemma}{Lemme}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}{Définition}
+\newtheorem{remark}{Remarque}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Exemple}
+\newtheorem{corollary}{Corollaire}
+
+\usepackage[margin=1in]{geometry}
+\usepackage[french]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\begin{document}
+\sloppy
+
+\section{Introduction}
+Ce chapitre aborde plusieurs notions fondamentales de l'analyse fonctionnelle, centrées sur l'étude des suites et séries de fonctions dans les espaces vectoriels normés. Nous introduirons les concepts de convergence simple et uniforme, définirons les espaces de Banach, étudierons les propriétés des applications linéaires continues entre ces espaces, et analyserons la convergence normale des séries. Enfin, nous établirons des liens avec l'intégration.
+
+\section{Convergence Uniforme des Suites de Fonctions}
+
+Soit $X$ un ensemble quelconque ($\mathbb{R}, \mathbb{C}$, intervalle, etc.) et $(E, ||\cdot||_E)$ un espace vectoriel normé (evn). Considérons une suite de fonctions $(f_n)_{n\in\mathbb{N}}$ où $f_n: X \to E$.
+
+\begin{definition}[Convergence Simple]
+La suite de fonctions $(f_n)$ converge simplement vers une fonction $f: X \to E$ si, pour tout $x \in X$ fixé, la suite $(f_n(x))_{n\in\mathbb{N}}$ converge vers $f(x)$ dans $(E, ||\cdot||_E)$. On note $f_n \xrightarrow{CS} f$.
+\[
+\forall x \in X, \lim_{n \to \infty} ||f_n(x) - f(x)||_E = 0
+\]
+\end{definition}
+
+\begin{definition}[Convergence Uniforme]
+La suite de fonctions $(f_n)$ converge uniformément vers une fonction $f: X \to E$ si la quantité $\sup_{x \in X} ||f_n(x) - f(x)||_E$ tend vers 0 lorsque $n \to \infty$. On note $f_n \xrightarrow{CU} f$.
+On définit la norme uniforme (ou norme sup) pour une fonction bornée $g: X \to E$ par $||g||_\infty = \sup_{x \in X} ||g(x)||_E$.
+Ainsi, la convergence uniforme $f_n \xrightarrow{CU} f$ équivaut à $||f_n - f||_\infty \to 0$ quand $n \to \infty$.
+
+De manière équivalente :
+\[
+\forall \epsilon > 0, \exists N \in \mathbb{N} \text{ tel que } \forall n \ge N, \forall x \in X, ||f_n(x) - f(x)||_E < \epsilon
+\]
+L'entier $N$ ne dépend que de $\epsilon$ (et pas de $x$).
+\end{definition}
+
+\begin{remark}
+La convergence uniforme implique la convergence simple. La réciproque est fausse en général.
+\end{remark}
+
+\begin{theorem}[Continuité de la limite uniforme]
+Soient $(E, d_E)$ un espace métrique et $(F, ||\cdot||_F)$ un evn. Soit $(f_n)$ une suite de fonctions continues de $E$ dans $F$. Si $f_n \xrightarrow{CU} f$ sur $E$, alors la fonction limite $f$ est continue sur $E$.
+\end{theorem}
+
+\begin{theorem}[Intégration terme à terme]
+Soit $[a, b]$ un intervalle de $\mathbb{R}$. Soit $(f_n)$ une suite de fonctions de $[a, b]$ dans $\mathbb{R}$ (ou $\mathbb{C}$) intégrables (au sens de Riemann, par exemple). Si $f_n \xrightarrow{CU} f$ sur $[a, b]$, alors $f$ est intégrable sur $[a, b]$ et
+\[
+\lim_{n \to \infty} \int_a^b f_n(x) dx = \int_a^b \left( \lim_{n \to \infty} f_n(x) \right) dx = \int_a^b f(x) dx
+\]
+\end{theorem}
+
+\begin{example}
+Considérons $f_n(x) = \frac{\sin(nx)}{\sqrt{n}}$ pour $x \in [0, 1]$.
+On a $\sup_{x \in [0, 1]} |f_n(x)| = \sup_{x \in [0, 1]} \left| \frac{\sin(nx)}{\sqrt{n}} \right| \le \frac{1}{\sqrt{n}}$.
+Comme $\frac{1}{\sqrt{n}} \to 0$ quand $n \to \infty$, on a $||f_n - 0||_\infty \to 0$.
+Donc, $f_n \xrightarrow{CU} 0$ sur $[0, 1]$. La fonction limite $f(x)=0$ est continue.
+Vérifions l'intégration :
+\begin{align*} \int_0^1 f_n(x) dx &= \int_0^1 \frac{\sin(nx)}{\sqrt{n}} dx = \frac{1}{\sqrt{n}} \left[ -\frac{\cos(nx)}{n} \right]_0^1 \\ &= \frac{1}{n\sqrt{n}} (-\cos(n) - (-\cos(0))) = \frac{1 - \cos(n)}{n^{3/2}} \end{align*}
+Comme $|1-\cos(n)| \le 2$, on a $\left| \int_0^1 f_n(x) dx \right| \le \frac{2}{n^{3/2}} \to 0$ quand $n \to \infty$.
+Et $\int_0^1 f(x) dx = \int_0^1 0 dx = 0$. Le théorème est vérifié.
+\end{example}
+
+\section{Espaces de Banach}
+
+\begin{definition}[Espace de Banach]
+Un espace vectoriel normé $(E, ||\cdot||)$ est dit complet si toute suite de Cauchy dans $E$ converge vers un élément de $E$. Un evn complet est appelé un espace de Banach.
+\end{definition}
+
+\begin{example}
+Soit $[a, b]$ un intervalle de $\mathbb{R}$. L'espace $C([a, b], \mathbb{R})$ des fonctions continues de $[a, b]$ dans $\mathbb{R}$, muni de la norme uniforme $||f||_\infty = \sup_{x \in [a, b]} |f(x)|$, est un espace de Banach.
+Cela découle du fait que l'espace $B([a, b], \mathbb{R})$ des fonctions bornées de $[a, b]$ dans $\mathbb{R}$, muni de la norme $|| \cdot ||_\infty$, est complet, et que $C([a, b], \mathbb{R})$ est un sous-espace fermé de $B([a, b], \mathbb{R})$ (car la limite uniforme de fonctions continues est continue).
+\end{example}
+
+\section{Convergence Normale}
+
+Soit $(E, ||\cdot||)$ un evn et $(u_n)_{n\in\mathbb{N}}$ une suite d'éléments de $E$. On s'intéresse à la série $\sum u_n$. On note $S_N = \sum_{n=0}^N u_n$ la suite des sommes partielles.
+
+\begin{definition}[Convergence d'une série]
+La série $\sum u_n$ converge dans $(E, ||\cdot||)$ si la suite des sommes partielles $(S_N)_{N\in\mathbb{N}}$ converge vers un élément $S \in E$. $S$ est appelé la somme de la série et est noté $S = \sum_{n=0}^\infty u_n$.
+\end{definition}
+
+\begin{definition}[Convergence Normale]
+La série $\sum u_n$ converge normalement dans $(E, ||\cdot||)$ si la série numérique à termes positifs $\sum_{n=0}^\infty ||u_n||$ converge dans $\mathbb{R}$.
+\end{definition}
+
+\begin{remark}
+Si $E = \mathbb{R}$ ou $\mathbb{C}$, la convergence normale équivaut à la convergence absolue ($\sum |u_n|$ converge). En général, la convergence normale implique la convergence absolue (si E est un Banach).
+\end{remark}
+
+\begin{theorem}[Convergence Normale et Complétude]
+Un espace vectoriel normé $(E, ||\cdot||)$ est un espace de Banach si et seulement si toute série normalement convergente dans $E$ est convergente.
+De plus, si $\sum u_n$ converge normalement dans un espace de Banach $E$, alors $\sum u_n$ converge et on a l'inégalité :
+\[
+\left\| \sum_{n=0}^\infty u_n \right\| \le \sum_{n=0}^\infty \|u_n\|
+\]
+\end{theorem}
+
+\begin{proof}[Démonstration ($\Leftarrow$)]
+Supposons que toute série normalement convergente est convergente. Soit $(x_n)$ une suite de Cauchy dans E. On peut extraire une sous-suite $(x_{n_k})$ telle que $||x_{n_{k+1}} - x_{n_k}|| \le \frac{1}{2^k}$.
+Posons $u_0 = x_{n_0}$ et $u_k = x_{n_k} - x_{n_{k-1}}$ pour $k \ge 1$.
+Alors $\sum_{k=1}^M ||u_k|| = \sum_{k=1}^M ||x_{n_k} - x_{n_{k-1}}|| \le \sum_{k=1}^M \frac{1}{2^{k-1}}$ qui converge (série géométrique).
+Donc la série $\sum u_k$ converge normalement. Par hypothèse, elle converge vers un $S \in E$.
+La somme partielle est $\sum_{k=0}^M u_k = x_{n_M}$. Donc $x_{n_M} \to S$ quand $M \to \infty$.
+Une suite de Cauchy qui admet une sous-suite convergente est convergente. Donc $(x_n)$ converge. $E$ est complet.
+\end{proof}
+
+\begin{proof}[Démonstration ($\Rightarrow$)]
+Supposons $E$ complet. Soit $\sum u_n$ une série normalement convergente. Cela signifie que la série numérique $\sum ||u_n||$ converge. Soit $T_N = \sum_{n=0}^N ||u_n||$. La suite $(T_N)$ converge dans $\mathbb{R}$, elle est donc de Cauchy.
+Soit $S_N = \sum_{n=0}^N u_n$. Pour $M > N$, on a :
+\[
+||S_M - S_N|| = \left\| \sum_{n=N+1}^M u_n \right\| \le \sum_{n=N+1}^M \|u_n\| = T_M - T_N
+\]
+Comme $(T_N)$ est de Cauchy, pour tout $\epsilon > 0$, il existe $N_0$ tel que pour $M, N \ge N_0$, $|T_M - T_N| < \epsilon$.
+L'inégalité ci-dessus montre alors que $||S_M - S_N|| \le |T_M - T_N| < \epsilon$ pour $M, N \ge N_0$.
+Donc la suite $(S_N)$ est de Cauchy dans $E$. Comme $E$ est complet, $(S_N)$ converge vers un $S \in E$. La série $\sum u_n$ converge.
+Pour l'inégalité finale, l'application $x \mapsto ||x||$ est continue (car $|||x|| - ||y||| \le ||x-y||$).
+Donc $||\sum_{n=0}^\infty u_n|| = ||\lim_{N \to \infty} S_N|| = \lim_{N \to \infty} ||S_N||$.
+On a $||S_N|| = ||\sum_{n=0}^N u_n|| \le \sum_{n=0}^N ||u_n|| = T_N$.
+En passant à la limite $N \to \infty$, on obtient $||\sum_{n=0}^\infty u_n|| \le \lim_{N \to \infty} T_N = \sum_{n=0}^\infty ||u_n\|$.
+\end{proof}
+
+
+\section{Applications Linéaires Continues}
+
+Soient $(E, ||\cdot||_E)$ et $(F, ||\cdot||_F)$ deux espaces vectoriels normés. Une application $A: E \to F$ est dite linéaire si $A(\lambda x + \mu y) = \lambda A(x) + \mu A(y)$ pour tous $x, y \in E$ et tous scalaires $\lambda, \mu$. On note $L(E, F)$ l'espace des applications linéaires de $E$ dans $F$.
+
+\begin{theorem}[Caractérisations de la continuité]
+Soit $A \in L(E, F)$. Les propriétés suivantes sont équivalentes :
+\begin{enumerate}
+    \item $A$ est continue sur $E$.
+    \item $A$ est continue en $0_E$.
+    \item $A$ est bornée : il existe une constante $C \ge 0$ telle que $||Ax||_F \le C ||x||_E$ for all $x \in E$.
+    \item $A$ est bornée sur la boule unité (ouverte ou fermée) ou sur la sphère unité.
+    \item $A$ est lipschitzienne sur $E$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}[Démonstration]
+(1) $\implies$ (2) est évident.
+
+(2) $\implies$ (3) : Supposons $A$ continue en $0_E$. Pour $\epsilon = 1$, il existe $\delta > 0$ tel que si $||x||_E \le \delta$, alors $||Ax||_F \le 1$.
+Soit $x \in E$, $x \ne 0_E$. Posons $y = \delta \frac{x}{||x||_E}$. Alors $||y||_E = \delta$, donc $||Ay||_F \le 1$.
+$||A(\delta \frac{x}{||x||_E})||_F = \frac{\delta}{||x||_E} ||Ax||_F \le 1$.
+Donc $||Ax||_F \le \frac{1}{\delta} ||x||_E$. On pose $C = 1/\delta$. Si $x = 0_E$, l'inégalité est trivialement vérifiée.
+
+(3) $\implies$ (5) : $||Ax - Ay||_F = ||A(x-y)||_F \le C ||x-y||_E$. Donc $A$ est lipschitzienne avec constante $C$.
+
+(5) $\implies$ (1) : Une application lipschitzienne est continue.
+
+(3) $\implies$ (4) : Si $||x||_E \le 1$, alors $||Ax||_F \le C ||x||_E \le C$. Donc $A$ est bornée sur la boule unité fermée. Le raisonnement est similaire pour la sphère ou la boule ouverte (en adaptant légèrement la constante si besoin).
+
+(4) $\implies$ (3) : Supposons $A$ bornée sur la sphère unité $S_E(0,1) = \{x \in E \mid ||x||_E = 1\}$. Soit $M = \sup_{||x||_E=1} ||Ax||_F < \infty$. Pour $x \ne 0_E$, $x/||x||_E$ est sur la sphère unité. Donc $||A(x/||x||_E)||_F \le M$, ce qui donne $\frac{1}{||x||_E} ||Ax||_F \le M$, soit $||Ax||_F \le M ||x||_E$. Posons $C=M$.
+\end{proof}
+
+\begin{definition}[Application linéaire continue / bornée]
+Une application linéaire continue entre deux evn est aussi appelée application linéaire bornée. On note $B(E, F)$ l'espace des applications linéaires continues (bornées) de $E$ dans $F$. $B(E, F)$ est un sous-espace vectoriel de $L(E, F)$.
+\end{definition}
+
+\begin{lemma}
+Si $E$ est un espace vectoriel normé de dimension finie, alors toute application linéaire $A \in L(E, F)$ est continue. Autrement dit, $L(E, F) = B(E, F)$.
+\end{lemma}
+\begin{proof}[Démonstration]
+Fixons une base $(e_1, \dots, e_n)$ de $E$. On peut identifier $E$ à $\mathbb{K}^n$ ($\mathbb{K}=\mathbb{R}$ ou $\mathbb{C}$) muni d'une norme, par exemple $||x||_\infty = \max_{1\le i \le n} |x_i|$ où $x = \sum x_i e_i$. Toutes les normes sur $E$ (de dimension finie) sont équivalentes. Prenons la norme $||\cdot||_1 = \sum |x_i|$.
+Alors $||Ax||_F = ||A(\sum x_i e_i)||_F = ||\sum x_i A(e_i)||_F \le \sum |x_i| ||A(e_i)||_F$.
+Soit $M = \max_{1\le i \le n} ||A(e_i)||_F$. Alors $||Ax||_F \le M \sum |x_i| = M ||x||_1$.
+D'après le théorème précédent (caractérisation 3), $A$ est continue (bornée) pour la norme $||\cdot||_1$. Comme toutes les normes sont équivalentes sur $E$, $A$ est continue pour n'importe quelle norme sur $E$.
+\proofbox
+\end{proof}
+
+\begin{definition}[Norme d'opérateur]
+Soit $A \in B(E, F)$. On définit la norme de l'opérateur $A$ (ou norme uniforme) par :
+\[
+||A|| = \sup_{x \in E, ||x||_E \le 1} ||Ax||_F = \sup_{x \in E, ||x||_E = 1} ||Ax||_F = \sup_{x \in E, x \ne 0_E} \frac{||Ax||_F}{||x||_E}
+\]
+Ceci définit bien une norme sur l'espace vectoriel $B(E, F)$.
+\end{definition}
+
+\begin{proposition}
+La norme d'opérateur vérifie les propriétés suivantes :
+\begin{enumerate}
+    \item $||Ax||_F \le ||A|| ||x||_E$ pour tout $x \in E$.
+    \item $||A||$ est la plus petite constante $C \ge 0$ telle que $||Ax||_F \le C ||x||_E$ pour tout $x \in E$.
+    \item Si $A \in B(E, F)$ et $B \in B(G, E)$, alors $A \circ B \in B(G, F)$ et $||A \circ B|| \le ||A|| ||B||$.
+\end{enumerate}
+\end{proposition}
+\begin{proof}[Démonstration (partielle)]
+(1) C'est une conséquence directe de la définition : pour $x \ne 0_E$, $\frac{||Ax||_F}{||x||_E} \le ||A||$, d'où $||Ax||_F \le ||A|| ||x||_E$. C'est trivial si $x=0_E$.
+(2) L'ensemble $\mathcal{C} = \{ C \ge 0 \mid ||Ax||_F \le C ||x||_E, \forall x \in E \}$ est non vide car $||A|| \in \mathcal{C}$ d'après (1). Par définition de la borne supérieure, pour tout $\epsilon > 0$, il existe $x_\epsilon$ tel que $\frac{||Ax_\epsilon||_F}{||x_\epsilon||_E} > ||A|| - \epsilon$. Si $C < ||A||$, alors il existe $x$ tel que $\frac{||Ax||_F}{||x||_E} > C$, donc $||Ax||_F > C ||x||_E$. Ainsi, aucune constante $C < ||A||$ n'est dans $\mathcal{C}$. Donc $||A|| = \inf \mathcal{C}$.
+(3) $||(A \circ B)(x)||_F = ||A(B(x))||_F \le ||A|| ||B(x)||_E \le ||A|| (||B|| ||x||_G) = (||A|| ||B||) ||x||_G$. Donc $A \circ B$ est bornée et $||A \circ B|| \le ||A|| ||B||$.
+\end{proof}
+
+\begin{theorem}
+Si $F$ est un espace de Banach, alors $B(E, F)$ muni de la norme d'opérateur est aussi un espace de Banach.
+\end{theorem}
+
+\section{Intégration et Normes}
+
+\begin{proposition}[Inégalité Intégrale]
+Soit $f: [a, b] \to \mathbb{R}$ (ou $\mathbb{C}$) une fonction intégrable. Alors $|f|$ est intégrable et
+\[
+\left| \int_a^b f(x) dx \right| \le \int_a^b |f(x)| dx
+\]
+\end{proposition}
+\begin{proof}[Idée de la démonstration (Riemann)]
+L'inégalité est vraie pour les sommes de Riemann : $|\sum f(c_i) \Delta x_i| \le \sum |f(c_i) \Delta x_i| = \sum |f(c_i)| \Delta x_i$. On passe à la limite.
+\end{proof}
+
+\begin{definition}[Norme $L^1$]
+Pour les fonctions continues sur $[a, b]$ (par exemple), on peut définir la norme $L^1$ par :
+\[
+||f||_1 = \int_a^b |f(x)| dx
+\]
+\end{definition}
+
+\begin{remark}
+L'espace $C([a, b], \mathbb{R})$ muni de la norme $||\cdot||_1$ n'est pas un espace de Banach.
+\end{remark}
+
+\begin{example}
+Considérons l'espace $E = C([0, 1], \mathbb{R})$ muni de la norme $||\cdot||_1$. Construisons une suite $(f_n)$ de Cauchy qui ne converge pas dans $E$.
+Soit $f_n(x) = \max(0, 1-nx)$. C'est une fonction continue, $f_n(0)=1$.
+Calculons sa norme $L^1$ :
+\[
+||f_n||_1 = \int_0^1 \max(0, 1-nx) dx = \int_0^{1/n} (1-nx) dx = \left[ x - \frac{nx^2}{2} \right]_0^{1/n} = \frac{1}{n} - \frac{n(1/n^2)}{2} = \frac{1}{2n}
+\]
+Donc $||f_n||_1 \to 0$. La suite $(f_n)$ converge vers la fonction nulle $f(x)=0$ pour la norme $L^1$.
+Cependant, cet exemple ne montre pas que l'espace n'est pas complet (car la suite converge, vers 0).
+Considérons plutôt la suite $f_n$ de la Proposition 6.4 du polycopié (page 29), qui forme une suite de Cauchy pour la norme $L^1$ mais dont la limite (ponctuelle) est une fonction discontinue, qui n'appartient donc pas à $C([0,1])$.
+Une autre suite classique est $f_n(x) = (1-x)^n$. $||f_n||_1 = \int_0^1 (1-x)^n dx = \frac{1}{n+1} \to 0$. $f_n(0)=1$. Cette suite converge vers 0 en norme $L^1$.
+
+Considérons l'exemple de la fonction "triangle" centrée en 0 : $f_n(x) = \max(0, 1-n|x|)$ sur $[-1, 1]$. $f_n(0)=1$.
+$||f_n||_1 = \int_{-1}^1 \max(0, 1-n|x|) dx = 2 \int_0^{1/n} (1-nx) dx = 2 \times \frac{1}{2n} = \frac{1}{n}$.
+Donc $f_n \to 0$ en norme $L^1$, mais $f_n(0)=1$. Cela illustre que la convergence en norme $L^1$ n'implique pas la convergence ponctuelle (ni uniforme).
+\end{example}
+\begin{verbatim}
+#save_to: triangle_fn.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+def fn(x, n):
+    return np.maximum(0, 1 - n * np.abs(x))
+
+x = np.linspace(-1, 1, 400)
+
+plt.figure(figsize=(6, 4))
+for n in [1, 2, 5, 10]:
+    plt.plot(x, fn(x, n), label=f'n={n}')
+
+plt.title('Suite $f_n(x) = \max(0, 1 - n|x|)$')
+plt.xlabel('x')
+plt.ylabel('$f_n(x)$')
+plt.legend()
+plt.grid(True)
+plt.ylim(-0.1, 1.1)
+plt.axhline(0, color='black',linewidth=0.5)
+plt.axvline(0, color='black',linewidth=0.5)
+
+# Ensure the save path is just the filename
+plt.savefig('triangle_fn.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.7\textwidth, keepaspectratio]{triangle_fn.png}
+\caption{Exemple de suite de fonctions $f_n(x) = \max(0, 1-n|x|)$ telle que $f_n(0)=1$ mais $||f_n||_1 = 1/n \to 0$.}
+\label{fig:triangle_fn}
+\end{figure}
+
+\begin{proposition}[Comparaison Normes L1 et L-infini]
+Pour $f \in C([a, b], \mathbb{R})$ :
+\[
+||f||_1 = \int_a^b |f(x)| dx \le \int_a^b ||f||_\infty dx = (b-a) ||f||_\infty
+\]
+La convergence uniforme implique donc la convergence en norme $L^1$. La réciproque est fausse, comme le montre l'exemple ci-dessus.
+\end{proposition}
+
+\end{document}
+```

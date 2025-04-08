@@ -1,17 +1,13 @@
 ```latex
 \documentclass{article}
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
-\usepackage{amsmath}
-\usepackage{amsfonts}
-\usepackage{amssymb}
+\usepackage{amssymb,amsmath,amsthm}
 \usepackage{graphicx}
-\usepackage{geometry}
-\usepackage{verbatim}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
 \usepackage{listings}
-\usepackage{amsthm}
-
-\geometry{a4paper, margin=1in}
+\usepackage{amsfonts} % Pour \mathbb
 
 \newtheorem{theorem}{Théorème}
 \newtheorem{lemma}{Lemme}
@@ -21,612 +17,370 @@
 \newtheorem{solution}{Solution}
 \newtheorem{example}{Exemple}
 
+\usepackage[margin=1in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern} % Police vectorielle
+
+% Définition de la commande \K pour le corps des scalaires
+\newcommand{\K}{\mathbb{K}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\N}{\mathbb{N}}
+
+\title{Espaces vectoriels normés}
+\date{\today}
+
 \begin{document}
+\maketitle
+% \tableofcontents % Removed as requested
 \sloppy
 
-\section{Espaces Vectoriels Normés}
+\section{Espaces vectoriels normés}
 
-\subsection{Espaces Vectoriel Normés}
+\subsection{Rappels sur les espaces vectoriels}
+Dans cette section, $E$ désigne un espace vectoriel sur $\K = \R$ ou $\C$, dont les éléments seront notés $x, y$, etc. Le vecteur nul dans $E$ sera noté $0_E$, ou parfois simplement $0$. Les scalaires seront notés $\lambda, \mu$, etc.
 
-\begin{definition}[Espace Vectoriel Normé]
-\label{def:evn}
-Soit $E$ un espace vectoriel sur $\mathbb{K}$, où $\mathbb{K} = \mathbb{R}$ ou $\mathbb{C}$. Une norme sur $E$ est une application $N: E \rightarrow \mathbb{R}^+$ telle que pour tous $x, y \in E$ et $\lambda \in \mathbb{K}$ on a :
+\subsection{Norme sur un espace vectoriel}
+
+\begin{definition}
+Soit $E$ un espace vectoriel sur $\K$, où $\K = \R$ ou $\C$. Une \textbf{norme} sur $E$ est une application $N : E \to \R^+$ telle que pour tous $x, y \in E$ et $\lambda \in \K$ on a :
 \begin{enumerate}
-    \item $N(\lambda x) = |\lambda| N(x)$.
-    \item $N(x+y) \leq N(x) + N(y)$ (inégalité triangulaire).
-    \item $N(x) = 0 \implies x = 0_E$.
+    \item $N(\lambda x) = |\lambda| N(x)$ (homogénéité positive)
+    \item $N(x + y) \leq N(x) + N(y)$ (inégalité triangulaire)
+    \item $N(x) = 0 \implies x = 0_E$ (séparation)
 \end{enumerate}
-Un espace vectoriel $E$ muni d'une norme $N$ se note $(E, N)$ et s'appelle un espace vectoriel normé.
-\end{definition}
+Un espace vectoriel $E$ muni d'une norme $N$ se note $(E, N)$ et s'appelle un \textbf{espace vectoriel normé} (evn).
 
-\begin{remark}
-Il est habituel de noter une norme par $\|x\|$ plutôt que par $N(x)$. On rencontre parfois dans la littérature le symbole $|||A|||$ quand $A$ est une application linéaire ou une matrice, qui est à éviter.
-\end{remark}
+Il est habituel de noter une norme par $\|x\|$, plutôt que par $N(x)$.
 
-\begin{definition}[Semi-norme]
-Une fonction $N: E \rightarrow \mathbb{R}^+$ vérifiant seulement les propriétés (1) et (2) de la Définition~\ref{def:evn} est appelée une \textbf{semi-norme}.
-\end{definition}
+Une fonction $N : E \to \R^+$ vérifiant seulement les propriétés (1) et (2) est appelée une \textbf{semi-norme}.
 
-Comme pour la valeur absolue, on déduit facilement de la propriété (2) de la Définition~\ref{def:evn} que
+Comme pour la fonction valeur absolue, on déduit facilement de (2) que
 \begin{equation}
-    |N(x) - N(y)| \leq N(x-y), \forall x, y \in E.
+|N(x) - N(y)| \leq N(x - y), \quad x, y \in E.
 \end{equation}
+\end{definition}
 
 \subsubsection{Norme induite}
-Si $(E, \|.\|)$ est un evn et $F \subset E$ est un sous-espace vectoriel, la restriction de $\|.\|$ à $F$ fait de $(F, \|.\|)$ un espace vectoriel normé.
+Si $(E, \|\cdot\|)$ est un evn et $F \subset E$ est un sous-espace vectoriel, la restriction de $\|\cdot\|$ à $F$ fait de $(F, \|\cdot\|)$ un espace vectoriel normé.
 
 \subsubsection{Exemples}
-Soit $E = \mathbb{K}^n$ dont les éléments sont notés $x = (x_1, ..., x_n)$, $x_i \in \mathbb{K}$. $E$ est un espace vectoriel de dimension $n$ sur $\mathbb{K}$. On pose:
-\begin{align*}
-    \|x\|_1 &= \sum_{i=1}^n |x_i|, \\
-    \|x\|_2 &= \left( \sum_{i=1}^n |x_i|^2 \right)^{1/2}, \\
-    \|x\|_\infty &= \max_{1 \leq i \leq n} |x_i|,
-\end{align*}
-et plus généralement
-\begin{equation}
-    \|x\|_p = \left( \sum_{i=1}^n |x_i|^p \right)^{1/p}, \quad 1 \leq p < \infty.
-\end{equation}
-Les fonctions $\|.\|_p$ pour $1 \leq p \leq \infty$ sont des normes sur $\mathbb{K}^n$. C'est facile à vérifier pour $p=1, \infty$, et déjà vu pour $p=2$. Pour $p$ quelconque, l'inégalité triangulaire s'appelle \textit{l'inégalité de Minkowski}.
+\begin{itemize}
+    \item Soit $E = \K^n$ dont les éléments sont notés $x = (x_1, \dots, x_n)$, $x_i \in \K$. $E$ est un espace vectoriel de dimension $n$ sur $\K$. On pose
+    \begin{itemize}
+        \item $\|x\|_1 = \sum_{i=1}^n |x_i|$ (norme 1)
+        \item $\|x\|_2 = \left(\sum_{i=1}^n |x_i|^2\right)^{1/2}$ (norme euclidienne)
+        \item $\|x\|_\infty = \max_{1 \leq i \leq n} |x_i|$ (norme infinie ou norme sup)
+        \item et plus généralement $\|x\|_p = \left(\sum_{i=1}^n |x_i|^p\right)^{1/p}$, $1 \leq p < \infty$ (norme p)
+    \end{itemize}
+    Les fonctions $\|\cdot\|_p$ pour $1 \leq p \leq \infty$ sont des normes sur $\K^n$. C'est facile pour $p = 1, \infty$. Pour $p=2$, l'inégalité triangulaire découle de Cauchy-Schwarz. Pour $p$ quelconque, l'inégalité triangulaire s'appelle l'inégalité de Minkowski.
 
-Soit $X$ un ensemble et soit $\mathcal{B}(X, \mathbb{K})$ l'ensemble des fonctions $f: X \rightarrow \mathbb{K}$ bornées, c'est à dire telles que $\|f\|_X = \sup_{x \in X} |f(x)| < \infty$. $(\mathcal{B}(X, \mathbb{K}), \|.\|_\infty)$ est un espace vectoriel normé.
+    \item Soit $X$ un ensemble et soit $\mathcal{B}(X, \K)$ l'ensemble des fonctions $f : X \to \K$ bornées, c'est à dire telles que $\|f\|_\infty := \sup_{x \in X} |f(x)| < \infty$. $(\mathcal{B}(X, \K), \|\cdot\|_\infty)$ est un espace vectoriel normé.
+    $\mathcal{B}(X, \K)$ est de dimension finie $n$ si et seulement si $X$ possède exactement $n$ éléments (exercice).
 
-$\mathcal{B}(X, \mathbb{K})$ est de dimension finie $n$ si et seulement si $X$ possède exactement $n$ éléments (exercice).
+    \item Soit $\mathcal{R}([a, b]; \K)$ l'ensemble des fonctions à valeurs dans $\K$ intégrables au sens de Riemann sur $[a, b]$. $\mathcal{R}([a, b]; \K)$ est de dimension infinie. En effet si on note par $1_{\{c\}}(x)$ la fonction qui vaut 1 si $x = c$ et 0 sinon, alors pour toute famille finie $\{c_1, \dots, c_N\}$ avec $c_i \in [a, b]$ les vecteurs $1_{\{c_1\}}, \dots, 1_{\{c_N\}}$ forment une famille libre de $\mathcal{R}([a, b]; \K)$ (exercice).
+    La fonction
+    \[ \|f\|_p = \left(\int_a^b |f(x)|^p dx\right)^{1/p}, \quad 1 \leq p < \infty \]
+    est une \textbf{semi-norme} sur $\mathcal{R}([a, b]; \K)$. À nouveau l'inégalité triangulaire pour $\|\cdot\|_p$ s'appelle l'inégalité de Minkowski (pour les intégrales). Ce n'est pas une norme car la fonction $f(x) = 1_{\{c\}}(x)$ pour $c \in [a, b]$ est non nulle mais $\|f\|_p = 0$.
 
-Soit $R([a, b]; \mathbb{K})$ l'ensemble des fonctions à valeurs dans $\mathbb{K}$ intégrables au sens de Riemann sur $[a, b]$. $R([a, b]; \mathbb{K})$ est de dimension infinie. En effet si on note par $1_{\{c\}}(x)$ la fonction qui vaut $1$ si $x=c$ et $0$ sinon, alors pour toute famille finie $\{c_1, ..., c_N\}$ avec $c_i \in [a, b]$ les vecteurs $1_{\{c_1\}}, ..., 1_{\{c_N\}}$ forment une famille libre de $R([a, b]; \mathbb{K})$ (exercice).
+    \item Considérons maintenant l'espace $\mathcal{C}([a, b]; \K)$ des fonctions continues sur $[a, b]$. $\mathcal{C}([a, b]; \K)$ est de dimension infinie car les familles $(1, x, x^2, \dots, x^n)$ sont libres pour tout $n \in \N$ (exercice).
+    $\|\cdot\|_p$ est une norme sur $\mathcal{C}([a, b]; \K)$. En effet si $\int_a^b |u(x)|^p dx = 0$ et $u$ continue, alors $u(x) = 0$ sur $[a, b]$.
 
-La fonction
-\begin{equation}
-    \|f\|_p = \left( \int_a^b |f(x)|^p dx \right)^{1/p}, \quad 1 \leq p < \infty
-\end{equation}
-est une semi-norme sur $R([a, b]; \mathbb{K})$. À nouveau l'inégalité triangulaire pour $\|.\|_p$ s'appelle l'\textit{inégalité de Minkowski (pour les intégrales)}. Ce n'est pas une norme car la fonction $f(x) = 1_{\{c\}}(x)$ pour $c \in [a, b]$ est non nulle mais $\|f\|_p = 0$.
-
-\subsection{Considérons maintenant l'espace $C([a, b]; \mathbb{K})$ des fonctions continues sur $[a, b]$}
-$C([a, b]; \mathbb{K})$ est de dimension infinie car les familles $(1, x, x^2, ..., x^n)$ sont libres pour tout $n \in \mathbb{N}$ (exercice).
-
-$\|.\|_p$ est une norme sur $C([a, b]; \mathbb{K})$. En effet si $\int_a^b |u(x)|^p dx = 0$ et $u$ continue, alors $u(x) = 0$ sur $[a, b]$.
-
-Soit $\mathbb{K}^\mathbb{N} = \{a = (a_n)_{n \in \mathbb{N}}\}$ l'espace vectoriel des suites à valeurs dans $\mathbb{K}$.
-
-Pour $1 \leq p < \infty$ on pose
-\begin{equation}
-    l^p(\mathbb{N}; \mathbb{K}) = \left\{ (a_n) : \sum_{n \in \mathbb{N}} |a_n|^p \text{ converge} \right\}.
-\end{equation}
-On vérifie que $l^p(\mathbb{N}; \mathbb{K})$ est un espace vectoriel et que
-\begin{equation}
-    \|a\|_p = \left( \sum_{n=0}^\infty |a_n|^p \right)^{1/p}
-\end{equation}
-est une norme sur $l^p(\mathbb{N}; \mathbb{K})$.
-
-De même
-\begin{equation}
-    l^\infty(\mathbb{N}; \mathbb{K}) = \left\{ (a_n) : \sup_{n \geq 0} |a_n| < \infty \right\},
-\end{equation}
-est un espace vectoriel et
-\begin{equation}
-    \|a\|_\infty = \sup_{n \geq 0} |a_n|
-\end{equation}
-est une norme sur $l^\infty(\mathbb{N}; \mathbb{K})$. $\mathbb{K}^\mathbb{N}$ ainsi que $l^p(\mathbb{N}; \mathbb{K})$ sont de dimension infinie. En effet en notant par $\delta_p$ la suite définie par $\delta_{p,n} = 1$ si $n=p$ et $0$ sinon, $(\delta_1, ..., \delta_N)$ est une famille libre pour tout $N \in \mathbb{N}$.
+    \item Soit $\K^\N = \{a = (a_n)_{n \in \N}\}$ l'espace vectoriel des suites à valeurs dans $\K$.
+    Pour $1 \leq p < \infty$ on pose
+    \[ \ell^p(\N; \K) = \left\{(a_n) \in \K^\N : \sum_{n \in \N} |a_n|^p \text{ converge}\right\} \]
+    On vérifie que $\ell^p(\N; \K)$ est un espace vectoriel et que
+    \[ \|a\|_p = \left(\sum_{n=0}^\infty |a_n|^p\right)^{1/p} \]
+    est une norme sur $\ell^p(\N; \K)$.
+    De même
+    \[ \ell^\infty(\N; \K) = \left\{(a_n) \in \K^\N : \sup_{n \geq 0} |a_n| < \infty\right\} \]
+    est un espace vectoriel et
+    \[ \|a\|_\infty = \sup_{n \geq 0} |a_n| \]
+    est une norme sur $\ell^\infty(\N; \K)$. $\K^\N$ ainsi que $\ell^p(\N; \K)$ sont de dimension infinie. En effet en notant par $\delta_p$ la suite définie par $\delta_{p,n} = 1$ si $n = p$ et 0 sinon, $(\delta_1, \dots, \delta_N)$ est une famille libre pour tout $N \in \N$.
+\end{itemize}
 
 \subsection{Topologie des espaces vectoriels normés}
 
 \subsubsection{Distance induite par une norme}
-\begin{definition}[Distance induite par une norme]
-\label{def:distance_induite}
-Soit $(E, \|.\|)$ un evn. La fonction $E \times E \ni (x, y) \mapsto d(x, y) = \|x-y\|$ est une distance sur $E$, appelée distance induite par la norme $\|.\|$.
+
+\begin{definition}
+Soit $(E, \|\cdot\|)$ un evn. La fonction $E \times E \ni (x, y) \mapsto d(x, y) = \|x - y\|$ est une distance sur $E$, appelée \textbf{distance induite par la norme} $\|\cdot\|$.
 \end{definition}
 
 On peut alors définir les boules de centre $a \in E$ de rayon $r$ comme
-\begin{align*}
-    B(a, r) &= \{x \in E : \|x-a\| < r\}, \\
-    B_f(a, r) &= \{x \in E : \|x-a\| \leq r\},
-\end{align*}
-les ensembles ouverts, fermés, compacts etc. de $E$.
+\[ B(a, r) = \{x \in E : \|x - a\| < r\} \quad \text{(boule ouverte)} \]
+\[ B_f(a, r) = \{x \in E : \|x - a\| \leq r\} \quad \text{(boule fermée)} \]
+les ensembles ouverts, fermés, compacts etc de $E$.
 
-\begin{definition}[Espace de Banach]
-\label{def:banach}
-Un espace vectoriel normé complet s'appelle un espace de \textbf{Banach}.
+\begin{definition}
+Un espace vectoriel normé complet s'appelle un \textbf{espace de Banach}.
 \end{definition}
-
-Les espaces vectoriels normés de dimension finie sont complets (quelque soit la norme dont ils sont équipés).
-
-Par contre un espace vectoriel normé de dimension \textit{infinie} n'est pas nécessairement complet.
-
-Les espaces $(\mathcal{B}(X; \mathbb{K}), \|.\|_\infty)$, $(C([a, b]; \mathbb{K}), \|.\|_\infty)$, $(l^p(\mathbb{N}; \mathbb{K}), \|.\|_p)$ pour $1 \leq p \leq \infty$ sont complets.
-
-L'espace $(C([a, b]; \mathbb{K}), \|.\|_p)$ pour $1 \leq p < \infty$ n'est pas complet, voir la Proposition~\ref{prop:C_not_banach}.
-
-Dans un espace de Banach les ensembles fermés et bornés ne sont pas toujours compacts, voir la Proposition~\ref{prop:unit_ball_not_compact}. En fait on peut montrer que la boule unité fermée $B_f(x_0, r)$ est compacte dans $(E, \|.\|)$ si et seulement si $E$ est de dimension finie.
-
-\subsubsection{Exemples}
-Donnons un exemple d'espace vectoriel normé de dimension infinie qui n'est pas complet.
-
-\begin{proposition}
-\label{prop:C_not_banach}
-L'espace $E = C([0, 1]; \mathbb{R})$ muni de la norme $\|f\|_1 = \int_0^1 |f(x)| dx$ n'est pas complet.
-\end{proposition}
-
-\begin{proof}
-Soit
-\begin{equation}
-    f_n(x) =
-    \begin{cases}
-        0 & \text{si } 0 \leq x \leq \frac{1}{2} - n^{-1}, \\
-        \frac{n}{2}(x - (\frac{1}{2} - n^{-1})) & \text{si } \frac{1}{2} - n^{-1} \leq x \leq \frac{1}{2} + n^{-1}, \\
-        1 & \text{si } \frac{1}{2} + n^{-1} \leq x \leq 1,
-    \end{cases}
-\end{equation}
-et
-\begin{equation}
-    f(x) =
-    \begin{cases}
-        0 & \text{si } 0 \leq x \leq \frac{1}{2}, \\
-        1 & \text{si } \frac{1}{2} < x \leq 1.
-    \end{cases}
-\end{equation}
-
-\begin{verbatim}
-#save_to: plot_fn_f.png
-import matplotlib.pyplot as plt
-import numpy as np
-
-def fn(x, n):
-    if 0 <= x <= 1/2 - 1/n:
-        return 0
-    elif 1/2 - 1/n < x <= 1/2 + 1/n:
-        return (n/2) * (x - (1/2 - 1/n))
-    elif 1/2 + 1/n < x <= 1:
-        return 1
-    else:
-        return 0
-
-def f(x):
-    if 0 <= x <= 1/2:
-        return 0
-    elif 1/2 < x <= 1:
-        return 1
-    else:
-        return 0
-
-x_vals = np.linspace(0, 1, 1000)
-n_val = 20 # Example n value, adjust as needed
-
-f_n_vals = [fn(x, n_val) for x in x_vals]
-f_vals = [f(x) for x in x_vals]
-
-plt.figure(figsize=(8, 6))
-plt.plot(x_vals, f_n_vals, label='$f_n(x)$', color='red')
-plt.plot(x_vals, f_vals, label='$f(x)$', color='blue', linestyle='--')
-
-plt.axvline(x=1/2 - 1/n_val, color='gray', linestyle=':')
-plt.axvline(x=1/2 + 1/n_val, color='gray', linestyle=':')
-plt.axvline(x=1/2, color='black', linestyle=':')
-
-plt.xlabel('x')
-plt.ylabel('y')
-plt.title('$f_n(x)$ and $f(x)$ functions')
-plt.legend()
-plt.grid(True)
-plt.savefig('plot_fn_f.png')
-plt.close()
-
-\end{verbatim}
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[ max width=\textwidth,
-     max height=0.4\textheight,
-     keepaspectratio]{plot_fn_f.png}
-    \caption{Fonctions $f_n(x)$ et $f(x)$}
-    \label{fig:plot_fn_f}
-\end{figure}
-On vérifie directement que $\|f - f_n\|_1 \rightarrow 0$ et donc $\forall \epsilon > 0$, $\exists N \in \mathbb{N}$ tel que $\|f - f_n\|_1 \leq \epsilon$ si $n > N$. Si $n, p > N$ on a donc $\|f_n - f_p\|_1 \leq \|f_n - f\|_1 + \|f_p - f\|_1 \leq 2\epsilon$, donc $(f_n)$ est de Cauchy dans $(C([0, 1]; \mathbb{R}), \|.\|_1)$.
-
-Supposons qu'il existe $g \in C([0, 1]; \mathbb{R})$ tel que $\|f_n - g\|_1 \rightarrow 0$. On a donc $\|f - g\|_1 = 0$, donc
-\begin{equation}
-    \int_0^1 |f - g|(x) dx = \int_{0}^{1/2} |f - g|(x) dx + \int_{1/2}^{1} |f - g|(x) dx = 0.
-\end{equation}
-Puisque $f(x) = 0$ pour $x \in [0, 1/2]$ et $f(x) = 1$ pour $x \in (1/2, 1]$, si $g$ était continue et $\|f-g\|_1 = 0$, alors $g(x) = f(x)$ presque partout. Cependant, $f$ est discontinue en $x=1/2$, donc $g$ ne peut pas être continue et égale à $f$ partout. Plus précisément, si $\int_0^{1/2} |0 - g(x)| dx = 0$ et $g$ est continue, alors $g(x) = 0$ sur $[0, 1/2]$. De même, si $\int_{1/2}^{1} |1 - g(x)| dx = 0$ et $g$ est continue, alors $g(x) = 1$ sur $[1/2, 1]$. C'est une contradiction car une fonction continue ne peut pas être à la fois $0$ sur $[0, 1/2]$ et $1$ sur $[1/2, 1]$ à moins d'être constante et égale à la fois à 0 et à 1, ce qui est impossible. Ainsi, $g$ ne peut pas être continue.
-La suite de Cauchy $(f_n)$ ne converge pas dans $(C([0, 1]; \mathbb{R}), \|.\|_1)$.
-\end{proof}
-
-Voici maintenant un exemple d'espace de Banach de dimension infinie dans lequel les ensembles fermés bornés ne sont pas nécessairement compacts.
-
-\begin{proposition}
-\label{prop:unit_ball_not_compact}
-Dans l'espace $E = (l^1(\mathbb{N}; \mathbb{R}), \|.\|_1)$ la boule unité fermée $B_f(0, 1)$ n'est pas compacte.
-\end{proposition}
-
-\begin{proof}
-Pour éviter des complications de notation, on note un élément de $E$ (c'est à dire une suite réelle) par $u$, et le $n$-ième terme de $u$ par $u(n)$. On note que pour $n \in \mathbb{N}$ fixé on a
-\begin{equation}
-    |u(n)| \leq \|u\|_1, \quad u \in E.
-\end{equation}
-Soit $(u_p)_{p \in \mathbb{N}}$ la suite d'éléments de $E$ définie par $u_p(n) = \delta_{np}$. On a $\|u_p\|_1 = 1$, donc $(u_p)_{p \in \mathbb{N}}$ est une suite dans $B_f(0, 1)$ qui est un ensemble fermé et borné dans $E$. Supposons qu'il existe une sous-suite $(u_{\varphi(p)})$ qui converge vers $u \in E$. Par l'inégalité triangulaire (Définition~\ref{def:evn}, propriété 2) on a
-\begin{equation}
-    |\|u\|_1 - \|u_{\varphi(p)}\|_1| \leq \|u - u_{\varphi(p)}\|_1,
-\end{equation}
-donc en faisant $p \rightarrow \infty$ on a $\|u\|_1 = 1$. D'après l'inégalité (\ref{eq:6.2}) appliqué à $u_{\varphi(p)} - u$ on a
-\begin{equation}
-    |u_{\varphi(p)}(n) - u(n)| \leq \|u_{\varphi(p)} - u\|_1,
-\end{equation}
-donc pour $n$ fixé $\lim_{p \rightarrow \infty} |u_{\varphi(p)}(n) - u(n)| = 0$. Comme $u_{\varphi(p)}(n) = 0$ dès que $\varphi(p) > n$ et pour $p$ suffisamment grand, $\varphi(p) > n$, donc on déduit que $u(n) = 0$. Comme $n$ est arbitraire, $u$ est la suite nulle ce qui contredit le fait que $\|u\|_1 = 1$. La boule unité fermée dans $E$ est donc fermée et bornée mais non compacte.
-\end{proof}
-
-\subsection{Normes équivalentes}
-
-Un point important à garder à l'esprit est que la notion d'ensembles ouverts, d'applications continues, d'ensembles compacts etc. dans un espace vectoriel $E$ dépend a priori du choix d'une norme sur $E$. Deux normes différentes sur $E$ conduisent en général à deux topologies différentes.
-
-\begin{definition}[Normes topologiquement équivalentes et équivalentes]
-\label{def:norm_equivalence}
-Soit $N_1, N_2$ deux normes sur un espace vectoriel $E$.
-\begin{enumerate}
-    \item On dit que $N_1$ et $N_2$ sont topologiquement équivalentes si $(E, N_1)$ et $(E, N_2)$ ont les mêmes ensembles ouverts.
-    \item On dit que $N_1$ et $N_2$ sont équivalentes (on écrit parfois $N_1 \sim N_2$) si il existe $C_1, C_2 > 0$ telles que
-    \begin{align*}
-        N_1(x) &\leq C_1 N_2(x), \\
-        N_2(x) &\leq C_2 N_1(x), \quad \forall x \in E.
-    \end{align*}
-\end{enumerate}
-\end{definition}
-On peut réécrire la condition (2) de la Définition~\ref{def:norm_equivalence} de manière plus élégante comme: il existe $C > 0$ tel que
-\begin{equation}
-    C^{-1} N_2(x) \leq N_1(x) \leq C N_2(x), \forall x \in E,
-\end{equation}
-(prendre $C = \max(C_1, C_2)$). La taille des constantes $C_1, C_2$ ou $C$ n'a que peu d'importance.
-
-Il est facile de voir que si $N_1 \sim N_2$ et $N_2 \sim N_3$ alors $N_1 \sim N_3$ (la relation $\sim$ comme la relation d'équivalence topologique sont des relations d'équivalence).
-
-\begin{theorem}
-\label{thm:topo_equiv_iff_equiv}
-Deux normes sur $E$ sont topologiquement équivalentes si et seulement si elles sont équivalentes.
-\end{theorem}
-
-La démonstration sera faite dans la section 6.6.3.
 
 \begin{remark}
-\label{rem:norms_equiv_in_Rn}
-Il est facile de voir que les normes $\|.\|_p$ sur $\mathbb{K}^n$ sont équivalentes entre elles. En effet on vérifie (exercice) que
-\begin{equation}
-    \|x\|_\infty \leq \|x\|_p \leq n^{1/p} \|x\|_\infty, \quad x \in \mathbb{K}^n.
-\end{equation}
-On verra dans la suite un résultat a priori surprenant qui affirme que toutes les normes sur $\mathbb{K}^n$ sont équivalentes.
+Les espaces vectoriels normés de dimension finie sont complets (quelque soit la norme dont ils sont équipés).
+Par contre un espace vectoriel normé de dimension infinie n'est pas nécessairement complet.
+Les espaces $(\mathcal{B}(X; \K), \|\cdot\|_\infty)$, $(\mathcal{C}([a, b]; \K), \|\cdot\|_\infty)$, $(\ell^p(\N; \K), \|\cdot\|_p)$ pour $1 \leq p \leq \infty$ sont complets.
+L'espace $\mathcal{C}([a, b]; \|\cdot\|_p)$ pour $1 \leq p < \infty$ n'est pas complet, voir Proposition~\ref{prop:C01_non_complet}.
+Dans un espace de Banach les ensembles fermés et bornés ne sont pas toujours compacts, voir la Proposition~\ref{prop:l1_non_compact}. En fait on peut montrer que la boule unité fermée $B_f(x_0, r)$ est compacte dans $(E, \|\cdot\|)$ si et seulement si $E$ est de dimension finie.
 \end{remark}
 
-Par contre les normes $\|.\|_p$ sur $C([a, b]; \mathbb{K})$ ne sont pas équivalentes entre elles. Par exemple si $[a, b] = [-1, 1]$ et
-\begin{equation}
-    f_n(x) =
-    \begin{cases}
-        1 - n|x| & \text{si } |x| \leq n^{-1}, \\
-        0 & \text{sinon}
-    \end{cases}
-\end{equation}
-\begin{verbatim}
-#save_to: plot_fn_norm.png
-import matplotlib.pyplot as plt
-import numpy as np
+\subsubsection{Exemples}
 
-def fn_norm(x, n):
-    if abs(x) <= 1/n:
-        return 1 - n*abs(x)
-    else:
-        return 0
-
-x_vals = np.linspace(-1, 1, 1000)
-n_vals = [1, 2, 5, 10] # Example n values
-
-plt.figure(figsize=(8, 6))
-
-for n in n_vals:
-    f_n_vals = [fn_norm(x, n) for x in x_vals]
-    plt.plot(x_vals, f_n_vals, label='$f_{}(x)$'.format(n))
-
-plt.xlabel('x')
-plt.ylabel('y')
-plt.title('$f_n(x)$ functions for different n values')
-plt.legend()
-plt.grid(True)
-plt.savefig('plot_fn_norm.png')
-plt.close()
-
-\end{verbatim}
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[ max width=\textwidth,
-     max height=0.4\textheight,
-     keepaspectratio]{plot_fn_norm.png}
-    \caption{Fonctions $f_n(x)$ pour différentes valeurs de n}
-    \label{fig:plot_fn_norm}
-\end{figure}
-(tracer son graphe), on a $\|f_n\|_\infty = 1$ et $\|f_n\|_1 = n^{-1}$. Ceci entraine qu'il n'existe pas de constante $C$ telle que $\|f\|_\infty \leq C \|f\|_1$ pour tout $f \in C([-1, 1]; \mathbb{K})$ (prendre $f=f_n$ and let $n \rightarrow \infty$).
-
-\subsubsection{Équivalence des normes en dimension finie}
-
-\begin{theorem}
-\label{thm:norm_equiv_finite_dim}
-Soit $E$ un espace vectoriel sur $\mathbb{K}$ de dimension finie. Alors $E$ possède au moins une norme et toutes les normes sur $E$ sont équivalentes.
-\end{theorem}
-
-\begin{proof}
-On peut supposer que $\mathbb{K} = \mathbb{R}$ (en identifiant $\mathbb{C}$ à $\mathbb{R}^2$). On fixe alors une base $B = (e_1, ..., e_n)$ de $E$ et on identifie $E$ à $\mathbb{R}^n$ à l'aide de $B$. On peut donc supposer que $E = \mathbb{R}^n$ et que $(e_1, ..., e_n)$ est la base canonique de $\mathbb{R}^n$. La norme $\|.\|_\infty$ est une norme sur $\mathbb{R}^n$, équivalente à la norme usuelle, et définissant donc les mêmes ouverts.
-
-Soit $S_\infty(0, 1) = \{x \in \mathbb{R}^n : \|x\|_\infty = 1\}$ la sphère de rayon $1$ pour $\|.\|_\infty$. $S_\infty(0, 1)$ est fermée, car l'application $E \ni x \mapsto \|x\| \in \mathbb{R}$ est continue sur tout evn $(E, \|.\|)$ (exercice). $S_\infty(0, 1)$ est évidemment bornée, donc compacte par le Théorème de Borel-Lebesgue.
-
-Soit maintenant $N: \mathbb{R}^n \rightarrow \mathbb{R}^+$ une norme. On a
-\begin{equation}
-    N(x) = N \left( \sum_{i=1}^n x_i e_i \right) \leq \sum_{i=1}^n |x_i| N(e_i) \leq \left( \sum_{i=1}^n N(e_i) \right) \max_{1 \leq i \leq n} |x_i| = C \|x\|_\infty, \quad C = \sum_{i=1}^n N(e_i).
-\end{equation}
-Grâce à l'inégalité triangle pour la norme $N$ (Définition~\ref{def:evn}, propriété 2), on obtient
-\begin{equation}
-    |N(x) - N(y)| \leq N(x-y) \leq C \|x-y\|_\infty,
-\end{equation}
-et donc la fonction $N: \mathbb{R}^n \rightarrow \mathbb{R}$ est continue sur $(\mathbb{R}^n, \|.\|_\infty)$. Par le Corollaire (4.8) $N$ est bornée et atteint ses bornes sur $S_\infty(0, 1)$. Comme $N(x) > 0$ pour tout $x \in S_\infty(0, 1)$ il existe donc des constantes $0 < a < b$ telles que
-\begin{equation}
-    a \leq N(x) \leq b, \forall x \in S_\infty(0, 1).
-\end{equation}
-En appliquant cette inégalité à $\frac{x}{\|x\|_\infty}$ pour $x \neq 0$, on en déduit que
-\begin{equation}
-    a \leq N \left( \frac{x}{\|x\|_\infty} \right) \leq b \implies a \|x\|_\infty \leq \|x\|_\infty N \left( \frac{x}{\|x\|_\infty} \right) = N(x) \leq b \|x\|_\infty, \forall x \neq 0,
-\end{equation}
-et l'inégalité est aussi vraie pour $x=0$. Par conséquent, $N$ et $\|.\|_\infty$ sont équivalentes. Toutes les normes sur $\mathbb{R}^n$ sont équivalentes à $\|.\|_\infty$ et donc équivalentes entre elles.
-\end{proof}
-
-\subsection{Compléments sur les espaces vectoriels normés}
-
-\subsubsection{Norme $L^\infty$ et convergence uniforme}
-
-Soit $X$ un ensemble (par exemple un intervalle de $\mathbb{R}$) et $(f_n)_{n \in \mathbb{N}}$ une suite de fonctions $f_n: X \rightarrow \mathbb{R}$.
-
-On rappelle que la suite de fonctions $(f_n)$ converge simplement vers une fonction $f: X \rightarrow \mathbb{R}$ si pour tout $x \in X$ la suite réelle $(f_n(x))$ converge vers $f(x)$. La convergence simple est la notion la plus faible de convergence pour des suites de fonctions. Exprimée à l'aide de quantificateurs, elle s'écrit:
-\begin{equation}
-    \forall x \in X, \forall \epsilon > 0, \exists N \in \mathbb{N} \text{ tel que } |f_n(x) - f(x)| \leq \epsilon, \forall n \geq N,
-\end{equation}
-l'entier $N$ dépendant a priori de $\epsilon$ et de $x$.
-
-La suite de fonctions $(f_n)$ converge \textit{uniformément} vers une fonction $f: X \rightarrow \mathbb{R}$ si
-\begin{equation}
-    \forall \epsilon > 0, \exists N \in \mathbb{N} \text{ tel que } |f_n(x) - f(x)| \leq \epsilon, \forall n \geq N, \forall x \in X.
-\end{equation}
-L'entier $N$ ne dépend maintenant que de $\epsilon$. On peut réécrire (\ref{eq:6.4}) comme
-\begin{equation}
-    \forall \epsilon > 0, \exists N \in \mathbb{N} \text{ tel que } \sup_{x \in X} |f_n(x) - f| \leq \epsilon.
-\end{equation}
-On voit donc que sur l'espace vectoriel $\mathcal{B}(X, \mathbb{R})$ des fonctions bornées sur $X$, une suite $(f_n)$ converge uniformément vers $f$ si et seulement si $(f_n)$ converge vers $f$ pour la norme $\|.\|_\infty$.
-
-\subsubsection{Limites uniformes de fonctions continues}
-
-Prenons $X = [a, b]$. L'espace $C([a, b]; \mathbb{R})$ des fonctions continues sur $[a, b]$ est un sous-espace vectoriel de l'espace $\mathcal{B}([a, b]; \mathbb{R})$ des fonctions bornées. On sait que la limite uniforme d'une suite de fonctions continues sur $[a, b]$ est une fonction continue sur $[a, b]$.
-
-Avec le langage que nous avons appris, ceci signifie que $C([a, b]; \mathbb{R})$ est un sous-espace vectoriel fermé de $\mathcal{B}([a, b]; \mathbb{R})$ muni de la norme $\|.\|_\infty$.
-
-\subsubsection{Séries à valeurs dans un espace vectoriel normé}
-
-Soit $(E, \|.\|)$ un espace vectoriel normé et $(u_n)_{n \in \mathbb{N}}$ une suite dans $E$. On peut former la suite
-\begin{equation}
-    S_N = \sum_{n=0}^N u_n,
-\end{equation}
-appelée suite des sommes partielles de la série $\sum_{n \in \mathbb{N}} u_n$. La définition suivante est exactement la même que pour les séries numériques.
-
-\begin{definition}[Convergence d'une série dans un EVN]
-\label{def:series_convergence_evn}
-La série $\sum_{n \in \mathbb{N}} u_n$ converge dans $(E, \|.\|)$ si la suite des sommes partielles $(S_N)_{N \in \mathbb{N}}$ converge dans $(E, \|.\|)$. L'élément $\lim_{N \rightarrow +\infty} S_N = \sum_{n=0}^\infty u_n$ est noté $\sum_{n=0}^\infty u_n$ et appelé somme de la série $\sum_{n \in \mathbb{N}} u_n$.
-\end{definition}
-
-\begin{proposition}
-\label{prop:series_linearity}
-Soit $\sum_{n \in \mathbb{N}} u_n$, $\sum_{n \in \mathbb{N}} v_n$ deux séries convergentes à valeurs dans $E$ et $\lambda \in \mathbb{K}$. Alors $\sum_{n \in \mathbb{N}} (u_n + v_n)$ et $\sum_{n \in \mathbb{N}} (\lambda u_n)$ sont convergentes et on a:
-\begin{align*}
-    \sum_{n=0}^\infty (u_n + v_n) &= \sum_{n=0}^\infty u_n + \sum_{n=0}^\infty v_n, \\
-    \sum_{n=0}^\infty (\lambda u_n) &= \lambda \sum_{n=0}^\infty u_n.
-\end{align*}
+\begin{proposition} \label{prop:C01_non_complet}
+L'espace $E = \mathcal{C}([0, 1]; \R)$ muni de la norme $\|f\|_1 = \int_0^1 |f(x)| dx$ n'est pas complet.
 \end{proposition}
 
-\subsubsection{Convergence normale}
-
-\begin{definition}[Convergence normale]
-\label{def:normal_convergence}
-Soit $(E, \|.\|)$ un espace vectoriel normé et $(u_n)_{n \in \mathbb{N}}$ une suite dans $E$. La série $\sum_{n \in \mathbb{N}} u_n$ converge normalement si la série numérique $\sum_{n \in \mathbb{N}} \|u_n\|$ converge.
-\end{definition}
-
-La convergence normale est un outil important pour montrer la convergence d'une série à valeurs dans un espace de Banach. On peut retenir sa définition en pensant à la 'convergence de la série des normes'.
-
-\begin{theorem}
-\label{thm:normal_convergence_implies_convergence}
-Soit $(E, \|.\|)$ un espace de Banach. Alors toute série $\sum_{n \in \mathbb{N}} u_n$ normalement convergente est convergente et on a
-\begin{equation}
-    \left\| \sum_{n=0}^\infty u_n \right\| \leq \sum_{n=0}^\infty \|u_n\|.
-\end{equation}
-\end{theorem}
-
-\section{Suites d'éléments de E}
-\subsection{Suite extraite}
-\textbf{Exemple:} $E = (\mathcal{C}([0, 1], \mathbb{R}), \|.\|_\infty)$. On construit une suite d'éléments de $C([0, 1], \mathbb{R})$ qui n'est pas compacte.
-
-\begin{lemma}
-\label{lemma:C_complete}
-Soit $E = (C([0, 1], \mathbb{R}), \|.\|_\infty)$. $E$ est complet.
-\end{lemma}
-
-\textbf{Exemple}
-On construit une suite d'éléments de $B_f(0, 1)$ qui n'admet pas de sous-suite convergente.
-
-Pour $n \in \mathbb{N}^*$, on pose $f_n : [0, 1] \rightarrow \mathbb{R}$ continue affine par morceaux :
-\begin{itemize}
-    \item $f_n(0) = 0$
-    \item $f_n(\frac{1}{2n}) = 1$
-    \item $f_n(\frac{1}{n}) = 0$
-    \item $f_n(x) = 0$ pour $x \geq \frac{1}{n}$ ou $x \leq 0$.
-\end{itemize}
+\begin{proof}
+Soit la suite de fonctions $(f_n)_{n \in \N}$ définie par
+\[
+f_n(x) =
+\begin{cases}
+0 & \text{si } 0 \leq x \leq \frac{1}{2} - \frac{1}{n} \\
+\frac{n}{2} (x - (\frac{1}{2} - \frac{1}{n})) & \text{si } \frac{1}{2} - \frac{1}{n} \leq x \leq \frac{1}{2} + \frac{1}{n} \\
+1 & \text{si } \frac{1}{2} + \frac{1}{n} \leq x \leq 1
+\end{cases}
+\]
+pour $n \geq 2$. Chaque $f_n$ est continue sur $[0, 1]$.
+Soit la fonction $f$ définie par
+\[
+f(x) =
+\begin{cases}
+0 & \text{si } 0 \leq x \leq \frac{1}{2} \\
+1 & \text{si } \frac{1}{2} < x \leq 1
+\end{cases}
+\]
+$f$ n'est pas continue en $x=1/2$.
 
 \begin{verbatim}
-#save_to: plot_fn_suite.png
-import matplotlib.pyplot as plt
-import numpy as np
-
-def fn_suite(x, n):
-    if x < 0 or x > 1/n:
-        return 0
-    elif 0 <= x <= 1/(2*n):
-        return 2*n*x
-    elif 1/(2*n) < x <= 1/n:
-        return 2 - 2*n*x
-    else:
-        return 0
-
-x_vals = np.linspace(-0.1, 0.2, 1000)
-n_vals = [1, 2, 3, 4, 5] # Example n values
-
-
-plt.figure(figsize=(8, 6))
-
-for n in n_vals:
-    f_n_vals = [fn_suite(x, n) for x in x_vals]
-    plt.plot(x_vals, f_n_vals, label='$f_{}(x)$'.format(n))
-
-plt.xlabel('x')
-plt.ylabel('y')
-plt.title('$f_n(x)$ functions for different n values')
-plt.legend()
-plt.grid(True)
-plt.savefig('plot_fn_suite.png')
-plt.close()
-
-\end{verbatim}
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[ max width=\textwidth,
-     max height=0.4\textheight,
-     keepaspectratio]{plot_fn_suite.png}
-    \caption{Fonctions $f_n(x)$ pour différentes valeurs de n}
-    \label{fig:plot_fn_suite}
-\end{figure}
-On remarque que $\forall n$, $\|f_n\|_\infty = 1$ et que si $n \neq p$, $f_n$ et $f_p$ ont des supports disjoints.
-
-Si $n \neq p$, $\|f_n - f_p\|_\infty = 1$.
-
-Donc $(f_n)_{n \geq 1}$ ne peut pas avoir de sous-suite de Cauchy, car si $\varphi : \mathbb{N} \rightarrow \mathbb{N}$ est strictement croissante, $\forall p \neq q$, $\|f_{\varphi(p)} - f_{\varphi(q)}\|_\infty = 1$.
-
-Donc $(f_n)_{n \geq 1}$ n'a pas de sous-suite convergente. $B_f(0, 1)$ n'est pas compacte.
-
-\section{Normes Equivalentes}
-
-\begin{definition}[Normes topologiquement équivalentes et équivalentes]
-$N_1, N_2$ sont topologiquement équivalentes sur $E$ si
-\begin{align*}
-    Id : (E, N_1) &\rightarrow (E, N_2) \text{ est continue} \\
-    Id : (E, N_2) &\rightarrow (E, N_1) \text{ est continue}
-\end{align*}
-$\iff \exists C_1, C_2 > 0$ telles que
-\begin{align*}
-    N_2(x) &\leq C_1 N_1(x) \\
-    N_1(x) &\leq C_2 N_2(x)
-\end{align*}
-$\iff \exists C > 0$ telles que
-\begin{equation}
-    \frac{1}{C} N_1(x) \leq N_2(x) \leq C N_1(x).
-\end{equation}
-Dans ce cas, on dit que $N_1$ et $N_2$ sont des normes équivalentes.
-\end{definition}
-
-\begin{theorem}
-\label{thm:norm_equiv_finite_dim_again}
-En dimension finie, toutes les normes sont équivalentes.
-\end{theorem}
-
-\begin{example}
-Dans $\mathbb{R}^2$, $N_1(x) = |x_1| + |x_2|$, $N_2(x) = \sqrt{x_1^2 + x_2^2}$, $N_\infty(x) = \max(|x_1|, |x_2|)$.
-\end{example}
-
-\begin{verbatim}
-#save_to: plot_norm_equivalence.png
+#save_to: fig_fn_prop64.png
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import numpy as np
 
+n = 5 # Example value for n
+x1 = np.linspace(0, 1/2 - 1/n, 10)
+y1 = np.zeros_like(x1)
+x2 = np.linspace(1/2 - 1/n, 1/2 + 1/n, 10)
+y2 = (n/2) * (x2 - (1/2 - 1/n))
+x3 = np.linspace(1/2 + 1/n, 1, 10)
+y3 = np.ones_like(x3)
+
+x = np.concatenate((x1, x2, x3))
+y = np.concatenate((y1, y2, y3))
+
 fig, ax = plt.subplots()
-
-# Square for N_inf
-square = patches.Rectangle((-1, -1), 2, 2, linewidth=1, edgecolor='r', facecolor='none', label='$N_\infty(x) = 1$')
-ax.add_patch(square)
-
-# Circle for N_2
-circle = patches.Circle((0, 0), radius=1, linewidth=1, edgecolor='g', facecolor='none', label='$N_2(x) = 1$')
-ax.add_patch(circle)
-
-# Diamond for N_1
-diamond_points = np.array([[0, 1], [1, 0], [0, -1], [-1, 0]])
-diamond = patches.Polygon(diamond_points, linewidth=1, edgecolor='b', facecolor='none', label='$N_1(x) = 1$')
-ax.add_patch(diamond)
-
-
-ax.set_aspect('equal', adjustable='box')
-ax.set_xlim([-1.5, 1.5])
-ax.set_ylim([-1.5, 1.5])
+ax.plot(x, y, label=f'$f_{n}(x)$ (n={n})')
 ax.set_xlabel('x')
-ax.set_ylabel('y')
-ax.set_title('Equivalence of Norms in $\mathbb{R}^2$')
-ax.legend()
+ax.set_ylabel('$f_n(x)$')
+ax.set_title('Fonction $f_n(x)$')
 ax.grid(True)
-plt.savefig('plot_norm_equivalence.png')
-plt.close()
-
-
+ax.axvline(1/2 - 1/n, color='r', linestyle='--', lw=1, label='$1/2 - 1/n$')
+ax.axvline(1/2 + 1/n, color='g', linestyle='--', lw=1, label='$1/2 + 1/n$')
+ax.legend()
+plt.ylim(-0.1, 1.1)
+plt.savefig('fig_fn_prop64.png')
 \end{verbatim}
 
-\begin{figure}[h]
+\begin{figure}[H]
     \centering
-    \includegraphics[ max width=\textwidth,
-     max height=0.4\textheight,
-     keepaspectratio]{plot_norm_equivalence.png}
-    \caption{Equivalence des Normes dans $\mathbb{R}^2$}
-    \label{fig:plot_norm_equivalence}
+    \includegraphics[max width=0.6\textwidth, keepaspectratio]{fig_fn_prop64.png}
+    \caption{Illustration de la fonction $f_n(x)$ pour $n=5$.}
+    \label{fig:fn_prop64}
 \end{figure}
-\begin{itemize}
-    \item $N_\infty(x) \leq N_2(x) \leq \sqrt{2} N_\infty(x)$
-    \item $N_\infty(x) \leq N_1(x) \leq 2 N_\infty(x)$
-    \item $N_2(x) \leq N_1(x) \leq \sqrt{2} N_2(x)$
-\end{itemize}
-Il existe un isomorphisme entre $(\mathbb{R}^2, N_1)$ et $(\mathbb{R}^2, N_2)$.
 
-$\mathbb{R}^2 \sim \mathbb{C}$. On identifie $\mathbb{R}^2$ et $\mathbb{C}$.
-$z = x_1 + ix_2 \leftrightarrow (x_1, x_2)$.
-$\|z\| = \sqrt{x_1^2 + x_2^2} = N_2((x_1, x_2))$.
+On vérifie directement que $\|f - f_n\|_1 \to 0$. Calculons la norme $\|f - f_n\|_1$:
+\begin{align*}
+\|f - f_n\|_1 &= \int_0^1 |f(x) - f_n(x)| dx \\
+&= \int_{1/2 - 1/n}^{1/2} \left|0 - \frac{n}{2}(x - (\frac{1}{2} - \frac{1}{n}))\right| dx + \int_{1/2}^{1/2 + 1/n} \left|1 - \frac{n}{2}(x - (\frac{1}{2} - \frac{1}{n}))\right| dx \\
+&= \int_{1/2 - 1/n}^{1/2} \frac{n}{2}(x - \frac{1}{2} + \frac{1}{n}) dx + \int_{1/2}^{1/2 + 1/n} \left(1 - \frac{n}{2}x + \frac{n}{4} - \frac{1}{2}\right) dx \\
+&= \int_{1/2 - 1/n}^{1/2} \frac{n}{2}(x - \frac{1}{2} + \frac{1}{n}) dx + \int_{1/2}^{1/2 + 1/n} \left(\frac{1}{2} + \frac{n}{4} - \frac{n}{2}x\right) dx
+\end{align*}
+L'aire correspond à deux triangles de base $1/n$ et de hauteur $1/2$.
+\[ \|f - f_n\|_1 = \text{Aire}(\text{triangle sous } f_n \text{ entre } 1/2-1/n \text{ et } 1/2) + \text{Aire}(\text{triangle sur } f_n \text{ entre } 1/2 \text{ et } 1/2+1/n) \]
+\[ \|f - f_n\|_1 = \frac{1}{2} \times \frac{1}{n} \times \frac{1}{2} + \frac{1}{2} \times \frac{1}{n} \times \frac{1}{2} = \frac{1}{2n} \]
+Donc $\|f - f_n\|_1 \to 0$ quand $n \to \infty$.
 
-\textbf{Soit $N$ une norme sur $\mathbb{R}^d$.}
-On veut montrer que $\exists a, b > 0$ telles que $a N_\infty(x) \leq N(x) \leq b N_\infty(x)$.
-On pose $S_\infty = \{x \in \mathbb{R}^d : N_\infty(x) = 1\}$.
-$S_\infty$ est compacte.
-$N$ est continue sur $(\mathbb{R}^d, N_\infty)$.
-$N$ est continue sur $S_\infty$.
-$N$ est bornée et atteint ses bornes sur $S_\infty$.
-$\exists x_0 \in S_\infty$ telle que $N(x_0) = \min_{x \in S_\infty} N(x) = a$.
-$\exists x_1 \in S_\infty$ telle que $N(x_1) = \max_{x \in S_\infty} N(x) = b$.
+Montrons que $(f_n)$ est une suite de Cauchy dans $(\mathcal{C}([0, 1]; \R), \|\cdot\|_1)$. Pour $m, n \in \N$,
+\[ \|f_n - f_m\|_1 \leq \|f_n - f\|_1 + \|f - f_m\|_1 = \frac{1}{2n} + \frac{1}{2m} \]
+Pour $\epsilon > 0$, il existe $N \in \N$ tel que pour $n, m \geq N$, $\frac{1}{2n} < \epsilon/2$ et $\frac{1}{2m} < \epsilon/2$. Donc $\|f_n - f_m\|_1 < \epsilon$. La suite $(f_n)$ est bien de Cauchy.
 
-$a = \min_{x \in S_\infty} N(x) > 0$ car si $N(x_0) = 0$ avec $N_\infty(x_0) = 1 \implies x_0 = 0$ et $N_\infty(x_0) = 0 \neq 1$. Contradiction. Donc $a > 0$.
-$b = \max_{x \in S_\infty} N(x) < \infty$ car $N$ continue sur le compact $S_\infty$.
+Supposons qu'il existe $g \in \mathcal{C}([0, 1]; \R)$ tel que $\|f_n - g\|_1 \to 0$. Alors par unicité de la limite dans l'espace des fonctions intégrables $L^1([0,1])$ (qui contient $\mathcal{C}([0, 1])$), on aurait $\|f - g\|_1 = 0$.
+\[ \|f - g\|_1 = \int_0^1 |f(x) - g(x)| dx = 0 \]
+Comme $f$ et $g$ sont continues sur $[0, 1/2[$ et sur $]1/2, 1]$ (puisque $g$ est continue sur $[0,1]$ et $f$ est constante sur ces intervalles), et que l'intégrale de la valeur absolue de leur différence est nulle, cela implique $f(x) = g(x)$ pour $x \in [0, 1/2[$ et $x \in ]1/2, 1]$.
+Donc $g(x) = 0$ pour $x \in [0, 1/2[$ et $g(x) = 1$ pour $x \in ]1/2, 1]$.
+Mais $g$ doit être continue en $x=1/2$. On aurait $\lim_{x \to (1/2)^-} g(x) = 0$ et $\lim_{x \to (1/2)^+} g(x) = 1$. Ceci contredit la continuité de $g$ au point $1/2$.
+La suite de Cauchy $(f_n)$ ne converge donc pas dans $(\mathcal{C}([0, 1]; \R), \|\cdot\|_1)$.
+\end{proof}
 
-Soit $x \in \mathbb{R}^d$, $x \neq 0$. On pose $y = \frac{x}{N_\infty(x)}$. $N_\infty(y) = 1 \implies y \in S_\infty$.
-$a \leq N(y) \leq b$.
-$a \leq N \left( \frac{x}{N_\infty(x)} \right) \leq b$.
-$a \leq \frac{N(x)}{N_\infty(x)} \leq b$.
-$a N_\infty(x) \leq N(x) \leq b N_\infty(x)$.
+
+\begin{proposition} \label{prop:l1_non_compact}
+Dans l'espace $E = (\ell^1(\N; \R), \|\cdot\|_1)$, la boule unité fermée $B_f(0, 1)$ n'est pas compacte.
+\end{proposition}
+
+\begin{proof}
+Pour éviter des complications de notation, on note un élément de $E$ (c'est à dire une suite réelle) par $u$, et le $n$-ième terme de $u$ par $u(n)$. On note que pour $n \in \N$ fixé on a
+\begin{equation} \label{eq:un_leq_u1}
+|u(n)| \leq \|u\|_1, \quad u \in E.
+\end{equation}
+Soit $(u_p)_{p \in \N}$ la suite d'éléments de $E$ définie par $u_p(n) = \delta_{np}$ (symbole de Kronecker, $u_p$ est la suite qui a 1 en position $p$ et 0 ailleurs). On a $\|u_p\|_1 = \sum_{n=0}^\infty |\delta_{np}| = 1$. Donc $(u_p)_{p \in \N}$ est une suite dans $B_f(0, 1)$. $B_f(0,1)$ est un ensemble fermé et borné dans $E$.
+
+Supposons qu'il existe une sous-suite $(u_{\varphi(p)})_{p \in \N}$ qui converge vers $u \in E$. Par l'inégalité triangulaire inversée (issue de (6.1)), on a
+\[ | \|u\|_1 - \|u_{\varphi(p)}\|_1 | \leq \|u - u_{\varphi(p)}\|_1 \]
+Comme $\|u_{\varphi(p)}\|_1 = 1$ et $\|u - u_{\varphi(p)}\|_1 \to 0$ quand $p \to \infty$, on a $\lim_{p \to \infty} \|u_{\varphi(p)}\|_1 = \|u\|_1$. Donc $\|u\|_1 = 1$.
+
+D'après \eqref{eq:un_leq_u1} appliqué à la différence $u_{\varphi(p)} - u$, on a
+\[ |u_{\varphi(p)}(n) - u(n)| \leq \|u_{\varphi(p)} - u\|_1 \]
+Pour $n$ fixé, comme $\|u_{\varphi(p)} - u\|_1 \to 0$, on a $\lim_{p \to \infty} u_{\varphi(p)}(n) = u(n)$.
+Or $u_{\varphi(p)}(n) = \delta_{n, \varphi(p)}$. Comme $\varphi: \N \to \N$ est strictement croissante, $\varphi(p) \to \infty$ quand $p \to \infty$. Donc pour $p$ assez grand, $\varphi(p) > n$, ce qui implique $\delta_{n, \varphi(p)} = 0$.
+Ainsi, pour tout $n$ fixé, $\lim_{p \to \infty} u_{\varphi(p)}(n) = 0$.
+On en déduit que $u(n) = 0$ pour tout $n \in \N$. Donc $u$ est la suite nulle.
+Alors $\|u\|_1 = 0$. Ceci contredit le fait que $\|u\|_1 = 1$.
+
+Donc la suite $(u_p)$ n'admet aucune sous-suite convergente dans $E$. La boule unité fermée $B_f(0, 1)$ dans $E = (\ell^1(\N; \R), \|\cdot\|_1)$ est donc fermée et bornée mais non compacte.
+\end{proof}
+
+\subsection{Normes équivalentes}
+Un point important à garder à l'esprit est que la notion d'ensembles ouverts, d'applications continues, d'ensembles compacts etc dans un espace vectoriel $E$ dépend a priori du choix d'une norme sur $E$. Deux normes différentes sur $E$ conduisent en général à deux topologies différentes.
+
+\begin{definition}
+Soit $N_1, N_2$ deux normes sur un espace vectoriel $E$.
+\begin{enumerate}
+    \item On dit que $N_1$ et $N_2$ sont \textbf{topologiquement équivalentes} si $(E, N_1)$ et $(E, N_2)$ ont les mêmes ensembles ouverts.
+    \item On dit que $N_1$ et $N_2$ sont \textbf{équivalentes} (on écrit parfois $N_1 \sim N_2$) s'il existe $C_1, C_2 > 0$ telles que
+    \[ N_1(x) \leq C_1 N_2(x), \quad N_2(x) \leq C_2 N_1(x), \quad \forall x \in E. \]
+\end{enumerate}
+On peut réécrire (2) de manière plus élégante comme : il existe $C > 0$ tel que
+\[ C^{-1} N_2(x) \leq N_1(x) \leq C N_2(x), \quad \forall x \in E, \]
+(prendre $C = \max(C_1, C_2^{-1})$). La taille des constantes $C_1, C_2$ ou $C$ n'a que peu d'importance.
+Il est facile de voir que si $N_1 \sim N_2$ et $N_2 \sim N_3$ alors $N_1 \sim N_3$ (la relation $\sim$, comme la relation d'équivalence topologique, sont des relations d'équivalence).
+\end{definition}
 
 \begin{theorem}
-\label{thm:topo_equiv_iff_equiv_again}
-$N_1, N_2$ sont topologiquement équivalentes si et seulement si $N_1, N_2$ sont équivalentes.
+Deux normes sur $E$ sont topologiquement équivalentes si et seulement si elles sont équivalentes.
+\end{theorem}
+\begin{proof}
+La démonstration sera faite dans 6.6.3 (non fournie dans ces notes). Esquisse: L'identité $Id: (E, N_1) \to (E, N_2)$ et son inverse $Id: (E, N_2) \to (E, N_1)$ doivent être continues. La continuité d'une application linéaire est équivalente à être bornée (Théorème 6.14), ce qui donne les inégalités de la définition d'équivalence.
+\end{proof}
+
+\begin{remark}
+Il est facile de voir que les normes $\|\cdot\|_p$ sur $\K^n$ sont équivalentes entre elles. En effet on vérifie (exercice) que
+\[ \|x\|_\infty \leq \|x\|_p \leq n^{1/p} \|x\|_\infty, \quad x \in \K^n. \]
+(Indication: $\|x\|_p^p = \sum |x_i|^p \leq \sum (\|x\|_\infty)^p = n \|x\|_\infty^p$. Et $|x_k| = (|x_k|^p)^{1/p} \leq (\sum |x_i|^p)^{1/p} = \|x\|_p$, donc $\|x\|_\infty = \max |x_k| \leq \|x\|_p$.)
+
+On verra dans la suite un résultat a priori surprenant qui affirme que toutes les normes sur $\K^n$ sont équivalentes.
+
+Par contre les normes $\|\cdot\|_p$ sur $\mathcal{C}([a, b]; \K)$ ne sont pas équivalentes entre elles. Par exemple si $[a, b] = [-1, 1]$ et
+\[
+f_n(x) =
+\begin{cases}
+1 - n|x| & \text{si } |x| \leq n^{-1} \\
+0 & \text{sinon}
+\end{cases}
+\]
+(tracer son graphe)
+\begin{verbatim}
+#save_to: fig_fn_rem68.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+n = 5 # Example value for n
+x = np.linspace(-1, 1, 400)
+y = np.maximum(0, 1 - n * np.abs(x))
+
+fig, ax = plt.subplots()
+ax.plot(x, y, label=f'$f_n(x)$ (n={n})')
+ax.set_xlabel('x')
+ax.set_ylabel('$f_n(x)$')
+ax.set_title('Fonction $f_n(x) = \max(0, 1-n|x|)$ sur $[-1, 1]$')
+ax.grid(True)
+ax.axvline(-1/n, color='r', linestyle='--', lw=1, label='$-1/n$')
+ax.axvline(1/n, color='g', linestyle='--', lw=1, label='$1/n$')
+ax.legend()
+plt.ylim(-0.1, 1.1)
+plt.savefig('fig_fn_rem68.png')
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[max width=0.6\textwidth, keepaspectratio]{fig_fn_rem68.png}
+    \caption{Graphe de la fonction $f_n(x)$ pour $n=5$.}
+    \label{fig:fn_rem68}
+\end{figure}
+
+On a $\|f_n\|_\infty = 1$ et $\|f_n\|_1 = \int_{-1}^1 f_n(x) dx = \int_{-1/n}^{1/n} (1 - n|x|) dx = 2 \int_0^{1/n} (1 - nx) dx = 2 [x - \frac{nx^2}{2}]_0^{1/n} = 2 (\frac{1}{n} - \frac{n(1/n)^2}{2}) = 2 (\frac{1}{n} - \frac{1}{2n}) = \frac{1}{n}$.
+Ceci entraîne qu'il n'existe pas de constante $C$ telle que $\|f\|_\infty \leq C \|f\|_1$ pour tout $f \in \mathcal{C}([-1, 1]; \K)$ (prendre $f = f_n$ et faire $n \to \infty$, on aurait $1 \leq C/n \to 0$, contradiction).
+Donc $\|\cdot\|_\infty$ et $\|\cdot\|_1$ ne sont pas équivalentes sur $\mathcal{C}([-1, 1])$.
+\end{remark}
+
+\subsubsection{Équivalence des normes en dimension finie}
+
+\begin{theorem} \label{thm:equiv_dim_finie}
+Soit $E$ un espace vectoriel sur $\K$ de dimension finie. Alors $E$ possède au moins une norme et toutes les normes sur $E$ sont équivalentes.
 \end{theorem}
 
-\textbf{Exercice:} $E = C([0, 1], \mathbb{R})$. Comparer $\|.\|_1$ et $\|.\|_\infty$.
-$\|f\|_1 = \int_0^1 |f(t)| dt$.
-$\|f\|_\infty = \sup_{t \in [0, 1]} |f(t)|$.
-$\|f\|_1 \leq \|f\|_\infty$.
-$\|f\|_\infty \leq C \|f\|_1$? Faux.
+\begin{proof}
+On peut supposer que $\K = \R$ (en identifiant $\C$ à $\R^2$).
+Soit $n = \dim(E)$. On fixe alors une base $\mathcal{B} = (e_1, \dots, e_n)$ de $E$. On peut identifier $E$ à $\R^n$ via l'isomorphisme $\Phi: \R^n \to E$ défini par $\Phi(x_1, \dots, x_n) = \sum_{i=1}^n x_i e_i$.
+Considérons la norme $\|\cdot\|_\infty$ sur $\R^n$ définie par $\|x\|_\infty = \max_{1 \leq i \leq n} |x_i|$ pour $x = (x_1, \dots, x_n)$.
 
-On prend $f_n$ (triangles). $\|f_n\|_\infty = 1$ et $\|f_n\|_1 = 1/n$.
-$\|f_n\|_\infty = n \|f_n\|_1$.
-On ne peut pas majorer $\|f\|_\infty$ par $C \|f\|_1$ avec $C$ constante indépendante de $f$.
-Donc $\|.\|_1$ et $\|.\|_\infty$ ne sont pas équivalentes.
+Soit $N$ une norme quelconque sur $E$. On définit une norme $N'$ sur $\R^n$ par $N'(x) = N(\Phi(x)) = N(\sum_{i=1}^n x_i e_i)$.
+Montrons que $N'$ est équivalente à $\|\cdot\|_\infty$ sur $\R^n$.
+Par l'inégalité triangulaire et l'homogénéité de $N$,
+\begin{align*}
+N'(x) = N\left(\sum_{i=1}^n x_i e_i\right) &\leq \sum_{i=1}^n N(x_i e_i) \\
+&= \sum_{i=1}^n |x_i| N(e_i) \\
+&\leq \left(\sum_{i=1}^n N(e_i)\right) \max_{1 \leq j \leq n} |x_j| \\
+&= C \|x\|_\infty
+\end{align*}
+où $C = \sum_{i=1}^n N(e_i)$ est une constante positive (car les $e_i$ ne sont pas nuls).
+
+Maintenant, montrons que $N': \R^n \to \R^+$ est une fonction continue pour la topologie induite par $\|\cdot\|_\infty$. Pour $x, y \in \R^n$,
+\[ |N'(x) - N'(y)| \leq N'(x - y) \quad \text{(par (6.1))} \]
+\[ N'(x - y) \leq C \|x - y\|_\infty \]
+Donc $|N'(x) - N'(y)| \leq C \|x - y\|_\infty$, ce qui prouve que $N'$ est $C$-lipschitzienne, donc continue sur $(\R^n, \|\cdot\|_\infty)$.
+
+Considérons la sphère unité pour la norme infinie : $S_\infty(0, 1) = \{x \in \R^n : \|x\|_\infty = 1\}$.
+$S_\infty(0, 1)$ est un ensemble fermé (car l'application $x \mapsto \|x\|_\infty$ est continue) et borné dans $\R^n$. Par le Théorème de Borel-Lebesgue (Théorème 3.36), $S_\infty(0, 1)$ est compact.
+
+Comme $N'$ est continue sur l'espace $(\R^n, \|\cdot\|_\infty)$ et $S_\infty(0, 1)$ est compact, $N'$ est bornée sur $S_\infty(0, 1)$ et atteint ses bornes (par le Corollaire 4.8).
+Soit $m = \min_{x \in S_\infty(0, 1)} N'(x)$ et $M = \max_{x \in S_\infty(0, 1)} N'(x)$.
+Comme $N'(x) = 0 \iff x = 0$, et que $0 \notin S_\infty(0, 1)$, on a $N'(x) > 0$ pour tout $x \in S_\infty(0, 1)$. Donc $m > 0$.
+Ainsi, il existe des constantes $0 < m \leq M$ telles que
+\[ m \leq N'(x) \leq M, \quad \forall x \in S_\infty(0, 1). \]
+
+Soit maintenant $y \in \R^n$, $y \neq 0$. Alors $x = y / \|y\|_\infty \in S_\infty(0, 1)$.
+On applique l'inégalité précédente à $x$:
+\[ m \leq N'(y / \|y\|_\infty) \leq M \]
+Par homogénéité de $N'$, $N'(y / \|y\|_\infty) = N'(y) / \|y\|_\infty$.
+\[ m \leq \frac{N'(y)}{\|y\|_\infty} \leq M \]
+\[ m \|y\|_\infty \leq N'(y) \leq M \|y\|_\infty, \quad \forall y \in \R^n, y \neq 0. \]
+L'inégalité est aussi vraie pour $y = 0$.
+Donc $N'$ est équivalente à $\|\cdot\|_\infty$.
+
+Comme $N$ était une norme arbitraire sur $E$, et que $N'$ est la norme correspondante sur $\R^n$, toutes les normes sur $E$ induisent des normes sur $\R^n$ qui sont équivalentes à $\|\cdot\|_\infty$. Par transitivité, toutes les normes sur $E$ sont équivalentes entre elles.
+\end{proof}
+
+\subsection{Compléments sur les espaces vectoriels normés}
+\subsubsection{Norme $L^\infty$ et convergence uniforme}
+Soit $X$ un ensemble (par exemple un intervalle de $\R$) et $(f_n)_{n \in \N}$ une suite de fonctions $f_n : X \to \R$.
+On rappelle que la suite de fonctions $(f_n)$ converge \textbf{simplement} vers une fonction $f : X \to \R$ si pour tout $x \in X$ la suite réelle $(f_n(x))$ converge vers $f(x)$. La convergence simple est la notion la plus faible de convergence pour des suites de fonctions. Exprimée à l'aide de quantificateurs, elle s'écrit :
+\begin{equation} \label{eq:conv_simple}
+\forall x \in X, \forall \epsilon > 0, \exists N \in \N \text{ tel que } |f_n(x) - f(x)| \leq \epsilon, \forall n \geq N,
+\end{equation}
+l'entier $N$ dépendant a priori de $\epsilon$ et de $x$.
+
+La suite de fonctions $(f_n)$ converge \textbf{uniformément} vers une fonction $f : X \to \R$ si
+\begin{equation} \label{eq:conv_unif}
+\forall \epsilon > 0, \exists N \in \N \text{ tel que } |f_n(x) - f(x)| \leq \epsilon, \forall n \geq N, \forall x \in X.
+\end{equation}
+L'entier $N$ ne dépend maintenant que de $\epsilon$. On peut réécrire (6.4) comme
+\begin{equation} \label{eq:conv_unif_sup}
+\forall \epsilon > 0, \exists N \in \N \text{ tel que } \sup_{x \in X} |f_n(x) - f(x)| \leq \epsilon, \forall n \geq N.
+\end{equation}
+On voit donc que sur l'espace vectoriel $\mathcal{B}(X, \R)$ des fonctions bornées sur $X$, une suite $(f_n)$ converge uniformément vers $f$ si et seulement si $(f_n)$ converge vers $f$ pour la norme $\|\cdot\|_\infty$.
+
 
 \end{document}
 ```

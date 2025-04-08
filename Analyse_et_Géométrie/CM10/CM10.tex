@@ -1,0 +1,459 @@
+```latex
+\documentclass{article}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{listings} % Added based on user preamble
+\usepackage[french]{babel} % Added for French typesetting
+\usepackage[utf8]{inputenc} % Added for UTF-8 input
+\usepackage[T1]{fontenc} % Added for font encoding
+
+\newtheorem{theorem}{Théorème} % Changed to French
+\newtheorem{lemma}{Lemme} % Changed to French
+\newtheorem{proposition}{Proposition} % Changed to French
+\newtheorem{definition}{Définition} % Changed to French
+\newtheorem{remark}{Remarque} % Changed to French
+\newtheorem{solution}{Solution} % Changed to French
+\newtheorem{example}{Exemple} % Changed to French
+\theoremstyle{definition} % Example, Solution, etc. should be in definition style
+\newtheorem{corollary}{Corollaire} % Added for completeness
+
+\usepackage[margin=1in]{geometry}
+
+\begin{document}
+\sloppy
+
+\section{Espaces Vectoriels Normés}
+
+\subsection{Norme Uniforme (Sup)}
+Soit $E = C^0([a,b], \mathbb{R})$ l'espace des fonctions continues sur $[a,b]$ à valeurs réelles.
+La norme uniforme (ou norme sup) est définie par :
+\[ \|u\|_\infty = \sup_{x \in [a,b]} |u(x)| \]
+Cette norme est aussi appelée $\|.\|_U$ dans les notes.
+
+Considérons l'intégrale $I(u) = \int_a^b u(x) dx$. Montrons que $I$ est une application linéaire continue de $(E, \|.\|_\infty)$ dans $(\mathbb{R}, |.|)$.
+
+\begin{proposition}
+L'application $I: (E, \|.\|_\infty) \to (\mathbb{R}, |. |)$ définie par $I(u) = \int_a^b u(x) dx$ est linéaire et continue.
+\end{proposition}
+
+\begin{proof}
+Linéarité : Pour $\lambda, \mu \in \mathbb{R}$ et $u, v \in E$,
+\begin{align*} I(\lambda u + \mu v) &= \int_a^b (\lambda u(x) + \mu v(x)) dx \\ &= \lambda \int_a^b u(x) dx + \mu \int_a^b v(x) dx \\ &= \lambda I(u) + \mu I(v) \end{align*}
+Continuité (Bornée) :
+\begin{align*} |I(u)| &= \left| \int_a^b u(x) dx \right| \\ &\le \int_a^b |u(x)| dx \\ &\le \int_a^b \sup_{t \in [a,b]} |u(t)| dx \\ &= \int_a^b \|u\|_\infty dx \\ &= (b-a) \|u\|_\infty \end{align*}
+Donc $|I(u)| \le C \|u\|_\infty$ avec $C = (b-a)$. L'application $I$ est donc continue (bornée).
+\end{proof}
+
+Calcul de la norme de $I$.
+
+\begin{proposition}
+La norme de l'application linéaire $I$ est $\|I\| = (b-a)$.
+\end{proposition}
+
+\begin{proof}
+On sait que $\|I\| = \sup_{\|u\|_\infty = 1} |I(u)|$.
+On a montré $|I(u)| \le (b-a) \|u\|_\infty$, donc $\|I\| \le (b-a)$.
+Prenons la fonction constante $u_0(x) = 1$. Alors $\|u_0\|_\infty = 1$.
+$I(u_0) = \int_a^b 1 dx = (b-a)$.
+Donc $|I(u_0)| = (b-a) = (b-a) \|u_0\|_\infty$.
+Ainsi, le sup est atteint et $\|I\| = (b-a)$.
+\end{proof}
+
+\subsection{Convergence Uniforme}
+Soit $(f_n)$ une suite de fonctions dans $C^0([a,b], \mathbb{R})$.
+\begin{definition}
+On dit que $(f_n)$ converge uniformément vers $f$ si $\|f_n - f\|_\infty \to 0$.
+\end{definition}
+
+Ceci est équivalent à :
+\[ \forall \epsilon > 0, \exists N \in \mathbb{N} \text{ tel que } \forall n \ge N, \forall x \in [a,b], |f_n(x) - f(x)| \le \epsilon \]
+La convergence uniforme implique la convergence simple.
+
+\begin{lemma}
+Si $(f_n)$ converge uniformément vers $f$ sur $[a,b]$ et si chaque $f_n$ est continue, alors $f$ est continue.
+L'espace $(C^0([a,b], \mathbb{R}), \|.\|_\infty)$ est un espace de Banach (complet).
+\end{lemma}
+
+\begin{lemma}
+Si $(f_n)$ converge uniformément vers $f$ sur $[a,b]$, alors
+\[ \lim_{n \to \infty} \int_a^b f_n(x) dx = \int_a^b \lim_{n \to \infty} f_n(x) dx = \int_a^b f(x) dx \]
+\end{lemma}
+\begin{proof}
+On veut montrer que $\left| \int_a^b f_n(x) dx - \int_a^b f(x) dx \right| \to 0$.
+\begin{align*} \left| \int_a^b (f_n(x) - f(x)) dx \right| &\le \int_a^b |f_n(x) - f(x)| dx \\ &\le \int_a^b \sup_{t \in [a,b]} |f_n(t) - f(t)| dx \\ &= \int_a^b \|f_n - f\|_\infty dx \\ &= (b-a) \|f_n - f\|_\infty \end{align*}
+Comme $\|f_n - f\|_\infty \to 0$ par convergence uniforme, on a $(b-a) \|f_n - f\|_\infty \to 0$.
+\end{proof}
+
+\subsection{Exemple de Calcul de Norme}
+
+Considérons $E = C^0([-1,1], \mathbb{R})$ muni de la norme $\|.\|_\infty$.
+Soit $A: E \to E$ définie par $(Au)(x) = \int_0^x u(t) dt$. $A$ est linéaire.
+
+\begin{proposition}
+L'opérateur $A: E \to E$ défini par $(Au)(x) = \int_0^x u(t) dt$ est borné et sa norme $\|A\| = 1$ (pour la norme $\|.\|_\infty$).
+\end{proposition}
+\begin{proof}
+Montrons que $A$ est bornée et calculons sa norme $\|A\|$.
+\begin{align*} |(Au)(x)| &= \left| \int_0^x u(t) dt \right| \\ &\le \left| \int_0^x |u(t)| dt \right| \\ &\le \left| \int_0^x \|u\|_\infty dt \right| \\ &= \|u\|_\infty |x| \end{align*}
+Donc $\|Au\|_\infty = \sup_{x \in [-1,1]} |(Au)(x)| \le \sup_{x \in [-1,1]} \|u\|_\infty |x| = \|u\|_\infty \sup_{x \in [-1,1]} |x| = \|u\|_\infty \times 1$.
+On a $\|Au\|_\infty \le 1 \times \|u\|_\infty$. Donc $A$ est bornée et $\|A\| \le 1$.
+
+Pour montrer que $\|A\| = 1$, cherchons une fonction $u$ telle que $\|u\|_\infty = 1$ et $\|Au\|_\infty$ est proche de 1.
+Prenons $u_0(x) = 1$. Alors $\|u_0\|_\infty = 1$.
+$(Au_0)(x) = \int_0^x 1 dt = x$.
+$\|Au_0\|_\infty = \sup_{x \in [-1,1]} |x| = 1$.
+Comme $\|Au_0\|_\infty = 1 \times \|u_0\|_\infty$, le sup est atteint et $\|A\| = 1$.
+\end{proof}
+
+\begin{proposition}
+Soit $\|A\|_1 = \sup_{\|u\|_\infty \le 1} \int_{-1}^1 |(Au)(x)| dx$. Alors $\|A\|_1 = 1$.
+\end{proposition}
+\begin{proof}
+Soit $\|A\|_1 = \sup_{\|u\|_\infty \le 1} \int_{-1}^1 |(Au)(x)| dx$.
+\begin{align*} \int_{-1}^1 |(Au)(x)| dx &\le \int_{-1}^1 \|u\|_\infty |x| dx \\ &= \|u\|_\infty \int_{-1}^1 |x| dx \\ &= \|u\|_\infty \left( \int_{-1}^0 -x dx + \int_0^1 x dx \right) \\ &= \|u\|_\infty \left( \left[-\frac{x^2}{2}\right]_{-1}^0 + \left[\frac{x^2}{2}\right]_0^1 \right) \\ &= \|u\|_\infty \left( (0 - (-\frac{1}{2})) + (\frac{1}{2} - 0) \right) = \|u\|_\infty \times 1 \end{align*}
+Donc $\|A\|_1 \le 1$.
+Prenons $u_0(x) = 1$.
+$\int_{-1}^1 |(Au_0)(x)| dx = \int_{-1}^1 |x| dx = 1$.
+Donc $\|A\|_1 = 1$.
+\end{proof}
+
+Considérons la fonction $u(x) = 1 - |x|$ sur $[-1, 1]$.
+\begin{verbatim}
+#save_to: u_plot.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+x = np.linspace(-1, 1, 400)
+u = 1 - np.abs(x)
+
+plt.figure(figsize=(5, 4))
+plt.plot(x, u, label='$u(x) = 1 - |x|$')
+plt.title('Fonction $u(x)$')
+plt.xlabel('x')
+plt.ylabel('u(x)')
+plt.grid(True)
+plt.ylim(0, 1.1)
+plt.xlim(-1.1, 1.1)
+plt.axhline(0, color='black',linewidth=0.5)
+plt.axvline(0, color='black',linewidth=0.5)
+plt.legend()
+plt.savefig('u_plot.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[ max width=0.6\textwidth, max height=0.4\textheight, keepaspectratio]{u_plot.png}
+\caption{Fonction $u(x) = 1 - |x|$.}
+\label{fig:u_plot}
+\end{figure}
+
+Considérons une suite de fonctions $(f_n)$ dans $C^0([a,b], \mathbb{R})$.
+Soit $f_n(x)$ la fonction "chapeau" centrée en $x_0$, de hauteur $C_n$ et de largeur $2/n$.
+\[ f_n(x) = \begin{cases} 0 & \text{si } x \le x_0 - 1/n \\ C_n (1 - n|x-x_0|) & \text{si } x_0 - 1/n \le x \le x_0 + 1/n \\ 0 & \text{si } x \ge x_0 + 1/n \end{cases} \]
+Supposons $a < x_0 - 1/n$ et $x_0 + 1/n < b$.
+L'intégrale de $f_n$ est l'aire du triangle :
+\[ \int_a^b f_n(x) dx = \frac{1}{2} \times \text{base} \times \text{hauteur} = \frac{1}{2} \times \frac{2}{n} \times C_n = \frac{C_n}{n} \]
+Si on veut $\|f_n\|_1 = \int_a^b |f_n(x)| dx = 1$, il faut choisir $C_n = n$.
+Dans ce cas, $f_n(x) = n(1 - n|x-x_0|)$ sur $[x_0 - 1/n, x_0 + 1/n]$.
+La norme sup est $\|f_n\|_\infty = \max f_n(x) = f_n(x_0) = C_n = n$.
+Donc on a $\|f_n\|_1 = 1$ mais $\|f_n\|_\infty = n \to \infty$.
+Les normes $\|.\|_1$ et $\|.\|_\infty$ ne sont pas équivalentes sur $C^0([a,b])$.
+
+\begin{verbatim}
+#save_to: fn_plot.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+def fn(x, x0, n, Cn):
+    cond1 = x <= x0 - 1/n
+    cond2 = (x >= x0 - 1/n) & (x <= x0 + 1/n)
+    cond3 = x >= x0 + 1/n
+    
+    y = np.zeros_like(x)
+    y[cond2] = Cn * (1 - n * np.abs(x[cond2] - x0))
+    return y
+
+x0 = 0.5
+a = 0
+b = 1
+n = 5
+Cn = n # pour que l'intégrale soit 1
+
+x = np.linspace(a, b, 500)
+y = fn(x, x0, n, Cn)
+
+plt.figure(figsize=(6, 4))
+plt.plot(x, y, label=f'$f_{n}(x)$ avec $n={n}, C_n={Cn}$')
+
+# Zone hachurée pour l'intégrale
+x_fill = np.linspace(x0 - 1/n, x0 + 1/n, 100)
+y_fill = fn(x_fill, x0, n, Cn)
+plt.fill_between(x_fill, y_fill, color='skyblue', alpha=0.4, label='Aire = $\int f_n(x) dx = C_n/n = 1$')
+
+plt.axhline(0, color='black',linewidth=0.5)
+plt.xlabel('x')
+plt.ylabel('$f_n(x)$')
+plt.title('Fonction chapeau $f_n(x)$')
+plt.legend()
+plt.grid(True)
+plt.text(x0, -0.1*Cn, '$x_0$', ha='center')
+plt.text(x0 - 1/n, -0.1*Cn, '$x_0 - 1/n$', ha='center')
+plt.text(x0 + 1/n, -0.1*Cn, '$x_0 + 1/n$', ha='center')
+plt.ylim(-0.2*Cn, 1.1*Cn)
+plt.savefig('fn_plot.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[ max width=0.7\textwidth, max height=0.4\textheight, keepaspectratio]{fn_plot.png}
+\caption{Fonction chapeau $f_n(x)$ avec $C_n=n$ pour que $\|f_n\|_1=1$.}
+\label{fig:fn_plot}
+\end{figure}
+
+Considérons la preuve que si $\|f_n\|_1 \to 0$, alors $\|f_n\|_\infty$ ne tend pas forcément vers 0.
+Soit $f_n(x)$ comme ci-dessus avec $C_n = \sqrt{n}$.
+$\|f_n\|_1 = C_n/n = \sqrt{n}/n = 1/\sqrt{n} \to 0$.
+$\|f_n\|_\infty = C_n = \sqrt{n} \to \infty$.
+
+Considérons l'opérateur $m: C^0([a,b]) \to C^0([a,b])$ défini par $(m f)(x) = m(x) f(x)$ où $m(x)$ est une fonction continue donnée.
+Soit $A = m$. $A$ est linéaire.
+$\|(Af)(x)\| = |m(x) f(x)| = |m(x)| |f(x)|$.
+$\|Af\|_\infty = \sup_x |m(x) f(x)| \le (\sup_x |m(x)|) (\sup_x |f(x)|) = \|m\|_\infty \|f\|_\infty$.
+Donc $\|A\| \le \|m\|_\infty$.
+Pour montrer l'égalité, supposons $m$ non nulle. Soit $x_0$ tel que $|m(x_0)| = \|m\|_\infty$.
+Considérons une suite de fonctions $(f_n)$ "pic" centrées en $x_0$ telles que $f_n(x_0)=1$, $\|f_n\|_\infty=1$ et le support de $f_n$ se contracte vers $x_0$.
+Par exemple, $f_n(x) = \max(0, 1 - n|x-x_0|)$.
+\begin{verbatim}
+#save_to: fn_proof_plot.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+def fn(x, x0, n):
+    return np.maximum(0, 1 - n * np.abs(x - x0))
+
+x0 = 0.5
+a = 0
+b = 1
+n = 10 # Exemple avec n=10
+
+x = np.linspace(a, b, 500)
+y = fn(x, x0, n)
+
+plt.figure(figsize=(6, 4))
+plt.plot(x, y, label=f'$f_{n}(x)$ pic en $x_0={x0}$')
+
+plt.axhline(0, color='black',linewidth=0.5)
+plt.xlabel('x')
+plt.ylabel('$f_n(x)$')
+plt.title(f'Fonction pic $f_n(x)$ pour la preuve ($n={n}$)')
+plt.legend()
+plt.grid(True)
+plt.text(x0, -0.1, '$x_0$', ha='center')
+plt.text(x0 - 1/n, -0.1, '$x_0 - 1/n$', ha='center')
+plt.text(x0 + 1/n, -0.1, '$x_0 + 1/n$', ha='center')
+plt.ylim(-0.2, 1.2)
+plt.savefig('fn_proof_plot.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[ max width=0.7\textwidth, max height=0.4\textheight, keepaspectratio]{fn_proof_plot.png}
+\caption{Fonction pic $f_n(x)$ utilisée dans la preuve.}
+\label{fig:fn_proof_plot}
+\end{figure}
+
+$|(Af_n)(x)| = |m(x) f_n(x)|$.
+$\|Af_n\|_\infty = \sup_x |m(x) f_n(x)|$.
+Comme $f_n$ est concentrée autour de $x_0$, et $f_n(x_0)=1$, $\|Af_n\|_\infty$ sera proche de $|m(x_0)| \|f_n\|_\infty = \|m\|_\infty$.
+Plus formellement :
+Soit $\epsilon > 0$. Par continuité de $m$, il existe $\delta > 0$ tel que si $|x-x_0| < \delta$, alors $|m(x) - m(x_0)| < \epsilon$.
+Choisissons $n$ assez grand pour que $1/n < \delta$. Alors le support de $f_n$ est dans $[x_0 - \delta, x_0 + \delta]$.
+Pour $x$ dans le support de $f_n$, on a $|m(x)| \ge |m(x_0)| - |m(x) - m(x_0)| > \|m\|_\infty - \epsilon$.
+$\|Af_n\|_\infty = \sup_{|x-x_0|\le 1/n} |m(x) f_n(x)|$.
+Puisque $f_n(x_0)=1$, $\|Af_n\|_\infty \ge |m(x_0)f_n(x_0)| = |m(x_0)| = \|m\|_\infty$.
+D'autre part, $\|Af_n\|_\infty = \sup_{|x-x_0|\le 1/n} |m(x) f_n(x)| \le \sup_{|x-x_0|\le 1/n} |m(x)| \times \|f_n\|_\infty$.
+Comme $\|f_n\|_\infty = 1$, $\|Af_n\|_\infty \le \sup_{|x-x_0|\le 1/n} |m(x)|$.
+Par continuité, $\lim_{n\to\infty} \sup_{|x-x_0|\le 1/n} |m(x)| = |m(x_0)| = \|m\|_\infty$.
+Donc $\lim_{n\to\infty} \|Af_n\|_\infty = \|m\|_\infty$.
+Puisque $\|Af_n\|_\infty \le \|A\| \|f_n\|_\infty = \|A\|$, en passant à la limite, on obtient $\|m\|_\infty \le \|A\|$.
+Comme on avait déjà $\|A\| \le \|m\|_\infty$, on conclut que $\|A\| = \|m\|_\infty$.
+
+\subsection{Normes équivalentes}
+
+\begin{definition}[Normes topologiquement équivalentes]
+Soit $E$ un espace vectoriel. Soit $N_1$ et $N_2$ deux normes sur $E$.
+On dit que $N_1$ et $N_2$ sont topologiquement équivalentes si $(E, N_1)$ et $(E, N_2)$ ont les mêmes ensembles ouverts.
+\end{definition}
+
+\begin{definition}[Normes équivalentes]
+Soit $E$ un espace vectoriel. Soit $N_1$ et $N_2$ deux normes sur $E$.
+On dit que $N_1$ et $N_2$ sont équivalentes (on écrit $N_1 \sim N_2$) s'il existe $C_1, C_2 > 0$ telles que
+    \[ \forall X \in E, \quad N_1(X) \le C_1 N_2(X) \quad \text{et} \quad N_2(X) \le C_2 N_1(X) \]
+    Ceci peut se réécrire : il existe $C > 0$ tel que
+    \[ \forall X \in E, \quad C^{-1} N_2(X) \le N_1(X) \le C N_2(X) \]
+\end{definition}
+
+\begin{theorem}[Equivalence topologique et équivalence des normes]
+Deux normes sur $E$ sont topologiquement équivalentes si et seulement si elles sont équivalentes.
+\end{theorem}
+\begin{proof} (Esquisse basée sur 6.6.3 du textbook)
+Soit $Id: (E, N_1) \to (E, N_2)$ et $Id: (E, N_2) \to (E, N_1)$.
+Les deux topologies sont les mêmes si et seulement si ces deux applications identité sont continues.
+Une application linéaire est continue si et seulement si elle est bornée (Théorème 6.14).
+$Id: (E, N_1) \to (E, N_2)$ est continue $\iff$ elle est bornée $\iff \exists C_1 > 0$ tel que $\|Id(x)\|_{N_2} \le C_1 \|x\|_{N_1}$, i.e., $N_2(x) \le C_1 N_1(x)$.
+$Id: (E, N_2) \to (E, N_1)$ est continue $\iff$ elle est bornée $\iff \exists C_2 > 0$ tel que $\|Id(x)\|_{N_1} \le C_2 \|x\|_{N_2}$, i.e., $N_1(x) \le C_2 N_2(x)$.
+Ces deux conditions réunies correspondent à la définition de normes équivalentes.
+\end{proof}
+
+\begin{theorem}[\textbf{Admission - Equivalence des normes en dimension finie}]
+Soit $E$ un espace vectoriel sur $\mathbb{K}$ ($\mathbb{R}$ ou $\mathbb{C}$) de dimension finie. Alors toutes les normes sur $E$ sont équivalentes.
+\end{theorem}
+\begin{proof} (Esquisse basée sur Thm 6.9 du textbook)
+On peut supposer $\mathbb{K} = \mathbb{R}$ (en identifiant $\mathbb{C}$ à $\mathbb{R}^2$).
+Soit $(e_1, ..., e_n)$ une base de $E$. On identifie $E$ à $\mathbb{R}^n$.
+La norme $\|x\|_\infty = \max_{1\le i \le n} |x_i|$ est une norme sur $\mathbb{R}^n$.
+Soit $N$ une norme quelconque sur $\mathbb{R}^n$. Montrons que $N$ est équivalente à $\|.\|_\infty$.
+Pour $x = \sum x_i e_i$, on a
+$N(x) = N(\sum x_i e_i) \le \sum |x_i| N(e_i) \le (\sum N(e_i)) \max |x_i| = C \|x\|_\infty$ avec $C = \sum N(e_i)$.
+Montrons qu'il existe $a > 0$ tel que $a \|x\|_\infty \le N(x)$.
+La fonction $N: (\mathbb{R}^n, \|.\|_\infty) \to \mathbb{R}$ est continue.
+En effet, $|N(x) - N(y)| \le N(x-y) \le C \|x-y\|_\infty$.
+Soit $S = \{ x \in \mathbb{R}^n \mid \|x\|_\infty = 1 \}$. $S$ est la sphère unité pour $\|.\|_\infty$.
+$S$ est fermée (car l'application $x \mapsto \|x\|_\infty$ est continue) et bornée.
+Par le théorème de Borel-Lebesgue (Thm 3.36), $S$ est compacte.
+La fonction continue $N$ atteint ses bornes sur le compact $S$.
+Comme $N(x) > 0$ pour $x \ne 0$ (donc pour $x \in S$), le minimum de $N$ sur $S$ est $a > 0$.
+Donc $\forall x \in S$, $N(x) \ge a$.
+Pour tout $x \ne 0$, le vecteur $y = x / \|x\|_\infty$ est dans $S$.
+Donc $N(y) \ge a$.
+$N(x / \|x\|_\infty) \ge a \implies \frac{1}{\|x\|_\infty} N(x) \ge a \implies N(x) \ge a \|x\|_\infty$.
+On a donc montré $a \|x\|_\infty \le N(x) \le C \|x\|_\infty$. $N$ est équivalente à $\|.\|_\infty$.
+Comme l'équivalence est une relation d'équivalence, toutes les normes sont équivalentes entre elles.
+\end{proof}
+
+\section{Applications Linéaires et Bornées}
+
+\begin{definition}[Application linéaire bornée]
+Soient $(E, \|.\|_E)$ et $(F, \|.\|_F)$ deux espaces vectoriels normés. Une application linéaire $A: E \to F$ est dite \textbf{bornée} (ou continue) s'il existe une constante $C \ge 0$ telle que
+\[ \forall x \in E, \quad \|Ax\|_F \le C \|x\|_E \]
+\end{definition}
+
+\begin{proposition}
+Pour une application linéaire $A: E \to F$, les propriétés suivantes sont équivalentes :
+\begin{enumerate}
+    \item $A$ est continue.
+    \item $A$ est continue en $0_E$.
+    \item $A$ est bornée.
+\end{enumerate}
+\end{proposition}
+
+\begin{definition}[Norme d'opérateur]
+Si $A: E \to F$ est une application linéaire bornée, on définit sa \textbf{norme} (appelée norme d'opérateur ou norme uniforme) par :
+\[ \|A\| = \sup_{x \in E, x \ne 0_E} \frac{\|Ax\|_F}{\|x\|_E} = \sup_{x \in E, \|x\|_E = 1} \|Ax\|_F = \sup_{x \in E, \|x\|_E \le 1} \|Ax\|_F \]
+C'est la plus petite constante $C$ telle que $\|Ax\|_F \le C \|x\|_E$ pour tout $x \in E$.
+\end{definition}
+
+\begin{proposition}
+Soit $A \in B(E, F)$ (l'espace des applications linéaires bornées de E dans F).
+\begin{enumerate}
+    \item $\|.\|$ est une norme sur $B(E, F)$.
+    \item On a $\|Ax\|_F \le \|A\| \|x\|_E$ pour tout $x \in E$.
+    \item $\|A\|$ est la plus petite constante $C$ telle que $\|Ax\|_F \le C \|x\|_E$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proposition}
+Si $A \in B(E, F)$ et $B \in B(F, G)$, alors $B \circ A \in B(E, G)$ et
+\[ \|B \circ A\| \le \|B\| \|A\| \]
+Si $E=F=G$, on note $B(E) = B(E,E)$, alors pour $A, B \in B(E)$,
+\[ \|AB\| \le \|A\| \|B\| \]
+\end{proposition}
+\begin{proof}
+$\| (B \circ A) x \|_G = \| B(Ax) \|_G \le \|B\| \|Ax\|_F \le \|B\| (\|A\| \|x\|_E) = (\|B\| \|A\|) \|x\|_E$.
+Donc $\|B \circ A\| \le \|B\| \|A\|$.
+\end{proof}
+
+\section{Le cas des matrices}
+
+On identifie une matrice $A \in M_n(\mathbb{C})$ (ou $M_n(\mathbb{R})$) avec l'application linéaire associée $A: \mathbb{K}^n \to \mathbb{K}^n$.
+L'espace vectoriel $M_n(\mathbb{K})$ est de dimension finie $n^2$. Toutes les normes y sont donc équivalentes.
+La norme la plus utile est la norme uniforme (norme d'opérateur) obtenue à partir de la norme euclidienne $\|.\|_2$ sur $\mathbb{K}^n$.
+\[ \|A\| = \sup_{x \in \mathbb{K}^n, \|x\|_2 = 1} \|Ax\|_2 \]
+
+\begin{definition}[Matrice adjointe]
+Soit $A = [a_{ij}] \in M_n(\mathbb{C})$. La matrice \textbf{adjointe} de $A$, notée $A^*$, est la matrice $B = [b_{ij}]$ telle que $b_{ij} = \overline{a_{ji}}$. (Transposée conjuguée).
+On a la propriété : $\forall x, y \in \mathbb{C}^n, \quad (Ax | y) = (x | A^*y)$, où $(u|v) = \sum_{i=1}^n u_i \overline{v_i}$ est le produit scalaire hermitien standard.
+\end{definition}
+
+\begin{definition}[Matrice autoadjointe]
+$A$ est dite \textbf{autoadjointe} (ou hermitienne) si $A = A^*$.
+\end{definition}
+
+\begin{lemma}
+Pour $A \in M_n(\mathbb{C})$ :
+\[ \|A^*\| = \|A\| \quad \text{et} \quad \|A^*A\| = \|A\|^2 \]
+\end{lemma}
+\begin{proof}
+On utilise $\|A\| = \sup_{\|x\|=1, \|y\|=1} |(Ax|y)|$.
+$|(Ax|y)| = |(x|A^*y)|$. Donc $\|A\| = \sup_{\|x\|=1, \|y\|=1} |(x|A^*y)| = \|A^*\|$.
+Pour la seconde égalité :
+$\|Ax\|_2^2 = (Ax|Ax) = (x|A^*Ax)$.
+Donc $\|A\|^2 = \sup_{\|x\|=1} \|Ax\|_2^2 = \sup_{\|x\|=1} (x|A^*Ax)$.
+La matrice $B = A^*A$ est autoadjointe. Pour une matrice autoadjointe $B$, on sait que $\sup_{\|x\|=1} (x|Bx)$ est égal à la plus grande valeur propre de $B$. (Ceci est lié au quotient de Rayleigh).
+D'autre part, $\|A^*A\| = \sup_{\|x\|=1} \|(A^*A)x\|_2$.
+Comme $A^*A$ est autoadjointe, $\|A^*A\|$ est égal au maximum du module de ses valeurs propres.
+Les valeurs propres de $A^*A$ sont réelles et positives ou nulles. Soit $\lambda_{\max}$ la plus grande valeur propre.
+Alors $\|A\|^2 = \sup_{\|x\|=1} (x|A^*Ax) = \lambda_{\max}(A^*A)$.
+Et $\|A^*A\| = \max |\lambda_i(A^*A)| = \lambda_{\max}(A^*A)$ car $\lambda_i \ge 0$.
+Donc $\|A\|^2 = \|A^*A\|$.
+\end{proof}
+
+\begin{theorem}[Calcul de la norme matricielle]
+Soit $A \in M_n(\mathbb{C})$. Soient $\lambda_1, ..., \lambda_n$ les valeurs propres de la matrice autoadjointe positive $A^*A$. Alors
+\[ \|A\| = \sqrt{\max_{1 \le i \le n} \lambda_i} \]
+Les racines carrées des valeurs propres de $A^*A$ sont appelées les valeurs singulières de $A$. Donc $\|A\|$ est la plus grande valeur singulière de $A$.
+\end{theorem}
+\begin{proof}
+Comme $\|A\|^2 = \|A^*A\|$ et $A^*A$ est autoadjointe, sa norme $\|A^*A\|$ est égale au maximum du module de ses valeurs propres (qui sont réelles et $\ge 0$).
+Donc $\|A\|^2 = \max \lambda_i (A^*A)$.
+D'où $\|A\| = \sqrt{\max \lambda_i}$.
+\proofname{Démonstration}
+\end{proof}
+
+\begin{lemma}[Inégalité de Cauchy-Schwarz pour la norme matricielle]
+Soit $A \in M_n(\mathbb{C})$.
+$\|Ax\|_2^2 = (x|A^*Ax)$.
+Comme $A^*A$ est autoadjointe, elle admet une base orthonormée $(v_1, ..., v_n)$ de vecteurs propres avec les valeurs propres réelles $\lambda_1, ..., \lambda_n \ge 0$.
+Soit $x = \sum_{i=1}^n c_i v_i$. Alors $\|x\|_2^2 = \sum |c_i|^2$.
+$A^*Ax = A^*A (\sum c_i v_i) = \sum c_i (A^*A v_i) = \sum c_i \lambda_i v_i$.
+$(x|A^*Ax) = (\sum c_j v_j | \sum c_i \lambda_i v_i) = \sum_{i,j} \overline{c_j} c_i \lambda_i (v_j|v_i) = \sum_{i=1}^n \lambda_i |c_i|^2$.
+Donc $\|Ax\|_2^2 = \sum_{i=1}^n \lambda_i |c_i|^2$.
+On a $\|Ax\|_2^2 = \sum \lambda_i |c_i|^2 \le (\max \lambda_j) \sum |c_i|^2 = (\max \lambda_j) \|x\|_2^2$.
+$\max \lambda_j = \|A\|^2$.
+Donc $\|Ax\|_2^2 \le \|A\|^2 \|x\|_2^2$, ce qui redonne $\|Ax\|_2 \le \|A\| \|x\|_2$.
+\end{lemma}
+
+\begin{definition}[Norme de Hilbert-Schmidt]
+\[ \|A\|_{HS} = \left( \sum_{i=1}^n \sum_{j=1}^n |a_{ij}|^2 \right)^{1/2} = \sqrt{Tr(A^*A)} \]
+où $Tr$ est la trace de la matrice.
+\end{definition}
+
+\begin{proposition}
+On a $\|A\| \le \|A\|_{HS}$.
+\end{proposition}
+\begin{proof}
+Par Cauchy-Schwarz sur $\mathbb{K}^n$:
+$\|Ax\|_2^2 = \sum_{i=1}^n \left| \sum_{j=1}^n a_{ij} x_j \right|^2 \le \sum_{i=1}^n \left( \sum_{j=1}^n |a_{ij}|^2 \right) \left( \sum_{k=1}^n |x_k|^2 \right)$
+$\|Ax\|_2^2 \le \left( \sum_{i=1}^n \sum_{j=1}^n |a_{ij}|^2 \right) \|x\|_2^2 = \|A\|_{HS}^2 \|x\|_2^2$.
+Donc $\|A\| = \sup_{\|x\|=1} \|Ax\|_2 \le \|A\|_{HS}$.
+\end{proof}
+
+\end{document}
+```

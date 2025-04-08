@@ -1,0 +1,306 @@
+```latex
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{verbatim}
+\usepackage{listings}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Example}
+
+\begin{document}
+\sloppy
+
+Ce document contient les solutions des exercices du contrôle 3 de PCDD 251, semaine du 7 Avril 2025. Les énoncés sont repris de la liste fournie et les solutions sont transcrites des notes manuscrites.
+
+\section{Exercice 1}
+Déterminer les points critiques de la fonction :
+\[f(x,y) = x^3 + y^3 - 3xy.\]
+Pour chaque point critique déterminer sa nature à l'aide de la matrice hessienne.
+
+\begin{solution}
+La fonction $f: \mathbb{R}^2 \to \mathbb{R}$ est de classe $C^2$ car c'est un polynôme.
+On cherche les points critiques en résolvant $\nabla f(x,y) = \vec{0}$.
+\begin{align*}
+\frac{\partial f}{\partial x}(x,y) &= 3x^2 - 3y \\
+\frac{\partial f}{\partial y}(x,y) &= 3y^2 - 3x
+\end{align*}
+Le système à résoudre est donc :
+\[ \begin{cases} 3x^2 - 3y = 0 \\ 3y^2 - 3x = 0 \end{cases} \implies \begin{cases} x^2 = y \\ y^2 = x \end{cases} \]
+En substituant la première équation dans la seconde, on obtient $(x^2)^2 = x$, soit $x^4 - x = 0$.
+\[ x(x^3 - 1) = 0 \]
+\[ x(x-1)(x^2+x+1) = 0 \]
+Les solutions réelles sont $x=0$ ou $x=1$.
+Si $x=0$, alors $y = x^2 = 0^2 = 0$. Le point critique est $(0,0)$.
+Si $x=1$, alors $y = x^2 = 1^2 = 1$. Le point critique est $(1,1)$.
+Les points critiques sont donc $(0,0)$ et $(1,1)$.
+
+On détermine la nature de ces points critiques à l'aide de la matrice hessienne.
+\begin{align*}
+\frac{\partial^2 f}{\partial x^2}(x,y) &= 6x \\
+\frac{\partial^2 f}{\partial y^2}(x,y) &= 6y \\
+\frac{\partial^2 f}{\partial x \partial y}(x,y) &= -3
+\end{align*}
+La matrice hessienne est :
+\[ H_f(x,y) = \begin{pmatrix} 6x & -3 \\ -3 & 6y \end{pmatrix} \]
+
+Pour le point $(0,0)$ :
+\[ H_f(0,0) = \begin{pmatrix} 0 & -3 \\ -3 & 0 \end{pmatrix} \]
+Son déterminant est $\det(H_f(0,0)) = (0)(0) - (-3)(-3) = -9$.
+Comme le déterminant est négatif, le point $(0,0)$ est un point col (ou point selle).
+Son polynôme caractéristique est $\lambda^2 - \text{Tr}(H_f(0,0))\lambda + \det(H_f(0,0)) = \lambda^2 - 0\lambda - 9 = \lambda^2 - 9$. Les racines sont $\lambda = 3$ et $\lambda = -3$. Les valeurs propres sont de signes opposés, confirmant que $(0,0)$ est un point col.
+
+Pour le point $(1,1)$ :
+\[ H_f(1,1) = \begin{pmatrix} 6 & -3 \\ -3 & 6 \end{pmatrix} \]
+Son déterminant est $\det(H_f(1,1)) = (6)(6) - (-3)(-3) = 36 - 9 = 27$.
+Sa trace est $\text{Tr}(H_f(1,1)) = 6 + 6 = 12$.
+Comme $\det(H_f(1,1)) = 27 > 0$ et $\text{Tr}(H_f(1,1)) = 12 > 0$, la matrice hessienne est définie positive, et le point $(1,1)$ est un minimum local.
+
+\end{solution}
+
+\section{Exercice 2}
+Déterminer les points critiques de la fonction :
+\[f(x,y) = (x + y)^2 + (x - y)^3.\]
+Pour chaque point critique déterminer sa nature à l'aide de la matrice hessienne.
+
+\begin{solution}
+La fonction $f: \mathbb{R}^2 \to \mathbb{R}$ est de classe $C^2$.
+On cherche les points critiques en résolvant $\nabla f(x,y) = \vec{0}$.
+$f(x,y) = x^2 + 2xy + y^2 + x^3 - 3x^2y + 3xy^2 - y^3$. (note: l'énoncé est $(x-y)^3$, pas $(x-y)^3$).
+Recalculons $f(x,y) = (x+y)^2 + (x-y)^3$.
+\begin{align*}
+\frac{\partial f}{\partial x}(x,y) &= 2(x+y) + 3(x-y)^2 \\
+\frac{\partial f}{\partial y}(x,y) &= 2(x+y) - 3(x-y)^2
+\end{align*}
+On cherche $\nabla f(x,y) = \vec{0}$ :
+\[ \begin{cases} 2(x+y) + 3(x-y)^2 = 0 & (E1) \\ 2(x+y) - 3(x-y)^2 = 0 & (E2) \end{cases} \]
+Posons $A = (x+y)$ et $B = (x-y)$. Le système devient :
+\[ \begin{cases} 2A + 3B^2 = 0 \\ 2A - 3B^2 = 0 \end{cases} \]
+En additionnant (E1) et (E2) : $4A = 0 \implies A = 0$.
+En soustrayant (E2) de (E1) : $6B^2 = 0 \implies B = 0$.
+Donc, on doit avoir $A = x+y = 0$ et $B = x-y = 0$.
+De $x+y = 0$ et $x-y = 0$, on tire $2x = 0 \implies x = 0$, et $2y = 0 \implies y = 0$.
+Le seul point critique est $(0,0)$.
+
+Déterminons sa nature. On calcule la matrice hessienne $H_f(x,y)$.
+\begin{align*}
+\frac{\partial^2 f}{\partial x^2}(x,y) &= \frac{\partial}{\partial x} (2(x+y) + 3(x-y)^2) = 2 + 6(x-y) \\
+\frac{\partial^2 f}{\partial y^2}(x,y) &= \frac{\partial}{\partial y} (2(x+y) - 3(x-y)^2) = 2 + 6(x-y)(-1)(-1) = 2 + 6(x-y) \\
+\frac{\partial^2 f}{\partial x \partial y}(x,y) &= \frac{\partial}{\partial y} (2(x+y) + 3(x-y)^2) = 2 + 6(x-y)(-1) = 2 - 6(x-y)
+\end{align*}
+Vérifions $\frac{\partial^2 f}{\partial y \partial x}$:
+$\frac{\partial}{\partial x} (2(x+y) - 3(x-y)^2) = 2 - 6(x-y)(1) = 2 - 6(x-y)$. C'est cohérent.
+\[ H_f(x,y) = \begin{pmatrix} 2 + 6(x-y) & 2 - 6(x-y) \\ 2 - 6(x-y) & 2 + 6(x-y) \end{pmatrix} \]
+Au point critique $(0,0)$ :
+\[ H_f(0,0) = \begin{pmatrix} 2 & 2 \\ 2 & 2 \end{pmatrix} \]
+Le déterminant est $\det(H_f(0,0)) = (2)(2) - (2)(2) = 4 - 4 = 0$.
+Donc $(0,0)$ est un point critique dégénéré. La matrice hessienne ne permet pas de conclure directement.
+(La note manuscrite s'arrête là concernant la nature du point).
+
+\end{solution}
+
+\section{Exercice 3}
+Soit $f : \mathbb{R}^2 \to \mathbb{R}$ la fonction définie par
+\[ f(x,y) = \begin{cases} x^{-1}y^2 & \text{si } x \neq 0, \\ 0 & \text{si } x = 0. \end{cases} \]
+1) Montrer que $f$ est dérivable au point $(0,0)$ dans toutes les directions.
+\textit{Indication : revenir à la définition en considérant la fonction $t \mapsto f(t\vec{v})$ pour un vecteur $\vec{v} \neq \vec{0}$ arbitraire.}
+2) Montrer que $f$ n'est pas continue en $(0,0)$.
+\textit{indication : on pourra trouver deux suites $(u_n)$ et $(v_n)$ de points dans $\mathbb{R}^2$ telles que $\lim u_n = \lim v_n = (0,0)$ mais $\lim f(u_n) \neq \lim f(v_n)$.}
+
+\begin{solution}
+1) Soit $\vec{v} = (a,b) \in \mathbb{R}^2$, $\vec{v} \neq (0,0)$. On étudie la dérivabilité en $t=0$ de la fonction $\phi(t) = f(t\vec{v}) = f(ta, tb)$.
+On veut calculer $\phi'(0) = \lim_{t \to 0} \frac{f(ta, tb) - f(0,0)}{t}$. On a $f(0,0) = 0$.
+
+Cas 1 : $a \neq 0$.
+Pour $t$ suffisamment petit et non nul, $ta \neq 0$.
+\[ f(ta, tb) = (ta)^{-1} (tb)^2 = \frac{t^2 b^2}{ta} = t \frac{b^2}{a} \]
+Alors
+\[ \frac{f(ta, tb) - f(0,0)}{t} = \frac{t \frac{b^2}{a} - 0}{t} = \frac{b^2}{a} \]
+Donc $\lim_{t \to 0} \frac{f(ta, tb) - f(0,0)}{t} = \frac{b^2}{a}$. La limite existe.
+
+Cas 2 : $a = 0$.
+Puisque $\vec{v} \neq (0,0)$, on a $b \neq 0$.
+Alors $t\vec{v} = (0, tb)$. Pour $t \neq 0$, on a $ta = 0$.
+Donc $f(ta, tb) = f(0, tb) = 0$.
+Alors
+\[ \frac{f(ta, tb) - f(0,0)}{t} = \frac{0 - 0}{t} = 0 \]
+Donc $\lim_{t \to 0} \frac{f(ta, tb) - f(0,0)}{t} = 0$. La limite existe.
+
+Dans les deux cas, la limite $\lim_{t \to 0} \frac{f(ta, tb) - f(0,0)}{t}$ existe.
+Donc $f$ est dérivable en $(0,0)$ dans la direction $\vec{v}$. Ceci étant vrai pour tout $\vec{v} \neq (0,0)$, $f$ est dérivable en $(0,0)$ dans toutes les directions.
+
+2) Soit $(x_n)$ la suite dans $(\mathbb{R}^2)^N$ définie par $x_n = (\frac{1}{n}, \frac{1}{\sqrt{n}})$ pour $n \in \mathbb{N}^*$.
+On a $\lim_{n \to \infty} x_n = (\lim \frac{1}{n}, \lim \frac{1}{\sqrt{n}}) = (0, 0)$.
+Calculons $f(x_n)$ pour $n \ge 1$. Comme $x_n = 1/n \neq 0$.
+\[ f(x_n) = f(\frac{1}{n}, \frac{1}{\sqrt{n}}) = \left(\frac{1}{n}\right)^{-1} \left(\frac{1}{\sqrt{n}}\right)^2 = n \cdot \frac{1}{n} = 1 \]
+Donc $\lim_{n \to \infty} f(x_n) = 1$.
+Or $f(0,0) = 0$.
+Comme $\lim_{n \to \infty} x_n = (0,0)$ mais $\lim_{n \to \infty} f(x_n) = 1 \neq f(0,0)$, la fonction $f$ n'est pas continue en $(0,0)$ par la caractérisation séquentielle des applications continues.
+
+\end{solution}
+
+\section{Exercice 4}
+Etudier la continuité de la fonction
+\[ f(x, y) = \begin{cases} x^4 & \text{si } y > x^2, \\ y^2 & \text{si } y \le x^2. \end{cases} \]
+
+\begin{solution}
+Soit $f(x,y)$.
+Sur $D_1 = \{(x,y) \in \mathbb{R}^2 \mid y > x^2\}$, $f(x,y) = x^4$. C'est une fonction polynomiale, donc continue sur $D_1$. $D_1$ est un ouvert.
+Sur $D_2 = \{(x,y) \in \mathbb{R}^2 \mid y < x^2\}$, $f(x,y) = y^2$. C'est une fonction polynomiale, donc continue sur $D_2$. $D_2$ est un ouvert.
+
+Il reste à étudier la continuité sur la parabole $\mathcal{P} = \{(x,y) \in \mathbb{R}^2 \mid y = x^2\}$.
+Soit $(x_0, y_0) \in \mathcal{P}$, c'est-à-dire $y_0 = x_0^2$.
+On a $f(x_0, y_0) = y_0^2 = (x_0^2)^2 = x_0^4$.
+On cherche $\lim_{(x,y) \to (x_0, y_0)} f(x,y)$.
+
+Considérons la limite pour $(x,y) \to (x_0, y_0)$ avec $(x,y) \in D_1$ (i.e., $y > x^2$).
+\[ \lim_{\substack{(x,y) \to (x_0, y_0) \\ y > x^2}} f(x,y) = \lim_{\substack{(x,y) \to (x_0, y_0) \\ y > x^2}} x^4 = x_0^4. \]
+
+Considérons la limite pour $(x,y) \to (x_0, y_0)$ avec $(x,y) \in D_2 \cup \mathcal{P}$ (i.e., $y \le x^2$).
+\[ \lim_{\substack{(x,y) \to (x_0, y_0) \\ y \le x^2}} f(x,y) = \lim_{\substack{(x,y) \to (x_0, y_0) \\ y \le x^2}} y^2 = y_0^2 = (x_0^2)^2 = x_0^4. \]
+
+Dans les deux cas, la limite existe et vaut $x_0^4$.
+De plus, $f(x_0, y_0) = y_0^2 = x_0^4$.
+Donc, pour tout $(x_0, y_0) \in \mathcal{P}$, $\lim_{(x,y) \to (x_0, y_0)} f(x,y) = f(x_0, y_0)$.
+La fonction $f$ est donc continue sur $\mathcal{P}$.
+
+Puisque $f$ est continue sur $D_1$, $D_2$ et $\mathcal{P}$, et que $D_1 \cup D_2 \cup \mathcal{P} = \mathbb{R}^2$, la fonction $f$ est continue sur $\mathbb{R}^2$.
+(Note: La note manuscrite mentionne $D_1 \cup D_2 = \mathbb{R}^2$ et cette union est disjointe? Non, $D_1 \cup D_2 \cup \{(x,y)|y=x^2\} = \mathbb{R}^2$. $f$ est continue sur $D_1$ et $D_2$. L'étude sur la frontière $y=x^2$ montre que la limite le long de $y>x^2$ est $x_0^4$ et le long de $y<x^2$ est $y_0^2$. Comme $y_0=x_0^2$, ces limites coïncident avec la valeur $f(x_0, x_0^2) = (x_0^2)^2=x_0^4$. Donc $f$ est continue sur $\mathbb{R}^2$.)
+
+\end{solution}
+
+\section{Exercice 5}
+Soit $E = C([0,1]; \mathbb{R})$ l' espace des fonctions réelles continues sur $[0, 1]$, muni de la norme $\|f\|_{\infty} = \sup_{x\in[0,1]} |f(x)|$. Soit
+\[ A = \{f \in E : f(0) = 0 \text{ et } \int_0^1 f(x)dx \ge 1\}. \]
+1) Montrer que $A$ est un fermé de $(E, \|\cdot\|_{\infty})$.
+\textit{Indication : on pourra étudier la continuité des applications de E dans R données par $f \mapsto f(0)$ et $f \mapsto \int_0^1 f(x)dx$.}
+2) Montrer que si $f \in A$ alors $\|f\|_{\infty} > 1$.
+\textit{Indication : si $f \in A$ et $\|f\|_{\infty} \le 1$ montrer que $\int_0^1 f(x)dx < 1$. En déduire que $\int_0^1 (1 - f(x))dx = 0$ puis que $f(x) = 1$ pour tout $x \in [0; 1]$.}
+
+\begin{solution}
+1) Soit $E = C([0,1], \mathbb{R})$ muni de la norme $\| \cdot \|_\infty$.
+Posons les applications $\Phi: E \to \mathbb{R}$ définie par $\Phi(f) = f(0)$ et $\Psi: E \to \mathbb{R}$ définie par $\Psi(f) = \int_0^1 f(t)dt$.
+Montrons que $\Phi$ et $\Psi$ sont continues. Pour la norme $\| \cdot \|_\infty$ sur $E$.
+$|\Phi(f)| = |f(0)| \le \sup_{t \in [0,1]} |f(t)| = \|f\|_\infty$.
+Donc $|\Phi(f)| \le 1 \cdot \|f\|_\infty$. $\Phi$ est une forme linéaire continue (bornée) sur $E$.
+$|\Psi(f)| = |\int_0^1 f(t)dt| \le \int_0^1 |f(t)| dt \le \int_0^1 \|f\|_\infty dt = \|f\|_\infty \int_0^1 dt = \|f\|_\infty$.
+Donc $|\Psi(f)| \le 1 \cdot \|f\|_\infty$. $\Psi$ est une forme linéaire continue (bornée) sur $E$.
+
+L'ensemble $A$ peut s'écrire $A = \{f \in E \mid \Phi(f) = 0\} \cap \{f \in E \mid \Psi(f) \ge 1\}$.
+Posons $A_1 = \{f \in E \mid \Phi(f) = 0\} = \Phi^{-1}(\{0\})$.
+Posons $A_2 = \{f \in E \mid \Psi(f) \ge 1\} = \Psi^{-1}([1, +\infty))$.
+Comme $\Phi$ est continue et $\{0\}$ est un fermé de $\mathbb{R}$, $A_1$ est un fermé de $E$.
+Comme $\Psi$ est continue et $[1, +\infty)$ est un fermé de $\mathbb{R}$, $A_2$ est un fermé de $E$.
+L'ensemble $A = A_1 \cap A_2$ est l'intersection finie de deux fermés, donc $A$ est un fermé de $E$.
+
+2) Soit $f \in A$. Supposons par l'absurde que $\|f\|_\infty \le 1$.
+On a: $\forall x \in [0,1]$, $|f(x)| \le \|f\|_\infty \le 1$.
+Alors $\int_0^1 f(x)dx \le \int_0^1 |f(x)|dx$.
+Comme $|f(x)| \le 1$ pour tout $x$, $\int_0^1 |f(x)|dx \le \int_0^1 1 dx = 1$.
+Donc $\int_0^1 f(x)dx \le 1$.
+Or, $f \in A$, donc par définition $\int_0^1 f(x)dx \ge 1$.
+La seule possibilité est donc $\int_0^1 f(x)dx = 1$.
+
+Considérons l'intégrale $I = \int_0^1 (1 - f(x)) dx$.
+$I = \int_0^1 1 dx - \int_0^1 f(x) dx = 1 - 1 = 0$.
+La fonction $g(x) = 1 - f(x)$ est continue sur $[0,1]$ car $f$ est continue.
+De plus, comme $f(x) \le |f(x)| \le \|f\|_\infty \le 1$, on a $1 - f(x) \ge 0$ pour tout $x \in [0,1]$.
+Donc $g(x) \ge 0$ pour tout $x \in [0,1]$.
+On a une fonction $g$ continue, positive, dont l'intégrale sur $[0,1]$ est nulle. Par nullité de l'intégrale d'une fonction continue positive, cela implique que $g(x) = 0$ pour tout $x \in [0,1]$.
+Donc $1 - f(x) = 0$, soit $f(x) = 1$ pour tout $x \in [0,1]$.
+Mais si $f(x) = 1$ pour tout $x \in [0,1]$, alors $f(0) = 1$.
+Or $f \in A$ impose $f(0) = 0$. On obtient la contradiction $1 = 0$.
+Donc l'hypothèse $\|f\|_\infty \le 1$ est fausse.
+On conclut que si $f \in A$, alors $\|f\|_\infty > 1$.
+
+\end{solution}
+
+\section{Exercice 6}
+Soit $l^1(\mathbb{N})$ l' espace vectoriel des suites réelles $a = (a_n)_{n\in\mathbb{N}}$ telle que la série $\sum_{n\in\mathbb{N}} |a_n|$ converge. On rappelle que $l^1(\mathbb{N})$ est muni de la norme
+\[ \|a\|_1 = \sum_{n=0}^{+\infty} |a_n|. \]
+1a) Expliquer pourquoi si $a \in l^1(\mathbb{N})$ alors la série $\sum_{n\in\mathbb{N}} a_n$ est convergente.
+1b) Montrer que l' application
+\[ \varphi: \begin{array}{ccc} l^1(\mathbb{N}) & \to & \mathbb{R} \\ a & \mapsto & \sum_{n=0}^{+\infty} a_n \end{array} \]
+est une application linéaire et que $|\varphi(a)| \le \|a\|_1$ pour tout $a \in l^1(\mathbb{N})$.
+2) Soit $F = \{a \in l^1(\mathbb{N}) : \varphi(a) = 1\}$. F est-il ouvert? fermé? borné?
+
+\begin{solution}
+1a) Soit $a = (a_n)_{n \in \mathbb{N}} \in l^1(\mathbb{N})$. Cela signifie que la série $\sum_{n=0}^\infty |a_n|$ converge.
+On cherche à montrer que la série $\sum_{n=0}^\infty a_n$ converge.
+Notons $S_n = \sum_{k=0}^n a_k$ la somme partielle de la série $\sum a_n$.
+Notons $A_n = \sum_{k=0}^n |a_k|$ la somme partielle de la série $\sum |a_n|$.
+Puisque $\sum |a_n|$ converge, la suite $(A_n)_{n \in \mathbb{N}}$ est convergente.
+Comme $l^1(\mathbb{N})$ est un espace de Banach (complet pour la norme $\| \cdot \|_1$), toute suite de Cauchy converge. $\mathbb{R}$ est complet.
+Montrons que la suite $(S_n)$ est de Cauchy dans $\mathbb{R}$.
+Soit $\epsilon > 0$. Puisque la suite $(A_n)$ converge, elle est de Cauchy.
+Donc $\exists N \in \mathbb{N}$ tel que $\forall m > n \ge N$, $|A_m - A_n| < \epsilon$.
+$|A_m - A_n| = \sum_{k=n+1}^m |a_k|$.
+Alors pour $m > n \ge N$, on a :
+\[ |S_m - S_n| = \left| \sum_{k=n+1}^m a_k \right| \le \sum_{k=n+1}^m |a_k| = |A_m - A_n| < \epsilon \]
+Donc la suite $(S_n)$ est de Cauchy dans $\mathbb{R}$. Comme $\mathbb{R}$ est complet, la suite $(S_n)$ converge.
+Cela signifie que la série $\sum_{n=0}^\infty a_n$ est convergente.
+(Alternativement : on dit qu'une série absolument convergente est convergente. C'est un théorème d'analyse.)
+
+1b) Montrons que $\varphi$ est linéaire. Soient $\lambda \in \mathbb{R}$, $a, b \in l^1(\mathbb{N})$.
+$a = (a_n)$, $b = (b_n)$. Alors $\lambda a + b = (\lambda a_n + b_n)$.
+Il faut d'abord vérifier que $\lambda a + b \in l^1(\mathbb{N})$.
+$\sum_{n=0}^\infty |\lambda a_n + b_n| \le \sum_{n=0}^\infty (|\lambda a_n| + |b_n|) = \sum_{n=0}^\infty (|\lambda| |a_n| + |b_n|) = |\lambda| \sum_{n=0}^\infty |a_n| + \sum_{n=0}^\infty |b_n| = |\lambda| \|a\|_1 + \|b\|_1$.
+Comme $\|a\|_1$ et $\|b\|_1$ sont finis, la série $\sum |\lambda a_n + b_n|$ converge, donc $\lambda a + b \in l^1(\mathbb{N})$.
+Maintenant, calculons $\varphi(\lambda a + b)$.
+\begin{align*}
+\varphi(\lambda a + b) &= \sum_{n=0}^\infty (\lambda a_n + b_n) \\
+&= \sum_{n=0}^\infty \lambda a_n + \sum_{n=0}^\infty b_n \quad \text{(par linéarité des séries convergentes)} \\
+&= \lambda \sum_{n=0}^\infty a_n + \sum_{n=0}^\infty b_n \\
+&= \lambda \varphi(a) + \varphi(b)
+\end{align*}
+Donc $\varphi$ est linéaire.
+
+Montrons que $|\varphi(a)| \le \|a\|_1$.
+\[ |\varphi(a)| = \left| \sum_{n=0}^\infty a_n \right| \le \sum_{n=0}^\infty |a_n| \quad \text{(par inégalité triangulaire généralisée)} \]
+\[ |\varphi(a)| \le \|a\|_1 \]
+Cette inégalité montre aussi que $\varphi$ est continue car elle est linéaire et bornée (sa norme d'opérateur est $\le 1$).
+
+2) Étude de $F = \{a \in l^1(\mathbb{N}) : \varphi(a) = 1\}$.
+$F = \varphi^{-1}(\{1\})$.
+
+F est-il fermé ?
+L'application $\varphi: (l^1(\mathbb{N}), \|\cdot\|_1) \to (\mathbb{R}, |\cdot|)$ est linéaire et continue (montré en 1b)).
+L'ensemble $\{1\}$ est un fermé de $\mathbb{R}$.
+L'image réciproque d'un fermé par une application continue est un fermé.
+Donc $F = \varphi^{-1}(\{1\})$ est un fermé de $l^1(\mathbb{N})$.
+
+F est-il ouvert ?
+Considérons la suite $a = (1, 0, 0, \dots)$. On a $\varphi(a) = 1$, donc $a \in F$.
+Considérons un voisinage $B(a, \delta)$ pour un $\delta > 0$.
+Soit la suite $b_\epsilon = (1+\epsilon, 0, 0, \dots)$ pour $\epsilon > 0$.
+$\varphi(b_\epsilon) = 1+\epsilon \neq 1$. Donc $b_\epsilon \notin F$.
+La distance $\|b_\epsilon - a\|_1 = \|(\epsilon, 0, 0, \dots)\|_1 = |\epsilon| = \epsilon$.
+Si on choisit $\epsilon < \delta$, alors $b_\epsilon \in B(a, \delta)$ mais $b_\epsilon \notin F$.
+Aucun voisinage de $a$ n'est inclus dans $F$.
+Donc $F$ n'est pas ouvert.
+
+F est-il borné ?
+Considérons la suite d'éléments de $l^1(\mathbb{N})$ définie par $a^{(p)} = (p+1, -p, 0, 0, \dots)$ pour $p \in \mathbb{N}$.
+Vérifions que $a^{(p)} \in l^1(\mathbb{N})$. $\|a^{(p)}\|_1 = |p+1| + |-p| + 0 + \dots = p+1+p = 2p+1$. C'est fini pour chaque $p$.
+Calculons $\varphi(a^{(p)})$:
+$\varphi(a^{(p)}) = \sum_{n=0}^\infty a_n^{(p)} = (p+1) + (-p) + 0 + \dots = 1$.
+Donc $a^{(p)} \in F$ pour tout $p \in \mathbb{N}$.
+La norme de ces éléments est $\|a^{(p)}\|_1 = 2p+1$.
+Lorsque $p \to \infty$, $\|a^{(p)}\|_1 \to \infty$.
+L'ensemble $F$ contient des éléments de norme arbitrairement grande.
+Donc $F$ n'est pas borné.
+(Note : la suite utilisée dans la note manuscrite $(p+1, -p, 0, \dots)$ est correcte pour montrer que $F$ n'est pas borné).
+
+\end{solution}
+
+\end{document}
+```
