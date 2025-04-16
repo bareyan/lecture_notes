@@ -1,0 +1,1698 @@
+```latex
+\documentclass{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{float}
+\usepackage{listings}
+\usepackage{verbatim}
+\usepackage{amsthm}
+
+\geometry{a4paper, margin=1in}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Example}
+
+\title{Élimination des Parties Cachées et Remplissage de Polygones}
+\date{\today}
+
+\begin{document}
+\maketitle
+\sloppy
+
+\section{Introduction : Élimination des Parties Cachées}
+
+Lors de la création d'images de synthèse tridimensionnelles, plusieurs objets peuvent occuper la même position sur l'écran (pixel). Le problème de l'élimination des parties cachées consiste à déterminer quelles parties de quels objets sont visibles depuis le point de vue de l'observateur (la caméra) afin de ne dessiner que celles-ci. Sans ce processus, les objets les plus éloignés pourraient être dessinés par-dessus les objets plus proches, créant une image incorrecte.
+
+Plusieurs approches algorithmiques existent pour résoudre ce problème. On les classe souvent en deux catégories : les algorithmes opérant dans l'espace objet et ceux opérant dans l'espace image. Ce chapitre se concentre sur les \textbf{algorithmes images}, qui déterminent la visibilité au niveau de chaque pixel de l'image finale.
+
+\begin{verbatim}
+#save_to: algorithms_overview.png
+from graphviz import Digraph
+
+dot = Digraph(comment='Algorithmes Images')
+dot.graph_attr['rankdir'] = 'TB'
+
+dot.node('A', 'Élimination des Parties Cachées :\nAlgorithmes Images')
+dot.node('B', 'Subdivision récursive\nde l\'image (Warnock)')
+dot.node('C', 'Ligne de balayage')
+dot.node('D', 'Test de profondeur') # Assuming this is a general category, not a specific algorithm like Z-buffer
+dot.node('E', 'Tampon de\nprofondeur - Zbuffer')
+dot.node('F', 'Scan-line-Watkins')
+dot.node('G', 'Scan-line-Zbuffer')
+
+
+dot.edge('A', 'B')
+dot.edge('A', 'C')
+dot.edge('A', 'D')
+dot.edge('A', 'E')
+
+dot.edge('C', 'F')
+dot.edge('C', 'G')
+
+
+dot.render('algorithms_overview', format='png', view=False, cleanup=True)
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.8\textwidth, keepaspectratio]{algorithms_overview.png}
+\caption{Classification des algorithmes d'élimination des parties cachées opérant dans l'espace image.}
+\label{fig:algo_overview}
+\end{figure}
+
+Parmi les algorithmes images, nous allons détailler l'algorithme de subdivision récursive de l'image (Warnock) et l'algorithme du tampon de profondeur (Z-buffer). Les algorithmes basés sur la ligne de balayage (Scan-Line), tels que ceux de Watkins ou utilisant un Z-buffer par ligne, seront brièvement évoqués.
+
+\section{Subdivision Récursive de l'Image : Algorithme de Warnock}
+
+L'algorithme de Warnock, développé par John Warnock, est un algorithme d'élimination des parties cachées basé sur le principe "diviser pour régner" (divide and conquer). L'idée est de subdiviser récursivement l'image en quadrants (structure de quadtree) jusqu'à ce que le contenu de chaque quadrant soit suffisamment simple pour être affiché directement.
+
+\subsection{Principe "Diviser pour Régner"}
+
+L'algorithme commence avec la fenêtre d'affichage entière.
+\begin{enumerate}
+    \item On examine le contenu du quadrant courant.
+    \item Si le contenu est simple (voir cas simples ci-dessous), on affiche le quadrant et on arrête la subdivision pour cette branche.
+    \item Si le contenu est complexe, on subdivise le quadrant en quatre sous-quadrants de taille égale.
+    \item On applique récursivement l'algorithme à chacun des sous-quadrants.
+\end{enumerate}
+
+Ce processus est illustré ci-dessous, montrant les étapes successives de subdivision de l'image.
+
+\begin{verbatim}
+#save_to: warnock_subdivision_1.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots()
+
+# Define window boundaries
+win_xmin, win_xmax = 0, 10
+win_ymin, win_ymax = 0, 10
+
+# Define polygons (Triangle and Rectangle)
+triangle = np.array([[3, 5], [7, 5], [5, 8]])
+rectangle = np.array([[4, 3], [8, 3], [8, 6], [4, 6]])
+
+# Draw window
+ax.add_patch(patches.Rectangle((win_xmin, win_ymin), win_xmax - win_xmin, win_ymax - win_ymin, fill=False, edgecolor='black', linewidth=1))
+
+# Draw polygons
+ax.add_patch(patches.Polygon(triangle, closed=True, facecolor='red', edgecolor='black'))
+ax.add_patch(patches.Polygon(rectangle, closed=True, facecolor='blue', edgecolor='black'))
+
+# Settings
+ax.set_xlim(win_xmin - 1, win_xmax + 1)
+ax.set_ylim(win_ymin - 1, win_ymax + 1)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xticks([])
+ax.set_yticks([])
+plt.box(False)
+
+
+plt.savefig('warnock_subdivision_1.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.5\textwidth, keepaspectratio]{warnock_subdivision_1.png}
+\caption{Image initiale avec deux polygones.}
+\label{fig:warnock_subdiv_1}
+\end{figure}
+
+\begin{verbatim}
+#save_to: warnock_subdivision_2.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots()
+win_xmin, win_xmax = 0, 10
+win_ymin, win_ymax = 0, 10
+triangle = np.array([[3, 5], [7, 5], [5, 8]])
+rectangle = np.array([[4, 3], [8, 3], [8, 6], [4, 6]])
+
+# Draw window and grid (1st subdivision)
+ax.add_patch(patches.Rectangle((win_xmin, win_ymin), win_xmax - win_xmin, win_ymax - win_ymin, fill=False, edgecolor='black', linewidth=1))
+ax.plot([win_xmin, win_xmax], [(win_ymin + win_ymax) / 2, (win_ymin + win_ymax) / 2], color='grey', linestyle='-', linewidth=0.5)
+ax.plot([(win_xmin + win_xmax) / 2, (win_xmin + win_xmax) / 2], [win_ymin, win_ymax], color='grey', linestyle='-', linewidth=0.5)
+
+ax.add_patch(patches.Polygon(triangle, closed=True, facecolor='red', edgecolor='black'))
+ax.add_patch(patches.Polygon(rectangle, closed=True, facecolor='blue', edgecolor='black'))
+
+ax.set_xlim(win_xmin - 1, win_xmax + 1)
+ax.set_ylim(win_ymin - 1, win_ymax + 1)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xticks([])
+ax.set_yticks([])
+plt.box(False)
+
+plt.savefig('warnock_subdivision_2.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.5\textwidth, keepaspectratio]{warnock_subdivision_2.png}
+\caption{Première subdivision en quadtree.}
+\label{fig:warnock_subdiv_2}
+\end{figure}
+
+\begin{verbatim}
+#save_to: warnock_subdivision_3.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots()
+win_xmin, win_xmax = 0, 10
+win_ymin, win_ymax = 0, 10
+triangle = np.array([[3, 5], [7, 5], [5, 8]])
+rectangle = np.array([[4, 3], [8, 3], [8, 6], [4, 6]])
+
+# Draw window and grid (2 levels)
+ax.add_patch(patches.Rectangle((win_xmin, win_ymin), win_xmax - win_xmin, win_ymax - win_ymin, fill=False, edgecolor='black', linewidth=1))
+mid_x, mid_y = (win_xmin + win_xmax) / 2, (win_ymin + win_ymax) / 2
+ax.plot([win_xmin, win_xmax], [mid_y, mid_y], color='grey', linestyle='-', linewidth=0.5)
+ax.plot([mid_x, mid_x], [win_ymin, win_ymax], color='grey', linestyle='-', linewidth=0.5)
+
+# Subdivide bottom-right quadrant
+q_xmin, q_xmax = mid_x, win_xmax
+q_ymin, q_ymax = win_ymin, mid_y
+q_mid_x, q_mid_y = (q_xmin + q_xmax) / 2, (q_ymin + q_ymax) / 2
+ax.plot([q_xmin, q_xmax], [q_mid_y, q_mid_y], color='grey', linestyle='-', linewidth=0.5)
+ax.plot([q_mid_x, q_mid_x], [q_ymin, q_ymax], color='grey', linestyle='-', linewidth=0.5)
+
+# Subdivide top-left quadrant
+q_xmin, q_xmax = win_xmin, mid_x
+q_ymin, q_ymax = mid_y, win_ymax
+q_mid_x, q_mid_y = (q_xmin + q_xmax) / 2, (q_ymin + q_ymax) / 2
+ax.plot([q_xmin, q_xmax], [q_mid_y, q_mid_y], color='grey', linestyle='-', linewidth=0.5)
+ax.plot([q_mid_x, q_mid_x], [q_ymin, q_ymax], color='grey', linestyle='-', linewidth=0.5)
+
+# Subdivide top-right quadrant
+q_xmin, q_xmax = mid_x, win_xmax
+q_ymin, q_ymax = mid_y, win_ymax
+q_mid_x, q_mid_y = (q_xmin + q_xmax) / 2, (q_ymin + q_ymax) / 2
+ax.plot([q_xmin, q_xmax], [q_mid_y, q_mid_y], color='grey', linestyle='-', linewidth=0.5)
+ax.plot([q_mid_x, q_mid_x], [q_ymin, q_ymax], color='grey', linestyle='-', linewidth=0.5)
+
+# Subdivide bottom-left quadrant
+q_xmin, q_xmax = win_xmin, mid_x
+q_ymin, q_ymax = win_ymin, mid_y
+q_mid_x, q_mid_y = (q_xmin + q_xmax) / 2, (q_ymin + q_ymax) / 2
+ax.plot([q_xmin, q_xmax], [q_mid_y, q_mid_y], color='grey', linestyle='-', linewidth=0.5)
+ax.plot([q_mid_x, q_mid_x], [q_ymin, q_ymax], color='grey', linestyle='-', linewidth=0.5)
+
+
+ax.add_patch(patches.Polygon(triangle, closed=True, facecolor='red', edgecolor='black'))
+ax.add_patch(patches.Polygon(rectangle, closed=True, facecolor='blue', edgecolor='black'))
+
+ax.set_xlim(win_xmin - 1, win_xmax + 1)
+ax.set_ylim(win_ymin - 1, win_ymax + 1)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xticks([])
+ax.set_yticks([])
+plt.box(False)
+
+plt.savefig('warnock_subdivision_3.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.5\textwidth, keepaspectratio]{warnock_subdivision_3.png}
+\caption{Deuxième niveau de subdivision dans les quadrants complexes.}
+\label{fig:warnock_subdiv_3}
+\end{figure}
+
+\begin{verbatim}
+#save_to: warnock_subdivision_4.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots()
+win_xmin, win_xmax = 0, 10
+win_ymin, win_ymax = 0, 10
+triangle = np.array([[3, 5], [7, 5], [5, 8]])
+rectangle = np.array([[4, 3], [8, 3], [8, 6], [4, 6]])
+
+# Draw window and grid (3 levels)
+ax.add_patch(patches.Rectangle((win_xmin, win_ymin), win_xmax - win_xmin, win_ymax - win_ymin, fill=False, edgecolor='black', linewidth=1))
+
+# Draw grid lines recursively
+def draw_grid(xmin, xmax, ymin, ymax, level):
+    if level <= 0:
+        return
+    mid_x = (xmin + xmax) / 2
+    mid_y = (ymin + ymax) / 2
+    ax.plot([xmin, xmax], [mid_y, mid_y], color='grey', linestyle='-', linewidth=0.5)
+    ax.plot([mid_x, mid_x], [ymin, ymax], color='grey', linestyle='-', linewidth=0.5)
+
+    # Only subdivide if polygons intersect the quadrant (simplified check)
+    quadrant_poly = patches.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin)
+    intersect = False
+    # Simple check: if center of polygons are roughly inside... this is not accurate
+    # A full implementation would clip polygons to the quadrant
+    if mid_x > 2 and mid_x < 9 and mid_y > 2 and mid_y < 9 : # Heuristic
+         intersect = True
+
+    if intersect and level > 1 : # only continue subdividing if complex and level > 1
+        draw_grid(xmin, mid_x, ymin, mid_y, level - 1)
+        draw_grid(mid_x, xmax, ymin, mid_y, level - 1)
+        draw_grid(xmin, mid_x, mid_y, ymax, level - 1)
+        draw_grid(mid_x, xmax, mid_y, ymax, level - 1)
+
+# Draw grid starting with level 3
+draw_grid(win_xmin, win_xmax, win_ymin, win_ymax, 3)
+
+
+ax.add_patch(patches.Polygon(triangle, closed=True, facecolor='red', edgecolor='black'))
+ax.add_patch(patches.Polygon(rectangle, closed=True, facecolor='blue', edgecolor='black'))
+
+ax.set_xlim(win_xmin - 1, win_xmax + 1)
+ax.set_ylim(win_ymin - 1, win_ymax + 1)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xticks([])
+ax.set_yticks([])
+plt.box(False)
+
+
+plt.savefig('warnock_subdivision_4.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.5\textwidth, keepaspectratio]{warnock_subdivision_4.png}
+\caption{Troisième niveau de subdivision.}
+\label{fig:warnock_subdiv_4}
+\end{figure}
+
+\subsection{Traitement des Quadrants}
+
+Pour chaque quadrant, l'algorithme détermine la liste des polygones potentiellement visibles (ceux qui intersectent le quadrant). Ensuite, il analyse la situation :
+
+\subsubsection{Cas Simples}
+Le contenu du quadrant est considéré comme simple et peut être tracé directement dans les cas suivants :
+\begin{itemize}
+    \item \textbf{Rien dans le quadrant :} Le quadrant est vide. On le remplit avec la couleur du fond.
+    \item \textbf{Un seul polygone :}
+        \begin{itemize}
+            \item Si le polygone \textbf{couvre totalement} le quadrant, on remplit le quadrant avec la couleur du polygone (éventuellement après calcul d'ombrage).
+            \item Si le polygone \textbf{couvre partiellement} le quadrant, on remplit le quadrant avec la couleur du fond, puis on dessine la partie du polygone contenue dans le quadrant. (Note : une approche alternative est de subdiviser même si un seul polygone est partiellement dedans, mais le cas simple ici suggère de le dessiner directement).
+            \item Si le polygone est \textbf{contenu} dans le quadrant, on le dessine avec sa couleur sur le fond.
+        \end{itemize}
+\end{itemize}
+
+\begin{verbatim}
+#save_to: warnock_simple_cases.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, axes = plt.subplots(1, 4, figsize=(12, 3))
+
+# Case 1: Empty (Background)
+axes[0].add_patch(patches.Rectangle((0, 0), 1, 1, facecolor='lightgrey'))
+axes[0].set_title('Fond')
+
+# Case 2: Single polygon (partially contained)
+axes[1].add_patch(patches.Rectangle((0, 0), 1, 1, facecolor='lightgrey'))
+triangle = np.array([[0.2, 0.2], [0.8, 0.2], [0.5, 0.8]])
+axes[1].add_patch(patches.Polygon(triangle, closed=True, facecolor='cyan', edgecolor='black'))
+axes[1].set_title('Partiellement contenu')
+
+# Case 3: Single polygon (surrounding) - interpretation of 'couvrant'
+axes[2].add_patch(patches.Rectangle((0, 0), 1, 1, facecolor='purple'))
+# Add a small inner rectangle to show it's covering
+# axes[2].add_patch(patches.Rectangle((0.1, 0.1), 0.8, 0.8, fill=False, edgecolor='white', linestyle='--'))
+axes[2].set_title('Couvrant')
+
+
+# Case 4: Single polygon (contained)
+axes[3].add_patch(patches.Rectangle((0, 0), 1, 1, facecolor='lightgrey'))
+poly = np.array([[0.2, 0.2], [0.5, 0.2], [0.8, 0.5], [0.5, 0.8], [0.2, 0.5]])
+axes[3].add_patch(patches.Polygon(poly, closed=True, facecolor='lime', edgecolor='black'))
+axes[3].set_title('Totalement contenu')
+
+
+for ax in axes:
+    ax.set_xlim(-0.1, 1.1)
+    ax.set_ylim(-0.1, 1.1)
+    ax.set_aspect('equal', adjustable='box')
+    ax.set_xticks([])
+    ax.set_yticks([])
+    #ax.spines['top'].set_visible(False)
+    #ax.spines['right'].set_visible(False)
+    #ax.spines['bottom'].set_visible(False)
+    #ax.spines['left'].set_visible(False)
+
+plt.tight_layout()
+plt.savefig('warnock_simple_cases.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.8\textwidth, keepaspectratio]{warnock_simple_cases.png}
+\caption{Cas simples de traitement d'un quadrant dans l'algorithme de Warnock.}
+\label{fig:warnock_simple_cases}
+\end{figure}
+
+\subsubsection{Cas Complexes : Plusieurs Polygones}
+
+Si plusieurs polygones sont présents dans le quadrant, la situation est complexe et nécessite une analyse plus poussée ou une subdivision :
+
+\begin{verbatim}
+#save_to: warnock_complex_case.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots()
+win_xmin, win_xmax = 0, 10
+win_ymin, win_ymax = 0, 10
+triangle = np.array([[3, 5], [7, 5], [5, 8]])
+rectangle = np.array([[4, 3], [8, 3], [8, 6], [4, 6]])
+
+# Draw window and grid (like figure 71)
+ax.add_patch(patches.Rectangle((win_xmin, win_ymin), win_xmax - win_xmin, win_ymax - win_ymin, fill=False, edgecolor='black', linewidth=1))
+mid_x, mid_y = (win_xmin + win_xmax) / 2, (win_ymin + win_ymax) / 2
+
+# Draw grid lines for the quadrant containing parts of both polygons (e.g., top right)
+q_xmin, q_xmax = mid_x, win_xmax
+q_ymin, q_ymax = mid_y, win_ymax
+q_mid_x, q_mid_y = (q_xmin + q_xmax) / 2, (q_ymin + q_ymax) / 2
+ax.plot([q_xmin, q_xmax], [q_mid_y, q_mid_y], color='grey', linestyle='-', linewidth=0.5)
+ax.plot([q_mid_x, q_mid_x], [q_ymin, q_ymax], color='grey', linestyle='-', linewidth=0.5)
+
+# Draw full grid for context
+ax.plot([win_xmin, win_xmax], [mid_y, mid_y], color='grey', linestyle='-', linewidth=0.5)
+ax.plot([mid_x, mid_x], [win_ymin, win_ymax], color='grey', linestyle='-', linewidth=0.5)
+
+
+ax.add_patch(patches.Polygon(triangle, closed=True, facecolor='red', edgecolor='black'))
+ax.add_patch(patches.Polygon(rectangle, closed=True, facecolor='blue', edgecolor='black'))
+
+ax.set_xlim(win_xmin - 1, win_xmax + 1)
+ax.set_ylim(win_ymin - 1, win_ymax + 1)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xticks([])
+ax.set_yticks([])
+plt.box(False)
+
+# Indicate the complex quadrant (e.g., top right)
+# ax.add_patch(patches.Rectangle((mid_x, mid_y), mid_x - win_xmin, mid_y- win_ymin, fill=False, edgecolor='green', linewidth=2))
+
+
+plt.savefig('warnock_complex_case.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.5\textwidth, keepaspectratio]{warnock_complex_case.png}
+\caption{Cas complexe : quadrant contenant plusieurs polygones.}
+\label{fig:warnock_complex}
+\end{figure}
+
+\begin{enumerate}
+    \item \textbf{Trier les polygones :} Les polygones dans le quadrant sont triés selon leur profondeur (distance à l'observateur).
+    \item \textbf{Vérifier le masquage complet :} On vérifie si le polygone le plus proche (après tri) masque complètement tous les autres polygones à l'intérieur du quadrant.
+    \begin{itemize}
+        \item Si un polygone P couvre entièrement le quadrant et est plus proche que tous les autres polygones intersectant le quadrant, alors on remplit le quadrant avec la couleur de P. Ce test peut parfois être effectué sans calculs complexes de profondeur si P est clairement devant les autres.
+    \end{itemize}
+    \item \textbf{Subdiviser :} Si aucun polygone ne masque entièrement les autres de manière simple, on subdivise le quadrant en quatre sous-quadrants et on réitère le processus pour chacun.
+\end{enumerate}
+
+\subsubsection{Critère d'Arrêt}
+
+La subdivision récursive s'arrête lorsque le quadrant devient plus petit qu'un pixel. À ce niveau de résolution :
+\begin{itemize}
+    \item On calcule la profondeur de chaque polygone intersectant le pixel (au centre du pixel, par exemple).
+    \item On détermine le polygone le plus proche de l'observateur.
+    \item On affiche le pixel avec la couleur de ce polygone le plus proche.
+\end{itemize}
+
+\subsection{Découpage Récursif et Problèmes Potentiels}
+
+Le découpage récursif continue jusqu'à ce qu'une décision puisse être prise pour chaque région.
+
+\begin{verbatim}
+#save_to: warnock_recursive_cut.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots()
+win_xmin, win_xmax = 0, 10
+win_ymin, win_ymax = 0, 10
+triangle = np.array([[3, 5], [7, 5], [5, 8]]) # Assume triangle (s1) is closer
+rectangle = np.array([[4, 3], [8, 3], [8, 6], [4, 6]]) # Assume rectangle (s2) is further
+
+# Draw window and grid (like figure 73)
+ax.add_patch(patches.Rectangle((win_xmin, win_ymin), win_xmax - win_xmin, win_ymax - win_ymin, fill=False, edgecolor='black', linewidth=1))
+
+# Draw grid lines recursively (similar to warnock_subdivision_4)
+def draw_grid_rec(xmin, xmax, ymin, ymax, level):
+    if level <= 0:
+        return
+    mid_x = (xmin + xmax) / 2
+    mid_y = (ymin + ymax) / 2
+    ax.plot([xmin, xmax], [mid_y, mid_y], color='grey', linestyle='-', linewidth=0.5)
+    ax.plot([mid_x, mid_x], [ymin, ymax], color='grey', linestyle='-', linewidth=0.5)
+
+    # Simplified condition to continue subdivision in the overlap region
+    if mid_x > 3 and mid_x < 8 and mid_y > 3 and mid_y < 8 and level > 1:
+         draw_grid_rec(xmin, mid_x, ymin, mid_y, level - 1)
+         draw_grid_rec(mid_x, xmax, ymin, mid_y, level - 1)
+         draw_grid_rec(xmin, mid_x, mid_y, ymax, level - 1)
+         draw_grid_rec(mid_x, xmax, mid_y, ymax, level - 1)
+
+draw_grid_rec(win_xmin, win_xmax, win_ymin, win_ymax, 3) # Draw 3 levels of grid
+
+# Draw polygons - draw rectangle first (further), then triangle (closer)
+ax.add_patch(patches.Polygon(rectangle, closed=True, facecolor='blue', edgecolor='black'))
+ax.add_patch(patches.Polygon(triangle, closed=True, facecolor='red', edgecolor='black', alpha=0.7)) # Make triangle slightly transparent to see overlap
+
+
+ax.set_xlim(win_xmin - 1, win_xmax + 1)
+ax.set_ylim(win_ymin - 1, win_ymax + 1)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xticks([])
+ax.set_yticks([])
+plt.box(False)
+ax.set_title("Découpage récursif des quadrants complexes")
+
+plt.savefig('warnock_recursive_cut.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.6\textwidth, keepaspectratio]{warnock_recursive_cut.png}
+\caption{Exemple de découpage récursif pour résoudre les cas complexes.}
+\label{fig:warnock_recursive_cut}
+\end{figure}
+
+Un problème peut survenir si les tests simples de masquage échouent à détecter une situation de masquage réel. Par exemple, un polygone S1 peut masquer entièrement d'autres polygones S2, S3, S4 à l'intérieur d'un quadrant donné, mais si S1 ne remplit pas *entièrement* le quadrant, les tests simples (comme vérifier si un polygone couvre le quadrant) peuvent ne pas le détecter. Le test de profondeur au niveau du pixel résout ce problème, mais le but de la subdivision est d'éviter ces calculs coûteux autant que possible.
+
+\begin{verbatim}
+#save_to: warnock_depth_issue.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots()
+
+# Quadrant boundaries
+q_xmin, q_xmax = 0, 10
+q_ymin, q_ymax = 0, 8
+ax.add_patch(patches.Rectangle((q_xmin, q_ymin), q_xmax - q_xmin, q_ymax - q_ymin, fill=False, edgecolor='black', linewidth=1))
+ax.text(5, 8.5, 'Quadrant', ha='center')
+
+
+# Polygons s1, s2, s3, s4 (represented by their Z ranges at different X)
+x_coords = np.array([1, 3, 5, 7, 9])
+
+# s1 (closer, potentially masking) - higher Z value means closer in this convention
+z_s1_max = np.array([6, 6, 6, 6, 6])
+z_s1_min = np.array([5, 5, 5, 5, 5])
+ax.plot(x_coords, z_s1_max, 'r--', label='zmax de s1')
+ax.plot(x_coords, z_s1_min, 'r-', label='zmin de s1')
+ax.fill_between(x_coords, z_s1_min, z_s1_max, color='red', alpha=0.3)
+ax.text(2, 5.5, 's1', color='red')
+
+
+# s2 (further)
+z_s2_max = np.array([4, 4, 4, 4, 4])
+z_s2_min = np.array([3, 3, 3, 3, 3])
+ax.plot(x_coords, z_s2_max, 'b--', label='zmax de s2')
+# ax.plot(x_coords, z_s2_min, 'b-', label='zmin de s2') # Not shown in original
+ax.fill_between(x_coords, z_s2_min, z_s2_max, color='blue', alpha=0.3)
+ax.text(4, 3.5, 's2', color='blue')
+
+
+# s3 (further)
+z_s3_max = np.array([3.5, 3.5, 3.5, 3.5, 3.5])
+z_s3_min = np.array([2.5, 2.5, 2.5, 2.5, 2.5])
+ax.fill_between(x_coords, z_s3_min, z_s3_max, color='green', alpha=0.3)
+ax.text(6, 3.0, 's3', color='green')
+
+# s4 (further)
+z_s4_max = np.array([4.5, 4.5, 4.5, 4.5, 4.5])
+z_s4_min = np.array([3.5, 3.5, 3.5, 3.5, 3.5])
+ax.fill_between(x_coords, z_s4_min, z_s4_max, color='purple', alpha=0.3)
+ax.text(8, 4.0, 's4', color='purple')
+
+# Vertical lines indicating tests might fail
+ax.vlines([2, 4, 6, 8], 0, 7, color='grey', linestyle=':', linewidth=1)
+
+
+# Labels and limits
+ax.set_xlabel('X')
+ax.set_ylabel('Z')
+ax.set_ylim(0, 9)
+ax.set_xlim(0, 10)
+ax.legend()
+ax.set_title('Problème : S1 masque les autres, mais test simple échoue')
+
+plt.savefig('warnock_depth_issue.png')
+
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.8\textwidth, keepaspectratio]{warnock_depth_issue.png}
+\caption{Illustration du problème où un polygone S1 masque d'autres polygones (S2, S3, S4) dans le quadrant selon l'axe Z, mais les tests simples peuvent ne pas le détecter si S1 ne couvre pas entièrement le quadrant.}
+\label{fig:warnock_depth_issue}
+\end{figure}
+
+Dans ce cas (Figure \ref{fig:warnock_depth_issue}), la subdivision est nécessaire car le test simple (S1 couvre-t-il le quadrant ?) échoue, même si S1 est effectivement le seul polygone visible dans cette zone.
+
+\section{Algorithme de Balayage (Scan-Line) - Aperçu}
+
+Les algorithmes de balayage traitent l'image ligne par ligne (horizontalement, le long de l'axe y). Le principe général est d'éliminer les parties cachées pour chaque ligne de balayage individuellement.
+
+\begin{itemize}
+    \item \textbf{Principe :} Pour une ligne de balayage donnée (y constant), on détermine tous les segments de polygones qui intersectent cette ligne.
+    \item \textbf{Visibilité :} On calcule ensuite, pour chaque segment le long de la ligne (en x), quel segment est le plus proche de l'observateur (en utilisant la coordonnée z).
+    \item \textbf{Affichage :} Seuls les segments visibles sont affichés sur la ligne de balayage courante.
+\end{itemize}
+
+\begin{verbatim}
+#save_to: scanline_principle.png
+import matplotlib.pyplot as plt
+import numpy as np
+from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+
+fig = plt.figure(figsize=(10, 5))
+
+# 3D View
+ax1 = fig.add_subplot(121, projection='3d')
+
+# Define two intersecting planes (simplified polygons)
+verts1 = np.array([[1, 1, 1], [5, 1, 1], [5, 5, 3], [1, 5, 3]])
+verts2 = np.array([[1, 3, 2], [5, 3, 2], [5, 7, 0], [1, 7, 0]])
+
+poly1 = Poly3DCollection([verts1], facecolors='cyan', linewidths=1, edgecolors='r', alpha=.25)
+poly2 = Poly3DCollection([verts2], facecolors='lightgreen', linewidths=1, edgecolors='b', alpha=.25)
+ax1.add_collection3d(poly1)
+ax1.add_collection3d(poly2)
+
+# Define a scanline plane (y=4)
+scan_y = 4
+scan_verts = np.array([[0, scan_y, -1], [6, scan_y, -1], [6, scan_y, 4], [0, scan_y, 4]])
+scan_plane = Poly3DCollection([scan_verts], facecolors='grey', alpha=0.3)
+ax1.add_collection3d(scan_plane)
+ax1.text(0, scan_y, 4.5, "Ligne de balayage (y=4)", color='black')
+
+# Intersections (approximate)
+inter1 = np.array([[1, scan_y, 2.5], [5, scan_y, 2.5]]) # Intersection with plane 1 at y=4
+inter2 = np.array([[1, scan_y, 1.5], [5, scan_y, 1.5]]) # Intersection with plane 2 at y=4 (adjust Z for visibility)
+ax1.plot(inter1[:,0], inter1[:,1], inter1[:,2], color='red', linewidth=3, label='Seg 1')
+ax1.plot(inter2[:,0], inter2[:,1], inter2[:,2], color='blue', linewidth=3, label='Seg 2')
+
+
+ax1.set_xlabel('X')
+ax1.set_ylabel('Y')
+ax1.set_zlabel('Z')
+ax1.set_xlim(0, 6)
+ax1.set_ylim(0, 8)
+ax1.set_zlim(-1, 5)
+ax1.set_title('Principe Scan-Line (Vue 3D)')
+ax1.view_init(elev=20., azim=-60)
+
+
+# 2D Projection View (X-Z plane at scanline y)
+ax2 = fig.add_subplot(122)
+ax2.plot(inter1[:,0], inter1[:,2], color='red', linewidth=2, label='Segment 1')
+ax2.plot(inter2[:,0], inter2[:,2], color='blue', linewidth=2, label='Segment 2')
+
+# Indicate visibility (Segment 1 is closer - higher Z if Z increases towards viewer)
+ax2.plot(inter1[:,0], inter1[:,2], color='red', linewidth=4) # Draw visible part thicker
+
+ax2.set_xlabel('X')
+ax2.set_ylabel('Z (Profondeur)')
+ax2.set_title(f'Vue 2D sur la Ligne de Balayage (y={scan_y})')
+ax2.grid(True, linestyle=':')
+ax2.legend()
+
+
+plt.tight_layout()
+plt.savefig('scanline_principle.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth, keepaspectratio]{scanline_principle.png}
+\caption{Principe de l'algorithme de balayage (Scan-Line). La scène 3D est coupée par un plan correspondant à la ligne de balayage courante (gauche). Les intersections forment des segments dans le plan X-Z (droite), où la visibilité est déterminée par la profondeur Z.}
+\label{fig:scanline_principle}
+\end{figure}
+
+Pour une ligne de balayage donnée, plusieurs cas peuvent se présenter lors de la comparaison des segments issus de différents polygones. La gestion des intervalles de segments et de leur profondeur est cruciale.
+
+\begin{verbatim}
+#save_to: scanline_cases.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, axes = plt.subplots(2, 2, figsize=(10, 6), sharex=True, sharey=True)
+fig.suptitle('Algorithme de Balayage : Différents cas rencontrés sur une ligne')
+
+# Case 1: Non-overlapping segments
+axes[0, 0].plot([1, 4], [3, 3], 'r-', linewidth=2, label='Seg A')
+axes[0, 0].plot([5, 8], [2, 2], 'b-', linewidth=2, label='Seg B')
+axes[0, 0].set_title('Segments disjoints')
+
+# Case 2: Overlapping, B behind A
+axes[0, 1].plot([1, 6], [3, 3], 'r-', linewidth=2, label='Seg A (devant)')
+axes[0, 1].plot([3, 8], [2, 2], 'b-', linewidth=2, label='Seg B (derrière)')
+axes[0, 1].plot([1, 6], [3, 3], 'r-', linewidth=4) # Visible part of A
+axes[0, 1].plot([6, 8], [2, 2], 'b-', linewidth=4) # Visible part of B
+axes[0, 1].set_title('Chevauchement (A devant B)')
+
+
+# Case 3: Overlapping, A behind B
+axes[1, 0].plot([1, 6], [2, 2], 'r-', linewidth=2, label='Seg A (derrière)')
+axes[1, 0].plot([3, 8], [3, 3], 'b-', linewidth=2, label='Seg B (devant)')
+axes[1, 0].plot([1, 3], [2, 2], 'r-', linewidth=4) # Visible part of A
+axes[1, 0].plot([3, 8], [3, 3], 'b-', linewidth=4) # Visible part of B
+axes[1, 0].set_title('Chevauchement (B devant A)')
+
+
+# Case 4: Complex overlap (crossing)
+axes[1, 1].plot([1, 8], [3, 1], 'r-', linewidth=2, label='Seg A') # Z decreases
+axes[1, 1].plot([2, 7], [1, 3], 'b-', linewidth=2, label='Seg B') # Z increases
+# Find intersection approx x=4.5, z=2
+axes[1, 1].plot([1, 4.5], [3, 2], 'r-', linewidth=4) # Visible A
+axes[1, 1].plot([4.5, 7], [2, 3], 'b-', linewidth=4) # Visible B
+axes[1, 1].plot([7, 8], [1.25, 1], 'r-', linewidth=4) # Visible A again (extrapolated)
+
+
+for ax_row in axes:
+    for ax in ax_row:
+        ax.set_xlabel('X')
+        ax.set_ylabel('Z (Profondeur)')
+        ax.grid(True, linestyle=':')
+        ax.legend()
+
+axes[0,0].set_xlim(0, 9)
+axes[0,0].set_ylim(0, 4)
+plt.tight_layout(rect=[0, 0.03, 1, 0.95]) # Adjust layout to prevent title overlap
+plt.savefig('scanline_cases.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth, keepaspectratio]{scanline_cases.png}
+\caption{Différents cas de segments rencontrés sur une ligne de balayage et détermination de la visibilité basée sur la profondeur Z.}
+\label{fig:scanline_cases}
+\end{figure}
+
+Des algorithmes spécifiques comme celui de Watkins gèrent ces cas en maintenant une liste active d'arêtes et en calculant les intersections et la visibilité le long de chaque ligne. Une variante utilise un tampon de profondeur (Z-buffer) unidimensionnel pour chaque ligne de balayage.
+
+\section{Tampon de Profondeur (Z-buffer)}
+
+L'algorithme du Z-buffer, développé par Edwin Catmull en 1974, est l'un des algorithmes d'élimination des parties cachées les plus simples et les plus utilisés, notamment car il est souvent implémenté directement dans le matériel graphique.
+
+\subsection{Concept}
+
+L'idée principale est de maintenir une mémoire tampon bidimensionnelle, appelée tampon de profondeur ou Z-buffer, de même taille que l'image à générer. Chaque élément de ce tampon stocke la profondeur (coordonnée Z) de l'objet le plus proche trouvé jusqu'à présent pour le pixel correspondant.
+
+\begin{itemize}
+    \item Le calcul de l'image se fait en traitant les objets (polygones/facettes) séquentiellement, les uns après les autres, sans ordre particulier (pas de tri préalable nécessaire).
+    \item Pour chaque polygone, on détermine les pixels qu'il recouvre sur l'écran.
+    \item Pour chaque pixel (x, y) recouvert par le polygone, on calcule sa profondeur Z.
+    \item On compare cette profondeur Z avec la valeur Z déjà stockée dans le Z-buffer à la position (x, y).
+    \item Si la nouvelle profondeur Z est inférieure (plus proche de l'observateur, selon la convention utilisée) à la valeur stockée, cela signifie que ce polygone est devant ce qui avait été dessiné précédemment à ce pixel. On met alors à jour le Z-buffer avec la nouvelle profondeur Z et on écrit la couleur du polygone dans le pixel (x, y) de l'image (tampon couleur).
+    \item Sinon (si Z est supérieur ou égal), le polygone est derrière ou au même niveau que ce qui est déjà visible, donc on ne modifie ni le Z-buffer ni le tampon couleur pour ce pixel.
+\end{itemize}
+
+Il ne s'agit donc pas d'un tri global des objets, mais d'une série de comparaisons et de mises à jour locales (calcul de maximum ou minimum, selon la convention Z) pour chaque pixel.
+
+\subsection{Zones Mémoire}
+
+Deux zones de mémoire principales sont utilisées :
+\begin{itemize}
+    \item \textbf{Tampon de Profondeur (Z-buffer)} : Tableau 2D de la taille de l'écran, stockant la profondeur Z du pixel visible le plus proche. Il est initialisé avec une valeur de profondeur maximale (infinie, ou la valeur la plus éloignée possible) pour chaque pixel.
+    \item \textbf{Tampon Couleur (Framebuffer)} : Tableau 2D de la taille de l'écran, stockant la couleur finale de chaque pixel. Il est initialisé avec la couleur de fond souhaitée.
+\end{itemize}
+
+\begin{verbatim}
+#save_to: zbuffer_init.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Create dummy data for visualization
+grid_size = 8
+z_buffer_init = np.full((grid_size, grid_size), np.inf)
+# color_buffer_init = np.full((grid_size, grid_size, 3), [0.8, 0.8, 0.8]) # Grey background
+color_buffer_init_val = 0.8 # Value for grayscale background
+
+fig, axes = plt.subplots(1, 2, figsize=(8, 4))
+
+# Z-Buffer Initialization
+im_z = axes[0].imshow(z_buffer_init, cmap='viridis', vmin=0, vmax=10) # Vmax arbitrary, just to show variation later
+axes[0].set_title('Z-buffer (Initialisé à ∞)')
+# Add text representation of infinity
+for r in range(grid_size):
+    for c in range(grid_size):
+        axes[0].text(c, r, '∞', ha='center', va='center', color='white', fontsize=8)
+# fig.colorbar(im_z, ax=axes[0])
+axes[0].set_xticks([])
+axes[0].set_yticks([])
+
+# Color Buffer Initialization
+im_c = axes[1].imshow(np.full((grid_size, grid_size), color_buffer_init_val), cmap='gray', vmin=0, vmax=1)
+axes[1].set_title('Buffer couleur (Fond)')
+axes[1].set_xticks([])
+axes[1].set_yticks([])
+
+
+plt.tight_layout()
+plt.savefig('zbuffer_init.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth, keepaspectratio]{zbuffer_init.png}
+\caption{Initialisation des tampons pour l'algorithme Z-buffer.}
+\label{fig:zbuffer_init}
+\end{figure}
+
+\subsection{Algorithme}
+
+Le pseudo-code de l'algorithme Z-buffer est le suivant :
+
+\begin{lstlisting}[language={}, breaklines=true, basicstyle=\small\ttfamily]
+// Initialisation
+for all pixels (i, j) {
+    Depth[i, j] = MAX_DEPTH  // Ou +infini
+    Image[i, j] = BACKGROUND_COLOUR
+}
+
+// Traitement des polygones
+for all polygons P {
+    for all pixels (i, j) covered by polygon P {
+        Calculate Z_pixel for pixel (i, j) on polygon P // (via interpolation)
+
+        // Convention: Z plus petit est plus proche
+        if (Z_pixel < Depth[i, j]) {
+            Calculate C_pixel for pixel (i, j) on polygon P // (couleur, ombrage)
+            Image[i, j] = C_pixel
+            Depth[i, j] = Z_pixel
+        }
+    }
+}
+\end{lstlisting}
+
+Le calcul de la profondeur `Z_pixel` pour chaque pixel à l'intérieur du polygone projeté se fait généralement par interpolation bilinéaire à partir des profondeurs connues aux sommets du polygone.
+
+\subsection{Exemple d'Exécution}
+
+Considérons le traitement de deux polygones, P1 (violet, Z=5) puis P2 (orange, Z=7), projetés sur l'écran. Le Z-buffer est initialisé à $\infty$ et le tampon couleur au gris.
+
+\begin{verbatim}
+#save_to: zbuffer_poly1.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+grid_size = 8
+z_buffer = np.full((grid_size, grid_size), 100.0) # Use a large float for infinity proxy
+color_buffer = np.full((grid_size, grid_size), 0.8) # Grey background value
+
+# Define polygon P1 (e.g., a triangle) projection and depth
+# Coordinates assume origin top-left for matrix indexing
+poly1_pixels = [(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6),
+                (2, 2), (2, 3), (2, 4), (2, 5),
+                (3, 3), (3, 4),
+                (4, 4)]
+poly1_z = 5.0
+poly1_color = 0.3 # Purple value
+
+# Process polygon P1
+for r, c in poly1_pixels:
+    if 0 <= r < grid_size and 0 <= c < grid_size:
+        if poly1_z < z_buffer[r, c]:
+            z_buffer[r, c] = poly1_z
+            color_buffer[r, c] = poly1_color
+
+fig, axes = plt.subplots(1, 2, figsize=(8, 4))
+fig.suptitle('Après traitement P1 (Violet, Z=5)')
+
+# Z-Buffer
+im_z = axes[0].imshow(z_buffer, cmap='viridis_r', vmin=0, vmax=10) # Use reversed map, low Z = hot color
+axes[0].set_title('Z-buffer')
+for r in range(grid_size):
+    for c in range(grid_size):
+        val = z_buffer[r, c]
+        text = f'{val:.0f}' if val != 100.0 else '∞'
+        axes[0].text(c, r, text, ha='center', va='center', color='white', fontsize=8)
+axes[0].set_xticks([])
+axes[0].set_yticks([])
+
+# Color Buffer
+im_c = axes[1].imshow(color_buffer, cmap='gray', vmin=0, vmax=1)
+axes[1].set_title('Buffer couleur')
+axes[1].set_xticks([])
+axes[1].set_yticks([])
+
+plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+plt.savefig('zbuffer_poly1.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth, keepaspectratio]{zbuffer_poly1.png}
+\caption{État des tampons après traitement du polygone P1 (Violet, Z=5).}
+\label{fig:zbuffer_poly1}
+\end{figure}
+
+Maintenant, traitons le polygone P2 (orange, Z=7).
+
+\begin{verbatim}
+#save_to: zbuffer_poly2.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+# State after P1
+grid_size = 8
+z_buffer = np.full((grid_size, grid_size), 100.0)
+color_buffer = np.full((grid_size, grid_size), 0.8)
+poly1_pixels = [(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (2, 2), (2, 3), (2, 4), (2, 5), (3, 3), (3, 4), (4, 4)]
+poly1_z = 5.0
+poly1_color = 0.3
+for r, c in poly1_pixels:
+    if 0 <= r < grid_size and 0 <= c < grid_size:
+        if poly1_z < z_buffer[r, c]:
+            z_buffer[r, c] = poly1_z
+            color_buffer[r, c] = poly1_color
+
+# Define polygon P2 (e.g., another triangle) projection and depth
+poly2_pixels = [(3, 1), (3, 2), (3, 3), (3, 4), (3, 5),
+                (4, 2), (4, 3), (4, 4),
+                (5, 3), (5, 4), (5, 5),
+                (6, 4)]
+poly2_z = 7.0
+poly2_color = 0.6 # Orange value
+
+# Process polygon P2
+for r, c in poly2_pixels:
+     if 0 <= r < grid_size and 0 <= c < grid_size:
+        if poly2_z < z_buffer[r, c]:
+            z_buffer[r, c] = poly2_z
+            color_buffer[r, c] = poly2_color
+
+fig, axes = plt.subplots(1, 2, figsize=(8, 4))
+fig.suptitle('Après traitement P2 (Orange, Z=7)')
+
+# Z-Buffer
+im_z = axes[0].imshow(z_buffer, cmap='viridis_r', vmin=0, vmax=10)
+axes[0].set_title('Z-buffer')
+for r in range(grid_size):
+    for c in range(grid_size):
+        val = z_buffer[r, c]
+        text = f'{val:.0f}' if val != 100.0 else '∞'
+        axes[0].text(c, r, text, ha='center', va='center', color='white', fontsize=8)
+axes[0].set_xticks([])
+axes[0].set_yticks([])
+
+
+# Color Buffer
+im_c = axes[1].imshow(color_buffer, cmap='gray', vmin=0, vmax=1)
+axes[1].set_title('Buffer couleur')
+axes[1].set_xticks([])
+axes[1].set_yticks([])
+
+plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+plt.savefig('zbuffer_poly2.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth, keepaspectratio]{zbuffer_poly2.png}
+\caption{État des tampons après traitement du polygone P2 (Orange, Z=7). Notez que P2 n'écrase P1 que là où P2 est devant (jamais dans cet exemple car Z=7 > Z=5) ou là où P1 n'était pas présent.}
+\label{fig:zbuffer_poly2}
+\end{figure}
+
+Si nous avions traité un troisième polygone P3 (disons, bleu, Z=3) qui recouvre certains pixels de P1 et P2, il aurait écrasé P1 et P2 là où il était présent, car sa profondeur Z=3 est inférieure à 5 et 7.
+
+\subsection{Calcul de la Profondeur par Interpolation}
+
+Pour déterminer la profondeur $Z_p$ d'un point $P(x_p, y_p)$ à l'intérieur d'un triangle projeté défini par les sommets $P_1(x_1, y_1, z_1)$, $P_2(x_2, y_2, z_2)$, $P_3(x_3, y_3, z_3)$, on utilise généralement l'interpolation bilinéaire. Une méthode courante consiste à interpoler linéairement le long des arêtes, puis à interpoler entre les points interpolés.
+
+Par exemple, si $P$ se trouve sur le segment $V_s P_3$, où $V_s$ est sur le segment $P_1 P_2$, on peut d'abord interpoler $Z_s$ en $V_s$ à partir de $Z_1$ et $Z_2$, puis interpoler $Z_p$ en $P$ à partir de $Z_s$ et $Z_3$.
+
+Soit $V_s$ le point d'intersection de la droite horizontale passant par $P$ avec l'arête $P_1 P_2$, et $V_t$ l'intersection avec $P_1 P_3$ (ou $P_2 P_3$).
+Les profondeurs $Z_s$ et $Z_t$ peuvent être calculées par interpolation linéaire le long des arêtes :
+\begin{align*}
+Z_s &= Z_1 + (Z_2 - Z_1) \frac{y_s - y_1}{y_2 - y_1} \quad \text{(si } V_s \text{ sur } P_1 P_2) \\
+Z_t &= Z_1 + (Z_3 - Z_1) \frac{y_t - y_1}{y_3 - y_1} \quad \text{(si } V_t \text{ sur } P_1 P_3)
+\end{align*}
+(Attention aux cas où les dénominateurs sont nuls - arêtes horizontales).
+
+Ensuite, la profondeur $Z_p$ au pixel $P(x_p, y_p)$ est interpolée linéairement entre $Z_s$ et $Z_t$ en fonction de la coordonnée $x_p$ :
+\[ Z_p = Z_s + (Z_t - Z_s) \frac{x_p - x_s}{x_t - x_s} \]
+
+\begin{verbatim}
+#save_to: zbuffer_interpolation.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, ax = plt.subplots()
+
+# Triangle vertices (projection)
+P1 = np.array([1, 1])
+P2 = np.array([8, 3])
+P3 = np.array([4, 7])
+triangle = np.array([P1, P2, P3])
+ax.add_patch(plt.Polygon(triangle, fill=False, edgecolor='black'))
+ax.text(P1[0]-0.5, P1[1], 'P1 (z1)', va='bottom')
+ax.text(P2[0]+0.1, P2[1], 'P2 (z2)', va='center')
+ax.text(P3[0], P3[1]+0.2, 'P3 (z3)', ha='center')
+
+# Interpolation points
+yp = 4 # y-coordinate of the scanline/pixel P
+# Find Vs on P1P2 at y=yp
+# Line P1P2: y - y1 = m * (x - x1) => y - 1 = (3-1)/(8-1) * (x - 1) => y - 1 = 2/7 * (x-1)
+# If y = yp = 4 => 3 = 2/7 * (x - 1) => 21/2 = x - 1 => x = 11.5
+# The formula in the image seems different, maybe it interpolates along x?
+# Let's use the points from the image diagram roughly
+Vs = np.array([2.5, 4]) # Approx location on P1P3
+Vt = np.array([6, 4]) # Approx location on P2P3 (diagram calls it Zb, let's use Vt)
+P = np.array([4, 4]) # Approx location for P
+
+ax.plot([P1[0], P3[0]], [P1[1], P3[1]], 'k--') # Edge P1P3
+ax.plot([P2[0], P3[0]], [P2[1], P3[1]], 'k--') # Edge P2P3
+
+ax.plot([Vs[0], Vt[0]], [Vs[1], Vt[1]], 'b-') # Horizontal line through P
+ax.plot(Vs[0], Vs[1], 'bo')
+ax.text(Vs[0]-0.2, Vs[1]+0.2, 'Vs (zs)', color='blue', ha='right')
+ax.plot(Vt[0], Vt[1], 'bo')
+ax.text(Vt[0]+0.2, Vt[1]+0.2, 'Vt (zt)', color='blue', ha='left') # Renamed Zb to Vt for consistency
+
+ax.plot(P[0], P[1], 'ro')
+ax.text(P[0], P[1]-0.3, 'P (zp)', color='red', ha='center')
+
+ax.set_xlabel('X écran')
+ax.set_ylabel('Y écran')
+ax.set_title('Calcul de la Profondeur par Interpolation')
+ax.set_xlim(0, 9)
+ax.set_ylim(0, 8)
+ax.set_aspect('equal', adjustable='box')
+ax.grid(True, linestyle=':')
+
+plt.savefig('zbuffer_interpolation.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth, keepaspectratio]{zbuffer_interpolation.png}
+\caption{Illustration de l'interpolation bilinéaire pour calculer la profondeur Zp d'un pixel P à l'intérieur d'un triangle projeté.}
+\label{fig:zbuffer_interpolation}
+\end{figure}
+
+*Note :* L'interpolation linéaire de Z dans l'espace écran n'est correcte que pour la projection parallèle. Pour la projection perspective, il faut interpoler 1/Z linéairement, puis inverser le résultat pour obtenir Zp.
+
+\subsection{Avantages et Inconvénients}
+
+\begin{itemize}
+    \item \textbf{Avantages :}
+        \begin{itemize}
+            \item Simplicité de mise en œuvre.
+            \item Pas de tri préalable des polygones nécessaire.
+            \item Fonctionne pour des scènes complexes avec des polygones entrelacés.
+            \item Rapidité : Facilement implémentable en matériel, parallélisable au niveau des pixels.
+        \end{itemize}
+    \item \textbf{Inconvénients :}
+        \begin{itemize}
+            \item Traitement de tous les polygones, même ceux qui seront finalement complètement cachés.
+            \item Taille mémoire nécessaire pour le Z-buffer (bien que de moins en moins un problème avec la mémoire graphique actuelle). La précision du Z-buffer (nombre de bits) peut être limitante pour des scènes très profondes.
+            \item Ne traite pas nativement les effets particuliers comme la transparence, les inter-réflexions ou la réfraction (des extensions existent mais complexifient l'algorithme).
+            \item Peut souffrir d'artefacts de "Z-fighting" si la précision du tampon est insuffisante pour distinguer des surfaces très proches.
+        \end{itemize}
+\end{itemize}
+
+\section{Remplissage de Polygones}
+
+Une fois les polygones projetés sur l'écran 2D et leur visibilité déterminée (par ex. via Z-buffer ou Warnock), l'étape suivante est de les "remplir", c'est-à-dire de colorer tous les pixels intérieurs au polygone projeté. Ce processus donne un aspect solide et réaliste aux objets.
+
+Le remplissage se fait en utilisant un modèle d'ombrage (shading) pour déterminer la couleur de chaque pixel intérieur, basé sur les propriétés du matériau, les sources de lumière et la géométrie de la surface (par exemple, ombrage plat, Gouraud, Phong, Lambert, etc.).
+
+Plusieurs méthodes existent pour déterminer quels pixels sont à l'intérieur d'un polygone projeté et pour les colorer.
+
+\subsection{Test d'Appartenance d'un Point à un Polygone}
+
+Cette méthode consiste à tester, pour chaque pixel potentiellement couvert par le polygone, s'il se trouve à l'intérieur ou à l'extérieur.
+
+\subsubsection{Polygones Convexes : Test des Demi-Plans}
+Pour un polygone convexe, un point P est à l'intérieur si et seulement s'il se trouve du même côté (par exemple, "à gauche" ou "à l'intérieur") de toutes les droites définies par les arêtes du polygone (orientées de manière cohérente, par ex., dans le sens horaire).
+On peut déterminer la normale "extérieure" $\vec{N}_{i, i+1}$ pour chaque arête $P_i P_{i+1}$. Un point $P$ est à l'intérieur si le produit scalaire $\vec{N}_{i, i+1} \cdot \vec{P_i P}$ est négatif ou nul pour toutes les arêtes $i$. S'il existe une arête pour laquelle ce produit scalaire est positif, le point est à l'extérieur.
+
+\begin{verbatim}
+#save_to: point_in_convex.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, ax = plt.subplots()
+
+# Convex polygon vertices
+P1 = np.array([1, 1])
+P2 = np.array([6, 1])
+P3 = np.array([7, 4])
+P4 = np.array([3, 6])
+P5 = np.array([0, 4])
+poly_verts = np.array([P1, P2, P3, P4, P5])
+ax.add_patch(plt.Polygon(poly_verts, fill=False, edgecolor='black', linewidth=1.5))
+for i, p in enumerate([P1, P2, P3, P4, P5]):
+    ax.text(p[0], p[1] + 0.2, f'P{i+1}', ha='center')
+
+# Points to test
+P_in = np.array([3, 3])
+P_out = np.array([7, 1])
+
+ax.plot(P_in[0], P_in[1], 'go', label='P_in (dedans)')
+ax.text(P_in[0], P_in[1]-0.3, 'Pin', color='green', ha='center')
+ax.plot(P_out[0], P_out[1], 'ro', label='P_out (dehors)')
+ax.text(P_out[0], P_out[1]-0.3, 'Pout', color='red', ha='center')
+
+# Draw normals (schematic) - assuming counter-clockwise order for interior check
+edges = [(P1, P2), (P2, P3), (P3, P4), (P4, P5), (P5, P1)]
+edge_centers = [ (p1+p2)/2 for p1, p2 in edges ]
+edge_vectors = [ p2-p1 for p1, p2 in edges ]
+# Normal = (dy, -dx) for vector (dx, dy) gives outward normal if CCW
+normals = [ np.array([v[1], -v[0]]) / np.linalg.norm(np.array([v[1], -v[0]])) for v in edge_vectors ]
+
+for center, normal in zip(edge_centers, normals):
+    ax.arrow(center[0], center[1], normal[0]*0.5, normal[1]*0.5, head_width=0.2, head_length=0.3, fc='blue', ec='blue')
+    # Check P_in and P_out relative to edge P1P2 -> P5P1
+    # Example: Edge P1P2 (vector [5, 0]), normal [0, -5] scaled -> [0, -1]
+    # P_in-P1 = [2, 2]. Normal . (P_in-P1) = [0, -1] . [2, 2] = -2 < 0 (Inside)
+    # P_out-P1 = [6, 0]. Normal . (P_out-P1) = [0, -1] . [6, 0] = 0 (On edge/Outside depending on convention)
+
+
+ax.set_title("Test d'appartenance (Polygone Convexe)")
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_xlim(-1, 8)
+ax.set_ylim(0, 7)
+ax.set_aspect('equal', adjustable='box')
+ax.grid(True, linestyle=':')
+ax.legend()
+
+plt.savefig('point_in_convex.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth, keepaspectratio]{point_in_convex.png}
+\caption{Test d'appartenance pour un polygone convexe. Un point est intérieur s'il est du même côté de toutes les arêtes (par ex., produit scalaire négatif avec les normales extérieures).}
+\label{fig:point_in_convex}
+\end{figure}
+
+\subsubsection{Cas Général : Test des Angles}
+Pour un polygone quelconque (convexe ou concave), on peut calculer la somme des angles orientés formés par les vecteurs reliant le point P à chaque paire de sommets consécutifs $(P_i, P_{i+1})$.
+\[ \sum_{i} \alpha_i = \sum_{i} \text{angle}(\vec{PP_i}, \vec{PP_{i+1}}) \]
+Si le point P est à l'intérieur du polygone, la somme des angles est $\pm 2\pi$ (ou $360^\circ$). Si le point est à l'extérieur, la somme des angles est $0$.
+
+\begin{verbatim}
+#save_to: point_in_angle_test.png
+import matplotlib.pyplot as plt
+import numpy as np
+import math
+
+def angle_between(v1, v2):
+    dot = v1[0]*v2[0] + v1[1]*v2[1]
+    det = v1[0]*v2[1] - v1[1]*v2[0] # Cross product magnitude in 2D
+    angle = math.atan2(det, dot)
+    return angle
+
+fig, axes = plt.subplots(1, 2, figsize=(10, 5), sharey=True)
+fig.suptitle("Test d'appartenance par somme des angles")
+
+# Polygon Vertices (Example from image 100)
+P1 = np.array([1, 1])
+P2 = np.array([7, 1])
+P3 = np.array([7, 5])
+P4 = np.array([4, 3]) # Concave vertex
+P5 = np.array([1, 5])
+poly_verts = np.array([P1, P2, P3, P4, P5])
+
+# Points to test
+P_in = np.array([5, 2])
+P_out = np.array([8, 3])
+
+titles = ['P dedans (Sum α = 2π)', 'P dehors (Sum α = 0)']
+points = [P_in, P_out]
+sum_angles_text = [r'$\sum \alpha_i = 2\pi$', r'$\sum \alpha_i = 0$']
+
+for i, ax in enumerate(axes):
+    P = points[i]
+    ax.add_patch(plt.Polygon(poly_verts, fill=False, edgecolor='black', linewidth=1.5))
+    ax.plot(P[0], P[1], 'ro')
+    ax.text(P[0], P[1]-0.3, 'P', color='red', ha='center')
+
+    total_angle = 0
+    verts_cycle = np.vstack((poly_verts, poly_verts[0])) # Close the loop
+
+    for j in range(len(poly_verts)):
+        Pi = verts_cycle[j]
+        Pi_plus_1 = verts_cycle[j+1]
+
+        v1 = Pi - P
+        v2 = Pi_plus_1 - P
+
+        angle = angle_between(v1, v2)
+        total_angle += angle
+
+        # Draw vectors and angle arc (simplified)
+        ax.plot([P[0], Pi[0]], [P[1], Pi[1]], 'grey', linestyle=':')
+        # Draw arc (approximation)
+        mid_angle_vec = (v1 / np.linalg.norm(v1) + v2 / np.linalg.norm(v2)) / 2
+        arc_center = P + mid_angle_vec * 0.3
+        # ax.text(arc_center[0], arc_center[1], f'α{j+1}', ha='center', va='center', fontsize=8)
+
+    ax.set_title(titles[i])
+    ax.text(4, 6, f'Somme angles ≈ {total_angle:.2f}\nAttendu: {sum_angles_text[i]}', ha='center')
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_xlim(0, 9)
+    ax.set_ylim(0, 7)
+    ax.set_aspect('equal', adjustable='box')
+    ax.grid(True, linestyle=':')
+
+plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+plt.savefig('point_in_angle_test.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth, keepaspectratio]{point_in_angle_test.png}
+\caption{Test d'appartenance par la somme des angles. La somme est $2\pi$ si le point est intérieur, $0$ s'il est extérieur.}
+\label{fig:point_in_angle_test}
+\end{figure}
+
+\subsubsection{Cas Général : Test du Nombre d'Intersections (Ray Casting)}
+Une méthode très générale consiste à tracer un rayon (une demi-droite) à partir du point P dans une direction quelconque (par exemple, vers $+X$) et à compter le nombre de fois où ce rayon intersecte les arêtes du polygone.
+\begin{itemize}
+    \item Si le nombre d'intersections est \textbf{impair}, le point P est à l'intérieur.
+    \item Si le nombre d'intersections est \textbf{pair} (y compris zéro), le point P est à l'extérieur.
+\end{itemize}
+Il faut traiter attentivement les cas limites :
+\begin{itemize}
+    \item Le rayon passe par un sommet : Compter l'intersection uniquement si les deux arêtes adjacentes au sommet sont de part et d'autre du rayon.
+    \item Le rayon chevauche une arête horizontale : Ne pas compter ces intersections ou utiliser une règle cohérente.
+    \item Le point P est sur une arête : Il est considéré comme intérieur ou extérieur selon la convention choisie.
+\end{itemize}
+
+\begin{verbatim}
+#save_to: point_in_ray_casting.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, axes = plt.subplots(1, 2, figsize=(10, 5), sharey=True)
+fig.suptitle("Test d'appartenance par nombre d'intersections (Ray Casting)")
+
+# Polygon Vertices (Example from image 101)
+P1 = np.array([1, 5])
+P2 = np.array([4, 7]) # Vertex causing issue in right plot
+P3 = np.array([7, 5])
+P4 = np.array([7, 1])
+P5 = np.array([1, 1])
+poly_verts = np.array([P1, P2, P3, P4, P5])
+
+# Points to test
+P_in = np.array([3, 4]) # Should have odd intersections
+P_out = np.array([3, 6]) # Should have even intersections (adjusted from image)
+
+points = [P_in, P_out]
+titles = ['4 Intersections (Dehors - Pair)', '3 Intersections (Dedans - Impair)'] # Adjusted titles based on expected results for chosen points
+# Note: Image 101 seems to have issues with its point locations or intersection counts.
+# Let's demonstrate the principle with clear cases. P_in(3,4) -> 1 intersection. P_out(3,6) -> 2 intersections.
+
+points = [np.array([3, 6]), np.array([3, 4])] # Swapped points for clarity
+titles = ['P dehors (2 Intersections - Pair)', 'P dedans (1 Intersection - Impair)']
+
+
+for i, ax in enumerate(axes):
+    P = points[i]
+    ax.add_patch(plt.Polygon(poly_verts, fill=False, edgecolor='black', linewidth=1.5))
+    ax.plot(P[0], P[1], 'ro')
+    ax.text(P[0], P[1]-0.3, 'P', color='red', ha='center')
+
+    # Draw ray to the right
+    ray_end_x = 9
+    ax.arrow(P[0], P[1], ray_end_x - P[0], 0, head_width=0.2, head_length=0.3, fc='blue', ec='blue', length_includes_head=True, linestyle='--')
+
+    # Count intersections (simplified logic, ignores edge cases for now)
+    intersections = 0
+    verts_cycle = np.vstack((poly_verts, poly_verts[0])) # Close the loop
+
+    for j in range(len(poly_verts)):
+        p1 = verts_cycle[j]
+        p2 = verts_cycle[j+1]
+
+        # Check if edge crosses the ray's y-level
+        if min(p1[1], p2[1]) <= P[1] < max(p1[1], p2[1]):
+            # Calculate x-intersection of edge with ray's y-level
+            if p2[1] != p1[1]: # Avoid division by zero for horizontal edges
+                x_intersect = p1[0] + (p2[0] - p1[0]) * (P[1] - p1[1]) / (p2[1] - p1[1])
+                if x_intersect > P[0]: # Intersection is to the right of P
+                    intersections += 1
+                    ax.plot(x_intersect, P[1], 'bx') # Mark intersection
+
+    ax.set_title(titles[i])
+    ax.text(P[0] + 1, P[1] + 0.5, f'Intersections: {intersections}', color='blue')
+
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_xlim(0, 9)
+    ax.set_ylim(0, 8)
+    ax.set_aspect('equal', adjustable='box')
+    ax.grid(True, linestyle=':')
+
+plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+plt.savefig('point_in_ray_casting.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth, keepaspectratio]{point_in_ray_casting.png}
+\caption{Test d'appartenance par comptage d'intersections. Un nombre impair d'intersections signifie que le point est intérieur, un nombre pair signifie qu'il est extérieur. (Note: les cas limites doivent être gérés avec soin).}
+\label{fig:point_in_ray_casting}
+\end{figure}
+
+\subsubsection{Identification d'un Polygone}
+Pour certains algorithmes, il est utile de savoir si un polygone est convexe ou concave, ou de connaître l'orientation des arêtes. On peut utiliser le produit vectoriel (ou produit mixte en 2D) pour cela. Pour trois sommets consécutifs $P_1, P_2, P_3$, le signe de $(P_2 - P_1) \times (P_3 - P_2)$ indique le sens de la rotation (gauche ou droite). Si tous les virages sont dans le même sens, le polygone est convexe. Le produit vectoriel entre deux vecteurs $p1 = (p1_x, p1_y)$ et $p2 = (p2_x, p2_y)$ en 2D est $p1_x p2_y - p1_y p2_x$.
+
+\begin{verbatim}
+#save_to: polygon_convexity_concavity.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+def cross_product_z(v1, v2):
+    return v1[0] * v2[1] - v1[1] * v2[0]
+
+fig, axes = plt.subplots(1, 2, figsize=(10, 5))
+fig.suptitle("Identification de Polygones (Convexité/Concavité)")
+
+# Convex Polygon (S1-S4 from image 102)
+S1_c = np.array([1, 1])
+S2_c = np.array([3, 1])
+S3_c = np.array([3, 3])
+S4_c = np.array([1, 3])
+poly_convex = np.array([S1_c, S2_c, S3_c, S4_c])
+axes[0].add_patch(plt.Polygon(poly_convex, fill=False, edgecolor='black', linewidth=1.5))
+axes[0].set_title('Polygone Convexe')
+axes[0].text(0.5, 3.5, "Tous produits vectoriels\n(S(i+1)-Si) x (S(i+2)-S(i+1))\nde même signe (>0 ici)", fontsize=8)
+# Check signs S4S1 x S1S2, S1S2 x S2S3, S2S3 x S3S4, S3S4 x S4S1
+vS4S1 = S1_c - S4_c # [0, -2]
+vS1S2 = S2_c - S1_c # [2, 0]
+vS2S3 = S3_c - S2_c # [0, 2]
+vS3S4 = S4_c - S3_c # [-2, 0]
+cp1 = cross_product_z(vS4S1, vS1S2) # 0*0 - (-2)*2 = 4 > 0
+cp2 = cross_product_z(vS1S2, vS2S3) # 2*2 - 0*0 = 4 > 0
+cp3 = cross_product_z(vS2S3, vS3S4) # 0*0 - 2*(-2) = 4 > 0
+cp4 = cross_product_z(vS3S4, vS4S1) # -2*(-2) - 0*0 = 4 > 0
+
+
+# Concave Polygon (S1-S5 from image 103)
+S1 = np.array([1, 1])
+S2 = np.array([3, 1])
+S3 = np.array([2, 2]) # Concave vertex
+S4 = np.array([3, 3])
+S5 = np.array([1, 3])
+poly_concave = np.array([S1, S2, S3, S4, S5])
+axes[1].add_patch(plt.Polygon(poly_concave, fill=False, edgecolor='black', linewidth=1.5))
+axes[1].set_title('Polygone Concave')
+axes[1].text(0.5, 3.5, "Produit vectoriel change\nde signe au sommet S3", fontsize=8)
+# Check signs S5S1 x S1S2 (+), S1S2 x S2S3 (-), S2S3 x S3S4 (+), S3S4 x S4S5 (+), S4S5 x S5S1 (+)
+vS5S1 = S1 - S5 # [0, -2]
+vS1S2 = S2 - S1 # [2, 0]
+vS2S3 = S3 - S2 # [-1, 1]
+vS3S4 = S4 - S3 # [1, 1]
+vS4S5 = S5 - S4 # [-2, 0]
+cp_S1 = cross_product_z(vS5S1, vS1S2) # 0*0 - (-2)*2 = 4 > 0
+cp_S2 = cross_product_z(vS1S2, vS2S3) # 2*1 - 0*(-1) = 2 > 0 (Wait, image 103 says S3 reentrant? Let's check S2S3 x S3S4)
+cp_S3 = cross_product_z(vS2S3, vS3S4) # (-1)*1 - 1*1 = -2 < 0 !!! Change of sign at S3
+cp_S4 = cross_product_z(vS3S4, vS4S5) # 1*0 - 1*(-2) = 2 > 0
+cp_S5 = cross_product_z(vS4S5, vS5S1) # (-2)*(-2) - 0*0 = 4 > 0
+
+
+for i, ax in enumerate([axes[0], axes[1]]):
+    poly = [poly_convex, poly_concave][i]
+    verts_cycle = np.vstack((poly, poly[0]))
+    for j in range(len(poly)):
+        ax.text(verts_cycle[j][0], verts_cycle[j][1]+0.1, f'S{j+1}', ha='center')
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_xlim(0, 4)
+    ax.set_ylim(0, 4)
+    ax.set_aspect('equal', adjustable='box')
+    ax.grid(True, linestyle=':')
+
+plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+plt.savefig('polygon_convexity_concavity.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth, keepaspectratio]{polygon_convexity_concavity.png}
+\caption{Utilisation du produit vectoriel pour déterminer la convexité (signe constant) ou la concavité (changement de signe) d'un polygone.}
+\label{fig:polygon_convexity_concavity}
+\end{figure}
+
+
+\subsection{Algorithme de Balayage de Lignes (Scan-Line Filling)}
+
+Cette méthode est très efficace pour le remplissage de polygones. Elle combine la détermination des pixels intérieurs et leur coloriage.
+\begin{itemize}
+    \item On balaie l'image horizontalement, une ligne de pixels (scan-line) à la fois, typiquement de bas en haut.
+    \item Pour chaque ligne de balayage qui intersecte le polygone :
+        \begin{enumerate}
+            \item Trouver toutes les intersections de la ligne de balayage avec les arêtes du polygone.
+            \item Trier ces intersections par coordonnée X croissante.
+            \item Remplir les pixels entre les paires successives d'intersections (1ère et 2ème, 3ème et 4ème, etc.). C'est la règle de parité : on est à l'intérieur du polygone entre une intersection impaire et une intersection paire.
+        \end{enumerate}
+    \item Pour optimiser la recherche des intersections, on utilise souvent une structure de données appelée "Table des Arêtes Actives" (Active Edge Table - AET). L'AET contient les arêtes qui sont intersectées par la ligne de balayage courante. Pour chaque arête dans l'AET, on stocke des informations utiles comme $Y_{max}$ (coordonnée Y maximale de l'arête), $X_{min}$ (coordonnée X de l'intersection avec la ligne courante), et $dx/dy$ (l'inverse de la pente, pour mettre à jour $X_{min}$ efficacement lorsque l'on passe à la ligne suivante $y+1$).
+    \item La liste des intersections pour la ligne courante est obtenue à partir des $X_{min}$ des arêtes dans l'AET. Après avoir rempli les segments de la ligne, on met à jour l'AET : on supprime les arêtes dont $Y_{max}$ est atteint, on ajoute les nouvelles arêtes commençant à $y+1$, et on met à jour $X_{min}$ pour les arêtes restantes ($X_{min} = X_{min} + dx/dy$).
+\end{itemize}
+
+\begin{verbatim}
+#save_to: scanline_fill_principle.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, ax = plt.subplots()
+
+# Polygon (example)
+P1 = np.array([2, 2])
+P2 = np.array([8, 3])
+P3 = np.array([6, 7])
+P4 = np.array([3, 6])
+poly_verts = np.array([P1, P2, P3, P4])
+ax.add_patch(plt.Polygon(poly_verts, fill=False, edgecolor='black', linewidth=1.5))
+
+# Draw Scanlines and fill spans (example for y=4)
+y_scan = 4
+ax.axhline(y_scan, color='blue', linestyle='--', linewidth=1, label=f'Scanline y={y_scan}')
+
+# Calculate intersections for y=4 (approximate from vertices)
+# Edge P1P2: y=2 to 3 -> no intersection at y=4
+# Edge P2P3: y=3 to 7. x = 8 + (6-8)*(y-3)/(7-3) = 8 - 2*(y-3)/4 = 8 - 0.5*(y-3). At y=4, x=8-0.5 = 7.5
+# Edge P3P4: y=7 to 6. x = 6 + (3-6)*(y-7)/(6-7) = 6 - 3*(y-7)/(-1) = 6 + 3*(y-7). At y=4, x=6+3*(-3) = -3 (outside P3P4 range)
+# Edge P4P1: y=6 to 2. x = 3 + (2-3)*(y-6)/(2-6) = 3 - 1*(y-6)/(-4) = 3 + 0.25*(y-6). At y=4, x=3+0.25*(-2) = 2.5
+
+intersections_x = sorted([2.5, 7.5])
+ax.plot(intersections_x, [y_scan, y_scan], 'bo') # Mark intersections
+
+# Fill between pairs
+if len(intersections_x) >= 2:
+    for i in range(0, len(intersections_x), 2):
+        x_start = intersections_x[i]
+        x_end = intersections_x[i+1]
+        ax.plot(np.linspace(x_start, x_end, 10), np.full(10, y_scan), 'r-', linewidth=4) # Draw filled span
+
+
+# Show another scanline (y=6)
+y_scan_2 = 6
+ax.axhline(y_scan_2, color='green', linestyle='--', linewidth=1, label=f'Scanline y={y_scan_2}')
+# P1P2: no
+# P2P3: x = 8 - 0.5*(6-3) = 8 - 1.5 = 6.5
+# P3P4: x = 6 + 3*(6-7) = 6 - 3 = 3
+# P4P1: y=6 is vertex P4, x=3. Special case handling needed. Let's use x=3 from P3P4 and P4P1 intersection.
+intersections_x_2 = sorted([3.0, 6.5]) # Need careful vertex handling in real code
+ax.plot(intersections_x_2, [y_scan_2, y_scan_2], 'go')
+if len(intersections_x_2) >= 2:
+    for i in range(0, len(intersections_x_2), 2):
+        x_start = intersections_x_2[i]
+        x_end = intersections_x_2[i+1]
+        ax.plot(np.linspace(x_start, x_end, 10), np.full(10, y_scan_2), 'r-', linewidth=4)
+
+
+ax.set_title('Algorithme de Remplissage par Balayage (Scan-Line)')
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_xlim(0, 9)
+ax.set_ylim(1, 8)
+ax.set_aspect('equal', adjustable='box')
+ax.grid(True, linestyle=':')
+ax.legend()
+
+plt.savefig('scanline_fill_principle.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth, keepaspectratio]{scanline_fill_principle.png}
+\caption{Principe du remplissage par balayage. Pour chaque ligne (ex: y=4, y=6), les intersections avec les arêtes sont trouvées, triées, puis les segments entre paires d'intersections sont remplis.}
+\label{fig:scanline_fill_principle}
+\end{figure}
+
+La gestion des détails, comme les sommets horizontaux, les sommets qui sont des extrema locaux en Y, et la mise à jour de l'AET, est essentielle pour une implémentation correcte.
+
+\subsubsection{Gestion des Conflits Frontaliers}
+Lors de l'utilisation d'algorithmes de traçage de segments (comme Bresenham) pour approximer les arêtes et trouver les intersections $X_{min}$, des erreurs d'arrondi peuvent survenir. Cela peut conduire à des points d'intersection calculés légèrement à l'extérieur du polygone réel ou à des incohérences entre arêtes partageant un sommet. Pour éviter les chevauchements ou les trous entre polygones adjacents, on peut adopter des conventions strictes : par exemple, toujours prendre les points intérieurs au polygone, ou utiliser les informations de l'équation de la droite ($Y_{max}$, $X_{min}$, $dx/dy$) pour une détermination plus précise des appartenances.
+
+\begin{verbatim}
+#save_to: scanline_conflicts.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, ax = plt.subplots()
+
+# Two adjacent polygons sharing an edge
+P1 = np.array([1, 1])
+P2 = np.array([4, 1])
+P3 = np.array([4, 4]) # Shared vertex
+P4 = np.array([1, 4])
+poly1_verts = np.array([P1, P2, P3, P4])
+
+P5 = np.array([4, 1]) # Shared vertex P2
+P6 = np.array([7, 1])
+P7 = np.array([7, 4])
+# P8 = P3
+poly2_verts = np.array([P5, P6, P7, P3])
+
+ax.add_patch(plt.Polygon(poly1_verts, fill=True, facecolor='lightblue', edgecolor='black', linewidth=1))
+ax.add_patch(plt.Polygon(poly2_verts, fill=True, facecolor='lightgreen', edgecolor='black', linewidth=1))
+
+# Scanline intersecting near shared edge/vertex
+y_scan = 2.5
+ax.axhline(y_scan, color='red', linestyle='--', linewidth=1)
+
+# Ideal intersections
+inter1_poly1 = 4.0 # Edge P2P3
+inter1_poly2 = 4.0 # Edge P5P3 (same as P2P3)
+
+# Simulated approximated intersections due to rasterization/rounding
+approx_inter1 = 3.95
+approx_inter2 = 4.05
+
+ax.plot(approx_inter1, y_scan, 'bo', label='Approx Inter P1')
+ax.plot(approx_inter2, y_scan, 'go', label='Approx Inter P2')
+
+# Plot potential issue
+ax.plot([1, approx_inter1], [y_scan, y_scan], 'b-', linewidth=3) # Fill P1
+ax.plot([approx_inter2, 7], [y_scan, y_scan], 'g-', linewidth=3) # Fill P2
+ax.text(5.5, y_scan + 0.2, "Trou !", color='red', ha='center')
+
+ax.set_title('Gestion des Conflits Frontaliers (Exemple de Trou)')
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_xlim(0, 8)
+ax.set_ylim(0, 5)
+ax.set_aspect('equal', adjustable='box')
+ax.grid(True, linestyle=':')
+ax.legend()
+
+plt.savefig('scanline_conflicts.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth, keepaspectratio]{scanline_conflicts.png}
+\caption{Exemple de conflit frontalier dû à l'approximation. Les intersections calculées pour la même arête partagée peuvent différer légèrement, créant des trous ou des chevauchements si non gérées correctement.}
+\label{fig:scanline_conflicts}
+\end{figure}
+
+\subsection{Remplissage de Régions (Méthode du Germe - Seed Fill)}
+
+Cette approche est différente du balayage. Elle fonctionne sur des régions définies par une couleur de frontière explicite dans le tampon d'image (framebuffer).
+\begin{itemize}
+    \item On commence avec un pixel "germe" (seed) dont on sait qu'il est à l'intérieur de la région à remplir.
+    \item L'algorithme propage récursivement (ou itérativement avec une pile) la couleur de remplissage aux pixels voisins, tant qu'ils ne sont pas de la couleur de la frontière (ou déjà remplis avec la couleur de remplissage).
+    \item Une version efficace (Scanline Seed Fill) optimise en remplissant des segments horizontaux (spans) de pixels contigus de même couleur initiale, puis en cherchant des pixels germes pour les lignes adjacentes (au-dessus et au-dessous) uniquement au début et à la fin de ces segments.
+\end{itemize}
+
+\begin{verbatim}
+#save_to: seed_fill.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Create a grid representing the framebuffer
+grid_size = 10
+framebuffer = np.zeros((grid_size, grid_size)) # 0: background, 1: boundary, 2: fill color
+
+# Define boundary pixels (simple square shape)
+framebuffer[2:8, 2] = 1
+framebuffer[2:8, 7] = 1
+framebuffer[2, 2:8] = 1
+framebuffer[7, 2:8] = 1
+
+# Seed pixel
+seed_pixel = (4, 4)
+fill_color = 2
+boundary_color = 1
+background_color = 0
+
+# Simple recursive fill (can lead to stack overflow for large regions)
+# Iterative version using stack is preferred
+pixels_to_fill = [seed_pixel]
+filled_pixels = set()
+
+while pixels_to_fill:
+    r, c = pixels_to_fill.pop()
+
+    if (r < 0 or r >= grid_size or c < 0 or c >= grid_size or # Out of bounds
+        (r,c) in filled_pixels or # Already filled
+        framebuffer[r, c] == boundary_color): # Is boundary
+        continue
+
+    framebuffer[r, c] = fill_color
+    filled_pixels.add((r,c))
+
+    # Add neighbors
+    pixels_to_fill.append((r+1, c))
+    pixels_to_fill.append((r-1, c))
+    pixels_to_fill.append((r, c+1))
+    pixels_to_fill.append((r, c-1))
+
+fig, ax = plt.subplots()
+cmap = plt.cm.get_cmap('gray', 3) # 3 distinct colors: background, boundary, fill
+ax.imshow(framebuffer, cmap=cmap, vmin=0, vmax=2)
+
+# Mark the initial seed
+ax.plot(seed_pixel[1], seed_pixel[0], 'ro', markersize=8, label='Germe Initial')
+
+ax.set_title('Remplissage de Régions (Méthode du Germe)')
+ax.set_xticks(np.arange(-.5, grid_size, 1), minor=True)
+ax.set_yticks(np.arange(-.5, grid_size, 1), minor=True)
+ax.grid(which="minor", color="grey", linestyle='-', linewidth=0.5)
+ax.tick_params(which="minor", size=0)
+ax.set_xticks([])
+ax.set_yticks([])
+ax.legend()
+
+plt.savefig('seed_fill.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\textwidth, keepaspectratio]{seed_fill.png}
+\caption{Principe du remplissage par germe. À partir d'un pixel intérieur (germe), la couleur se propage aux voisins jusqu'à rencontrer la frontière.}
+\label{fig:seed_fill}
+\end{figure}
+
+Cette méthode est utile lorsque les régions sont définies par des frontières de pixels plutôt que par des définitions géométriques de polygones.
+
+
+\section{Coûts Comparés des Algorithmes}
+
+Les performances des différents algorithmes d'élimination des parties cachées dépendent fortement de la complexité de la scène (nombre de polygones, profondeur, etc.). Le graphique suivant donne une idée qualitative des coûts relatifs.
+
+\begin{verbatim}
+#save_to: cost_comparison.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Data from image 95 (qualitative values)
+num_polygons = ['100', '2500', '60000']
+peintre = [50, 200, 550]
+warnock = [80, 350, 450]
+scan_line = [60, 250, 300]
+z_buffer = [70, 150, 200] # Z-buffer seems relatively less affected by polygon count increase
+
+x = np.arange(len(num_polygons))
+width = 0.15
+
+fig, ax = plt.subplots(figsize=(8, 5))
+rects1 = ax.bar(x - 1.5*width, peintre, width, label='Peintre', color='yellow')
+rects2 = ax.bar(x - 0.5*width, warnock, width, label='Warnock', color='red')
+rects3 = ax.bar(x + 0.5*width, scan_line, width, label='Scan-Line', color='blue')
+rects4 = ax.bar(x + 1.5*width, z_buffer, width, label='Z-Buffer', color='green')
+
+ax.set_ylabel('Coût (Temps relatif)')
+ax.set_xlabel('Nombre de Polygones')
+ax.set_title('Coûts Comparés des Algorithmes (Qualitatif)')
+ax.set_xticks(x)
+ax.set_xticklabels(num_polygons)
+ax.legend()
+
+# Add some value labels (optional)
+# ax.bar_label(rects1, padding=3)
+# ax.bar_label(rects4, padding=3)
+
+ax.grid(axis='y', linestyle=':')
+plt.tight_layout()
+plt.savefig('cost_comparison.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth, keepaspectratio]{cost_comparison.png}
+\caption{Comparaison qualitative des coûts (temps d'exécution) des algorithmes en fonction du nombre de polygones dans la scène. (Adapté de l'image 95).}
+\label{fig:cost_comparison}
+\end{figure}
+
+On observe que le Z-buffer a tendance à avoir un coût qui augmente moins rapidement avec le nombre de polygones que d'autres méthodes comme l'algorithme du peintre ou Warnock, surtout pour des scènes complexes. Scan-Line se situe souvent entre les deux. Cependant, ces coûts dépendent aussi fortement de l'implémentation (matérielle vs logicielle) et des caractéristiques spécifiques de la scène.
+
+\section{Choix de l'Algorithme}
+
+Le choix de l'algorithme idéal pour l'élimination des parties cachées et le remplissage dépend de plusieurs facteurs :
+
+\begin{itemize}
+    \item \textbf{Complexité de la scène :} Nombre de polygones, profondeur moyenne, distribution spatiale.
+    \item \textbf{Matériel disponible :} Présence d'accélération matérielle (GPU) pour certains algorithmes (notamment Z-buffer).
+    \item \textbf{Effets souhaités :} Besoin de gérer la transparence, les réflexions, etc., qui peuvent être plus faciles à intégrer dans certains algorithmes.
+    \item \textbf{Pré-traitements :} Certains algorithmes nécessitent des tris préalables (Peintre) ou des structures de données complexes (Warnock, Scan-Line AET).
+    \item \textbf{Coût mémoire :} Compromis entre la mémoire nécessaire (ex: Z-buffer) et le temps de calcul.
+\end{itemize}
+
+\subsection{Scénarios d'Utilisation}
+
+\begin{itemize}
+    \item \textbf{Z-Buffer :}
+        \begin{itemize}
+            \item \textbf{Usage général :} C'est l'algorithme le plus couramment utilisé aujourd'hui, surtout grâce à son implémentation matérielle généralisée dans les GPU.
+            \item \textbf{Avantages :} Simple à implémenter (si logiciellement), pas de pré-traitement complexe, performance relativement indépendante de l'ordre des polygones, fourni "gratuitement" par la librairie graphique / le matériel.
+            \item \textbf{Inconvénients :} Peut nécessiter beaucoup de mémoire (moins un problème aujourd'hui), moins élégant pour gérer certains effets (transparence), peut avoir des problèmes de précision (Z-fighting).
+        \end{itemize}
+    \item \textbf{Scan-Line :}
+        \begin{itemize}
+            \item \textbf{Usage spécifique ("pour les hackers") :} Peut être très efficace si implémenté soigneusement en logiciel, surtout lorsque l'accès direct au matériel graphique n'est pas possible ou souhaité.
+            \item \textbf{Avantages :} Faible coût mémoire (ne stocke que les informations de la ligne courante), cohérence spatiale exploitée (les informations d'une ligne aident pour la suivante), peut être très efficace car lié directement à la fonction d'affichage ligne par ligne.
+            \item \textbf{Inconvénients :} Plus complexe à implémenter correctement (gestion de l'AET, cas particuliers), moins facilement parallélisable que le Z-buffer au niveau pixel.
+        \end{itemize}
+     \item \textbf{Warnock :}
+         \begin{itemize}
+             \item \textbf{Usage historique/pédagogique :} Intéressant pour son approche "diviser pour régner".
+             \item \textbf{Avantages :} Peut être rapide pour des scènes simples ou avec de grandes zones uniformes.
+             \item \textbf{Inconvénients :} La subdivision peut devenir coûteuse pour des scènes complexes, la gestion des polygones aux frontières des quadrants ajoute de la complexité. Moins utilisé dans les systèmes modernes comparé au Z-buffer.
+         \end{itemize}
+\end{itemize}
+
+En pratique, l'algorithme Z-buffer domine largement dans le rendu en temps réel grâce à son efficacité et son intégration matérielle. Les algorithmes de type Scan-Line peuvent encore trouver leur place dans des contextes spécifiques ou pour des rendus logiciels optimisés.
+
+
+\end{document}
+```

@@ -1,0 +1,911 @@
+```latex
+\documentclass{article}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{listings}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Example}
+
+\usepackage[margin=1in]{geometry}
+% Définir la langue pour listings si nécessaire
+\lstset{
+    language=[LaTeX]TeX,
+    breaklines=true,
+    basicstyle=\small\ttfamily,
+}
+
+
+\begin{document}
+\sloppy
+
+\section{Illumination}
+
+\subsection{Pipeline Graphique}
+
+L'illumination est une étape clé dans le pipeline graphique 3D. Elle intervient après les transformations de modélisation et avant la transformation d'affichage.
+
+\begin{verbatim}
+#save_to: pipeline_illumination.png
+from graphviz import Digraph
+
+dot = Digraph(comment='Pipeline Graphique')
+dot.attr(rankdir='TB')
+
+dot.node('A', 'Transformations de modélisation')
+dot.node('B', 'Illumination (Shading)', style='filled', color='lightblue')
+dot.node('C', 'Transformation d\'affichage')
+dot.node('D', 'Clipping')
+dot.node('E', 'Transformation écran (Projection)')
+dot.node('F', 'Pixelisation (Rasterization)')
+dot.node('G', 'Visibilité / Rendu')
+
+dot.edge('A', 'B')
+dot.edge('B', 'C')
+dot.edge('C', 'D')
+dot.edge('D', 'E')
+dot.edge('E', 'F')
+dot.edge('F', 'G')
+
+dot.render('pipeline_illumination', format='png', view=False)
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.8\textwidth, keepaspectratio]{pipeline_illumination.png}
+\caption{Place de l'Illumination dans le Pipeline Graphique.}
+\label{fig:pipeline_illumination}
+\end{figure}
+
+\subsection{Introduction à l'Illumination}
+
+\begin{itemize}
+    \item Les primitives (points, lignes, polygones) sont éclairées selon leur matériau, le type de surface et les sources de lumière environnantes.
+    \item Les modèles d'illumination sont généralement locaux, ce qui signifie que le calcul de l'éclairage pour une primitive ne prend pas en compte les ombres portées par d'autres objets. Le calcul est effectué par primitive en utilisant des modèles comme diffus, ambiant, Gouraud, Phong, etc.
+\end{itemize}
+
+L'illumination comprend deux aspects principaux :
+\begin{itemize}
+    \item \textbf{Ombrage (éclairement \& shading):} Détermine comment la lumière interagit avec la surface de l'objet pour définir sa couleur et sa luminosité.
+    \item \textbf{Texture (plaquage, mappage):} Applique des détails de surface (images, motifs) sur les objets pour augmenter le réalisme.
+\end{itemize}
+
+\begin{verbatim}
+#save_to: ombrage_texture_illustration.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+
+# Ombrage Sphere
+axs[0].set_title("Ombrage (éclairement & shading)")
+axs[0].set_xlim(-1.5, 1.5)
+axs[0].set_ylim(-1.5, 1.5)
+axs[0].set_aspect('equal', adjustable='box')
+axs[0].axis('off')
+
+# Sphere
+sphere = patches.Circle((0, 0), 1, color='lightgrey', ec='black')
+axs[0].add_patch(sphere)
+
+# Shading components (simplified representation)
+axs[0].text(0, 1.1, 'HIGHLIGHT', ha='center', va='center', fontsize=8)
+axs[0].plot([0, 0], [1, 1.2], 'r-', lw=1)
+
+axs[0].text(0.8, 0.8, 'MID TONE', ha='center', va='center', fontsize=8)
+axs[0].plot([0.7, 0.9], [0.7, 0.9], 'r-', lw=1)
+
+axs[0].text(0.9, 0, 'CORE SHADOW', ha='center', va='center', fontsize=8)
+axs[0].plot([0.8, 1], [0, 0], 'r-', lw=1)
+
+axs[0].text(0.6, -0.8, 'REFLECTED\nHIGHLIGHT', ha='center', va='center', fontsize=8)
+axs[0].plot([0.5, 0.7], [-0.7, -0.9], 'r-', lw=1)
+
+axs[0].text(1.2, -1.2, 'CAST SHADOW', ha='center', va='center', fontsize=8)
+axs[0].add_patch(patches.Ellipse((0.8, -1.2), 1.5, 0.5, angle=-20, color='darkgrey'))
+axs[0].plot([0.9, 1.1], [-1.1, -1.3], 'r-', lw=1)
+
+
+# Texture Mapping Cubes
+axs[1].set_title("Texture (plaquage, mappage)")
+axs[1].set_xlim(0, 4)
+axs[1].set_ylim(0, 2)
+axs[1].set_aspect('equal', adjustable='box')
+axs[1].axis('off')
+
+# Simple representation of textured cubes
+axs[1].add_patch(patches.Rectangle((0.5, 0.5), 0.8, 0.8, color='grey', hatch='/'))
+axs[1].add_patch(patches.Rectangle((1.5, 0.5), 0.8, 0.8, color='darkgrey', hatch='\\'))
+axs[1].add_patch(patches.Rectangle((2.5, 0.5), 0.8, 0.8, color='lightgrey', hatch='x'))
+
+plt.tight_layout()
+plt.savefig('ombrage_texture_illustration.png')
+
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.9\textwidth, keepaspectratio]{ombrage_texture_illustration.png}
+\caption{Illustration de l'Ombrage et de la Texture.}
+\label{fig:ombrage_texture_illustration}
+\end{figure}
+
+\section{Définitions}
+
+\begin{definition}[Illumination]
+Transport du flux lumineux direct ou indirect depuis les sources lumineuses vers les surfaces de la scène. On distingue les modèles locaux (interaction directe source-surface) des modèles globaux (prenant en compte les interactions entre objets, comme les ombres portées ou les réflexions indirectes).
+\end{definition}
+
+\begin{definition}[Éclairement]
+Calcul de l'intensité lumineuse en un point précis de la scène. Il modélise l'interaction entre une source lumineuse et le point éclairé.
+\end{definition}
+
+\begin{definition}[Ombrage (Shading)]
+Utilisation du modèle d'éclairement pour déterminer la couleur finale d'un pixel à l'écran, souvent par interpolation des valeurs calculées aux sommets des primitives.
+\end{definition}
+
+\section{Éclairement et Ombrage}
+
+Le calcul de l'éclairement et de l'ombrage en un point dépend de plusieurs facteurs :
+\begin{itemize}
+    \item La position du point dans l'espace.
+    \item L'orientation de la surface au niveau de ce point (définie par la normale à la surface).
+    \item Les caractéristiques de la surface (comment elle diffuse ou réfléchit la lumière, sa transparence, sa couleur, sa texture...).
+    \item Les sources de lumière présentes dans la scène (leur type : directionnelles, ponctuelles, etc., leur intensité, leur couleur).
+    \item La position et l'orientation de la "caméra" ou du point de vue de l'observateur.
+\end{itemize}
+
+\section{Sources de Lumières}
+
+\subsection{Lumière ambiante}
+\begin{itemize}
+    \item Représente une lumière de fond qui éclaire toute la scène uniformément, simulant la lumière indirecte réfléchie par l'environnement.
+    \item Elle n'a pas de direction ni de position spécifique.
+    \item Est uniquement caractérisée par son \textbf{intensité} (et sa couleur).
+\end{itemize}
+
+\subsection{Sources ponctuelles}
+\begin{itemize}
+    \item Sources de lumière placées en un point précis de l'espace.
+    \item Elles émettent de la lumière radialement dans toutes les directions (isotropique) ou dans des directions privilégiées (anisotropique).
+    \item Caractérisées par leur \textbf{intensité}, leur \textbf{position} et une fonction d'\textbf{atténuation} ('falloff') qui décrit comment l'intensité diminue avec la distance.
+    \item Lorsque la source ponctuelle prend du volume (n'est plus un point mathématique), elle devient une "source étendue".
+\end{itemize}
+
+\subsection{Sources directionnelles}
+\begin{itemize}
+    \item Simulent une source de lumière très éloignée (comme le soleil).
+    \item Éclairent la scène avec des rayons lumineux parallèles provenant tous d'une même direction.
+    \item Caractérisées par leur \textbf{intensité} et leur \textbf{direction}. La position n'est pas pertinente.
+\end{itemize}
+
+\subsection{Sources projecteur ou spot}
+\begin{itemize}
+    \item Sources de lumière qui émettent un cône de lumière dans une direction spécifique.
+    \item Caractérisées par leur \textbf{position}, leur \textbf{direction}, un \textbf{angle d'ouverture} du cône et un \textbf{facteur de concentration} (comment l'intensité diminue du centre vers les bords du cône).
+\end{itemize}
+
+\textit{Note: Les diagrammes illustrant les sources lumineuses ne sont pas recréés ici, mais leur description est fournie ci-dessus.}
+
+\section{Modèles d'Éclairement}
+
+Plusieurs modèles sont utilisés pour simuler l'interaction de la lumière avec les surfaces :
+\begin{itemize}
+    \item Lumière émise
+    \item Lumière ambiante
+    \item Réflexion diffuse
+    \item Réflexion spéculaire
+    \item Brillance (associée à la réflexion spéculaire)
+\end{itemize}
+
+\subsection{Lumière Émise}
+\begin{itemize}
+    \item Certains objets peuvent eux-mêmes émettre de la lumière (par exemple, une lampe, un écran).
+    \item Dans les modèles locaux simples, on considère souvent que les objets ne sont pas intrinsèquement émetteurs de lumière. Ils ne font que réfléchir la lumière des sources externes.
+    \item La lumière émise peut être considérée comme un niveau minimum d'éclairement propre à l'objet, indépendant des sources externes.
+\end{itemize}
+
+\subsection{Lumière Ambiante}
+\begin{itemize}
+    \item Correspond au modèle d'éclairage le plus simple.
+    \item On considère qu'il existe une source lumineuse virtuelle présente partout, éclairant de manière égale dans toutes les directions.
+    \item Physiquement, cela approxime la lumière indirecte réfléchie par l'environnement global (par exemple, la lumière du ciel ou les réflexions multiples dans une pièce).
+    \item Ce modèle assure qu'aucun objet, même non directement éclairé par une source ponctuelle ou directionnelle, ne soit complètement noir. Il fournit un niveau minimum d'éclairage appliqué sur tous les objets.
+    \item On définit l'intensité résultant de la lumière ambiante réfléchie par une surface ($I_p$) comme :
+      \[ I_p = p_a \cdot I_a \]
+      où :
+      \begin{itemize}
+          \item $I_a$ est l'intensité de la lumière ambiante incidente.
+          \item $p_a$ est le coefficient de réflexion ambiante de la surface (une propriété du matériau, comprise entre 0 et 1, souvent de la même couleur que la réflexion diffuse).
+          \item $I_p$ est l'intensité (couleur) résultante réfléchie par la surface due à la composante ambiante.
+      \end{itemize}
+    \item Cette intensité $I_p$ est constante sur toute la surface de l'objet, quelle que soit son orientation ou la position de l'observateur.
+\end{itemize}
+\textbf{Propriétés :}
+\begin{itemize}
+    \item Ne permet pas de percevoir la forme 3D des objets car l'éclairage est uniforme.
+    \item Modélise simplement l'interréflexion globale entre toutes les surfaces d'une scène.
+    \item Évite qu'un objet dans l'ombre soit complètement noir.
+\end{itemize}
+
+\textit{Note: L'illustration des théières avec augmentation de $p_a$ montre simplement des objets devenant uniformément plus clairs.}
+
+\subsection{Réflexion Diffuse}
+\begin{itemize}
+    \item Simule la réflexion de la lumière sur des surfaces mates ou rugueuses (non brillantes).
+    \item Si on considère une surface \textbf{Lambertienne} (idéalement diffuse), la lumière incidente est réfléchie de manière égale dans toutes les directions, indépendamment de la position de l'observateur.
+    \item L'intensité de la lumière réfléchie dépend de :
+        \begin{itemize}
+            \item $I_l$ : L'intensité de la source lumineuse incidente.
+            \item $\theta$ : L'angle entre le vecteur pointant vers la source lumineuse ($\vec{L}$) et la normale à la surface ($\vec{N}$) au point considéré.
+            \item $p_d$ : Le coefficient de réflexion diffuse de la surface (propriété du matériau, $0 \le p_d \le 1$).
+        \end{itemize}
+    \item Principe physique : Une source lumineuse émet une certaine énergie par unité de surface. Selon l'angle d'incidence des rayons lumineux, cette énergie se répartit sur une surface plus ou moins grande de l'objet. Si les rayons sont perpendiculaires à la surface ($\theta = 0$), l'énergie est concentrée sur la plus petite surface possible, résultant en une intensité réfléchie maximale. Plus l'angle $\theta$ augmente, plus l'énergie se répartit sur une grande surface, et l'intensité réfléchie diminue. Cette dépendance est modélisée par le terme $\cos(\theta)$.
+    \item La formule pour l'intensité diffuse réfléchie ($I_p$) est :
+      \[ I_p = p_d \cdot I_l \cdot \cos(\theta) \]
+      ou en utilisant le produit scalaire des vecteurs normalisés :
+      \[ I_p = p_d \cdot I_l \cdot (\vec{N} \cdot \vec{L}) \]
+      Note : Si $\vec{N} \cdot \vec{L} < 0$, cela signifie que la lumière vient de derrière la surface, donc l'intensité diffuse est nulle ($\cos(\theta)$ est pris comme $\max(0, \cos(\theta))$).
+\end{itemize}
+
+\begin{verbatim}
+#save_to: reflexion_diffuse_diagram.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots(figsize=(6, 4))
+ax.set_xlim(-1, 1.5)
+ax.set_ylim(-0.2, 1.2)
+ax.set_aspect('equal', adjustable='box')
+ax.axis('off')
+
+# Surface
+ax.plot([-0.8, 0.8], [0, 0], 'k-', lw=2, label='Surface')
+
+# Point on surface
+ax.plot(0, 0, 'ko')
+
+# Normal
+ax.arrow(0, 0, 0, 0.8, head_width=0.05, head_length=0.1, fc='b', ec='b', label='Normale (N)')
+ax.text(0.05, 0.8, 'Normale', color='b', va='center')
+
+# Light Ray
+L_angle_rad = np.deg2rad(120)
+ax.arrow(np.cos(L_angle_rad)*0.7, np.sin(L_angle_rad)*0.7, -np.cos(L_angle_rad)*0.6, -np.sin(L_angle_rad)*0.6, head_width=0.05, head_length=0.1, fc='r', ec='r', label='Rayon de lumière (L)')
+ax.text(np.cos(L_angle_rad)*0.8, np.sin(L_angle_rad)*0.8, 'Rayon de lumière', color='r', ha='right', va='bottom')
+
+# Angle theta
+theta_angle = 90 - np.rad2deg(L_angle_rad) # Angle with Normal
+angle_patch = patches.Arc((0,0), 0.4, 0.4, angle=90, theta1=0, theta2=theta_angle, color='g', lw=1)
+ax.add_patch(angle_patch)
+ax.text(0.2 * np.cos(np.deg2rad(90 + theta_angle / 2)), 0.2 * np.sin(np.deg2rad(90 + theta_angle / 2)), r'$\theta$', color='g', ha='center', va='center')
+
+ax.legend(loc='lower right', fontsize=8)
+plt.title("Réflexion Diffuse: Angle $\\theta$")
+plt.savefig('reflexion_diffuse_diagram.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.6\textwidth, keepaspectratio]{reflexion_diffuse_diagram.png}
+\caption{Angle $\theta$ utilisé dans le calcul de la réflexion diffuse.}
+\label{fig:reflexion_diffuse_diagram}
+\end{figure}
+
+\textit{Note: L'illustration des théières avec $p_a=0$ et augmentation de $p_d$ montre des objets dont la luminosité dépend de l'orientation par rapport à la lumière, avec des surfaces face à la lumière plus claires et des surfaces perpendiculaires ou orientées à l'opposé plus sombres.}
+
+\subsection{Modèle Diffuse + Ambiante}
+On combine souvent les composantes ambiante et diffuse pour obtenir un éclairage plus réaliste :
+\[ I_{total} = I_{ambiant} + I_{diffus} = p_a I_a + p_d I_l \max(0, \vec{N} \cdot \vec{L}) \]
+
+\textit{Note: Le diagramme de grille de théières montre l'effet combiné: l'augmentation de $p_a$ (verticalement) augmente la luminosité globale, tandis que l'augmentation de $p_d$ (horizontalement) augmente le contraste dû à l'orientation.}
+
+\subsection{Réflexion Spéculaire}
+\begin{itemize}
+    \item Simule la réflexion sur des surfaces brillantes ou polies (effet "miroir").
+    \item Contrairement à la réflexion diffuse, la lumière est réfléchie préférentiellement dans une certaine direction.
+    \item \textbf{Modèle de Phong [1973]:} Le modèle le plus connu. Il fait intervenir la position de l'observateur. Les rayons lumineux sont réfléchis de manière symétrique par rapport à la normale à la surface.
+    \item L'intensité spéculaire observée dépend de :
+        \begin{itemize}
+            \item $I_l$ : L'intensité de la source lumineuse incidente.
+            \item $\theta'$ : L'angle entre le rayon réfléchi idéal ($\vec{R}$) et le vecteur pointant vers le point de vue ($\vec{V}$).
+            \item $p_s$ : Le coefficient de réflexion spéculaire de la surface ($0 \le p_s \le 1$).
+            \item $n$ : L'exposant de \textbf{rugosité} (ou brillance, \textit{shininess}), qui contrôle la netteté du reflet.
+        \end{itemize}
+    \item Le rayon réfléchi $\vec{R}$ est calculé par : $\vec{R} = 2(\vec{N} \cdot \vec{L})\vec{N} - \vec{L}$ (avec $\vec{L}$ pointant *vers* la source).
+    \item L'intensité spéculaire est maximale lorsque l'observateur regarde exactement dans la direction du rayon réfléchi ($\theta' = 0$). Elle diminue rapidement lorsque l'angle $\theta'$ augmente. Cette diminution est modélisée par $\cos^n(\theta')$.
+    \item La formule pour l'intensité spéculaire de Phong ($I_s$) est :
+      \[ I_s = p_s \cdot I_l \cdot (\cos(\theta'))^n \]
+      ou en utilisant le produit scalaire des vecteurs normalisés :
+      \[ I_s = p_s \cdot I_l \cdot (\vec{R} \cdot \vec{V})^n \]
+      Note : Si $\vec{R} \cdot \vec{V} < 0$, l'intensité spéculaire est nulle ($\cos(\theta')$ est pris comme $\max(0, \cos(\theta'))$).
+    \item L'exposant $n$ (rugosité / shininess) :
+        \begin{itemize}
+            \item Une valeur \textbf{élevée} de $n$ (ex: > 100, voire $\infty$ ou 1024 pour un miroir parfait) produit une petite tâche spéculaire très intense (surface très lisse).
+            \item Une valeur \textbf{faible} de $n$ (ex: 1 à 10) produit une tâche spéculaire large et diffuse (surface plus rugueuse).
+        \end{itemize}
+\end{itemize}
+
+\begin{verbatim}
+#save_to: reflexion_speculaire_diagram.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots(figsize=(6, 4))
+ax.set_xlim(-1.2, 1.2)
+ax.set_ylim(-0.2, 1.5)
+ax.set_aspect('equal', adjustable='box')
+ax.axis('off')
+
+# Surface
+ax.plot([-1, 1], [0, 0], 'k-', lw=2)
+ax.plot(0, 0, 'ko') # Point on surface
+
+# Normal
+ax.arrow(0, 0, 0, 0.8, head_width=0.05, head_length=0.1, fc='b', ec='b')
+ax.text(0.05, 0.8, 'Normale (N)', color='b', va='center')
+
+# Light Ray (L) - incoming
+L_angle_rad = np.deg2rad(135)
+ax.arrow(np.cos(L_angle_rad)*0.7, np.sin(L_angle_rad)*0.7, -np.cos(L_angle_rad)*0.6, -np.sin(L_angle_rad)*0.6, head_width=0.05, head_length=0.1, fc='r', ec='r')
+ax.text(np.cos(L_angle_rad)*0.8, np.sin(L_angle_rad)*0.8, 'Rayon lumière (L)', color='r', ha='right', va='bottom')
+
+# Reflected Ray (R)
+R_angle_rad = np.deg2rad(45)
+ax.arrow(0, 0, np.cos(R_angle_rad)*0.7, np.sin(R_angle_rad)*0.7, head_width=0.05, head_length=0.1, fc='m', ec='m')
+ax.text(np.cos(R_angle_rad)*0.75, np.sin(R_angle_rad)*0.75, 'Rayon réfléchi (R)', color='m', ha='left', va='bottom')
+
+# View Ray (V)
+V_angle_rad = np.deg2rad(60)
+ax.arrow(0, 0, np.cos(V_angle_rad)*0.9, np.sin(V_angle_rad)*0.9, head_width=0.05, head_length=0.1, fc='g', ec='g')
+ax.text(np.cos(V_angle_rad)*0.95, np.sin(V_angle_rad)*0.95, 'Point de vue (V)', color='g', ha='left', va='bottom')
+
+# Angle theta'
+angle_patch = patches.Arc((0,0), 0.3, 0.3, angle=np.rad2deg(R_angle_rad), theta1=0, theta2=np.rad2deg(V_angle_rad - R_angle_rad), color='orange', lw=1)
+ax.add_patch(angle_patch)
+mid_angle = (R_angle_rad + V_angle_rad) / 2
+ax.text(0.35 * np.cos(mid_angle), 0.35 * np.sin(mid_angle), r"$\theta'$", color='orange', ha='center', va='center')
+
+plt.title("Réflexion Spéculaire (Phong): Angle $\\theta'$")
+plt.savefig('reflexion_speculaire_diagram.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.7\textwidth, keepaspectratio]{reflexion_speculaire_diagram.png}
+\caption{Angles et vecteurs pour la réflexion spéculaire de Phong.}
+\label{fig:reflexion_speculaire_diagram}
+\end{figure}
+
+\begin{itemize}
+    \item \textbf{Modèle Blinn-Phong [1977]:} Une version simplifiée et souvent plus rapide à calculer.
+    \item Au lieu de calculer le rayon réfléchi $\vec{R}$, on calcule le vecteur \textbf{demi-angle} (halfway vector) $\vec{H}$, qui est à mi-chemin entre le vecteur lumière $\vec{L}$ et le vecteur vue $\vec{V}$.
+      \[ \vec{H} = \frac{\vec{L} + \vec{V}}{\|\vec{L} + \vec{V}\|} \]
+    \item L'intensité spéculaire dépend alors de l'angle $\theta''$ entre la normale $\vec{N}$ et le vecteur demi-angle $\vec{H}$.
+    \item La formule devient :
+      \[ I_s = p_s \cdot I_l \cdot (\cos(\theta''))^n \]
+      ou en utilisant le produit scalaire des vecteurs normalisés :
+      \[ I_s = p_s \cdot I_l \cdot (\vec{N} \cdot \vec{H})^n \]
+       Note : Si $\vec{N} \cdot \vec{H} < 0$, l'intensité spéculaire est nulle ($\cos(\theta'')$ est pris comme $\max(0, \cos(\theta''))$).
+    \item Ce modèle est souvent préféré car $\vec{H}$ est plus simple à calculer que $\vec{R}$, surtout quand $\vec{V}$ et $\vec{L}$ sont constants (vue ou source à l'infini). Les résultats visuels sont très similaires à ceux de Phong, bien que l'exposant $n$ puisse nécessiter un ajustement pour obtenir le même aspect.
+\end{itemize}
+
+\begin{verbatim}
+#save_to: reflexion_blinn_phong_diagram.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots(figsize=(6, 4))
+ax.set_xlim(-1.2, 1.2)
+ax.set_ylim(-0.2, 1.5)
+ax.set_aspect('equal', adjustable='box')
+ax.axis('off')
+
+# Surface
+ax.plot([-1, 1], [0, 0], 'k-', lw=2)
+ax.plot(0, 0, 'ko') # Point on surface
+
+# Normal
+ax.arrow(0, 0, 0, 0.8, head_width=0.05, head_length=0.1, fc='b', ec='b')
+ax.text(0.05, 0.8, 'Normale (N)', color='b', va='center')
+
+# Light Ray (L) - normalized, pointing TO light source
+L_angle_rad = np.deg2rad(135)
+ax.arrow(0, 0, np.cos(L_angle_rad)*0.7, np.sin(L_angle_rad)*0.7, head_width=0.05, head_length=0.1, fc='r', ec='r')
+ax.text(np.cos(L_angle_rad)*0.75, np.sin(L_angle_rad)*0.75, 'Lumière (L)', color='r', ha='right', va='bottom')
+
+# View Ray (V) - normalized
+V_angle_rad = np.deg2rad(60)
+ax.arrow(0, 0, np.cos(V_angle_rad)*0.9, np.sin(V_angle_rad)*0.9, head_width=0.05, head_length=0.1, fc='g', ec='g')
+ax.text(np.cos(V_angle_rad)*0.95, np.sin(V_angle_rad)*0.95, 'Point de vue (V)', color='g', ha='left', va='bottom')
+
+# Halfway Vector (H)
+L_vec = np.array([np.cos(L_angle_rad), np.sin(L_angle_rad)])
+V_vec = np.array([np.cos(V_angle_rad), np.sin(V_angle_rad)])
+H_vec = (L_vec + V_vec) / np.linalg.norm(L_vec + V_vec)
+ax.arrow(0, 0, H_vec[0]*0.8, H_vec[1]*0.8, head_width=0.05, head_length=0.1, fc='purple', ec='purple')
+ax.text(H_vec[0]*0.85, H_vec[1]*0.85, 'Vecteur H', color='purple', ha='center', va='bottom')
+
+# Angle theta''
+H_angle_rad = np.arctan2(H_vec[1], H_vec[0])
+N_angle_rad = np.pi/2
+theta_double_prime = np.rad2deg(N_angle_rad - H_angle_rad)
+
+angle_patch = patches.Arc((0,0), 0.4, 0.4, angle=np.rad2deg(H_angle_rad), theta1=0, theta2=theta_double_prime, color='cyan', lw=1)
+ax.add_patch(angle_patch)
+mid_angle = (H_angle_rad + N_angle_rad) / 2
+ax.text(0.45 * np.cos(mid_angle), 0.45 * np.sin(mid_angle), r'$\theta''$', color='cyan', ha='center', va='center')
+
+plt.title("Réflexion Spéculaire (Blinn-Phong): Angle $\\theta''$")
+plt.savefig('reflexion_blinn_phong_diagram.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.7\textwidth, keepaspectratio]{reflexion_blinn_phong_diagram.png}
+\caption{Vecteur demi-angle $\vec{H}$ et angle $\theta''$ pour Blinn-Phong.}
+\label{fig:reflexion_blinn_phong_diagram}
+\end{figure}
+
+\textit{Note: Les sphères comparant Blinn-Phong et Phong montrent des résultats visuels très similaires.}
+
+\subsection{Modèle d'Éclairement Complet (Phong ou Blinn-Phong)}
+Le modèle d'illumination complet combine les composantes ambiante, diffuse et spéculaire pour calculer l'intensité finale ($I$) en un point P :
+\[ I(P) = I_{ambiant} + I_{diffus} + I_{speculaire} \]
+En utilisant les notations précédentes et en introduisant un facteur d'atténuation $F_d$ qui peut dépendre de la distance à la source lumineuse (pour les sources ponctuelles/spots), l'équation pour une seule source lumineuse $l$ devient :
+\[ I(P) = p_a I_a + F_{d,l} \cdot (p_d \cdot I_l \cdot \max(0, \vec{N} \cdot \vec{L}_l) + p_s \cdot I_l \cdot \max(0, \vec{N} \cdot \vec{H}_l)^n) \]
+(Ici, la version Blinn-Phong est utilisée pour le terme spéculaire).
+
+\textit{Note: Le diagramme de grille de théières montre l'effet combiné : l'augmentation de $p_s$ (marquée 'ps' ou 'n' sur le slide) ajoute ou renforce les reflets brillants.}
+
+\textit{Note: Les images des théières de la page 7 illustrent le résultat visuel de l'application du modèle complet avec différents paramètres.}
+
+\subsection{Modèle coloré}
+Pour obtenir des couleurs, les calculs sont effectués séparément pour chaque composante de couleur (Rouge, Vert, Bleu - RVB) :
+\begin{itemize}
+    \item L'intensité de la lumière ambiante $I_a$ et de chaque source $I_l$ ont des composantes $(I_{ar}, I_{ag}, I_{ab})$ et $(I_{lr}, I_{lg}, I_{lb})$.
+    \item Les coefficients de réflexion $p_a$, $p_d$, $p_s$ sont également définis par composante : $(p_{ar}, p_{ag}, p_{ab})$, $(p_{dr}, p_{dg}, p_{db})$, $(p_{sr}, p_{sg}, p_{sb})$. Ces coefficients représentent la couleur intrinsèque du matériau.
+    \item L'équation complète est appliquée pour chaque canal R, V, B :
+      \begin{align*} I_r &= p_{ar} I_{ar} + \sum_l F_{d,l} (p_{dr} I_{lr} (\vec{N} \cdot \vec{L}_l) + p_{sr} I_{lr} (\vec{N} \cdot \vec{H}_l)^n) \\ I_g &= p_{ag} I_{ag} + \sum_l F_{d,l} (p_{dg} I_{lg} (\vec{N} \cdot \vec{L}_l) + p_{sg} I_{lg} (\vec{N} \cdot \vec{H}_l)^n) \\ I_b &= p_{ab} I_{ab} + \sum_l F_{d,l} (p_{db} I_{lb} (\vec{N} \cdot \vec{L}_l) + p_{sb} I_{lb} (\vec{N} \cdot \vec{H}_l)^n) \end{align*}
+      (Les termes $\max(0, \cdot)$ sont omis pour la lisibilité).
+\end{itemize}
+Si plusieurs sources lumineuses sont présentes, leurs contributions (diffuse et spéculaire) sont sommées. La composante ambiante est généralement ajoutée une seule fois.
+
+\subsection{Transparence}
+Pour gérer la transparence, un paramètre $t$ (souvent appelé alpha, $\alpha$) est introduit ($0 \le t \le 1$, où $t=1$ est opaque et $t=0$ est transparent). La couleur finale $I$ d'un fragment semi-transparent est calculée en combinant sa propre couleur calculée $I(P)$ avec la couleur $I(\text{derriere P})$ de ce qui se trouve derrière lui :
+\[ I = t \cdot I(P) + (1-t) \cdot I(\text{derriere P}) \]
+
+\subsection{Halo}
+Le halo simule un effet de lueur autour des objets lumineux ou réfléchissants. La couleur et l'intensité du halo dépendent souvent de l'épaisseur de l'objet traversé ou de l'intensité de la source.
+
+\section{Modèles d'Ombrage (Shading)}
+
+L'ombrage (\textit{shading}) est la technique utilisée pour appliquer les modèles d'éclairement aux surfaces des objets (souvent représentés par des maillages de polygones, typiquement des triangles) afin de déterminer la couleur de chaque pixel.
+
+\begin{verbatim}
+#save_to: modeles_ombrage_locaux_globaux.png
+from graphviz import Digraph
+
+dot = Digraph(comment='Modèles d\'Ombrage')
+dot.attr(rankdir='TB')
+
+subgraph_local = Digraph('cluster_local')
+subgraph_local.attr(label='LOCAL', style='filled', color='lightgrey')
+subgraph_local.node('Lambert')
+subgraph_local.node('Gouraud')
+subgraph_local.node('Phong')
+subgraph_local.edge('Lambert', 'Gouraud') # Indicate progression/relation if any
+subgraph_local.edge('Gouraud', 'Phong')
+
+subgraph_global = Digraph('cluster_global')
+subgraph_global.attr(label='GLOBAL', style='filled', color='lightgrey')
+subgraph_global.node('Ray-Tracing')
+subgraph_global.node('Radiosite')
+
+dot.node('MODELE D\'ECLAIREMENT')
+dot.subgraph(subgraph_local)
+dot.subgraph(subgraph_global)
+
+dot.edge('MODELE D\'ECLAIREMENT', 'Lambert', lhead='cluster_local')
+dot.edge('MODELE D\'ECLAIREMENT', 'Ray-Tracing', lhead='cluster_global')
+
+
+dot.render('modeles_ombrage_locaux_globaux', format='png', view=False)
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.7\textwidth, keepaspectratio]{modeles_ombrage_locaux_globaux.png}
+\caption{Classification des modèles d'ombrage.}
+\label{fig:modeles_ombrage_locaux_globaux}
+\end{figure}
+
+\begin{itemize}
+    \item \textbf{Modèles locaux :} La luminance à la surface d'un objet est calculée en considérant l'objet comme isolé. On utilise uniquement les paramètres de l'objet lui-même et les paramètres des sources de lumière directes. (Ex: Lambert, Gouraud, Phong).
+    \item \textbf{Modèles globaux :} La luminance est calculée en tenant compte des interactions avec tous les objets de la scène (ombres portées, réflexions indirectes, etc.). (Ex: Ray Tracing, Radiosité).
+\end{itemize}
+Nous nous concentrons ici sur les modèles locaux.
+
+\subsection{Ombrage de Lambert (Plat / Constant)}
+\begin{itemize}
+    \item La méthode d'ombrage la plus simple pour les facettes polygonales.
+    \item Une seule valeur d'illumination est calculée pour l'ensemble de la facette et appliquée uniformément à tous ses pixels.
+    \item Le calcul est typiquement fait au centre de la facette, en utilisant la normale géométrique de la facette elle-même (qui est constante sur toute la facette).
+    \item Formule (pour la composante diffuse) : $I_{facette} = p_d \cdot I_l \cdot \max(0, \vec{N}_{facette} \cdot \vec{L})$
+    \item \textbf{Problème :} Crée des discontinuités d'intensité visibles aux arêtes entre les facettes, donnant un aspect facetté. L'œil humain a tendance à exagérer ces changements brusques d'intensité (effet de \textit{Mach Banding}).
+    \item \textbf{Solution :} Utiliser une interpolation pour lisser les transitions (voir Gouraud et Phong).
+\end{itemize}
+
+\textit{Note: L'illustration des sphères montre clairement l'aspect facetté avec 16, 32 et 64 facettes.}
+\textit{Note: Le diagramme d'intensité illustre la discontinuité perçue (marches d'escalier).}
+
+\subsection{Ombrage de Gouraud [1971]}
+\begin{itemize}
+    \item Développé par Henri Gouraud pour éliminer les discontinuités de l'ombrage plat.
+    \item Principe : Interpoler les valeurs d'\textit{intensité} (couleur) aux sommets de la facette.
+    \item Étapes :
+        \begin{enumerate}
+            \item  \textbf{Calculer les normales aux sommets :} Pour chaque sommet, calculer une normale qui représente la moyenne de l'orientation de la surface autour de ce sommet. Cela se fait généralement en moyennant les normales des facettes qui partagent ce sommet. $N_s = \frac{\sum N_i}{\|\sum N_i\|}$, où $N_i$ sont les normales des faces incidentes au sommet $s$.
+            \item  \textbf{Calculer l'intensité aux sommets :} Appliquer le modèle d'éclairement (par exemple, Ambiant + Diffus + Spéculaire) à chaque sommet en utilisant sa normale calculée ($N_s$) pour obtenir une intensité ($I_{s1}, I_{s2}, I_{s3}$ pour un triangle). $I_s = p_a I_a + p_d I_l (\vec{N}_s \cdot \vec{L}) + p_s I_l (\vec{N}_s \cdot \vec{H})^n$.
+            \item  \textbf{Interpoler les intensités à l'intérieur de la facette :} Pour chaque pixel à l'intérieur de la facette, interpoler linéairement (ou bilinéairement) les intensités calculées aux sommets. Ceci est souvent fait par scan-line :
+                \begin{itemize}
+                    \item Interpoler les intensités le long des arêtes gauche et droite de la facette pour la ligne de balayage actuelle ($y$) pour obtenir $I_{gauche}$ et $I_{droite}$.
+                      \[ I_{gauche} = I_{s1} \frac{y - y_2}{y_1 - y_2} + I_{s2} \frac{y - y_1}{y_2 - y_1} \]
+                      (Exemple pour l'arête S1-S2, adaptation pour les autres arêtes).
+                    \item Interpoler horizontalement entre $I_{gauche}$ et $I_{droite}$ pour la coordonnée $x$ du pixel.
+                      \[ I_{pixel}(x,y) = I_{gauche} \frac{x - x_{droite}}{x_{gauche} - x_{droite}} + I_{droite} \frac{x - x_{gauche}}{x_{droite} - x_{gauche}} \]
+                      (Simplifié, utilise souvent les coordonnées barycentriques).
+                \end{itemize}
+        \end{enumerate}
+    \item \textbf{Caractéristiques :}
+        \begin{itemize}
+            \item Produit un aspect lisse et continu.
+            \item Efficace en termes de calcul (calcul du modèle d'éclairement uniquement aux sommets).
+            \item Facile à implémenter avec des algorithmes de remplissage de polygones comme le Z-buffer (scan-line).
+            \item \textbf{Inconvénients :} N'est qu'une approximation. Peut manquer ou déformer les reflets spéculaires s'ils se produisent au milieu d'une facette (car l'interpolation se fait sur les intensités finales). Peut produire des artefacts visuels (comme des bandes de Mach si la tessellation n'est pas assez fine).
+        \end{itemize}
+\end{itemize}
+
+\textit{Note: Le pseudo-code pour l'interpolation de Gouraud est omis mais les étapes sont décrites ci-dessus.}
+
+\subsection{Ombrage de Phong [1973]}
+\begin{itemize}
+    \item Développé pour améliorer la gestion des reflets spéculaires par rapport à Gouraud.
+    \item Principe : Interpoler les vecteurs \textit{normaux} aux sommets, puis appliquer le modèle d'éclairement complet à chaque pixel en utilisant la normale interpolée.
+    \item Étapes :
+        \begin{enumerate}
+            \item  \textbf{Calculer les normales aux sommets :} Identique à Gouraud ($N_{s1}, N_{s2}, N_{s3}$).
+            \item  \textbf{Interpoler les normales à l'intérieur de la facette :} Pour chaque pixel, interpoler linéairement (ou bilinéairement) les vecteurs normaux des sommets pour obtenir une normale interpolée $\vec{N}_{pixel}$. L'interpolation se fait de la même manière que pour les intensités dans Gouraud (par scan-line ou coordonnées barycentriques).
+                \[ \vec{N}_{pixel}(x,y) = Interpolation(\vec{N}_{s1}, \vec{N}_{s2}, \vec{N}_{s3}) \]
+                (Important: le vecteur normal interpolé doit être \textit{renormalisé} après interpolation).
+            \item  \textbf{Calculer l'intensité au pixel :} Appliquer le modèle d'éclairement complet (Ambiant + Diffus + Spéculaire) pour le pixel courant en utilisant la normale interpolée et renormalisée $\vec{N}_{pixel}$.
+                \[ I_{pixel} = p_a I_a + p_d I_l (\vec{N}_{pixel} \cdot \vec{L}) + p_s I_l (\vec{N}_{pixel} \cdot \vec{H})^n \]
+        \end{enumerate}
+    \item \textbf{Caractéristiques :}
+        \begin{itemize}
+            \item Produit des reflets spéculaires plus précis et réalistes que Gouraud, même s'ils apparaissent au milieu des facettes.
+            \item Est généralement considéré comme donnant un meilleur rendu visuel que Gouraud, même pour des modèles sans spécularité forte.
+            \item \textbf{Inconvénients :} Nettement plus coûteux en calcul que Gouraud, car le modèle d'éclairement complet (incluant potentiellement des racines carrées pour la normalisation et des exponentiations pour le spéculaire) doit être évalué pour chaque pixel, et non juste aux sommets.
+        \end{itemize}
+\end{itemize}
+
+\textit{Note: Les comparaisons visuelles (sphères, visages) montrent que Lambert est facetté, Gouraud est lisse mais avec des reflets spéculaires diffus/manquants, et Phong est lisse avec des reflets nets et bien placés.}
+
+\subsection{Ajout des Couleurs et Plusieurs Sources}
+Comme pour les modèles d'éclairement, l'ombrage est appliqué par composante de couleur (RVB). Pour gérer plusieurs sources lumineuses, les contributions diffuses et spéculaires de chaque source sont additionnées à la composante ambiante unique.
+\[ I_{pixel} = \text{Ambiant} + \sum_{l \in \text{lumières}} (\text{Diffus}_l + \text{Spéculaire}_l) \]
+où Ambiant, Diffus$_l$, Spéculaire$_l$ sont calculés en utilisant les normales appropriées (facette pour Lambert, sommet pour Gouraud, pixel interpolé pour Phong) et les propriétés de la lumière $l$.
+
+\section{Interpolation Linéaire et Coordonnées Barycentriques}
+
+L'interpolation est fondamentale pour les ombrages de Gouraud et Phong.
+
+\subsection{Interpolation Linéaire en 1D}
+Pour interpoler une valeur $f$ entre deux points $x_i$ et $x_j$ où les valeurs sont $f_i$ et $f_j$, on utilise un paramètre $t \in [0,1]$ :
+\[ f(t) = f_i + t(f_j - f_i) = (1-t)f_i + tf_j \]
+où $t = (x - x_i) / (x_j - x_i)$.
+Cela peut être vu comme une combinaison linéaire de deux fonctions de base, $(1-t)$ et $t$.
+
+\subsection{Interpolation Linéaire en 2D (pour les triangles)}
+Pour interpoler une valeur (intensité, normale, coordonnée de texture, etc.) $f$ à l'intérieur d'un triangle défini par les sommets $p_i, p_j, p_k$ avec les valeurs $f_i, f_j, f_k$, on utilise les \textbf{coordonnées barycentriques}.
+
+Un point $p$ à l'intérieur du triangle peut s'écrire comme une combinaison affine des sommets :
+$p = \alpha p_i + \beta p_j + \gamma p_k$, avec $\alpha, \beta, \gamma \ge 0$ et $\alpha + \beta + \gamma = 1$.
+Les coefficients $(\alpha, \beta, \gamma)$ sont les coordonnées barycentriques de $p$. Ils peuvent être calculés comme des rapports d'aires :
+\begin{align*} \alpha &= \frac{\text{area}(p, p_j, p_k)}{\text{area}(p_i, p_j, p_k)} \\ \beta &= \frac{\text{area}(p, p_i, p_k)}{\text{area}(p_i, p_j, p_k)} \\ \gamma &= \frac{\text{area}(p, p_i, p_j)}{\text{area}(p_i, p_j, p_k)} \quad (= 1 - \alpha - \beta) \end{align*}
+La valeur interpolée $f(p)$ est alors :
+\[ f(p) = \alpha f_i + \beta f_j + \gamma f_k \]
+Ces coordonnées sont calculées lors de la rastérisation (remplissage) du triangle et permettent d'interpoler n'importe quel attribut défini aux sommets.
+
+\section{Interpolation en Projection Perspective}
+
+\subsection{Le Problème}
+L'interpolation barycentrique directe des attributs dans l'espace écran 2D après une projection perspective ne correspond pas à une interpolation linéaire dans l'espace 3D d'origine. Cela est dû à la division par la profondeur (ou coordonnée $w$) lors de la projection. Si on interpole linéairement en 2D des attributs (comme les coordonnées de texture), on obtient des déformations incorrectes (non linéaires en 3D).
+
+\subsection{Interpolation avec Correction de Perspective}
+Pour obtenir une interpolation correcte en perspective, il faut interpoler les attributs d'une manière qui tienne compte de la profondeur.
+\begin{itemize}
+    \item Soit $q$ l'attribut à interpoler (ex: coordonnée de texture $u$ ou $v$, couleur R, G ou B) et $z$ la profondeur (distance à la caméra) au sommet.
+    \item Au lieu d'interpoler $q$ directement, on calcule $P = q/z$ et $Z = 1/z$ pour chaque sommet.
+    \item On interpole $P$ et $Z$ linéairement dans l'espace écran 2D en utilisant les coordonnées barycentriques $(\alpha, \beta, \gamma)$ :
+      \begin{align*} P_{interp} &= \alpha P_i + \beta P_j + \gamma P_k \\ Z_{interp} &= \alpha Z_i + \beta Z_j + \gamma Z_k \end{align*}
+    \item La valeur finale de l'attribut interpolé correctement en perspective pour le pixel est obtenue en divisant $P_{interp}$ par $Z_{interp}$ :
+      \[ q_{pixel} = \frac{P_{interp}}{Z_{interp}} \]
+\end{itemize}
+Cette méthode assure que l'interpolation est linéaire dans l'espace 3D. Elle est essentielle pour obtenir des textures et des couleurs correctes sur des surfaces inclinées par rapport à l'observateur.
+
+\textit{Note: L'illustration du quadrilatère divisé montre la discontinuité qui apparaît si la correction de perspective n'est pas utilisée lors de l'interpolation (par exemple, de coordonnées de texture).}
+
+\section{Textures (Plaquage et Mappage)}
+
+Le \textbf{Texture Mapping} (plaquage de texture) consiste à appliquer une image (la texture) sur la surface d'un objet 3D pour ajouter des détails visuels sans augmenter la complexité géométrique du modèle.
+
+\subsection{Motivation}
+Calculer l'éclairage par sommet et interpoler (Gouraud/Phong) peut nécessiter une géométrie très fine pour représenter des détails fins. Le plaquage de texture est une alternative plus efficace : on calcule un éclairage plus simple sur une géométrie moins complexe, puis on module le résultat avec une image de texture détaillée.
+
+\subsection{Types de Textures}
+Il existe de nombreux types de textures utilisés pour différents effets :
+\begin{itemize}
+    \item \textbf{Couleurs (Colour map / Diffuse map / Albedo) :} Définit la couleur de base de la surface.
+    \item \textbf{Transparence (Alpha map) :} Contrôle l'opacité de la surface (souvent dans le canal alpha de la texture de couleur).
+    \item \textbf{Relief (Bump maps, Normal maps, Displacement maps) :} Simulent des détails de relief en modifiant la normale perçue (Normal map) ou en déplaçant réellement les sommets (Displacement map), sans ajouter de polygones.
+    \item \textbf{Spéculaires (Specular map, Gloss map, Roughness map, Metallic map) :} Contrôlent comment la surface réfléchit la lumière spéculaire (intensité, couleur, netteté du reflet, caractère métallique).
+    \item \textbf{Environnement (Environment map, Cube map) :} Utilisées pour simuler des réflexions de l'environnement sur des surfaces réfléchissantes.
+    \item \textbf{Lumière (Light map) :} Stocke un éclairage précalculé (souvent l'illumination globale indirecte) qui est ensuite ajouté à l'éclairage dynamique.
+    \item \textbf{Autres :} Occlusion ambiante, émissivité, épaisseur (pour le subsurface scattering), etc.
+\end{itemize}
+
+\subsection{Attributs des Textures et Combinaison}
+Les textures peuvent être combinées pour créer des effets complexes :
+\begin{itemize}
+    \item \textbf{Diffuse + Spéculaire :} Une texture de couleur (diffuse) et une texture contrôlant la brillance (spéculaire).
+    \item \textbf{Diffuse + Transparence :} Utilisation du canal alpha pour rendre certaines parties invisibles ou semi-transparentes.
+    \item \textbf{Illumination précalculée (Light map) :} Multipliée ou ajoutée à la couleur de base pour simuler un éclairage statique complexe.
+    \item \textbf{Simulation d'environnement :} Une texture cubique (Cube map) représentant l'environnement autour de l'objet est utilisée pour calculer les réflexions.
+    \item \textbf{Normal Mapping :} Une texture spéciale (Normal map) stocke des vecteurs normaux. Lors du calcul de l'éclairage, la normale lue dans cette texture est utilisée à la place de la normale géométrique, créant une illusion de relief détaillé sur une surface plane.
+    \item \textbf{Displacement Mapping :} Similaire au Normal Mapping, mais les valeurs de la texture sont utilisées pour déplacer réellement les sommets de la géométrie le long de leur normale, créant un relief réel (plus coûteux).
+\end{itemize}
+
+\subsection{Fonction de Plaquage (Mapping)}
+Le processus consiste à établir une correspondance entre les points de la surface 3D de l'objet $P(x, y, z)$ et les points (coordonnées) $(s, t)$ ou $(u, v)$ dans l'image de texture 2D $I(s, t)$. Cette correspondance est la fonction de plaquage $f: P(x, y, z) \rightarrow (s, t)$.
+
+\textbf{Coordonnées de Texture (UV Mapping) :}
+La méthode la plus courante consiste à assigner des coordonnées de texture $(u, v)$ à chaque sommet du modèle 3D. Ces coordonnées $(u, v)$ se situent généralement dans l'intervalle $[0, 1]$ et indiquent quelle partie de l'image de texture correspond à ce sommet.
+Lors de la rastérisation, ces coordonnées $(u, v)$ sont interpolées sur la surface du polygone (en utilisant l'interpolation avec correction de perspective !) pour chaque pixel. La coordonnée $(u, v)$ interpolée est ensuite utilisée pour lire la couleur (ou autre valeur) dans l'image de texture.
+
+\textbf{Méthodes de projection pour générer les UV :}
+Pour les objets simples, les coordonnées UV peuvent être générées par des projections mathématiques :
+\begin{itemize}
+    \item \textbf{Planaire :} Projection sur un plan. $f(x, y, z) = (k_x x + c_x, k_y y + c_y)$. Convient aux objets plats.
+    \item \textbf{Cylindrique :} Enroulement autour d'un cylindre. Les coordonnées sont basées sur l'angle $\theta$ autour de l'axe du cylindre et la hauteur $y$. $f(\theta, y) = (\theta / (2\pi), y/H)$, où $\theta = \text{atan2}(x, z)$.
+    \item \textbf{Sphérique :} Basé sur les angles de longitude ($\theta$) et latitude ($\phi$). $f(\theta, \phi) = (\theta / (2\pi), \phi / \pi)$, où $\theta = \text{atan2}(x, z)$, $\phi = \text{asin}(y/R)$.
+\end{itemize}
+Pour les modèles complexes, les coordonnées UV sont souvent créées manuellement par un artiste 3D dans un processus appelé "UV unwrapping" (dépliage UV).
+
+\subsection{Interprétation des Coordonnées Hors [0, 1]}
+Que faire si les coordonnées $(u, v)$ interpolées tombent en dehors de l'intervalle $[0, 1]$ ? Plusieurs modes d'adressage de texture existent :
+\begin{itemize}
+    \item \textbf{GL\_CLAMP\_TO\_EDGE :} La coordonnée est limitée à l'intervalle [0, 1]. La couleur du bord de la texture est répétée.
+    \item \textbf{GL\_REPEAT :} La partie entière de la coordonnée est ignorée, seule la partie fractionnaire est utilisée. La texture se répète.
+    \item \textbf{GL\_MIRRORED\_REPEAT :} Similaire à REPEAT, mais la texture est répétée en miroir à chaque fois.
+\end{itemize}
+
+\subsection{Problèmes et Limites}
+\begin{itemize}
+    \item \textbf{Distorsion :} Selon la méthode de plaquage UV, la texture peut apparaître étirée ou compressée sur certaines parties du modèle. Un bon dépliage UV vise à minimiser ces distorsions.
+    \item \textbf{Crénelage (Aliasing) :} Apparaît lorsque la résolution de la texture ne correspond pas bien à la taille à laquelle elle est affichée à l'écran.
+\end{itemize}
+
+\subsection{Magnification vs. Minification}
+\begin{itemize}
+    \item \textbf{Magnification (Agrandissement) :} La caméra est proche de l'objet texturé. Un pixel à l'écran correspond à une petite zone (moins d'un texel) dans la texture.
+        \begin{itemize}
+            \item \textit{Problème :} Peut rendre la texture pixellisée si on prend simplement le texel le plus proche (\textit{Nearest neighbor filtering}).
+            \item \textit{Solution :} Interpolation bilinéaire (moyenne pondérée des 4 texels voisins) pour un résultat plus lisse.
+        \end{itemize}
+    \item \textbf{Minification (Réduction) :} La caméra est loin de l'objet texturé. Un pixel à l'écran correspond à une grande zone (plusieurs texels) dans la texture.
+        \begin{itemize}
+            \item \textit{Problème :} Si on échantillonne juste un texel au centre de la zone couverte par le pixel, on manque beaucoup d'informations, ce qui conduit à des artefacts scintillants (aliasing) et des motifs moirés.
+            \item \textit{Solution :} Il faut calculer une couleur moyenne de tous les texels couverts par le pixel. C'est coûteux à faire dynamiquement. Une solution est le \textbf{MIP-Mapping}.
+        \end{itemize}
+\end{itemize}
+
+\subsection{Aliasing et MIP-Mapping}
+Le \textbf{MIP-Mapping} est une technique de préfiltrage pour lutter contre l'aliasing de minification.
+\begin{itemize}
+    \item \textbf{Idée :} Créer une pyramide d'images pré-filtrées de la texture originale, où chaque niveau est une version réduite de moitié et moyennée du niveau précédent. Le niveau 0 est la texture originale ($X_0, Y_0$). Le niveau 1 est $(X_0/2, Y_0/2)$, le niveau 2 est $(X_0/4, Y_0/4)$, etc., jusqu'à une texture 1x1 pixel. (MIP vient de \textit{multum in parvo}, "beaucoup de choses dans un petit espace").
+    \item \textbf{Utilisation :} En fonction de la distance de l'objet ou de la taille projetée de la texture à l'écran, le système graphique choisit le niveau de MIP-map le plus approprié (celui où un pixel écran correspond à environ un texel de ce niveau de MIP-map).
+    \item \textbf{Filtrage inter-niveaux :} On peut encore améliorer la qualité en interpolant linéairement entre les deux niveaux de MIP-map les plus proches (\textit{filtrage trilinéaire}).
+    \item \textbf{Modes OpenGL :}
+        \begin{itemize}
+            \item `GL_NEAREST` / `GL_LINEAR` : Pas de MIP-Mapping (bon pour magnification).
+            \item `GL_NEAREST_MIPMAP_NEAREST` : Choisit le meilleur niveau MIP, prend le texel le plus proche.
+            \item `GL_LINEAR_MIPMAP_NEAREST` : Choisit le meilleur niveau MIP, interpole bilinéairement dans ce niveau.
+            \item `GL_NEAREST_MIPMAP_LINEAR` : Interpole linéairement entre les texels les plus proches de deux niveaux MIP.
+            \item `GL_LINEAR_MIPMAP_LINEAR` : Interpole bilinéairement dans deux niveaux MIP et interpole linéairement entre les résultats (filtrage trilinéaire, meilleure qualité, plus coûteux).
+        \end{itemize}
+\end{itemize}
+
+\section{Ray Tracing}
+
+Le Ray Tracing (lancer de rayons) est une technique d'illumination globale alternative au pipeline de rastérisation standard.
+
+\subsection{Introduction}
+\begin{itemize}
+    \item Approche basée sur le pixel (\textit{image-order rendering}) et non sur l'objet (\textit{object-order rendering} comme la rastérisation).
+    \item Principe "inverse-mapping" : Au lieu de projeter les objets vers l'écran, on lance des rayons depuis la caméra (l'œil) à travers chaque pixel de l'écran et on détermine ce que ce rayon rencontre dans la scène.
+    \item Étapes de base :
+        \begin{enumerate}
+            \item  Pour chaque pixel de l'écran, construire un rayon partant de la caméra et passant par ce pixel.
+            \item  Trouver la première intersection de ce rayon avec un objet de la scène.
+            \item  Si une intersection est trouvée, déterminer la couleur en ce point d'intersection.
+        \end{enumerate}
+\end{itemize}
+
+\begin{verbatim}
+#save_to: ray_tracing_basic.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots(figsize=(8, 5))
+ax.set_xlim(-1, 7)
+ax.set_ylim(-2, 3)
+ax.set_aspect('equal', adjustable='box')
+ax.axis('off')
+
+# Camera (Eye)
+ax.plot(0, 0, 'o', markersize=10, color='blue', label='Caméra')
+ax.text(0, -0.3, 'Caméra', ha='center')
+
+# Image Plane (Screen)
+ax.plot([2, 2], [-1, 1], 'k-', label='Plan de projection')
+ax.text(2.1, 1.1, 'Plan de projection')
+
+# Pixels on screen
+pixels_y = np.linspace(-0.8, 0.8, 5)
+ax.plot([2]*5, pixels_y, 's', color='grey')
+
+# Scene Object
+obj = patches.Circle((5, 0.5), 1, color='orange', label='Objet Scène')
+ax.add_patch(obj)
+
+# Rays
+for py in pixels_y:
+    direction = np.array([2, py]) - np.array([0,0])
+    norm_direction = direction / np.linalg.norm(direction)
+    # Check intersection (simplified: assumes intersection if ray passes near object center)
+    # Line equation: P = O + t*D = (0,0) + t*(norm_direction)
+    # Circle equation: |P - C|^2 = r^2 => |t*D - C|^2 = r^2
+    # Solve for t... (omitted for simplicity diagram)
+    # Here, just draw ray towards object if y is near center
+    if abs(py - 0.5 * (2 / 5)) < 0.6: # Heuristic based on projection factor
+        ax.arrow(0, 0, norm_direction[0]*6, norm_direction[1]*6, head_width=0.1, head_length=0.2, fc='lightblue', ec='lightblue', length_includes_head=True, alpha=0.7)
+        # Show intersection point (approximate)
+        intersect_t = 4.0 # Approximate distance to intersection
+        ax.plot(intersect_t*norm_direction[0], intersect_t*norm_direction[1], 'ro', markersize=5)
+    else:
+         ax.arrow(0, 0, norm_direction[0]*7, norm_direction[1]*7, head_width=0.1, head_length=0.2, fc='lightgrey', ec='lightgrey', length_includes_head=True, alpha=0.5)
+
+
+plt.title("Ray Tracing: Lancer de rayons depuis la caméra")
+plt.savefig('ray_tracing_basic.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.8\textwidth, keepaspectratio]{ray_tracing_basic.png}
+\caption{Principe du lancer de rayons.}
+\label{fig:ray_tracing_basic}
+\end{figure}
+
+\subsection{Calcul de la Couleur au Point d'Intersection}
+Pour déterminer la couleur au point d'intersection, on applique un modèle d'éclairement (similaire à Phong), mais on peut aussi simuler des phénomènes globaux :
+\begin{itemize}
+    \item \textbf{Ombres :} Depuis le point d'intersection, tracer un rayon ("rayon d'ombre") vers chaque source lumineuse. Si ce rayon rencontre un autre objet avant d'atteindre la source, le point est dans l'ombre de cette source (sa contribution directe est nulle).
+    \item \textbf{Réflexion :} Si la surface est réfléchissante, lancer un nouveau rayon dans la direction de la réflexion (calculée comme dans Phong : $\vec{R} = 2(\vec{N} \cdot \vec{L})\vec{N} - \vec{L}$, où $\vec{L}$ est ici la direction opposée au rayon incident). La couleur obtenue par ce rayon réfléchi est ajoutée à la couleur du point d'intersection, pondérée par le coefficient de réflexion de la surface.
+    \item \textbf{Réfraction :} Si la surface est transparente ou translucide, lancer un nouveau rayon dans la direction de la réfraction (calculée par la loi de Snell-Descartes). La couleur obtenue par ce rayon réfracté est ajoutée, pondérée par le coefficient de transparence/réfraction.
+\end{itemize}
+
+\subsection{Ray Tracing Récursif}
+Les rayons de réflexion et de réfraction peuvent eux-mêmes intersecter d'autres objets, générant à leur tour de nouveaux rayons d'ombre, de réflexion et de réfraction. Ce processus récursif permet de simuler des réflexions multiples, des réfractions complexes et des ombres douces (si on utilise des sources étendues). La récursion s'arrête après un certain nombre de rebonds ou lorsque l'intensité du rayon devient négligeable.
+
+\begin{verbatim}
+#save_to: ray_tracing_recursive.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots(figsize=(8, 5))
+ax.set_xlim(-1, 7)
+ax.set_ylim(-2, 3)
+ax.set_aspect('equal', adjustable='box')
+ax.axis('off')
+
+# Camera (Eye)
+ax.plot(0, 0, 'o', markersize=10, color='blue')
+ax.text(0, -0.3, 'Caméra', ha='center')
+
+# Image Plane
+ax.plot([1.5, 1.5], [-1, 1], 'k-')
+ax.text(1.6, 1.1, 'Plan projection')
+
+# Objects
+obj1 = patches.Circle((4, 0), 0.8, color='orange') # Reflective
+obj2 = patches.Rectangle((5, -1.5), 1.5, 0.5, color='cyan') # Opaque
+ax.add_patch(obj1)
+ax.add_patch(obj2)
+
+# Light Source
+ax.plot(6, 2, '*', markersize=15, color='yellow', label='Lumière')
+ax.text(6, 2.3, 'Lumière', ha='center')
+
+
+# Primary Ray
+primary_dir = np.array([1.5, 0.3]) - np.array([0,0])
+primary_norm = primary_dir / np.linalg.norm(primary_dir)
+intersect1_t = 3.4 # Approx distance
+intersect1_pt = intersect1_t * primary_norm
+ax.arrow(0, 0, intersect1_pt[0], intersect1_pt[1], head_width=0.1, head_length=0.2, fc='lightblue', ec='lightblue', length_includes_head=True)
+ax.plot(intersect1_pt[0], intersect1_pt[1], 'ro', markersize=5)
+
+# Shadow Ray
+shadow_dir = np.array([6, 2]) - intersect1_pt
+shadow_norm = shadow_dir / np.linalg.norm(shadow_dir)
+# Check intersection with obj2 (Simplified check) - Assume it blocks
+shadow_intersect_t = 2.0 # Approx dist to obj2
+shadow_intersect_pt = intersect1_pt + shadow_intersect_t * shadow_norm
+ax.arrow(intersect1_pt[0], intersect1_pt[1], shadow_dir[0], shadow_dir[1], head_width=0.08, head_length=0.15, fc='grey', ec='grey', linestyle='--', length_includes_head=True)
+ax.plot(shadow_intersect_pt[0], shadow_intersect_pt[1], 'kx', markersize=6) # Blocked
+ax.text(intersect1_pt[0]+0.5, intersect1_pt[1]+0.8, 'Ombre', color='grey', rotation=30)
+
+
+# Reflection Ray
+normal1 = intersect1_pt - np.array([4, 0])
+normal1 = normal1 / np.linalg.norm(normal1)
+incoming_dir = -primary_norm
+reflect_dir = incoming_dir - 2 * np.dot(incoming_dir, normal1) * normal1
+reflect_norm = reflect_dir / np.linalg.norm(reflect_dir)
+intersect2_t = 2.5 # Approx dist to obj2
+intersect2_pt = intersect1_pt + intersect2_t * reflect_norm
+ax.arrow(intersect1_pt[0], intersect1_pt[1], reflect_norm[0]*3, reflect_norm[1]*3, head_width=0.08, head_length=0.15, fc='magenta', ec='magenta', length_includes_head=True)
+ax.plot(intersect2_pt[0], intersect2_pt[1], 'go', markersize=5)
+ax.text(intersect1_pt[0]+0.1, intersect1_pt[1]-0.5, 'Réflexion', color='magenta', rotation=-50)
+
+
+# Refraction Ray (Could be added if obj1 was transparent)
+# refraction_dir = ... (Snell's law)
+# ax.arrow(intersect1_pt[0], intersect1_pt[1], refract_dir[0]*3, refract_dir[1]*3, head_width=0.08, head_length=0.15, fc='green', ec='green', linestyle=':')
+# ax.text(intersect1_pt[0]+0.5, intersect1_pt[1]+0.2, 'Réfraction', color='green')
+
+
+plt.title("Ray Tracing Récursif: Ombres et Réflexions")
+plt.savefig('ray_tracing_recursive.png')
+
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.8\textwidth, keepaspectratio]{ray_tracing_recursive.png}
+\caption{Illustration du lancer de rayons récursif avec ombres et réflexions.}
+\label{fig:ray_tracing_recursive}
+\end{figure}
+
+Le Ray Tracing est capable de produire des images très réalistes mais est traditionnellement beaucoup plus coûteux en calcul que la rastérisation, bien que les accélérations matérielles récentes (RTX) le rendent de plus en plus viable pour le temps réel.
+
+
+\end{document}
+```

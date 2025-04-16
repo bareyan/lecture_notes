@@ -1,0 +1,1431 @@
+```latex
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\usepackage{verbatim}
+\usepackage{float}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Example}
+
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    captionpos=b,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    frame=lines,
+    rulesepcolor=\color{gray!50},
+    backgroundcolor=\color{white!97!gray},
+    commentstyle=\color{green!60!black},
+    keywordstyle=\color{blue},
+    stringstyle=\color{orange},
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+
+\title{Chapitre: Infographie et Science des Données: Fondements Mathématiques et Pipeline Graphique}
+\date{}
+
+\begin{document}
+\maketitle
+\sloppy
+
+\section*{Chapitre: Infographie et Science des Données: Fondements Mathématiques et Pipeline Graphique}
+
+\subsection{Introduction}
+
+L'infographie est un domaine vaste et dynamique au croisement de l'informatique, des mathématiques, de la physique et de l'art. Elle concerne la création, la manipulation et l'affichage d'images et de modèles numériques.
+
+\subsubsection{Définition}
+
+\begin{definition}
+L'infographie peut être définie comme « l'application de l'informatique à la création, au traitement, et à l'exploitation des images numériques ». C'est un terme valise formé à partir des mots INFOrmatique et GRAPHIque, dont l'appellation a été déposée par la société Benson en 1974.
+\end{definition}
+
+Ce domaine est intrinsèquement interdisciplinaire, faisant appel à :
+\begin{itemize}
+    \item Physique (modélisation de la lumière)
+    \item Mathématiques (géométrie, algèbre linéaire)
+    \item Perception humaine (couleurs, formes)
+    \item Interaction homme-machine (interfaces)
+    \item Ingénierie (matériel graphique, logiciels)
+    \item Conception graphique et art (esthétique, communication visuelle)
+\end{itemize}
+
+Conceptuellement, l'infographie prend en entrée une description d'une scène (géométrie, matériaux, lumière, caméra) et produit une image en sortie. C'est le processus inverse de la vision par ordinateur (Computer Vision), qui analyse une image pour en extraire une description ou une compréhension.
+
+\begin{verbatim}
+#save_to: input_output_graphics.png
+from graphviz import Digraph
+
+dot = Digraph(comment='Infographie Input/Output')
+dot.attr(rankdir='LR')
+
+dot.node('Input', 'Input:\nDescription de la scène\n- Géométrie des surfaces 3D\n- Matériaux des surfaces\n- Lumière\n- Caméra', shape='box')
+dot.node('Process', 'Infographie\n(Computer Graphics)', shape='ellipse')
+dot.node('Output', 'Output:\nImage', shape='box')
+
+dot.edge('Input', 'Process')
+dot.edge('Process', 'Output')
+
+dot.render('input_output_graphics', format='png', view=False, cleanup=True)
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.8\textwidth, keepaspectratio]{input_output_graphics.png}
+\caption{Processus conceptuel de l'infographie.}
+\label{fig:input_output_graphics}
+\end{figure}
+
+Une scène 3D typique est composée de plusieurs éléments clés :
+\begin{itemize}
+    \item Objets 3D : La géométrie des formes présentes dans la scène.
+    \item Matériaux : Les propriétés de surface des objets (couleur, texture, réflectivité).
+    \item Lumières : Les sources éclairant la scène.
+    \item Caméra : Le point de vue à partir duquel la scène est observée.
+\end{itemize}
+L'image de synthèse finale résulte de l'interaction entre les sources de lumière, les objets et leurs matériaux, vue depuis la caméra. La \textbf{géométrie} est l'élément constitutif essentiel, et l'organisation spatiale des objets forme le \textbf{modèle géométrique} de la scène virtuelle.
+
+En infographie, le terme \textbf{modèle} peut désigner :
+\begin{itemize}
+    \item Un \textbf{modèle géométrique} : La représentation d'un objet avec ses attributs (couleur, texture, réflectance, etc.).
+    \item Un \textbf{modèle mathématique} : La description d'un processus physique ou informatique (par exemple, le calcul de la réflexion de la lumière sur une surface).
+\end{itemize}
+
+\subsubsection{Évolution Historique}
+
+L'infographie a une riche histoire marquée par des avancées logicielles et matérielles.
+
+\paragraph{Les débuts interactifs :}
+\begin{itemize}
+    \item \textbf{1963 : Ivan Sutherland - SKETCHPAD}. Considéré comme le pionnier de l'infographie interactive. Sketchpad était le premier système complet permettant de sélectionner, pointer, dessiner et éditer graphiquement sur un écran. Il introduisait des concepts clés comme les structures de données graphiques, les algorithmes nécessaires, la modélisation hiérarchique et les menus contextuels (pop-up).
+\end{itemize}
+
+\paragraph{Affichage :}
+\begin{itemize}
+    \item \textbf{Écrans vectoriels :} Les premiers écrans traçaient des lignes directement.
+    \begin{itemize}
+        \item 1963 : Oscilloscope modifié (utilisé pour Sketchpad).
+        \item 1974 : "Picture System" d'Evans et Sutherland.
+    \end{itemize}
+    \item \textbf{Écrans raster :} Affichent une grille de pixels (bitmap).
+    \begin{itemize}
+        \item 1975 : Buffer de frames (mémoire vidéo) par Evans et Sutherland.
+        \item Années 1980 : Ordinateurs personnels basés sur les bitmaps (ex: Apple Macintosh, 1984).
+        \item Années 1990 : Écrans LCD (Liquid-Crystal Displays) sur les ordinateurs portables.
+        \item Années 2000 : Appareils photo numériques, projecteurs à micro-miroirs. Les écrans CRT (Cathode Ray Tube) sont progressivement remplacés par les LCD.
+    \end{itemize}
+    \item \textbf{Autres technologies :} Stéréo, casques de Réalité Virtuelle, interfaces tactiles, haptiques, audio 3D.
+\end{itemize}
+
+\paragraph{Entrées (Inputs) :}
+\begin{itemize}
+    \item \textbf{2D :} Stylo lumineux, tablette graphique, souris, joystick, trackball, écran tactile.
+    \item \textbf{3D :} Traqueurs de mouvement 3D, systèmes multi-caméras, télémètres actifs.
+    \item \textbf{Autres :} Gants de données (tactiles), reconnaissance vocale, reconnaissance gestuelle.
+\end{itemize}
+
+\paragraph{Rendu (Simulation de la lumière) :}
+\begin{itemize}
+    \item \textbf{Années 1960 - Visibilité :} Résolution du problème des lignes et surfaces cachées.
+    \begin{itemize}
+        \item Roberts (1963), Appel (1967) : Algorithmes de lignes cachées.
+        \item Warnock (1969), Watkins (1970) : Algorithmes de surfaces cachées.
+        \item Sutherland (1974) : Tri par visibilité.
+    \end{itemize}
+    \item \textbf{Années 1970 - Graphiques Raster :} Premiers modèles d'ombrage locaux.
+    \begin{itemize}
+        \item Gouraud (1971) : Ombrage lisse (interpolation des couleurs).
+        \item Phong (1974) : Modèle d'illumination spéculaire.
+        \item Blinn (1974) : Mapping de texture, surfaces courbes.
+        \item Catmull (1974) : Z-buffer (tampon de profondeur) pour la visibilité.
+        \item Crow (1977) : Techniques d'anti-aliasing (anticrénelage).
+    \end{itemize}
+    \item \textbf{Début Années 1980 - Illumination globale :} Simulation plus réaliste de la lumière.
+    \begin{itemize}
+        \item Whitted (1980) : Ray tracing (lancer de rayons) pour réflexions et réfractions.
+        \item Goral et al. (1984), Cohen (1985) : Radiosité pour les inter-réflexions diffuses.
+        \item Kajiya (1986) : Équation de rendu (formalisation générale).
+    \end{itemize}
+    \item \textbf{Fin Années 1980 - Photoréalisme :} Techniques avancées pour le réalisme.
+    \begin{itemize}
+        \item Cook (1984) : Arbres d'ombrage (Shading trees).
+        \item Perlin (1985) : Bruit de Perlin (textures procédurales), langage de shading.
+        \item Hanrahan \& Lawson (1990) : RenderMan (standard de rendu).
+    \end{itemize}
+    \item \textbf{Début Années 1990 - Rendu Non-Photoréaliste (NPR) :} Styles artistiques.
+    \begin{itemize}
+        \item Drebin et al. (1988), Levoy (1988) : Rendu de volumes (visualisation médicale).
+        \item Haeberli (1990) : Programmes de peinture impressionniste.
+        \item Salesin et al. (1994-) : Illustration automatique à l'encre et au stylo.
+        \item Meier (1996) : Rendu de peinture (simulation de coups de pinceau).
+    \end{itemize}
+    \item \textbf{Fin Années 1990 - Rendu Basé sur Images (IBR) :} Utilisation de photographies.
+    \begin{itemize}
+        \item Chen \& Williams (1993) : Interpolation de points de vue.
+        \item McMillan \& Bishop (1995) : Modélisation plénoptique.
+        \item Levoy \& Hanrahan (1996) : Rendu des champs lumineux.
+    \end{itemize}
+\end{itemize}
+
+\paragraph{Programmation et Matériel :}
+\begin{itemize}
+    \item \textbf{Début Années 1980 - Cartes Graphiques :} Matériel dédié.
+    \begin{itemize}
+        \item Clark (1979) : Premier processeur programmable dédié au graphisme 3D (Geometry Engine).
+        \item 1982 : Création de Silicon Graphics (SGI), Adobe et AutoDesk.
+        \item 1987 : Première carte graphique grand public.
+        \item 1992 : OpenGL 1.0 (API graphique standard).
+        \item 1993 : Création de NVIDIA.
+        \item 1994 : VRML (Virtual Reality Modeling Language).
+        \item 1996 : DirectX de Microsoft.
+        \item 1997 : Java3D de Sun Microsystems.
+        \item 2007 : OpenGL 3.0 (évolution majeure avec shaders programmables).
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Applications}
+
+L'infographie trouve des applications dans de nombreux domaines :
+\begin{itemize}
+    \item \textbf{Science des Données :} Visualisation de données complexes (médicales, géophysiques, biologiques, dynamique des fluides - CFD) pour l'analyse et la compréhension.
+    \item \textbf{Divertissement :}
+    \begin{itemize}
+        \item Films d'animation (ex: Shrek).
+        \item Effets spéciaux (VFX) dans les films (ex: simulation d'explosions, personnages numériques).
+        \item Jeux vidéo (temps réel, interaction).
+    \end{itemize}
+    \item \textbf{Art \& Design :} Création artistique numérique, design graphique, illustration.
+    \item \textbf{Design Industriel \& Ingénierie Assistée par Ordinateur (CAE) :} Conception et visualisation de produits (ex: voitures), simulations techniques.
+    \item \textbf{Supervision \& Téléopération :} Contrôle à distance de systèmes (ex: robots chirurgicaux), interfaces de supervision.
+    \item \textbf{Simulateurs (offline) :}
+    \begin{itemize}
+        \item Entraînement (conduite, pilotage).
+        \item Jeux de simulation.
+        \item Reconstruction virtuelle (ex: bâtiments historiques).
+    \end{itemize}
+    \item \textbf{Navigation :} Systèmes de cartographie 3D, aide à la navigation.
+    \item \textbf{Communications :} Présentations visuelles, supports de communication (ex: conférences comme SIGGRAPH).
+\end{itemize}
+
+\subsection{I. Le Pipeline Graphique}
+
+Le pipeline graphique est une séquence d'étapes conceptuelles utilisées pour transformer une description de scène 3D en une image 2D affichable sur un écran. Chaque primitive géométrique (souvent des triangles) traverse ces étapes.
+
+\begin{verbatim}
+#save_to: pipeline_graphique.png
+from graphviz import Digraph
+
+dot = Digraph(comment='Pipeline Graphique')
+dot.graph_attr['rankdir'] = 'TB'
+
+dot.node('Input', 'Modèles 3D', shape='box')
+dot.node('ModelTrans', 'Transformations de\nmodélisation', shape='box', style='filled', fillcolor='lightblue')
+dot.node('Shading', 'Illumination\n(Shading)', shape='box', style='filled', fillcolor='lightblue')
+dot.node('ViewTrans', 'Transformation\nd\'affichage', shape='box', style='filled', fillcolor='lightblue')
+dot.node('Clipping', 'Clipping', shape='box', style='filled', fillcolor='lightblue')
+dot.node('Proj', 'Transformation écran\n(Projection)', shape='box', style='filled', fillcolor='lightblue')
+dot.node('Raster', 'Pixelisation\n(Rasterization)', shape='box', style='filled', fillcolor='lightblue')
+dot.node('Visibility', 'Visibilité / Rendu', shape='box', style='filled', fillcolor='deepskyblue')
+dot.node('Output', 'Images', shape='box')
+
+dot.edge('Input', 'ModelTrans')
+dot.edge('ModelTrans', 'Shading')
+dot.edge('Shading', 'ViewTrans')
+dot.edge('ViewTrans', 'Clipping')
+dot.edge('Clipping', 'Proj')
+dot.edge('Proj', 'Raster')
+dot.edge('Raster', 'Visibility')
+dot.edge('Visibility', 'Output')
+
+dot.render('pipeline_graphique', format='png', view=False, cleanup=True)
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, keepaspectratio]{pipeline_graphique.png}
+\caption{Les étapes principales du pipeline graphique.}
+\label{fig:pipeline_graphique}
+\end{figure}
+
+\subsubsection{1. Transformations de Modélisation}
+\begin{itemize}
+    \item \textbf{Objectif :} Positionner et orienter chaque objet 3D dans un espace commun appelé "monde" (World Space).
+    \item \textbf{Processus :} Applique des transformations (translation, rotation, mise à l'échelle) aux coordonnées locales de chaque objet (Object Space) pour les placer dans le repère global (World Space).
+\end{itemize}
+
+\begin{verbatim}
+#save_to: model_transform.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, ax = plt.subplots(1, 2, figsize=(8, 4))
+
+# Object Space
+ax[0].set_title("Object Space")
+ax[0].arrow(0, 0, 1, 0, head_width=0.1, head_length=0.15, fc='red', ec='red', length_includes_head=True)
+ax[0].arrow(0, 0, 0, 1, head_width=0.1, head_length=0.15, fc='green', ec='green', length_includes_head=True)
+ax[0].text(1.1, 0, 'x', color='red', va='center')
+ax[0].text(0, 1.1, 'y', color='green', ha='center')
+ax[0].plot([0.2, 0.8, 0.5, 0.2], [0.2, 0.2, 0.7, 0.2], 'b-') # Simple triangle
+ax[0].set_xlim(-0.5, 1.5)
+ax[0].set_ylim(-0.5, 1.5)
+ax[0].set_aspect('equal', adjustable='box')
+ax[0].grid(True, linestyle=':')
+ax[0].axhline(0, color='black', linewidth=0.5)
+ax[0].axvline(0, color='black', linewidth=0.5)
+ax[0].set_xlabel("Local X")
+ax[0].set_ylabel("Local Y")
+
+
+# World Space
+ax[1].set_title("World Space")
+ax[1].arrow(0, 0, 1, 0, head_width=0.1, head_length=0.15, fc='red', ec='red', length_includes_head=True)
+ax[1].arrow(0, 0, 0, 1, head_width=0.1, head_length=0.15, fc='green', ec='green', length_includes_head=True)
+ax[1].text(1.1, 0, 'X', color='red', va='center')
+ax[1].text(0, 1.1, 'Y', color='green', ha='center')
+# Transformed triangle (example: translate)
+tx, ty = 1.5, 0.5
+ax[1].plot([0.2+tx, 0.8+tx, 0.5+tx, 0.2+tx], [0.2+ty, 0.2+ty, 0.7+ty, 0.2+ty], 'b-')
+ax[1].set_xlim(-0.5, 3)
+ax[1].set_ylim(-0.5, 3)
+ax[1].set_aspect('equal', adjustable='box')
+ax[1].grid(True, linestyle=':')
+ax[1].axhline(0, color='black', linewidth=0.5)
+ax[1].axvline(0, color='black', linewidth=0.5)
+ax[1].set_xlabel("World X")
+ax[1].set_ylabel("World Y")
+
+# Arrow indicating transformation
+ax[0].annotate('', xy=(1.6, 0.75), xycoords='axes fraction', xytext=(1.1, 0.75),
+            arrowprops=dict(arrowstyle="->", color='black', lw=2))
+
+plt.tight_layout()
+plt.savefig('model_transform.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.6\textwidth, keepaspectratio]{model_transform.png}
+\caption{Passage de l'espace objet (Object Space) à l'espace monde (World Space).}
+\label{fig:model_transform}
+\end{figure}
+
+\subsubsection{2. Illumination (Shading)}
+\begin{itemize}
+    \item \textbf{Objectif :} Calculer la couleur de chaque point visible des objets en fonction des matériaux, des sources de lumière et de la position de l'observateur.
+    \item \textbf{Processus :} Les modèles d'illumination (souvent locaux à ce stade, sans ombres portées complexes) calculent l'interaction de la lumière avec la surface. Exemples de modèles : diffus (Lambert), spéculaire (Phong, Blinn-Phong), ambiant. Les calculs sont effectués par primitive (triangle) ou par sommet.
+\end{itemize}
+
+\subsubsection{3. Transformation d'Affichage (Viewing Transformation)}
+\begin{itemize}
+    \item \textbf{Objectif :} Transformer les coordonnées du monde (World Space) vers l'espace de la caméra (Eye Space ou View Space).
+    \item \textbf{Processus :} Place la caméra à l'origine et aligne sa direction de vue avec un axe (souvent -z). Les coordonnées des objets sont recalculées par rapport à ce nouveau repère.
+\end{itemize}
+
+\begin{verbatim}
+#save_to: view_transform.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, ax = plt.subplots(1, 2, figsize=(8, 4))
+
+# World Space
+ax[0].set_title("World Space")
+ax[0].arrow(0, 0, 1, 0, head_width=0.1, head_length=0.15, fc='red', ec='red', length_includes_head=True)
+ax[0].arrow(0, 0, 0, 1, head_width=0.1, head_length=0.15, fc='green', ec='green', length_includes_head=True)
+ax[0].arrow(0, 0, 0.7, 0.7, head_width=0.1, head_length=0.15, fc='blue', ec='blue', length_includes_head=True) # Z axis (simulated)
+ax[0].text(1.1, 0, 'Xw', color='red', va='center')
+ax[0].text(0, 1.1, 'Yw', color='green', ha='center')
+ax[0].text(0.8, 0.8, 'Zw', color='blue')
+# Camera representation
+cam_pos = np.array([2, 1])
+cam_dir = np.array([-1, -0.5])
+cam_dir = cam_dir / np.linalg.norm(cam_dir) * 0.5
+ax[0].plot(cam_pos[0], cam_pos[1], 'ko', markersize=8, label='Camera')
+ax[0].arrow(cam_pos[0], cam_pos[1], cam_dir[0], cam_dir[1], head_width=0.1, head_length=0.15, fc='black', ec='black')
+ax[0].set_xlim(-1, 3)
+ax[0].set_ylim(-1, 3)
+ax[0].set_aspect('equal', adjustable='box')
+ax[0].grid(True, linestyle=':')
+ax[0].set_xlabel("World X")
+ax[0].set_ylabel("World Y")
+
+# Eye Space
+ax[1].set_title("Eye Space")
+ax[1].arrow(0, 0, 1, 0, head_width=0.1, head_length=0.15, fc='red', ec='red', length_includes_head=True)
+ax[1].arrow(0, 0, 0, 1, head_width=0.1, head_length=0.15, fc='green', ec='green', length_includes_head=True)
+ax[1].arrow(0, 0, 0.7, 0.7, head_width=0.1, head_length=0.15, fc='blue', ec='blue', length_includes_head=True) # Z axis (simulated)
+ax[1].text(1.1, 0, 'Xe', color='red', va='center')
+ax[1].text(0, 1.1, 'Ye', color='green', ha='center')
+ax[1].text(0.8, 0.8, 'Ze', color='blue') # Often points out or into screen
+ax[1].plot(0, 0, 'ko', markersize=8, label='Camera at Origin')
+ax[1].set_xlim(-2, 2)
+ax[1].set_ylim(-2, 2)
+ax[1].set_aspect('equal', adjustable='box')
+ax[1].grid(True, linestyle=':')
+ax[1].set_xlabel("Eye X")
+ax[1].set_ylabel("Eye Y")
+
+# Arrow indicating transformation
+ax[0].annotate('', xy=(1.6, 0.75), xycoords='axes fraction', xytext=(1.1, 0.75),
+            arrowprops=dict(arrowstyle="->", color='black', lw=2))
+
+plt.tight_layout()
+plt.savefig('view_transform.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.6\textwidth, keepaspectratio]{view_transform.png}
+\caption{Passage de l'espace monde (World Space) à l'espace caméra (Eye Space).}
+\label{fig:view_transform}
+\end{figure}
+
+\subsubsection{4. Clipping}
+\begin{itemize}
+    \item \textbf{Objectif :} Supprimer les parties de la scène qui sont en dehors du volume de vision défini par la caméra (View Frustum).
+    \item \textbf{Processus :} Les primitives (triangles) sont coupées ou rejetées si elles se trouvent en dehors des six plans définissant le frustum (proche, lointain, gauche, droite, haut, bas). Les coordonnées sont souvent normalisées dans cette étape ou la suivante pour former les Coordonnées Normalisées de Périphérique (NDC - Normalized Device Coordinates), généralement dans un cube [-1, 1] x [-1, 1] x [-1, 1] ou [0, 1] x [0, 1] x [0, 1].
+\end{itemize}
+
+\begin{verbatim}
+#save_to: clipping.png
+import matplotlib.pyplot as plt
+import numpy as np
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+
+fig = plt.figure(figsize=(6, 5))
+ax = fig.add_subplot(111, projection='3d')
+
+# Define Frustum Vertices (example)
+near = 1
+far = 5
+ratio = 1.0
+fov_y_rad = np.radians(60)
+Hnear = 2 * np.tan(fov_y_rad / 2) * near
+Wnear = Hnear * ratio
+Hfar = 2 * np.tan(fov_y_rad / 2) * far
+Wfar = Hfar * ratio
+
+n_bl = [-Wnear/2, -Hnear/2, -near]
+n_br = [ Wnear/2, -Hnear/2, -near]
+n_tl = [-Wnear/2,  Hnear/2, -near]
+n_tr = [ Wnear/2,  Hnear/2, -near]
+f_bl = [-Wfar/2, -Hfar/2, -far]
+f_br = [ Wfar/2, -Hfar/2, -far]
+f_tl = [-Wfar/2,  Hfar/2, -far]
+f_tr = [ Wfar/2,  Hfar/2, -far]
+
+verts = [
+    [n_bl, n_br, n_tr, n_tl], # Near
+    [f_bl, f_br, f_tr, f_tl], # Far
+    [n_bl, n_br, f_br, f_bl], # Bottom
+    [n_tl, n_tr, f_tr, f_tl], # Top
+    [n_bl, n_tl, f_tl, f_bl], # Left
+    [n_br, n_tr, f_tr, f_br]  # Right
+]
+
+# Draw frustum faces
+ax.add_collection3d(Poly3DCollection(verts, facecolors='cyan', linewidths=1, edgecolors='r', alpha=.15))
+
+# Draw lines connecting near and far planes
+ax.plot([n_bl[0], f_bl[0]], [n_bl[1], f_bl[1]], [n_bl[2], f_bl[2]], 'r-')
+ax.plot([n_br[0], f_br[0]], [n_br[1], f_br[1]], [n_br[2], f_br[2]], 'r-')
+ax.plot([n_tl[0], f_tl[0]], [n_tl[1], f_tl[1]], [n_tl[2], f_tl[2]], 'r-')
+ax.plot([n_tr[0], f_tr[0]], [n_tr[1], f_tr[1]], [n_tr[2], f_tr[2]], 'r-')
+
+
+ax.set_xlabel('Eye X')
+ax.set_ylabel('Eye Y')
+ax.set_zlabel('-Eye Z (Depth)') # Z increases away from camera
+ax.set_title('Volume de Vision (Frustum)')
+ax.view_init(elev=20., azim=-70)
+# Invert Z axis for visualization convention
+ax.set_zlim(-far -1 , -near + 1)
+ax.invert_zaxis()
+
+
+plt.tight_layout()
+plt.savefig('clipping.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.6\textwidth, keepaspectratio]{clipping.png}
+\caption{Clipping contre le volume de vision (frustum) dans l'espace caméra.}
+\label{fig:clipping}
+\end{figure}
+
+\subsubsection{5. Transformation Écran (Projection)}
+\begin{itemize}
+    \item \textbf{Objectif :} Projeter les primitives 3D (après clipping et potentiellement normalisation en NDC) sur un plan image 2D (Screen Space).
+    \item \textbf{Processus :} Applique une transformation de projection (perspective ou orthographique) qui transforme le volume de vision (frustum ou cube NDC) en coordonnées écran (pixels), tout en conservant généralement l'information de profondeur (z) pour l'étape de visibilité.
+\end{itemize}
+
+\begin{verbatim}
+#save_to: projection.png
+import matplotlib.pyplot as plt
+import numpy as np
+import matplotlib.patches as patches
+
+fig, ax = plt.subplots(1, 2, figsize=(8, 4))
+
+# NDC Space (assuming cube [-1, 1])
+ax[0].set_title("NDC Space")
+ax[0].set_xlim(-1.2, 1.2)
+ax[0].set_ylim(-1.2, 1.2)
+ax[0].set_aspect('equal', adjustable='box')
+ax[0].axhline(0, color='black', linewidth=0.5)
+ax[0].axvline(0, color='black', linewidth=0.5)
+ax[0].grid(True, linestyle=':')
+ax[0].set_xlabel("NDC X")
+ax[0].set_ylabel("NDC Y")
+# Draw NDC bounds
+rect = patches.Rectangle((-1,-1), 2, 2, linewidth=1, edgecolor='r', facecolor='none', linestyle='--')
+ax[0].add_patch(rect)
+# Example primitive in NDC
+ax[0].plot([-0.5, 0.5, 0.0, -0.5], [-0.5, -0.5, 0.5, -0.5], 'b-')
+
+
+# Screen Space
+ax[1].set_title("Screen Space")
+width = 800
+height = 600
+ax[1].set_xlim(-50, width + 50)
+ax[1].set_ylim(-50, height + 50) # Matplotlib origin bottom-left, screen often top-left
+ax[1].invert_yaxis() # Match screen coordinate convention (optional but common)
+ax[1].set_aspect('equal', adjustable='box')
+ax[1].grid(True, linestyle=':')
+ax[1].set_xlabel("Screen X (pixels)")
+ax[1].set_ylabel("Screen Y (pixels)")
+# Draw screen bounds
+rect_screen = patches.Rectangle((0,0), width, height, linewidth=1, edgecolor='r', facecolor='none', linestyle='--')
+ax[1].add_patch(rect_screen)
+# Example primitive mapped to Screen Space
+# Scale/Translate from [-1,1]x[-1,1] to [0,W]x[0,H]
+# X_screen = (X_ndc + 1) * width / 2
+# Y_screen = (Y_ndc + 1) * height / 2
+x_ndc = np.array([-0.5, 0.5, 0.0, -0.5])
+y_ndc = np.array([-0.5, -0.5, 0.5, -0.5])
+x_screen = (x_ndc + 1) * width / 2
+y_screen = (y_ndc + 1) * height / 2
+ax[1].plot(x_screen, y_screen, 'b-')
+
+
+# Arrow indicating transformation
+ax[0].annotate('', xy=(1.6, 0.75), xycoords='axes fraction', xytext=(1.1, 0.75),
+            arrowprops=dict(arrowstyle="->", color='black', lw=2))
+
+plt.tight_layout()
+plt.savefig('projection.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.7\textwidth, keepaspectratio]{projection.png}
+\caption{Passage des Coordonnées Normalisées (NDC) à l'espace écran (Screen Space).}
+\label{fig:projection}
+\end{figure}
+
+\subsubsection{6. Pixelisation (Rasterization)}
+\begin{itemize}
+    \item \textbf{Objectif :} Convertir les primitives 2D (définies par leurs sommets en coordonnées écran) en une série de fragments (pixels potentiels) qui couvrent la forme de la primitive.
+    \item \textbf{Processus :} Pour chaque primitive (ex: triangle), détermine quels pixels de la grille de l'écran sont couverts par celle-ci. Interpole les attributs définis aux sommets (couleur, coordonnées de texture, profondeur) pour chaque fragment généré.
+\end{itemize}
+
+\begin{verbatim}
+#save_to: rasterization.png
+import matplotlib.pyplot as plt
+import numpy as np
+import matplotlib.patches as patches
+
+fig, ax = plt.subplots(figsize=(6, 5))
+ax.set_title("Rasterization")
+
+# Define triangle vertices in screen space
+verts = np.array([[1.5, 1.5], [7.5, 3.5], [3.5, 7.5]])
+
+# Draw grid
+ax.set_xticks(np.arange(0, 10, 1))
+ax.set_yticks(np.arange(0, 10, 1))
+ax.set_xlim(0, 9)
+ax.set_ylim(0, 9)
+ax.grid(True)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xlabel("Screen X")
+ax.set_ylabel("Screen Y")
+
+# Draw triangle outline
+triangle = patches.Polygon(verts, closed=True, edgecolor='blue', facecolor='none', linewidth=2)
+ax.add_patch(triangle)
+
+# Simulate rasterized pixels (fragments) - simple centroid check
+pixels_x, pixels_y = [], []
+for i in range(10):
+    for j in range(10):
+        # Center of pixel
+        px, py = i + 0.5, j + 0.5
+        # Simple point-in-triangle test (Barycentric coordinates would be better)
+        # Check if point is inside using half-plane tests
+        def sign(p1, p2, p3):
+            return (p1[0] - p3[0]) * (p2[1] - p3[1]) - (p2[0] - p3[0]) * (p1[1] - p3[1])
+
+        d1 = sign((px, py), verts[0], verts[1])
+        d2 = sign((px, py), verts[1], verts[2])
+        d3 = sign((px, py), verts[2], verts[0])
+
+        has_neg = (d1 < 0) or (d2 < 0) or (d3 < 0)
+        has_pos = (d1 > 0) or (d2 > 0) or (d3 > 0)
+
+        if not (has_neg and has_pos): # Point is on or inside the triangle
+             pixels_x.append(i)
+             pixels_y.append(j)
+
+# Draw filled pixels
+for x, y in zip(pixels_x, pixels_y):
+     rect = patches.Rectangle((x, y), 1, 1, linewidth=0, facecolor='lightblue', alpha=0.7)
+     ax.add_patch(rect)
+
+
+plt.gca().invert_yaxis() # Match screen coords if needed
+plt.tight_layout()
+plt.savefig('rasterization.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.5\textwidth, keepaspectratio]{rasterization.png}
+\caption{Découpage d'une primitive (triangle) en fragments (pixels).}
+\label{fig:rasterization}
+\end{figure}
+
+\subsubsection{7. Visibilité / Rendu}
+\begin{itemize}
+    \item \textbf{Objectif :} Déterminer, pour chaque pixel, quel fragment est réellement visible (gestion des recouvrements) et écrire la couleur finale dans le framebuffer (mémoire image).
+    \item \textbf{Processus :}
+    \begin{itemize}
+        \item \textbf{Élimination des parties cachées :} Souvent réalisée à l'aide d'un Z-buffer (tampon de profondeur) qui stocke la profondeur du fragment le plus proche pour chaque pixel. Un nouveau fragment n'est dessiné que s'il est plus proche que celui déjà stocké.
+        \item \textbf{Remplissage du framebuffer :} La couleur du fragment visible (calculée lors de l'illumination et interpolée lors de la rastérisation) est écrite dans le pixel correspondant du framebuffer. D'autres opérations peuvent avoir lieu ici (mélange alpha pour la transparence, etc.).
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Résumé des Systèmes de Coordonnées}
+Le passage à travers le pipeline implique plusieurs changements de systèmes de coordonnées :
+\begin{enumerate}
+    \item \textbf{Repère Objet (Object Space)} : Coordonnées locales à chaque objet.
+    \item \textbf{Repère Scène (World Space)} : Espace commun où tous les objets sont placés.
+    \item \textbf{Repère Caméra (Eye Space)} : La scène vue depuis la caméra.
+    \item \textbf{Repère Caméra Normalisé (NDC)} : Coordonnées normalisées après projection et clipping, souvent dans un cube.
+    \item \textbf{Espace Écran (Screen Space)} : Coordonnées en pixels sur l'image finale.
+\end{enumerate}
+
+\begin{verbatim}
+#save_to: coordinate_systems.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, axs = plt.subplots(1, 5, figsize=(15, 3.5), subplot_kw={'aspect': 'equal'})
+fig.suptitle('Systèmes de Coordonnées', fontsize=14)
+
+titles = ['Repère Objet', 'Repère Scène', 'Repère Caméra', 'NDC', 'Espace Écran']
+xlabels = ['x_obj', 'X_w', 'X_e', 'X_ndc', 'X_scr']
+ylabels = ['y_obj', 'Y_w', 'Y_e', 'Y_ndc', 'Y_scr']
+limits = [(-1, 2), (-1, 5), (-2, 2), (-1.2, 1.2), (-100, 900)]
+
+for i, ax in enumerate(axs):
+    ax.set_title(titles[i])
+    ax.set_xlim(limits[i][0], limits[i][1])
+    ax.set_ylim(limits[i][0], limits[i][1])
+    if i == 4: # Screen space Y often inverted and different range
+        ax.set_ylim(700, -100) # Example 800x600 screen
+    ax.axhline(0, color='black', linewidth=0.5)
+    ax.axvline(0, color='black', linewidth=0.5)
+    ax.grid(True, linestyle=':')
+    ax.set_xlabel(xlabels[i])
+    ax.set_ylabel(ylabels[i])
+    # Draw example axis representation
+    ax.arrow(0, 0, 0.5 * (limits[i][1] - limits[i][0]) * 0.2, 0, head_width=0.1, head_length=0.15, fc='red', ec='red', length_includes_head=True)
+    ax.arrow(0, 0, 0, 0.5 * (limits[i][1] - limits[i][0]) * 0.2, head_width=0.1, head_length=0.15, fc='green', ec='green', length_includes_head=True)
+    if i == 4: # Screen space Y arrow points down if inverted
+         ax.arrow(0, 0, 0, -0.5 * (limits[i][0] - limits[i][1]) * 0.2, head_width=15, head_length=25, fc='green', ec='green', length_includes_head=True)
+
+
+plt.tight_layout(rect=[0, 0.03, 1, 0.95]) # Adjust layout for suptitle
+plt.savefig('coordinate_systems.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, keepaspectratio]{coordinate_systems.png}
+\caption{Illustration des différents systèmes de coordonnées.}
+\label{fig:coordinate_systems}
+\end{figure}
+
+
+\subsubsection{Détails du Pipeline}
+Le pipeline traite séquentiellement chaque primitive (triangle).
+\begin{itemize}
+    \item \textbf{Entrées :} Modèles géométriques (objets, surfaces), sources de lumière, modèle d'illumination, caméra (point de vue, frustum), fenêtre d'affichage (viewport), et format de sortie (couleurs, intensités, ex: 24 bits RVB).
+    \item \textbf{Implémentation :} Peut être réalisé de diverses manières, combinant matériel (hardware) et logiciel (software). Certaines étapes peuvent offrir des points de programmation (ex: vertex shaders, pixel/fragment shaders) pour personnaliser le rendu.
+\end{itemize}
+
+
+\subsection{II. Fondements Mathématiques}
+
+L'infographie repose fortement sur des concepts mathématiques pour décrire et manipuler les objets et la lumière dans l'espace.
+
+\subsubsection{Pourquoi des Mathématiques ?}
+De nombreux concepts graphiques font appel aux mathématiques :
+\begin{itemize}
+    \item Systèmes de coordonnées (cartésiens, etc.)
+    \item Transformations (translation, rotation, échelle, projection)
+    \item Rayonnement (Ray-casting, Ray-tracing)
+    \item Conversion des couleurs (espaces colorimétriques)
+    \item Tests d'intersection (objets, rayons)
+    \item Requêtes géométriques (distances, angles)
+    \item Simulations physiques (gravité, collisions)
+    \item Et bien d'autres...
+\end{itemize}
+Les deux piliers mathématiques principaux sont l'algèbre linéaire et l'analyse vectorielle.
+
+\subsubsection{Algèbre Linéaire}
+
+\paragraph{Matrices :}
+\begin{definition}
+Une matrice M est un tableau rectangulaire (à deux indices) de $n \times m$ valeurs numériques extraites d'un même ensemble $\mathbb{E}$ (par exemple, $\mathbb{R}$).
+\[ M =
+\begin{pmatrix}
+m_{11} & m_{12} & \cdots & m_{1m} \\
+m_{21} & m_{22} & \cdots & m_{2m} \\
+\vdots & \vdots & \ddots & \vdots \\
+m_{n1} & m_{n2} & \cdots & m_{nm}
+\end{pmatrix}
+\]
+Où $n$ est le nombre de lignes et $m$ le nombre de colonnes.
+Si $n = m$, la matrice est dite \textbf{carrée}.
+\end{definition}
+
+\textbf{Exemple ($n=4, m=5$):}
+\[ M =
+\begin{pmatrix}
+m_{11} & m_{12} & m_{13} & m_{14} & m_{15} \\
+m_{21} & m_{22} & m_{23} & m_{24} & m_{25} \\
+m_{31} & m_{32} & m_{33} & m_{34} & m_{35} \\
+m_{41} & m_{42} & m_{43} & m_{44} & m_{45}
+\end{pmatrix}
+\]
+
+\textbf{Opérations possibles :}
+\begin{itemize}
+    \item \textbf{Addition :}
+    \begin{itemize}
+        \item Matrice-matrice (si mêmes dimensions) : $(A+B)_{ij} = A_{ij} + B_{ij}$
+        \item Scalaire-matrice : $(s+M)_{ij} = s + M_{ij}$ (moins courant) ou $(sM)_{ij} = s \times M_{ij}$ (multiplication scalaire)
+    \end{itemize}
+    \item \textbf{Multiplication :}
+    \begin{itemize}
+        \item Scalaire-matrice : $(sM)_{ij} = s \times M_{ij}$
+        \item Matrice-vecteur : voir ci-dessous.
+        \item Matrice-matrice : voir ci-dessous.
+    \end{itemize}
+    \item \textbf{Inversion :} Pour les matrices carrées inversibles $M^{-1}$ tel que $M M^{-1} = M^{-1} M = I$ (identité).
+    \item \textbf{Transposition :} $(M^T)_{ij} = M_{ji}$ (échange lignes et colonnes).
+\end{itemize}
+
+\paragraph{Produit Matrice par Vecteur :}
+Soient une matrice $M$ de dimension $m \times n$ et un vecteur colonne $V$ de dimension $n$ ( $n \times 1$). Le vecteur résultant $W$ est de dimension $m$ ( $m \times 1$) et est calculé comme suit : $W = M \cdot V$.
+Chaque composante $w_i$ de $W$ est le produit scalaire de la $i$-ème ligne de $M$ avec le vecteur $V$ :
+\[ w_i = \sum_{k=1}^{n} M_{ik} V_k \quad (1 \le i \le m) \]
+Visuellement :
+\[
+\begin{pmatrix} \cdots & \cdots & \cdots \\ \hline m_{i1} & m_{i2} & \cdots & m_{in} \\ \hline \cdots & \cdots & \cdots \end{pmatrix}_{m \times n}
+\times
+\begin{pmatrix} v_1 \\ v_2 \\ \vdots \\ v_n \end{pmatrix}_{n \times 1}
+=
+\begin{pmatrix} \vdots \\ w_i \\ \vdots \end{pmatrix}_{m \times 1}
+\]
+\textbf{Exemple :}
+\[
+\begin{pmatrix} 2 & 4 \\ 6 & 8 \\ 10 & 12 \end{pmatrix}_{3 \times 2}
+\times
+\begin{pmatrix} 1 \\ 3 \end{pmatrix}_{2 \times 1}
+=
+\begin{pmatrix} (2 \times 1) + (4 \times 3) \\ (6 \times 1) + (8 \times 3) \\ (10 \times 1) + (12 \times 3) \end{pmatrix}
+=
+\begin{pmatrix} 14 \\ 30 \\ 46 \end{pmatrix}_{3 \times 1}
+\]
+
+\paragraph{Produit Matrice par Matrice :}
+Soient deux matrices $M_1$ de dimension $n \times m$ et $M_2$ de dimension $m \times p$. La matrice produit $M$ est de dimension $n \times p$.
+Chaque élément $m_{ij}$ de $M$ est le produit scalaire de la $i$-ème ligne de $M_1$ avec la $j$-ème colonne de $M_2$ :
+\[ m_{ij} = \sum_{k=1}^{m} (M_1)_{ik} (M_2)_{kj} \quad (1 \le i \le n, 1 \le j \le p) \]
+Visuellement :
+\[
+\begin{pmatrix} \vdots \\ \hline (M_1)_{i1} \cdots (M_1)_{im} \\ \hline \vdots \end{pmatrix}_{n \times m}
+\times
+\begin{pmatrix} \cdots & (M_2)_{1j} & \cdots \\ & \vdots & \\ \cdots & (M_2)_{mj} & \cdots \end{pmatrix}_{m \times p}
+=
+\begin{pmatrix} \ddots & \vdots & \\ \cdots & m_{ij} & \cdots \\ & \vdots & \ddots \end{pmatrix}_{n \times p}
+\]
+\textbf{Exemple :}
+\[
+\begin{pmatrix} 1 & 3 & 5 \\ 7 & 9 & 11 \end{pmatrix}_{2 \times 3}
+\times
+\begin{pmatrix} 2 & 4 \\ 6 & 8 \\ 10 & 12 \end{pmatrix}_{3 \times 2}
+=
+\begin{pmatrix}
+(1\!\cdot\!2 \!+\! 3\!\cdot\!6 \!+\! 5\!\cdot\!10) & (1\!\cdot\!4 \!+\! 3\!\cdot\!8 \!+\! 5\!\cdot\!12) \\
+(7\!\cdot\!2 \!+\! 9\!\cdot\!6 \!+\! 11\!\cdot\!10) & (7\!\cdot\!4 \!+\! 9\!\cdot\!8 \!+\! 11\!\cdot\!12)
+\end{pmatrix}
+=
+\begin{pmatrix} 70 & 88 \\ 178 & 232 \end{pmatrix}_{2 \times 2}
+\]
+
+\subsubsection{Analyse Vectorielle}
+
+\paragraph{Scalaires :}
+\begin{itemize}
+    \item Un scalaire est une grandeur totalement définie par un \textbf{nombre} et une unité (optionnelle en maths pures).
+    \item Il a une valeur numérique mais \textbf{pas d'orientation}.
+    \item Exemples : Masse, Distance, Température, Volume, Densité, etc.
+    \item Les scalaires obéissent aux lois de l'algèbre ordinaire.
+    \item \textbf{Opérations élémentaires :} Addition (+), Multiplication (·).
+    \item \textbf{Propriétés :}
+    \begin{itemize}
+        \item Commutativité : $\alpha + \beta = \beta + \alpha$, $\alpha \cdot \beta = \beta \cdot \alpha$
+        \item Associativité : $\alpha + (\beta + \gamma) = (\alpha + \beta) + \gamma$, $\alpha \cdot (\beta \cdot \gamma) = (\alpha \cdot \beta) \cdot \gamma$
+        \item Distributivité : $\alpha \cdot (\beta + \gamma) = (\alpha \cdot \beta) + (\alpha \cdot \gamma)$
+    \end{itemize}
+    \item \textbf{Identité :}
+    \begin{itemize}
+        \item Addition : 0 ($\alpha + 0 = 0 + \alpha = \alpha$)
+        \item Multiplication : 1 ($\alpha \cdot 1 = 1 \cdot \alpha = \alpha$)
+    \end{itemize}
+\end{itemize}
+
+\paragraph{Vecteurs :}
+\begin{itemize}
+    \item Un vecteur est une entité mathématique définie par $n$ valeurs numériques (composantes) extraites du même ensemble $\mathbb{E}$ (e.g., $\mathbb{N}, \mathbb{Z}, \mathbb{R}, \mathbb{C}$).
+    \item Ces valeurs décrivent le \textbf{module} (longueur) et l'\textbf{orientation} du vecteur.
+    \item $n$ est appelé la \textbf{dimension} du vecteur. On dit que le vecteur est défini dans $E^n$. $E^n$ est un espace vectoriel de dimension $n$.
+    \item \textbf{Exemple :} En $\mathbb{R}^3$, un vecteur $\vec{v}$ peut être écrit comme $\begin{pmatrix} x \\ y \\ z \end{pmatrix}$.
+    \item \textbf{Usages :} Déplacement, Vitesse, Accélération, Force.
+    \item Les vecteurs obéissent aux lois de l'algèbre vectorielle.
+    \item \textbf{Opérations élémentaires :} Addition de vecteurs, multiplication par un scalaire, produit scalaire, produit vectoriel (en dim 3), normalisation.
+\end{itemize}
+
+\paragraph{Vecteurs Unitaires et Base :}
+\begin{itemize}
+    \item Dans un repère, les vecteurs sont décrits dans une \textbf{base}, qui est un ensemble de vecteurs linéairement indépendants (unités de l'ensemble).
+    \item La base est généralement \textbf{orthonormée} (vecteurs unitaires et perpendiculaires entre eux). En 3D, on utilise souvent la base canonique $(\vec{i}, \vec{j}, \vec{k})$.
+    \item Un vecteur $\vec{V}$ est représenté par l'addition des vecteurs de base, multipliés chacun par la \textbf{projection} (composante) de $\vec{V}$ sur l'axe correspondant.
+    \[ \vec{V} = x'\vec{i} + y'\vec{j} + z'\vec{k} \]
+    où $x', y', z'$ sont les composantes de $\vec{V}$ dans la base $(\vec{i}, \vec{j}, \vec{k})$.
+\end{itemize}
+
+\begin{verbatim}
+#save_to: vector_basis.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, ax = plt.subplots(figsize=(5, 5))
+ax.set_title("Vecteur dans une Base Orthonormée (2D)")
+
+# Base vectors
+ax.arrow(0, 0, 1, 0, head_width=0.1, head_length=0.15, fc='red', ec='red', length_includes_head=True, label='i')
+ax.arrow(0, 0, 0, 1, head_width=0.1, head_length=0.15, fc='green', ec='green', length_includes_head=True, label='j')
+ax.text(1.1, -0.1, 'i', color='red', va='top')
+ax.text(-0.1, 1.1, 'j', color='green', ha='right')
+
+# Vector V
+vx, vy = 2.5, 1.8
+ax.arrow(0, 0, vx, vy, head_width=0.1, head_length=0.15, fc='blue', ec='blue', length_includes_head=True, label='V')
+ax.text(vx + 0.1, vy, 'V', color='blue')
+
+# Components
+ax.plot([0, vx], [vy, vy], 'k--')
+ax.plot([vx, vx], [0, vy], 'k--')
+ax.text(vx/2, vy+0.1, "x' i", color='red', ha='center')
+ax.text(vx+0.1, vy/2, "y' j", color='green', va='center')
+ax.text(vx, -0.2, "x'", color='black')
+ax.text(-0.2, vy, "y'", color='black')
+
+ax.set_xlim(-0.5, 3.5)
+ax.set_ylim(-0.5, 3.5)
+ax.set_aspect('equal', adjustable='box')
+ax.grid(True, linestyle=':')
+ax.axhline(0, color='black', linewidth=0.5)
+ax.axvline(0, color='black', linewidth=0.5)
+ax.set_xlabel("X")
+ax.set_ylabel("Y")
+
+plt.tight_layout()
+plt.savefig('vector_basis.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.5\textwidth, keepaspectratio]{vector_basis.png}
+\caption{Représentation d'un vecteur par ses composantes dans une base.}
+\label{fig:vector_basis}
+\end{figure}
+
+
+\paragraph{Addition de Vecteurs :}
+\begin{itemize}
+    \item \textbf{Règle du parallélogramme :} Géométriquement, la somme $\vec{A} + \vec{B}$ est la diagonale du parallélogramme formé par $\vec{A}$ et $\vec{B}$.
+    \item \textbf{Addition des composantes :} Algébriquement, on additionne les composantes correspondantes :
+    Si $\vec{A} = a_x \vec{i} + a_y \vec{j} + a_z \vec{k}$ et $\vec{B} = b_x \vec{i} + b_y \vec{j} + b_z \vec{k}$, alors
+    \[ \vec{A} + \vec{B} = (a_x + b_x) \vec{i} + (a_y + b_y) \vec{j} + (a_z + b_z) \vec{k} \]
+\end{itemize}
+
+\begin{verbatim}
+#save_to: vector_addition.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+
+# Parallelogram Rule
+ax[0].set_title("Addition: Règle du Parallélogramme")
+A = np.array([2, 1])
+B = np.array([1, 3])
+R = A + B
+ax[0].arrow(0, 0, A[0], A[1], head_width=0.15, head_length=0.2, fc='red', ec='red', length_includes_head=True)
+ax[0].arrow(0, 0, B[0], B[1], head_width=0.15, head_length=0.2, fc='blue', ec='blue', length_includes_head=True)
+ax[0].arrow(0, 0, R[0], R[1], head_width=0.15, head_length=0.2, fc='green', ec='green', length_includes_head=True)
+ax[0].text(A[0], A[1]+0.1, 'A', color='red')
+ax[0].text(B[0]+0.1, B[1], 'B', color='blue')
+ax[0].text(R[0]+0.1, R[1]-0.1, 'A+B', color='green')
+# Dashed lines for parallelogram
+ax[0].plot([A[0], R[0]], [A[1], R[1]], 'b--')
+ax[0].plot([B[0], R[0]], [B[1], R[1]], 'r--')
+ax[0].set_xlim(-0.5, 4)
+ax[0].set_ylim(-0.5, 5)
+ax[0].set_aspect('equal', adjustable='box')
+ax[0].grid(True, linestyle=':')
+ax[0].axhline(0, color='black', linewidth=0.5)
+ax[0].axvline(0, color='black', linewidth=0.5)
+
+
+# Component Addition Example
+ax[1].set_title("Addition: Composantes")
+A = np.array([3, 1])
+B = np.array([1, 2])
+R = A + B
+Rx = A[0] + B[0]
+Ry = A[1] + B[1]
+Ax, Ay = A[0], A[1]
+Bx, By = B[0], B[1]
+
+# Vector A and components
+ax[1].arrow(0, 0, Ax, Ay, head_width=0.15, head_length=0.2, fc='red', ec='red', length_includes_head=True)
+ax[1].text(Ax, Ay+0.1, 'A', color='red')
+ax[1].plot([0, Ax], [Ay, Ay], 'r:')
+ax[1].plot([Ax, Ax], [0, Ay], 'r:')
+ax[1].text(Ax/2, -0.3, 'Ax', color='red')
+ax[1].text(-0.3, Ay/2, 'Ay', color='red')
+
+# Vector B and components (shifted)
+ax[1].arrow(Ax, Ay, Bx, By, head_width=0.15, head_length=0.2, fc='blue', ec='blue', length_includes_head=True)
+ax[1].text(Ax+Bx, Ay+By+0.1, 'B', color='blue')
+ax[1].plot([Ax, Ax+Bx], [Ay+By, Ay+By], 'b:')
+ax[1].plot([Ax+Bx, Ax+Bx], [Ay, Ay+By], 'b:')
+ax[1].text(Ax + Bx/2, Ay-0.3, 'Bx', color='blue')
+ax[1].text(Ax-0.3, Ay + By/2, 'By', color='blue')
+
+# Resultant Vector R and components
+ax[1].arrow(0, 0, Rx, Ry, head_width=0.15, head_length=0.2, fc='green', ec='green', length_includes_head=True)
+ax[1].text(Rx/2, Ry+0.1, 'R = A+B', color='green')
+ax[1].plot([0, Rx], [Ry, Ry], 'g--')
+ax[1].plot([Rx, Rx], [0, Ry], 'g--')
+ax[1].text(Rx/2, -0.6, 'Rx = Ax+Bx', color='green')
+ax[1].text(Rx+0.1, Ry/2, 'Ry = Ay+By', color='green', rotation=90, va='center')
+
+
+ax[1].set_xlim(-0.5, 5)
+ax[1].set_ylim(-0.8, 4)
+ax[1].set_aspect('equal', adjustable='box')
+ax[1].grid(True, linestyle=':')
+ax[1].axhline(0, color='black', linewidth=0.5)
+ax[1].axvline(0, color='black', linewidth=0.5)
+
+plt.tight_layout()
+plt.savefig('vector_addition.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, keepaspectratio]{vector_addition.png}
+\caption{Addition de vecteurs : règle du parallélogramme et addition des composantes.}
+\label{fig:vector_addition}
+\end{figure}
+
+\paragraph{Norme d'un Vecteur :}
+\begin{itemize}
+    \item La norme (ou module) d'un vecteur $\vec{V}$, notée $||\vec{V}||$ ou $|\vec{V}|$, est sa longueur.
+    \item Elle est calculée par le théorème de Pythagore en utilisant ses composantes.
+    \item En 2D : $||\vec{V}|| = ||x'\vec{i} + y'\vec{j}|| = \sqrt{(x')^2 + (y')^2}$
+    \item En 3D : $||\vec{V}|| = ||x'\vec{i} + y'\vec{j} + z'\vec{k}|| = \sqrt{(x')^2 + (y')^2 + (z')^2}$
+    \item En dimension $n$, on généralise : la norme est la racine carrée de la somme des carrés des composantes.
+    \item La norme du vecteur $\vec{AB}$ (reliant le point A au point B) est la distance entre A et B.
+\end{itemize}
+
+\paragraph{Normalisation d'un Vecteur :}
+\begin{itemize}
+    \item La normalisation transforme un vecteur non nul en un \textbf{vecteur unitaire} (de norme 1) ayant la même direction et le même sens.
+    \item Pour normaliser un vecteur $\vec{V}$, il suffit de diviser chacune de ses composantes par sa norme $||\vec{V}||$.
+    \item Le vecteur normalisé $\hat{V}$ est : $\hat{V} = \frac{\vec{V}}{||\vec{V}||} = \frac{1}{||\vec{V}||} (x'\vec{i} + y'\vec{j} + z'\vec{k})$
+    \[ \hat{V} = \left( \frac{x'}{||\vec{V}||}, \frac{y'}{||\vec{V}||}, \frac{z'}{||\vec{V}||} \right) \]
+    où $||\vec{V}|| = \sqrt{(x')^2 + (y')^2 + (z')^2}$
+\end{itemize}
+
+\begin{verbatim}
+#save_to: normalization.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, ax = plt.subplots(figsize=(5, 5))
+ax.set_title("Normalisation d'un Vecteur")
+
+V = np.array([3, 2])
+norm_V = np.linalg.norm(V)
+V_hat = V / norm_V
+
+# Original Vector V
+ax.arrow(0, 0, V[0], V[1], head_width=0.15, head_length=0.2, fc='blue', ec='blue', length_includes_head=True)
+ax.text(V[0], V[1]+0.1, f'V (norme={norm_V:.2f})', color='blue')
+
+# Normalized Vector V_hat
+ax.arrow(0, 0, V_hat[0], V_hat[1], head_width=0.1, head_length=0.15, fc='lime', ec='green', length_includes_head=True)
+ax.text(V_hat[0]+0.1, V_hat[1]-0.2, 'V_hat (norme=1)', color='green')
+
+# Unit circle (reference)
+circle = plt.Circle((0, 0), 1, color='gray', fill=False, linestyle='--')
+ax.add_artist(circle)
+
+ax.set_xlim(-0.5, 4)
+ax.set_ylim(-0.5, 3)
+ax.set_aspect('equal', adjustable='box')
+ax.grid(True, linestyle=':')
+ax.axhline(0, color='black', linewidth=0.5)
+ax.axvline(0, color='black', linewidth=0.5)
+ax.set_xlabel("X")
+ax.set_ylabel("Y")
+
+plt.tight_layout()
+plt.savefig('normalization.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.5\textwidth, keepaspectratio]{normalization.png}
+\caption{Un vecteur $\vec{V}$ et son vecteur normalisé $\hat{V}$.}
+\label{fig:normalization}
+\end{figure}
+
+\paragraph{Produit Scalaire (Dot Product) :}
+\begin{itemize}
+    \item Le produit scalaire de deux vecteurs $\vec{A}$ et $\vec{B}$ est un \textbf{scalaire}.
+    \item \textbf{Définition géométrique :} $\vec{A} \cdot \vec{B} = ||\vec{A}|| \, ||\vec{B}|| \cos \theta$, où $\theta$ est l'angle entre les deux vecteurs. Cela correspond au produit du module de l'un par la projection du second sur le premier.
+    \item \textbf{Définition par composantes :} $\vec{A} \cdot \vec{B} = A_x B_x + A_y B_y + A_z B_z$.
+    \item \textbf{Propriétés :}
+    \begin{itemize}
+        \item Commutativité : $\vec{u} \cdot \vec{v} = \vec{v} \cdot \vec{u}$
+        \item Distributivité par l'addition : $(\vec{u} + \vec{v}) \cdot \vec{w} = \vec{u} \cdot \vec{w} + \vec{v} \cdot \vec{w}$
+        \item Distributivité par un scalaire : $\vec{u} \cdot (k \vec{v}) = k (\vec{u} \cdot \vec{v})$
+    \end{itemize}
+    \item \textbf{Angle entre deux vecteurs :} On peut déduire l'angle $\theta$ :
+    \[ \cos \theta = \frac{\vec{A} \cdot \vec{B}}{||\vec{A}|| \, ||\vec{B}||} = \frac{A_x B_x + A_y B_y + A_z B_z}{\sqrt{A_x^2+A_y^2+A_z^2} \sqrt{B_x^2+B_y^2+B_z^2}} \]
+    \item \textbf{Signe et Orthogonalité :}
+    \begin{itemize}
+        \item $\vec{A} \cdot \vec{B} > 0 \implies -90^\circ < \theta < 90^\circ$ (angle aigu)
+        \item $\vec{A} \cdot \vec{B} = 0 \implies \theta = \pm 90^\circ$ (vecteurs orthogonaux)
+        \item $\vec{A} \cdot \vec{B} < 0 \implies 90^\circ < \theta < 180^\circ$ ou $-180^\circ < \theta < -90^\circ$ (angle obtus)
+    \end{itemize}
+    \item \textbf{Applications :}
+    \begin{itemize}
+        \item Projection d'un vecteur sur un autre.
+        \item Élimination des faces cachées (back-face culling) : si le produit scalaire entre la normale à la face et la direction de vue est positif, la face est tournée vers l'arrière.
+        \item Calcul d'angle entre vecteurs.
+        \item Calcul de la quantité de lumière perçue (lois de Lambert, Phong).
+        \item Ombrage.
+    \end{itemize}
+\end{itemize}
+
+\paragraph{Produit Vectoriel (Cross Product) :} (Principalement en 3D)
+\begin{itemize}
+    \item Le produit vectoriel de deux vecteurs $\vec{A}$ et $\vec{B}$ (noté $\vec{A} \times \vec{B}$) est un \textbf{vecteur}.
+    \item \textbf{Direction :} $\vec{A} \times \vec{B}$ est perpendiculaire au plan formé par $\vec{A}$ et $\vec{B}$. Son sens est donné par la règle de la main droite (si on tourne $\vec{A}$ vers $\vec{B}$, le pouce indique la direction de $\vec{A} \times \vec{B}$).
+    \item \textbf{Module :} $||\vec{A} \times \vec{B}|| = ||\vec{A}|| \, ||\vec{B}|| |\sin \theta|$, où $\theta$ est l'angle entre $\vec{A}$ et $\vec{B}$. Le module correspond à l'aire du parallélogramme formé par $\vec{A}$ et $\vec{B}$.
+    \item Le produit vectoriel est nul si les vecteurs sont parallèles ($\theta=0^\circ$ or $180^\circ$) et maximal s'ils sont perpendiculaires ($\theta=90^\circ$).
+    \item \textbf{Calcul par composantes :}
+    \[ \vec{A} \times \vec{B} =
+    \begin{vmatrix}
+    \vec{i} & \vec{j} & \vec{k} \\
+    A_x & A_y & A_z \\
+    B_x & B_y & B_z
+    \end{vmatrix}
+    = (A_y B_z - A_z B_y)\vec{i} - (A_x B_z - A_z B_x)\vec{j} + (A_x B_y - A_y B_x)\vec{k}
+    \]
+    \textbf{Exemple :} $\vec{A}=(1, 2, -4)$, $\vec{B}=(3, -1, 5)$
+    \begin{align*} \vec{A} \times \vec{B} &= \vec{i} (2 \times 5 - (-4) \times (-1)) - \vec{j} (1 \times 5 - (-4) \times 3) + \vec{k} (1 \times (-1) - 2 \times 3) \\ &= \vec{i} (10 - 4) - \vec{j} (5 + 12) + \vec{k} (-1 - 6) \\ &= 6\vec{i} - 17\vec{j} - 7\vec{k} \end{align*}
+    \item \textbf{Propriétés :}
+    \begin{itemize}
+        \item Anticommutativité : $\vec{u} \times \vec{v} = -(\vec{v} \times \vec{u})$
+        \item Distributivité sur l'addition : $(\vec{u} + \vec{v}) \times \vec{w} = \vec{u} \times \vec{w} + \vec{v} \times \vec{w}$
+        \item Distributivité par un scalaire : $(k\vec{u}) \times \vec{v} = \vec{u} \times (k\vec{v}) = k (\vec{u} \times \vec{v})$
+        \item Non-associativité : $(\vec{u} \times \vec{v}) \times \vec{w} \ne \vec{u} \times (\vec{v} \times \vec{w})$ (en général)
+    \end{itemize}
+    \item \textbf{Application :} Calcul de la \textbf{normale} à un plan (ou une face de triangle). Si $\vec{P1P2}$ et $\vec{P1P3}$ sont deux vecteurs arêtes d'un triangle, $\vec{P1P2} \times \vec{P1P3}$ donne un vecteur normal à la face.
+\end{itemize}
+
+\subsection{III. Implémentation du Pipeline Graphique}
+
+Le pipeline graphique peut être implémenté de différentes manières, allant du tout logiciel aux solutions matérielles dédiées.
+
+\subsubsection{Implémentation Logicielle (Software Configurable)}
+\begin{itemize}
+    \item Toutes les étapes du pipeline sont exécutées par le CPU (processeur central).
+    \item Configuration : Entièrement logicielle.
+    \item Performance : Limitée, surtout pour les scènes complexes et le rendu en temps réel.
+    \item Historique : Approche initiale avant l'avènement des cartes graphiques dédiées.
+\end{itemize}
+
+\begin{verbatim}
+#save_to: impl_software.png
+from graphviz import Digraph
+
+dot = Digraph(comment='Implémentation Software')
+dot.graph_attr['rankdir'] = 'TB'
+
+node_style = {'shape': 'box', 'style': 'filled'}
+pipeline_color = 'lightblue'
+compute_color = 'lightgrey'
+
+with dot.subgraph(name='cluster_pipeline') as pipe:
+    pipe.attr(label='Pipeline Graphique', style='filled', color='lightgrey')
+    pipe.node('ModelTrans', 'Transformations\nmodélisation', **node_style, fillcolor=pipeline_color)
+    pipe.node('Shading', 'Illumination', **node_style, fillcolor=pipeline_color)
+    pipe.node('ViewTrans', 'Transfo.\naffichage', **node_style, fillcolor=pipeline_color)
+    pipe.node('Clipping', 'Clipping', **node_style, fillcolor=pipeline_color)
+    pipe.node('Proj', 'Projection', **node_style, fillcolor=pipeline_color)
+    pipe.node('Raster', 'Rasterization', **node_style, fillcolor=pipeline_color)
+    pipe.node('Visibility', 'Visibilité/Rendu', **node_style, fillcolor='deepskyblue')
+    pipe.edge('ModelTrans', 'Shading')
+    pipe.edge('Shading', 'ViewTrans')
+    pipe.edge('ViewTrans', 'Clipping')
+    pipe.edge('Clipping', 'Proj')
+    pipe.edge('Proj', 'Raster')
+    pipe.edge('Raster', 'Visibility')
+
+
+dot.node('CPU', 'Software\nconfigurable\n(CPU)', shape='box', style='filled', fillcolor=compute_color, height='2.5')
+
+# Invisible edges for alignment (optional, might complicate)
+# dot.edge('CPU', 'ModelTrans', style='invis')
+
+dot.render('impl_software', format='png', view=False, cleanup=True)
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.4\textwidth, keepaspectratio]{impl_software.png}
+\caption{Implémentation entièrement logicielle (CPU).}
+\label{fig:impl_software}
+\end{figure}
+
+
+\subsubsection{Premières Cartes Graphiques (Hardware)}
+\begin{itemize}
+    \item Certaines étapes clés (notamment la rastérisation) sont accélérées par du matériel dédié (Hardware).
+    \item Configuration : Le logiciel configure le matériel.
+    \item Performance : Amélioration significative par rapport au tout logiciel.
+\end{itemize}
+
+\begin{verbatim}
+#save_to: impl_early_hw.png
+from graphviz import Digraph
+
+dot = Digraph(comment='Implémentation Early Hardware')
+dot.graph_attr['rankdir'] = 'LR' # Left to Right layout might be clearer
+
+node_style = {'shape': 'box', 'style': 'filled'}
+pipeline_color = 'lightblue'
+compute_color_sw = 'lightgrey'
+compute_color_hw = 'lightcoral'
+
+with dot.subgraph(name='cluster_pipeline') as pipe:
+    pipe.attr(label='Pipeline Graphique', style='filled', color='lightgrey')
+    pipe.node('ModelTrans', 'Transformations\nmodélisation', **node_style, fillcolor=pipeline_color)
+    pipe.node('Shading', 'Illumination', **node_style, fillcolor=pipeline_color)
+    pipe.node('ViewTrans', 'Transfo.\naffichage', **node_style, fillcolor=pipeline_color)
+    pipe.node('Clipping', 'Clipping', **node_style, fillcolor=pipeline_color)
+    pipe.node('Proj', 'Projection', **node_style, fillcolor=pipeline_color)
+    pipe.node('Raster', 'Rasterization', **node_style, fillcolor=compute_color_hw) # Hardware accelerated
+    pipe.node('Visibility', 'Visibilité/Rendu', **node_style, fillcolor=compute_color_hw) # Hardware accelerated
+
+    pipe.edge('ModelTrans', 'Shading')
+    pipe.edge('Shading', 'ViewTrans')
+    pipe.edge('ViewTrans', 'Clipping')
+    pipe.edge('Clipping', 'Proj')
+    pipe.edge('Proj', 'Raster')
+    pipe.edge('Raster', 'Visibility')
+
+
+dot.node('CPU', 'Software\nconfigurable\n(CPU)', **node_style, fillcolor=compute_color_sw)
+dot.node('GPU_HW', 'Hardware\n(GPU)', **node_style, fillcolor=compute_color_hw)
+
+# Connect stages to implementation
+dot.edge('CPU', 'ModelTrans', style='dashed', arrowhead='none')
+dot.edge('CPU', 'Shading', style='dashed', arrowhead='none')
+dot.edge('CPU', 'ViewTrans', style='dashed', arrowhead='none')
+dot.edge('CPU', 'Clipping', style='dashed', arrowhead='none')
+dot.edge('CPU', 'Proj', style='dashed', arrowhead='none')
+dot.edge('GPU_HW', 'Raster', style='dashed', arrowhead='none')
+dot.edge('GPU_HW', 'Visibility', style='dashed', arrowhead='none')
+
+
+dot.render('impl_early_hw', format='png', view=False, cleanup=True)
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, keepaspectratio]{impl_early_hw.png}
+\caption{Implémentation avec accélération matérielle (Hardware) pour certaines étapes.}
+\label{fig:impl_early_hw}
+\end{figure}
+
+\subsubsection{Cartes Graphiques Configurables (Hardware Configurable)}
+\begin{itemize}
+    \item Davantage d'étapes sont implémentées en matériel.
+    \item Le matériel offre des options de configuration, mais les opérations restent largement fixes (pipeline à fonction fixe).
+    \item Performance : Encore améliorée.
+\end{itemize}
+
+\begin{verbatim}
+#save_to: impl_hw_configurable.png
+from graphviz import Digraph
+
+dot = Digraph(comment='Implémentation Hardware Configurable')
+dot.graph_attr['rankdir'] = 'LR'
+
+node_style = {'shape': 'box', 'style': 'filled'}
+pipeline_color = 'lightblue'
+compute_color_sw = 'lightgrey'
+compute_color_hw = 'lightcoral'
+
+with dot.subgraph(name='cluster_pipeline') as pipe:
+    pipe.attr(label='Pipeline Graphique', style='filled', color='lightgrey')
+    pipe.node('ModelTrans', 'Transformations\nmodélisation', **node_style, fillcolor=compute_color_hw) # HW
+    pipe.node('Shading', 'Illumination', **node_style, fillcolor=compute_color_hw) # HW
+    pipe.node('ViewTrans', 'Transfo.\naffichage', **node_style, fillcolor=compute_color_hw) # HW
+    pipe.node('Clipping', 'Clipping', **node_style, fillcolor=compute_color_hw) # HW
+    pipe.node('Proj', 'Projection', **node_style, fillcolor=compute_color_hw) # HW
+    pipe.node('Raster', 'Rasterization', **node_style, fillcolor=compute_color_hw) # HW
+    pipe.node('Visibility', 'Visibilité/Rendu', **node_style, fillcolor=compute_color_hw) # HW
+
+    pipe.edge('ModelTrans', 'Shading')
+    pipe.edge('Shading', 'ViewTrans')
+    pipe.edge('ViewTrans', 'Clipping')
+    pipe.edge('Clipping', 'Proj')
+    pipe.edge('Proj', 'Raster')
+    pipe.edge('Raster', 'Visibility')
+
+dot.node('CPU', 'Software\n(CPU)', **node_style, fillcolor=compute_color_sw) # Still needed for setup/control
+dot.node('GPU_HW_Conf', 'Hardware\nConfigurable\n(GPU)', **node_style, fillcolor=compute_color_hw)
+
+# Connect stages to implementation
+dot.edge('GPU_HW_Conf', 'ModelTrans', style='dashed', arrowhead='none')
+# ... (connect all HW stages)
+dot.edge('GPU_HW_Conf', 'Visibility', style='dashed', arrowhead='none')
+
+
+dot.render('impl_hw_configurable', format='png', view=False, cleanup=True)
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, keepaspectratio]{impl_hw_configurable.png}
+\caption{Implémentation avec matériel configurable pour la plupart des étapes.}
+\label{fig:impl_hw_configurable}
+\end{figure}
+
+\subsubsection{Cartes Graphiques Programmables (Hardware Programmable)}
+\begin{itemize}
+    \item C'est l'architecture moderne des GPU (Graphics Processing Units).
+    \item Certaines étapes clés (typiquement liées aux sommets/vertices et aux fragments/pixels) deviennent programmables via des \textbf{shaders} (petits programmes exécutés sur le GPU).
+    \item Offre une flexibilité énorme pour créer des effets visuels personnalisés.
+    \item Le matériel est hautement parallèle pour traiter des millions de sommets et de fragments simultanément.
+\end{itemize}
+
+\begin{verbatim}
+#save_to: impl_hw_programmable.png
+from graphviz import Digraph
+
+dot = Digraph(comment='Implémentation Hardware Programmable')
+dot.graph_attr['rankdir'] = 'LR'
+
+node_style = {'shape': 'box', 'style': 'filled'}
+pipeline_color = 'lightblue'
+prog_color = 'yellowgreen' # Programmable stages
+fixed_color = 'lightcoral' # Fixed function HW stages
+compute_color_sw = 'lightgrey'
+
+with dot.subgraph(name='cluster_pipeline') as pipe:
+    pipe.attr(label='Pipeline Graphique', style='filled', color='lightgrey')
+    # Simplified Programmable Pipeline Stages
+    pipe.node('VertexProc', 'Traitement\nSommets\n(Vertex Shader)', **node_style, fillcolor=prog_color)
+    pipe.node('PrimitiveAssembly', 'Assemblage\nPrimitives', **node_style, fillcolor=fixed_color)
+    pipe.node('Raster', 'Rasterization', **node_style, fillcolor=fixed_color)
+    pipe.node('FragmentProc', 'Traitement\nFragments\n(Fragment/Pixel Shader)', **node_style, fillcolor=prog_color)
+    pipe.node('PerSampleOps', 'Opérations\npar Échantillon\n(Depth Test, Blend)', **node_style, fillcolor=fixed_color)
+
+    pipe.edge('VertexProc', 'PrimitiveAssembly')
+    pipe.edge('PrimitiveAssembly', 'Raster')
+    pipe.edge('Raster', 'FragmentProc')
+    pipe.edge('FragmentProc', 'PerSampleOps')
+
+
+dot.node('CPU', 'Software\n(CPU)', **node_style, fillcolor=compute_color_sw) # Control, Data Upload
+dot.node('GPU_HW_Prog', 'Hardware\nProgrammable\n(GPU)', **node_style, fillcolor='orange') # Representing the whole GPU
+
+# Connect stages to GPU
+dot.edge('GPU_HW_Prog', 'VertexProc', style='dashed', arrowhead='none')
+# ... (connect all stages to GPU)
+dot.edge('GPU_HW_Prog', 'PerSampleOps', style='dashed', arrowhead='none')
+
+
+dot.render('impl_hw_programmable', format='png', view=False, cleanup=True)
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, keepaspectratio]{impl_hw_programmable.png}
+\caption{Implémentation avec matériel programmable (GPU moderne).}
+\label{fig:impl_hw_programmable}
+\end{figure}
+
+
+\subsubsection{Le GPU (Graphics Processing Unit)}
+\begin{itemize}
+    \item \textbf{Matériel spécialisé :} Conçu pour les calculs massivement parallèles typiques de l'infographie. Très bon dans l'exécution de quelques opérations simples sur d'énormes volumes de données (SIMD/SIMT - Single Instruction, Multiple Data/Thread).
+    \item \textbf{Architecture :} Composé de nombreux cœurs de calcul simples regroupés en unités d'exécution, avec des hiérarchies de caches et un accès rapide à une mémoire dédiée (VRAM).
+    \begin{itemize}
+        \item Unités d'exécution (SIMD/Streaming Multiprocessors).
+        \item Caches (L1, L2).
+        \item Unités spécialisées (Texture mapping units, Raster Operations Pipelines - ROPs, Tessellation units, Ray Tracing cores - sur les GPU récents).
+        \item Scheduler / Work Distributor : Gère la distribution des tâches (sommets, fragments) aux unités d'exécution.
+        \item Interface Mémoire : Connexion à la mémoire GPU (GDDR).
+    \end{itemize}
+    \item \textbf{Performance :} Peut exécuter la même opération (shader) sur des millions de points/pixels de données à la fois. Idéal lorsque le même code est exécuté sur de nombreuses données indépendantes. Moins efficace si le code diverge fortement entre les threads (mauvais pour les branchements conditionnels complexes).
+    \item \textbf{Catalogue d'opérations réduit :} Optimisé pour les opérations mathématiques (algèbre linéaire, interpolations) courantes en graphisme.
+\end{itemize}
+
+\begin{verbatim}
+#save_to: gpu_architecture.png
+from graphviz import Digraph
+
+# Using record shape for structured nodes
+# Avoid '<' and '>' in labels, use 'lt' and 'gt' if needed or structure differently
+
+dot = Digraph(comment='GPU Architecture Simplifiée', node_attr={'shape': 'record', 'style': 'filled', 'fillcolor': 'lightblue'})
+dot.graph_attr['rankdir'] = 'TB'
+
+# Representing multiple SIMD units
+with dot.subgraph(name='cluster_simd_units') as c:
+    c.attr(color='grey', label='Unités de Calcul (ex: SMs)')
+    c.node('simd1', '{ {SIMD Exec | Cache} | {Texture} }', fillcolor='lightgreen')
+    c.node('simd2', '{ {SIMD Exec | Cache} | {Texture} }', fillcolor='lightgreen')
+    c.node('simd_dots', '...', shape='plaintext')
+    c.node('simdn', '{ {SIMD Exec | Cache} | {Texture} }', fillcolor='lightgreen')
+    # Keep them roughly aligned
+    c.edge('simd1', 'simd2', style='invis')
+    c.edge('simd2', 'simd_dots', style='invis')
+    c.edge('simd_dots', 'simdn', style='invis')
+
+
+# Other fixed function units (example)
+with dot.subgraph(name='cluster_fixed_units') as c:
+     c.attr(color='grey', label='Unités Fonction Fixe')
+     c.node('tess', '{Tessellate}', fillcolor='orange')
+     c.node('raster', '{Clip/Cull | Rasterize}', fillcolor='orange')
+     c.node('rop', '{Z-Buffer/Blend (ROP)}', fillcolor='orange')
+     # Keep them roughly aligned
+     c.edge('tess', 'raster', style='invis')
+     c.edge('raster', 'rop', style='invis')
+
+
+# Scheduler and Memory
+dot.node('scheduler', '{Scheduler / Work Distributor}', fillcolor='yellow')
+dot.node('memory_ctrl', '{Contrôleur Mémoire}', fillcolor='grey')
+dot.node('gpu_memory', '{Mémoire GPU (VRAM)}', shape='cylinder', fillcolor='lightgrey')
+
+
+# Connections (simplified flow)
+dot.edge('scheduler', 'simd1', style='dashed')
+dot.edge('scheduler', 'simd2', style='dashed')
+dot.edge('scheduler', 'simdn', style='dashed')
+dot.edge('scheduler', 'tess', style='dashed') # Scheduler might direct work to various units
+
+# Data flow (conceptual) between units
+dot.edge('simdn','tess', style='dotted') # Vertices processed -> Tessellation
+dot.edge('tess','raster', style='dotted') # Tessellated primitives -> Rasterizer
+dot.edge('raster','rop', style='dotted') # Fragments -> ROPs
+# Memory Access
+dot.edge('simd1', 'memory_ctrl', style='dashed')
+dot.edge('simd2', 'memory_ctrl', style='dashed')
+dot.edge('simdn', 'memory_ctrl', style='dashed')
+dot.edge('rop', 'memory_ctrl', style='dashed') # ROPs write to memory
+dot.edge('memory_ctrl', 'gpu_memory')
+
+dot.render('gpu_architecture', format='png', view=False, cleanup=True)
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.8\textwidth, keepaspectratio]{gpu_architecture.png}
+\caption{Schéma simplifié de l'architecture d'un GPU moderne.}
+\label{fig:gpu_architecture}
+\end{figure}
+
+\subsection{IV. Espaces Vectoriels et Affines}
+
+Ces concepts mathématiques sont fondamentaux pour structurer l'espace dans lequel évoluent les objets graphiques.
+
+\begin{itemize}
+    \item \textbf{Espace Vectoriel :} C'est l'espace où vivent les \textbf{vecteurs} (déplacements, directions). Ses propriétés principales incluent l'existence d'un vecteur nul ($\vec{0}$) et la stabilité par combinaison linéaire (si $\vec{u}$ et $\vec{v}$ sont dans l'espace, alors $\alpha \vec{u} + \beta \vec{v}$ l'est aussi, pour tous scalaires $\alpha, \beta$). Un espace vectoriel n'a pas d'origine "privilégiée".
+    \item \textbf{Espace Affine :} C'est l'espace où vivent les \textbf{points} et où l'on définit les objets géométriques usuels (droites, plans, etc.). Il se construit à partir :
+    \begin{itemize}
+        \item D'un point de référence (l'\textbf{origine} O).
+        \item D'un \textbf{espace vectoriel} associé (l'ensemble des déplacements autorisés à partir de n'importe quel point).
+    \end{itemize}
+    Un point P peut être vu comme la somme de l'origine O et d'un vecteur $\vec{OP}$ appartenant à l'espace vectoriel associé. La différence entre deux points est un vecteur : $\vec{AB} = B - A$. L'addition d'un point et d'un vecteur est un point : $A + \vec{v} = B$. L'addition de deux points n'est généralement pas définie directement dans ce cadre (mais le barycentre l'est).
+\end{itemize}
+
+
+\subsection{Conclusion}
+
+Ce chapitre a introduit les concepts fondamentaux de l'infographie, de son histoire et ses applications à son mécanisme central, le pipeline graphique. Nous avons vu que chaque étape du pipeline transforme les données géométriques et d'apparence pour aboutir à l'image finale. L'implémentation de ce pipeline a évolué de solutions purement logicielles vers des architectures matérielles massivement parallèles et programmables (GPU).
+
+Au cœur de ces processus se trouvent les mathématiques : l'algèbre linéaire (matrices pour les transformations) et l'analyse vectorielle (vecteurs pour les positions, directions, normales ; produits scalaires et vectoriels pour les calculs d'angles, de projections, d'orientation). La maîtrise de ces outils mathématiques et la compréhension du pipeline graphique sont essentielles pour quiconque s'intéresse à la création ou à l'analyse d'images de synthèse, y compris dans le contexte de la science des données où la visualisation joue un rôle crucial.
+
+\end{document}
+```

@@ -1,0 +1,1238 @@
+```latex
+\documentclass{article}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{listings}
+\usepackage[french]{babel} % Added for French typography
+
+\newtheorem{theorem}{Théorème} % Changed to French
+\newtheorem{lemma}{Lemme} % Changed to French
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}{Définition} % Changed to French
+\newtheorem{remark}{Remarque} % Changed to French
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Exemple} % Changed to French
+
+\usepackage[margin=1in]{geometry}
+
+% Code listing settings
+\usepackage{xcolor} % Required for colors in listings
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    language=Pseudocode % Changed default language to Pseudocode for pseudocode listings
+}
+\lstset{style=mystyle}
+
+
+\begin{document}
+\sloppy
+
+\section{Rastérisation}
+
+La rastérisation, aussi appelée pixélisation, est un processus fondamental en infographie qui consiste à convertir des descriptions géométriques de primitives (comme les points, les lignes et les triangles) en une représentation basée sur des pixels sur un écran ou dans une image bitmap. C'est une étape clé du pipeline graphique qui permet d'afficher des scènes 3D sur des écrans 2D.
+
+\subsection{Pipeline Graphique}
+Le pipeline graphique est une séquence d'étapes qui transforment une description de scène 3D en une image 2D affichable. La rastérisation est l'une des dernières étapes majeures de ce pipeline.
+
+\begin{verbatim}
+#save_to: pipeline_graphique.png
+from graphviz import Digraph
+
+dot = Digraph(comment='Pipeline Graphique', graph_attr={'rankdir': 'TB'})
+
+dot.node('A', 'Transformations de modélisation')
+dot.node('B', 'Illumination (Shading)')
+dot.node('C', 'Transformation d\'affichage')
+dot.node('D', 'Clipping')
+dot.node('E', 'Transformation écran (Projection)')
+dot.node('F', 'Pixelisation (Rasterization)', style='filled', fillcolor='orange')
+dot.node('G', 'Visibilité / Rendu')
+
+dot.edges(['AB', 'BC', 'CD', 'DE', 'EF', 'FG'])
+
+dot.render('pipeline_graphique', format='png', view=False)
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.8\textwidth, keepaspectratio]{pipeline_graphique.png}
+\caption{Étapes simplifiées du pipeline graphique mettant en évidence la Rastérisation.}
+\label{fig:pipeline_graphique}
+\end{figure}
+
+La rastérisation implique deux actions principales :
+\begin{itemize}
+    \item \textbf{Découpe des primitives 2D en pixels :} Déterminer quels pixels de la grille de l'écran sont couverts par chaque primitive géométrique (après projection).
+    \item \textbf{Interpolation des valeurs connues aux sommets :} Calculer les attributs (comme la couleur, la profondeur, les coordonnées de texture) pour chaque pixel couvert (fragment) en interpolant les valeurs définies aux sommets de la primitive.
+\end{itemize}
+
+\begin{verbatim}
+#save_to: raster_triangle_grid.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots()
+
+# Grille de pixels
+for i in range(11):
+    ax.plot([0, 10], [i, i], color='lightgray', linestyle='-', linewidth=0.5)
+    ax.plot([i, i], [0, 10], color='lightgray', linestyle='-', linewidth=0.5)
+
+# Triangle
+triangle_vertices = np.array([[2.5, 1.5], [7.5, 4.5], [4.5, 8.5]])
+triangle = patches.Polygon(triangle_vertices, closed=True, edgecolor='blue', facecolor='lightblue', alpha=0.7)
+ax.add_patch(triangle)
+
+# Pixels "couverts" (approximatif)
+covered_pixels = [
+    (3,2), (4,2), (5,2), (6,2),
+    (3,3), (4,3), (5,3), (6,3), (7,3),
+    (3,4), (4,4), (5,4), (6,4), (7,4),
+    (4,5), (5,5), (6,5), (7,5),
+    (4,6), (5,6), (6,6),
+    (4,7), (5,7),
+    (5,8)
+]
+for px, py in covered_pixels:
+    rect = patches.Rectangle((px, py), 1, 1, linewidth=0.5, edgecolor='black', facecolor='gray')
+    ax.add_patch(rect)
+
+ax.set_xlim(0, 10)
+ax.set_ylim(0, 10)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xticks(np.arange(0.5, 10.5, 1))
+ax.set_yticks(np.arange(0.5, 10.5, 1))
+ax.set_xticklabels([])
+ax.set_yticklabels([])
+ax.grid(False)
+plt.title("Découpe d'un triangle en pixels")
+
+plt.savefig('raster_triangle_grid.png')
+plt.close()
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, max height=0.4\textheight, keepaspectratio]{raster_triangle_grid.png}
+\caption{Illustration de la découpe d'une primitive (triangle) en pixels sur une grille.}
+\label{fig:raster_triangle_grid}
+\end{figure}
+
+\subsection{Pipeline de Rastérisation}
+Le pipeline de rastérisation moderne est conçu pour la génération d'images en temps réel.
+\begin{itemize}
+    \item \textbf{Input:} Primitives 3D, essentiellement des triangles, potentiellement avec des attributs supplémentaires (couleur, normales, coordonnées de texture). Par exemple, un objet peut être défini par une liste de sommets (LS) et une liste de faces (F), chaque face référençant des sommets:
+    \begin{itemize}
+        \item LS = \{P0, P1, P2, P3\}
+        \item F1 = (LS[0], LS[1], LS[2])
+        \item F2 = (LS[0], LS[2], LS[3])
+        \item ...
+        \item Obj = \{F1, F2, F3, F4\}
+    \end{itemize}
+    \item \textbf{Output:} Une image bitmap (un tableau 2D de pixels), potentiellement avec des informations supplémentaires par pixel (profondeur pour le test de visibilité, alpha pour la transparence).
+    \item \textbf{Objectif:} Comprendre les étapes intermédiaires qui mènent de la géométrie aux pixels.
+    \item \textbf{Exécution:} En pratique, ces étapes sont massivement parallélisées et exécutées par le GPU (Graphics Processing Unit).
+\end{itemize}
+
+\subsection{Pourquoi les triangles?}
+Le pipeline de rastérisation est fortement optimisé pour le traitement des triangles. Toutes les primitives géométriques, y compris les points et les lignes, sont généralement converties en triangles avant ou pendant la rastérisation.
+
+\begin{verbatim}
+#save_to: primitives_to_triangles.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots(figsize=(6, 2))
+
+# Point comme triangle dégénéré
+ax.plot(1, 1, 'bo', markersize=8, label='"Point"')
+# triangle_point = patches.Polygon([[0.9, 0.9], [1.1, 0.9], [1.0, 1.1]], closed=True, edgecolor='blue', facecolor='lightblue', alpha=0.5)
+# ax.add_patch(triangle_point)
+ax.text(1, 0.5, '"Point"', ha='center')
+
+
+# Ligne comme deux triangles
+ax.plot([3, 6], [1, 1], 'b-', linewidth=3, label='"Line"')
+triangle_line1 = patches.Polygon([[3, 0.9], [6, 0.9], [3, 1.1]], closed=True, edgecolor='blue', facecolor='lightblue', alpha=0.5)
+triangle_line2 = patches.Polygon([[6, 0.9], [6, 1.1], [3, 1.1]], closed=True, edgecolor='blue', facecolor='lightblue', alpha=0.5)
+ax.add_patch(triangle_line1)
+ax.add_patch(triangle_line2)
+ax.text(4.5, 0.5, '"Line"', ha='center')
+
+
+ax.set_xlim(0, 7)
+ax.set_ylim(0, 2)
+ax.set_aspect('equal', adjustable='box')
+ax.axis('off')
+plt.title("Conversion des primitives en triangles")
+
+plt.savefig('primitives_to_triangles.png')
+plt.close()
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.6\textwidth, keepaspectratio]{primitives_to_triangles.png}
+\caption{Conversion conceptuelle de points et lignes en triangles pour la rastérisation.}
+\label{fig:primitives_to_triangles}
+\end{figure}
+
+Pourquoi cette focalisation sur les triangles?
+\begin{itemize}
+    \item \textbf{Approximation universelle:} N'importe quelle forme 3D complexe peut être approximée par un maillage de triangles.
+    \item \textbf{Planaire:} Un triangle est toujours planaire, ce qui garantit un vecteur normal bien défini (utile pour l'éclairage).
+    \item \textbf{Interpolation facile:} Les attributs (couleur, etc.) peuvent être facilement et efficacement interpolés sur la surface du triangle en utilisant les coordonnées barycentriques.
+\end{itemize}
+
+\subsection{Pixels sur l'écran}
+L'étape finale de la rastérisation consiste à déterminer la couleur de chaque pixel sur l'écran.
+\begin{itemize}
+    \item Chaque élément d'image (pixel) est affiché comme un petit carré de lumière avec la couleur appropriée (approximativement).
+    \item Pixel signifie "picture element".
+\end{itemize}
+
+\subsection{Rastérisation en bref}
+La question centrale de la rastérisation est: \textbf{Quels pixels le triangle (projeté) chevauche-t-il?}
+
+\begin{verbatim}
+#save_to: raster_bref.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, axs = plt.subplots(1, 2, figsize=(8, 4))
+
+# Input Triangle
+axs[0].set_title("Input:\nPosition projetée des sommets\ndu triangle: P0, P1, P2")
+triangle_vertices = np.array([[1.5, 1.5], [8.5, 3.5], [5.5, 8.5]])
+triangle = patches.Polygon(triangle_vertices, closed=True, edgecolor='red', facecolor='lightcoral', alpha=0.7)
+axs[0].add_patch(triangle)
+for i in range(11):
+    axs[0].plot([0, 10], [i, i], color='lightgray', linestyle=':', linewidth=0.5)
+    axs[0].plot([i, i], [0, 10], color='lightgray', linestyle=':', linewidth=0.5)
+axs[0].set_xlim(0, 10)
+axs[0].set_ylim(0, 10)
+axs[0].set_aspect('equal', adjustable='box')
+axs[0].set_xticks([])
+axs[0].set_yticks([])
+axs[0].grid(False)
+
+# Output Pixels
+axs[1].set_title("Output:\nEnsemble des pixels \"couverts\"\npar le triangle")
+covered_pixels_coords = [
+    (2,2), (3,2), (4,2), (5,2), (6,2), (7,2), (8,2),
+    (2,3), (3,3), (4,3), (5,3), (6,3), (7,3), (8,3),
+    (3,4), (4,4), (5,4), (6,4), (7,4),
+    (3,5), (4,5), (5,5), (6,5), (7,5),
+    (4,6), (5,6), (6,6),
+    (4,7), (5,7),
+    (5,8)
+]
+pixel_values = np.zeros((10, 10))
+for r, c in covered_pixels_coords:
+    # Adjusting indices for typical matrix representation if needed, but using coords directly here
+    if 0 <= c < 10 and 0 <= r < 10:
+         # Plotting rectangles for covered pixels
+        rect = patches.Rectangle((r, c), 1, 1, linewidth=1, edgecolor='red', facecolor='lightcoral')
+        axs[1].add_patch(rect)
+
+for i in range(11):
+    axs[1].plot([0, 10], [i, i], color='lightgray', linestyle=':', linewidth=0.5)
+    axs[1].plot([i, i], [0, 10], color='lightgray', linestyle=':', linewidth=0.5)
+axs[1].set_xlim(0, 10)
+axs[1].set_ylim(0, 10)
+axs[1].set_aspect('equal', adjustable='box')
+axs[1].set_xticks([])
+axs[1].set_yticks([])
+axs[1].grid(False)
+
+
+plt.tight_layout()
+plt.savefig('raster_bref.png')
+plt.close()
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, max height=0.4\textheight, keepaspectratio]{raster_bref.png}
+\caption{Entrée (sommets du triangle projeté) et sortie (pixels couverts) de la rastérisation.}
+\label{fig:raster_bref}
+\end{figure}
+
+Une autre question importante gérée pendant ou après la rastérisation est la visibilité : \textbf{Quel est le triangle le plus proche de la caméra dans chaque pixel ?} Ceci est généralement résolu à l'aide d'un Z-buffer (tampon de profondeur).
+
+Les principaux aspects abordés dans le contexte de la rastérisation incluent :
+\begin{itemize}
+    \item \textbf{Traçage :} Algorithmes pour dessiner des lignes et des courbes (segments de droites, cercles).
+    \item \textbf{Anticrénelage (Antialiasing) :} Techniques pour réduire les artefacts visuels (jaggies) dus à la discrétisation.
+    \item \textbf{Remplissage des primitives projetées :} Algorithmes pour remplir l'intérieur des polygones (triangles).
+\end{itemize}
+
+\subsection{Traçage : Segments de Droites}
+Le traçage de segments de droite est un algorithme de base essentiel pour de nombreux traitements en infographie, tels que le dessin en fil de fer, le remplissage de polygones, et l'élimination des parties cachées. L'objectif est de déterminer quels pixels doivent être allumés pour représenter au mieux un segment de droite continu entre deux points $(x_1, y_1)$ et $(x_2, y_2)$ sur une grille de pixels discrète.
+
+Il y a trois impératifs pour un bon algorithme de traçage de segment discret :
+\begin{enumerate}
+    \item Tout point du segment discret est traversé par le segment continu.
+    \item Le segment discret doit être connexe. Tout point du segment discret touche au moins un autre point, soit par l'un de ses côtés (4-connexité), soit par un de ses sommets (8-connexité). La 4-connexité est souvent préférée pour éviter des lignes trop épaisses en diagonale.
+    \item On trace le moins de points possibles (idéalement, un seul pixel par colonne ou par ligne de la grille, selon la pente).
+\end{enumerate}
+
+\begin{verbatim}
+#save_to: trace_connectivite.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, axs = plt.subplots(1, 2, figsize=(8, 4.5))
+
+def draw_grid_and_pixels(ax, title, center_pixel, neighbors):
+    ax.set_title(title)
+    # Grille
+    for i in range(6):
+        ax.plot([0, 5], [i, i], color='lightgray', linestyle='-', linewidth=0.5)
+        ax.plot([i, i], [0, 5], color='lightgray', linestyle='-', linewidth=0.5)
+
+    # Pixel central
+    cx, cy = center_pixel
+    rect = patches.Rectangle((cx, cy), 1, 1, linewidth=1, edgecolor='black', facecolor='blue')
+    ax.add_patch(rect)
+    ax.text(cx + 0.5, cy + 0.5, 'P', color='white', ha='center', va='center', fontsize=12)
+
+
+    # Voisins
+    for nx, ny in neighbors:
+        rect = patches.Rectangle((nx, ny), 1, 1, linewidth=1, edgecolor='black', facecolor='lightblue')
+        ax.add_patch(rect)
+
+    ax.set_xlim(0, 5)
+    ax.set_ylim(0, 5)
+    ax.set_aspect('equal', adjustable='box')
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.grid(False)
+
+# 4-Connexité
+center = (2, 2)
+neighbors_4 = [(2, 3), (2, 1), (3, 2), (1, 2)]
+draw_grid_and_pixels(axs[0], "4-Connexité", center, neighbors_4)
+
+# 8-Connexité
+neighbors_8 = [(2, 3), (2, 1), (3, 2), (1, 2), (1, 1), (1, 3), (3, 1), (3, 3)]
+draw_grid_and_pixels(axs[1], "8-Connexité", center, neighbors_8)
+
+
+plt.tight_layout()
+plt.savefig('trace_connectivite.png')
+plt.close()
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.7\textwidth, keepaspectratio]{trace_connectivite.png}
+\caption{Voisins d'un pixel (P) en 4-connexité (côtés) et 8-connexité (côtés et sommets).}
+\label{fig:trace_connectivite}
+\end{figure}
+
+\subsubsection{Tracé de segments par l'équation cartésienne}
+Une approche simple consiste à utiliser l'équation cartésienne de la droite : $y = ax + b$.
+Soit un segment entre $(x_1, y_1)$ et $(x_2, y_2)$. La pente $a$ et l'ordonnée à l'origine $b$ sont :
+\begin{align*} a &= \frac{y_2 - y_1}{x_2 - x_1} \\ b &= y_1 - a x_1 \end{align*}
+Pour simplifier, supposons $x_2 > x_1$, $y_2 \ge y_1$ et que la pente est inférieure ou égale à 1, c'est-à-dire $(x_2 - x_1) \ge (y_2 - y_1)$. Dans ce cas, pour chaque valeur entière de $x$ entre $x_1$ et $x_2$, on calcule la valeur $y$ correspondante et on arrondit à l'entier le plus proche pour déterminer le pixel à allumer.
+
+\paragraph{Incrémentation suivant l'axe x (pente $\le 1$)}
+Si la valeur absolue de la pente $|a| \le 1$, on incrémente $x$ de $x_1$ à $x_2$ et on calcule $y = \text{round}(ax + b)$ pour chaque $x$.
+
+\begin{lstlisting}[language=Pseudocode, caption={Algorithme simple basé sur l'équation cartésienne (incrémentation en x)}, label={lst:droitesimple_x}]
+DroiteSimple (int x1, int x2, int y1, int y2)
+{
+  a = (y2 - y1) / (x2 - x1);
+  b = y1 - a * x1;
+  x = x1;
+  while (x <= x2) // Inclure x2
+  {
+    AfficherPixel(x, round(a * x + b)); // Arrondi nécessaire
+    x = x + 1;
+  }
+}
+\end{lstlisting}
+
+\begin{verbatim}
+#save_to: trace_cartesian_x.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots(figsize=(5, 5))
+
+x1, y1 = 1, 1
+x2, y2 = 5, 6 # Pente > 1, mauvais cas pour l'incrémentation en x pur
+# Exemple du slide: (1,1) a (5,6), a = 5/4 = 1.25, b = 1 - 1.25*1 = -0.25
+# Les pixels sont (1,1), (2, round(1.25*2-0.25)=round(2.25)=2), (3, round(3.5)=4), (4, round(4.75)=5), (5, round(6)=6)
+# L'exemple du slide pour x-incr (page 10) semble mal calculé ou vise une autre ligne.
+# Prenons l'exemple visuel: (1,1) a (5,4) => a = 3/4 = 0.75, b = 1 - 0.75*1 = 0.25
+x1_vis, y1_vis = 1, 1
+x2_vis, y2_vis = 5, 4
+a_vis = (y2_vis - y1_vis) / (x2_vis - x1_vis)
+b_vis = y1_vis - a_vis * x1_vis
+
+pixels_x = []
+coordinates_x = []
+for x in range(x1_vis, x2_vis + 1):
+    y_exact = a_vis * x + b_vis
+    y = round(y_exact)
+    pixels_x.append((x, int(y)))
+    coordinates_x.append(f"({x},{int(y)})")
+
+# Grille
+grid_max_x = 6
+grid_max_y = 5
+for i in range(grid_max_x + 1):
+    ax.plot([0, grid_max_x], [i, i], color='lightgray', linestyle='-', linewidth=0.5)
+for i in range(grid_max_y + 1):
+    ax.plot([i, i], [0, grid_max_y], color='lightgray', linestyle='-', linewidth=0.5)
+
+# Ligne idéale
+ax.plot([x1_vis, x2_vis], [y1_vis, y2_vis], color='red', linestyle='--')
+
+# Pixels
+for px, py in pixels_x:
+    rect = patches.Rectangle((px, py), 1, 1, linewidth=1, edgecolor='black', facecolor='blue')
+    ax.add_patch(rect)
+
+ax.set_xlim(0, grid_max_x)
+ax.set_ylim(0, grid_max_y)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xticks(np.arange(0.5, grid_max_x + 0.5, 1))
+ax.set_yticks(np.arange(0.5, grid_max_y + 0.5, 1))
+ax.set_xticklabels(np.arange(0, grid_max_x + 1, 1))
+ax.set_yticklabels(np.arange(0, grid_max_y + 1, 1))
+ax.invert_yaxis() # Match slide layout
+ax.xaxis.tick_top() # Match slide layout
+plt.title("Incrémentation suivant x (1,1) à (5,4)")
+ax.set_xlabel("x")
+ax.set_ylabel("y")
+
+# Annotations
+# annotation_text = "\n".join(coordinates_x)
+# ax.text(grid_max_x + 0.5, grid_max_y / 2, annotation_text, va='center')
+
+plt.savefig('trace_cartesian_x.png')
+plt.close()
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.6\textwidth, keepaspectratio]{trace_cartesian_x.png}
+\caption{Exemple de tracé par incrémentation suivant l'axe x (pour une pente $\le 1$).}
+\label{fig:trace_cartesian_x}
+\end{figure}
+
+\paragraph{Incrémentation suivant l'axe y (pente $> 1$)}
+Si la valeur absolue de la pente $|a| > 1$, on doit incrémenter $y$ de $y_1$ à $y_2$ et calculer $x = \text{round}((y - b) / a)$ pour chaque $y$.
+
+\begin{lstlisting}[language=Pseudocode, caption={Algorithme simple basé sur l'équation cartésienne (incrémentation en y)}, label={lst:droitesimple_y}]
+DroiteSimpleY (int x1, int x2, int y1, int y2)
+{
+  a = (y2 - y1) / (x2 - x1);
+  b = y1 - a * x1;
+  y = y1;
+  while (y <= y2) // Inclure y2
+  {
+    AfficherPixel(round((y - b) / a), y); // Arrondi nécessaire
+    y = y + 1;
+  }
+}
+\end{lstlisting}
+
+\begin{verbatim}
+#save_to: trace_cartesian_y.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots(figsize=(5, 5))
+
+# Exemple du slide: (1,1) a (5,6) => a = 5/4 = 1.25, b = -0.25
+x1, y1 = 1, 1
+x2, y2 = 5, 6
+a = (y2 - y1) / (x2 - x1)
+b = y1 - a * x1
+
+pixels_y = []
+coordinates_y = []
+for y in range(y1, y2 + 1):
+    x_exact = (y - b) / a
+    x = round(x_exact)
+    pixels_y.append((int(x), y))
+    coordinates_y.append(f"({int(x)},{y})")
+    # Slide coords: (1,1), (1,2), (2,3), (3,4), (4,5), (5,6)
+    # Calculés:
+    # y=1: x=(1 - -0.25)/1.25 = 1.25/1.25=1 -> (1,1)
+    # y=2: x=(2 - -0.25)/1.25 = 2.25/1.25=1.8 -> round(1.8)=2 -> (2,2) - Differs from slide
+    # y=3: x=(3 - -0.25)/1.25 = 3.25/1.25=2.6 -> round(2.6)=3 -> (3,3) - Differs from slide
+    # y=4: x=(4 - -0.25)/1.25 = 4.25/1.25=3.4 -> round(3.4)=3 -> (3,4) - Differs from slide
+    # y=5: x=(5 - -0.25)/1.25 = 5.25/1.25=4.2 -> round(4.2)=4 -> (4,5)
+    # y=6: x=(6 - -0.25)/1.25 = 6.25/1.25=5 -> round(5)=5 -> (5,6)
+# The slide's example coordinates for Y incrementation seem inconsistent with the formula y=ax+b and rounding.
+# Let's use the slide's coordinates for visualization.
+pixels_y_slide = [(1,1), (1,2), (2,3), (3,4), (4,5), (5,6)]
+coordinates_y_slide = ["(1,1)", "(1,2)", "(2,3)", "(3,4)", "(4,5)", "(5,6)"]
+
+
+# Grille
+grid_max_x = 6
+grid_max_y = 7
+for i in range(grid_max_x + 1):
+    ax.plot([0, grid_max_x], [i, i], color='lightgray', linestyle='-', linewidth=0.5)
+for i in range(grid_max_y + 1):
+    ax.plot([i, i], [0, grid_max_y], color='lightgray', linestyle='-', linewidth=0.5)
+
+# Ligne idéale
+ax.plot([x1, x2], [y1, y2], color='red', linestyle='--')
+
+# Pixels (from slide)
+for px, py in pixels_y_slide:
+    rect = patches.Rectangle((px, py), 1, 1, linewidth=1, edgecolor='black', facecolor='blue')
+    ax.add_patch(rect)
+
+ax.set_xlim(0, grid_max_x)
+ax.set_ylim(0, grid_max_y)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xticks(np.arange(0.5, grid_max_x + 0.5, 1))
+ax.set_yticks(np.arange(0.5, grid_max_y + 0.5, 1))
+ax.set_xticklabels(np.arange(0, grid_max_x + 1, 1))
+ax.set_yticklabels(np.arange(0, grid_max_y + 1, 1))
+ax.invert_yaxis() # Match slide layout
+ax.xaxis.tick_top() # Match slide layout
+plt.title("Incrémentation suivant y (1,1) à (5,6)")
+ax.set_xlabel("x")
+ax.set_ylabel("y")
+
+# Annotations
+# annotation_text = "\n".join(coordinates_y_slide)
+# ax.text(grid_max_x + 0.5, grid_max_y / 2, annotation_text, va='center')
+
+
+plt.savefig('trace_cartesian_y.png')
+plt.close()
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.6\textwidth, keepaspectratio]{trace_cartesian_y.png}
+\caption{Exemple de tracé par incrémentation suivant l'axe y (pour une pente $> 1$). Les pixels sont ceux indiqués sur la diapositive.}
+\label{fig:trace_cartesian_y}
+\end{figure}
+
+Il faut donc "switcher" entre ces deux versions (incrémentation en $x$ ou en $y$) en fonction de la pente de la droite. Les autres cas (pentes négatives, $x_1 > x_2$, etc.) peuvent être traités par symétrie.
+
+\paragraph{Caractéristiques}
+\begin{itemize}
+    \item \textbf{Simplicité algorithmique :} L'idée de base est facile à comprendre.
+    \item \textbf{Lenteur :} Cette méthode nécessite des calculs en virgule flottante (division pour $a$, multiplication $ax$, addition $ax+b$), ainsi qu'une opération d'arrondi (`round` ou `cast` implicite après ajout de 0.5), ce qui est coûteux en termes de performance par rapport aux opérations sur entiers.
+\end{itemize}
+
+\subsubsection{Algorithmes de Bresenham}
+L'algorithme de Bresenham (développé par Jack Bresenham en 1962) est une méthode beaucoup plus efficace pour tracer des lignes car il utilise uniquement des opérations sur entiers (additions, soustractions, comparaisons et décalages binaires implicites par multiplication par 2).
+
+L'idée clé est de maintenir une variable d'erreur $e$ qui représente la distance (ou une valeur proportionnelle à la distance) entre la position $y$ du pixel courant et la position $y$ exacte sur la ligne idéale, pour le $x$ courant. À chaque étape (incrémentation de $x$), on met à jour $e$. Si $e$ dépasse un certain seuil (0.5 pour l'erreur normalisée, ou $dx$ pour l'erreur entière), cela signifie que la ligne est passée plus près du pixel supérieur $(x_k+1, y_k+1)$ que du pixel est $(x_k+1, y_k)$. Dans ce cas, on incrémente $y$ et on ajuste $e$ en conséquence.
+
+Considérons le cas simple $0 \le a \le 1$. À l'étape $k$, on a tracé le pixel $(x_k, y_k)$. Pour $x_{k+1} = x_k+1$, on doit choisir entre le pixel Est $E = (x_k+1, y_k)$ et le pixel Nord-Est $NE = (x_k+1, y_k+1)$. On choisit le pixel le plus proche de la ligne idéale.
+
+Soit $y$ la coordonnée $y$ exacte sur la ligne pour $x_{k+1}$. La décision est basée sur la distance verticale entre $y$ et le point milieu $M = (x_k+1, y_k+0.5)$.
+\begin{itemize}
+    \item Si $y < y_k + 0.5$, on choisit $E$.
+    \item Si $y \ge y_k + 0.5$, on choisit $NE$.
+\end{itemize}
+Cette condition est équivalente à tester le signe d'un paramètre de décision $d = f(x_k+1, y_k+0.5)$, où $f(x, y) = (y_2-y_1)x - (x_2-x_1)y + c$ est dérivé de l'équation implicite de la droite. L'astuce de Bresenham est de calculer ce paramètre de décision de manière incrémentale en utilisant uniquement des entiers.
+
+\paragraph{Algorithme de base (avec flottants pour l'erreur)}
+Une première version conceptuelle utilise une erreur $e$ initialisée à 0. À chaque pas en $x$, on ajoute la pente $a=dy/dx$ à $e$. Si $e$ dépasse 0.5, on incrémente $y$ et on soustrait 1 à $e$ (pour ramener l'erreur par rapport au nouveau $y$).
+
+\begin{lstlisting}[language=Pseudocode, caption={Algorithme de Bresenham (conceptuel, avec erreur flottante)}, label={lst:bresenham_float}]
+DroiteBresenhamFloat (int x1, int x2, int y1, int y2)
+{
+  dx = x2 - x1;
+  dy = y2 - y1;
+  a = dy / dx; // Pente (flottant)
+  x = x1;
+  y = y1;
+  e = 0.0;     // Erreur (flottant)
+  while (x <= x2)
+  {
+    AfficherPixel (x, y);
+    e = e + a;
+    x = x + 1;
+    if (e > 0.5)
+    {
+      y = y + 1;
+      e = e - 1.0;
+    }
+  }
+}
+\end{lstlisting}
+
+\paragraph{Optimisation 1 : Éliminer la division initiale}
+On peut éviter la division $dy/dx$ en multipliant toute l'équation de l'erreur par $dx$. L'erreur $e$ devient $e' = e \times dx$.
+L'incrément devient $a \times dx = dy$. Le seuil $0.5$ devient $0.5 \times dx$. L'ajustement devient $1.0 \times dx = dx$.
+
+\begin{lstlisting}[language=Pseudocode, caption={Bresenham sans division initiale (seuil flottant)}, label={lst:bresenham_nodiv}]
+DroiteBresenhamNoDiv (int x1, int x2, int y1, int y2)
+{
+  dx = x2 - x1;
+  dy = y2 - y1;
+  x = x1;
+  y = y1;
+  e = 0; // Erreur * dx (entier)
+  while (x <= x2)
+  {
+    AfficherPixel (x, y);
+    e = e + dy;     // Incrémenter l'erreur (entier)
+    x = x + 1;
+    // Comparaison avec seuil flottant dx/2
+    if (e * 2 > dx) // Equivalent à e > dx/2 en entiers si dx > 0
+    {
+      y = y + 1;
+      e = e - dx;   // Ajuster l'erreur (entier)
+    }
+  }
+}
+\end{lstlisting}
+
+\paragraph{Optimisation 2 : Éliminer la comparaison flottante (ou la multiplication par 2)}
+On peut éliminer la comparaison $e > dx/2$ (ou $2e > dx$) en initialisant l'erreur différemment. L'algorithme classique de Bresenham utilise un paramètre de décision $p_k = 2 dx \times e_k = 2 dy \cdot (x_k - x_1) - 2 dx \cdot (y_k - y_1)$.
+La valeur initiale est $p_0 = 2dy - dx$.
+La mise à jour se fait comme suit :
+\begin{itemize}
+    \item Si $p_k < 0$, le prochain pixel est $E = (x_k+1, y_k)$, et $p_{k+1} = p_k + 2dy$.
+    \item Si $p_k \ge 0$, le prochain pixel est $NE = (x_k+1, y_k+1)$, et $p_{k+1} = p_k + 2dy - 2dx$.
+\end{itemize}
+
+\begin{lstlisting}[language=Pseudocode, caption={Algorithme de Bresenham classique (entiers seulement)}, label={lst:bresenham_int}]
+DroiteBresenhamInt (int x1, int x2, int y1, int y2)
+{
+  dx = x2 - x1;
+  dy = y2 - y1;
+  x = x1;
+  y = y1;
+  p = 2 * dy - dx; // Parametre de decision initial
+  incE = 2 * dy;       // Increment si E choisi
+  incNE = 2 * (dy - dx); // Increment si NE choisi
+
+  AfficherPixel (x, y);
+  while (x < x2) // Boucle dx fois
+  {
+    x = x + 1;
+    if (p < 0)
+    {
+      p = p + incE;
+      // y ne change pas
+    }
+    else
+    {
+      y = y + 1;
+      p = p + incNE;
+    }
+    AfficherPixel (x, y);
+  }
+}
+\end{lstlisting}
+
+Cet algorithme final n'utilise que des additions, soustractions et comparaisons sur des entiers, le rendant extrêmement rapide. Des adaptations similaires existent pour les autres pentes et directions.
+
+\paragraph{Rapidité due à :}
+\begin{itemize}
+    \item Utilisation exclusive d'entiers courts (les valeurs de $dx, dy, p$ restent généralement petites, de l'ordre de la résolution de l'écran).
+    \item Opérations arithmétiques simples sur ces entiers (additions, soustractions, comparaisons).
+\end{itemize}
+
+\section{Anticrénelage (Antialiasing)}
+
+Les algorithmes de tracé comme celui de Bresenham produisent des lignes qui peuvent apparaître comme des "escaliers" (appelés "jaggies"), en particulier sur les lignes à faible pente. Ce phénomène est appelé \textbf{crénelage} (aliasing). Il est dû à la nature discrète de la grille de pixels qui sous-échantillonne le signal continu de la ligne idéale. D'autres artefacts, comme les motifs de Moiré, peuvent aussi apparaître.
+
+L'\textbf{anticrénelage} (antialiasing) regroupe les techniques visant à réduire ces artefacts pour améliorer la qualité visuelle des images. L'idée générale est de simuler une couverture partielle des pixels par la primitive, en utilisant des nuances de couleur ou d'intensité.
+
+\begin{figure}[H]
+\centering
+% Placeholder: Ideally show two images, one aliased, one antialiased
+\fbox{Image: Comparaison Crénelage vs Anticrénelage}
+\caption{Effet du crénelage (gauche) et résultat après anticrénelage (droite).}
+\label{fig:aliasing_vs_antialiasing}
+\end{figure}
+
+Les deux principales approches sont :
+\begin{itemize}
+    \item Le sur-échantillonnage de l'image.
+    \item Les algorithmes de tracé de segments corrigés.
+\end{itemize}
+
+\subsection{Antialiasing: Sur-échantillonnage de l'Image}
+
+Le principe est de calculer l'image à une résolution plus élevée que la résolution finale désirée (par exemple, 3x3 ou 5x5 sous-pixels pour chaque pixel final), puis de combiner les valeurs des sous-pixels pour obtenir la valeur du pixel final. Cette combinaison se fait par \textbf{filtrage}.
+
+\begin{verbatim}
+#save_to: supersampling_concept.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, axs = plt.subplots(1, 3, figsize=(12, 4))
+
+# 1. Matrice d'origine (Pixel)
+axs[0].set_title("Matrice d'origine (1 pixel)")
+rect_orig = patches.Rectangle((0, 0), 1, 1, linewidth=2, edgecolor='black', facecolor='none')
+axs[0].add_patch(rect_orig)
+axs[0].text(0.5, 0.5, 'Pixel Final', ha='center', va='center')
+axs[0].set_xlim(-0.2, 1.2)
+axs[0].set_ylim(-0.2, 1.2)
+axs[0].set_aspect('equal', adjustable='box')
+axs[0].axis('off')
+
+# 2. Sur-échantillonnage (e.g., 3x3)
+axs[1].set_title("Sur-échantillonnage (e.g., 3x3)")
+for i in range(3):
+    for j in range(3):
+        rect_sub = patches.Rectangle((i/3, j/3), 1/3, 1/3, linewidth=0.5, edgecolor='gray', facecolor='lightblue' if (i+j)%2==0 else 'lightyellow')
+        axs[1].add_patch(rect_sub)
+# Dessiner une ligne traversant les sous-pixels
+axs[1].plot([-0.1, 1.1], [0.1, 0.9], 'r-', linewidth=2)
+axs[1].set_xlim(-0.2, 1.2)
+axs[1].set_ylim(-0.2, 1.2)
+axs[1].set_aspect('equal', adjustable='box')
+axs[1].axis('off')
+
+
+# 3. Filtrage (Retour à la résolution d'origine)
+axs[2].set_title("Filtrage / Moyenne")
+# Calculer une couleur moyenne (conceptuel)
+# Supposons que la ligne rouge couvre certains sous-pixels
+# Exemple: 5 sous-pixels touchés -> intensité moyenne
+avg_color = np.mean([1 if (i+j)%2==0 else 0.8 for i in range(3) for j in range(3) if abs((j/3+1/6) - (0.8*(i/3+1/6) + 0.1)) < 0.2 ]) # Approximation grossière
+face_color_final = plt.cm.Blues(avg_color * 0.5 + 0.3) # Map average to a color shade
+
+rect_final = patches.Rectangle((0, 0), 1, 1, linewidth=2, edgecolor='black', facecolor=face_color_final)
+axs[2].add_patch(rect_final)
+axs[2].text(0.5, 0.5, f'Pixel Final\n(Couleur Moyenne)', ha='center', va='center', color='white' if avg_color > 0.5 else 'black')
+axs[2].set_xlim(-0.2, 1.2)
+axs[2].set_ylim(-0.2, 1.2)
+axs[2].set_aspect('equal', adjustable='box')
+axs[2].axis('off')
+
+
+plt.tight_layout()
+plt.savefig('supersampling_concept.png')
+plt.close()
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, max height=0.3\textheight, keepaspectratio]{supersampling_concept.png}
+\caption{Concept du sur-échantillonnage : calculer sur une grille plus fine, puis filtrer.}
+\label{fig:supersampling_concept}
+\end{figure}
+
+Plusieurs paramètres influencent le sur-échantillonnage :
+
+\begin{verbatim}
+#save_to: antialiasing_params.png
+from graphviz import Digraph
+
+dot = Digraph(comment='Antialiasing Parameters', graph_attr={'rankdir': 'TB'})
+
+dot.node('Params', 'Paramètres', shape='box')
+dot.node('Type', 'Type', shape='box')
+dot.node('Res', 'Résolution', shape='box')
+dot.node('Filtre', 'Filtre', shape='box')
+
+dot.edge('Params', 'Type')
+dot.edge('Params', 'Res')
+dot.edge('Params', 'Filtre')
+
+# Types
+dot.node('Det', 'Déterministe', shape='ellipse')
+dot.node('Alea', 'Aléatoire', shape='ellipse')
+dot.edge('Type', 'Det')
+dot.edge('Type', 'Alea')
+
+# Sous-types Déterministe
+dot.node('Reg', 'Régulier', shape='ellipse')
+dot.node('Adap', 'Adaptatif', shape='ellipse')
+dot.edge('Det', 'Reg')
+dot.edge('Det', 'Adap')
+
+# Sous-types Aléatoire
+dot.node('Uni', 'Uniforme', shape='ellipse')
+dot.node('Jit', 'Jittering', shape='ellipse')
+dot.node('Poi', 'Disque de Poisson', shape='ellipse')
+dot.edge('Alea', 'Uni')
+dot.edge('Alea', 'Jit')
+dot.edge('Alea', 'Poi')
+
+
+# Filtre
+dot.node('Forme', 'Forme du filtre', shape='box')
+dot.node('Taille', 'Taille du filtre', shape='box')
+dot.edge('Filtre', 'Forme')
+dot.edge('Filtre', 'Taille')
+
+dot.render('antialiasing_params', format='png', view=False)
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, max height=0.5\textheight, keepaspectratio]{antialiasing_params.png}
+\caption{Paramètres clés des techniques d'anticrénelage par sur-échantillonnage.}
+\label{fig:antialiasing_params}
+\end{figure}
+
+\begin{itemize}
+    \item \textbf{Type d'échantillonnage:}
+        \begin{itemize}
+            \item \textbf{Déterministe:} Les positions des sous-pixels sont fixes.
+                \begin{itemize}
+                    \item \textit{Régulier:} Grille régulière de sous-pixels (e.g., 2x2, 4x4). Simple mais peut réintroduire des motifs réguliers. Augmente le temps de calcul par $n^2$ (si $n \times n$ sous-pixels).
+                    \item \textit{Adaptatif:} Raffinement progressif. On échantillonne plus finement seulement dans les zones où c'est nécessaire (e.g., près des contours, zones à haute fréquence de texture), basé sur certains critères (différence de couleur/profondeur entre échantillons voisins). Plus efficace que le régulier mais plus complexe.
+                \end{itemize}
+            \item \textbf{Aléatoire:} Les positions des sous-pixels sont choisies aléatoirement ou pseudo-aléatoirement à l'intérieur du pixel. Transforme l'aliasing cohérent en bruit, ce qui est souvent moins gênant pour l'œil humain.
+                \begin{itemize}
+                    \item \textit{Uniforme:} Chaque position est tirée indépendamment et uniformément. Simple, mais peut créer des amas et des vides.
+                    \item \textit{Jittering (Grille perturbée):} On part d'une grille régulière et on perturbe aléatoirement la position de chaque échantillon à l'intérieur de sa cellule. Bon compromis entre régularité et aléatoire.
+                    \item \textit{Disque de Poisson:} Garantit une distance minimale entre les échantillons, imitant la distribution des photorécepteurs dans la rétine. Donne des résultats de haute qualité mais plus coûteux à générer.
+                \end{itemize}
+        \end{itemize}
+    \item \textbf{Résolution:} Le nombre de sous-pixels utilisés (e.g., 4x, 8x, 16x). Plus la résolution est élevée, meilleur est l'anticrénelage, mais plus le coût de calcul est important.
+    \item \textbf{Filtre:} La manière dont les valeurs des sous-pixels sont combinées.
+        \begin{itemize}
+            \item \textit{Forme du filtre:} Définit comment pondérer les échantillons.
+                \begin{itemize}
+                    \item Boîte (Box): Moyenne simple (tous les échantillons ont le même poids). Le plus simple, mais peut flouter l'image.
+                    \item Cône/Tente (Tent): Poids décroissant linéairement avec la distance au centre du pixel. Meilleur compromis netteté/flou que la boîte.
+                    \item Gaussienne: Poids décroissant selon une fonction gaussienne. Donne des résultats doux, souvent perçus comme naturels.
+                \end{itemize}
+            \item \textit{Taille du filtre:} La zone sur laquelle le filtre est appliqué (souvent liée à la taille du pixel final).
+        \end{itemize}
+\end{itemize}
+
+\begin{verbatim}
+#save_to: sampling_patterns.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, axs = plt.subplots(1, 4, figsize=(12, 3.5), sharex=True, sharey=True)
+titles = ['Déterministe: Régulier', 'Aléatoire: Uniforme', 'Aléatoire: Disque de Poisson (approx)', 'Aléatoire: Jittering']
+n_samples = 16 # Nombre d'échantillons par pixel
+
+# 1. Régulier (4x4 grid)
+grid_size = int(np.sqrt(n_samples))
+x_reg, y_reg = np.meshgrid(np.linspace(1/(2*grid_size), 1 - 1/(2*grid_size), grid_size),
+                           np.linspace(1/(2*grid_size), 1 - 1/(2*grid_size), grid_size))
+axs[0].plot(x_reg.flatten(), y_reg.flatten(), 'bo', markersize=4)
+
+# 2. Uniforme
+x_uni = np.random.rand(n_samples)
+y_uni = np.random.rand(n_samples)
+axs[1].plot(x_uni, y_uni, 'bo', markersize=4)
+
+# 3. Disque de Poisson (Approximation simple: rejet)
+min_dist = 0.18
+points = []
+max_tries = n_samples * 100
+tries = 0
+while len(points) < n_samples and tries < max_tries:
+    tries += 1
+    new_point = np.random.rand(2)
+    valid = True
+    for p in points:
+        if np.linalg.norm(new_point - p) < min_dist:
+            valid = False
+            break
+    if valid:
+        points.append(new_point)
+points = np.array(points)
+if len(points) > 0:
+    axs[2].plot(points[:, 0], points[:, 1], 'bo', markersize=4)
+else:
+    axs[2].text(0.5, 0.5, "Échec approx.", ha='center', va='center')
+
+
+# 4. Jittering (4x4 grid)
+x_jit, y_jit = np.meshgrid(np.linspace(0, 1 - 1/grid_size, grid_size),
+                           np.linspace(0, 1 - 1/grid_size, grid_size))
+x_jit = x_jit.flatten() + np.random.rand(n_samples) / grid_size
+y_jit = y_jit.flatten() + np.random.rand(n_samples) / grid_size
+axs[3].plot(x_jit, y_jit, 'bo', markersize=4)
+
+
+for i, ax in enumerate(axs):
+    ax.set_title(titles[i])
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.set_aspect('equal', adjustable='box')
+    ax.set_xticks([])
+    ax.set_yticks([])
+    # Dessiner la boîte du pixel
+    rect = plt.Rectangle((0,0), 1, 1, fill=False, edgecolor='black')
+    ax.add_patch(rect)
+    if i > 0: # Dessiner les cellules de la grille pour Jittering
+        if i == 3:
+             for gx in np.linspace(0, 1, grid_size+1):
+                 ax.plot([gx, gx], [0,1], 'gray', linestyle=':', linewidth=0.5)
+             for gy in np.linspace(0, 1, grid_size+1):
+                 ax.plot([0,1], [gy, gy], 'gray', linestyle=':', linewidth=0.5)
+
+
+plt.tight_layout()
+plt.savefig('sampling_patterns.png')
+plt.close()
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, max height=0.3\textheight, keepaspectratio]{sampling_patterns.png}
+\caption{Différents types de motifs d'échantillonnage à l'intérieur d'un pixel.}
+\label{fig:sampling_patterns}
+\end{figure}
+
+\subsubsection{Forme du Filtre}
+Le filtre détermine comment les contributions des échantillons sont pondérées pour calculer la couleur finale du pixel.
+
+\begin{verbatim}
+#save_to: filter_shapes.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, axs = plt.subplots(1, 3, figsize=(12, 3), sharey=True)
+x = np.linspace(-1.5, 1.5, 300)
+
+# 1. Boîte
+y_box = np.where(np.abs(x) <= 0.5, 1, 0)
+axs[0].plot(x, y_box)
+axs[0].set_title("Boîte (Box)")
+axs[0].fill_between(x, 0, y_box, alpha=0.3)
+
+# 2. Cône (Tente)
+y_tent = np.maximum(0, 1 - np.abs(x))
+axs[1].plot(x, y_tent)
+axs[1].set_title("Cône / Tente (Tent)")
+axs[1].fill_between(x, 0, y_tent, alpha=0.3)
+
+
+# 3. Gaussienne
+sigma = 0.4
+y_gauss = np.exp(-x**2 / (2 * sigma**2))
+axs[2].plot(x, y_gauss)
+axs[2].set_title("Gaussienne")
+axs[2].fill_between(x, 0, y_gauss, alpha=0.3)
+
+
+for ax in axs:
+    ax.set_xlabel("Distance du centre")
+    ax.set_ylabel("Poids")
+    ax.grid(True, linestyle=':')
+    ax.set_ylim(0, 1.1)
+
+plt.tight_layout()
+plt.savefig('filter_shapes.png')
+plt.close()
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, max height=0.3\textheight, keepaspectratio]{filter_shapes.png}
+\caption{Profils 1D de filtres courants : Boîte, Cône/Tente, Gaussienne.}
+\label{fig:filter_shapes}
+\end{figure}
+
+\subsubsection{Taille du Filtre}
+La taille du filtre (souvent exprimée comme un noyau de convolution) affecte également le résultat. Des filtres plus larges peuvent produire plus de flou mais mieux lisser les hautes fréquences. Les filtres gaussiens sont souvent définis par leur écart-type et peuvent être de différentes tailles (e.g., 3x3, 5x5 pixels).
+
+Exemples de noyaux de filtre Gaussiens (non normalisés):
+\begin{center}
+\begin{tabular}{ccc}
+\multicolumn{3}{c}{3x3} \\ \hline
+1 & 2 & 1 \\
+2 & 4 & 2 \\
+1 & 2 & 1 \\ \hline
+\end{tabular}
+\qquad
+\begin{tabular}{ccccc}
+\multicolumn{5}{c}{5x5} \\ \hline
+1 & 2 & 3 & 2 & 1 \\
+2 & 4 & 6 & 4 & 2 \\
+3 & 6 & 9 & 6 & 3 \\
+2 & 4 & 6 & 4 & 2 \\
+1 & 2 & 3 & 2 & 1 \\ \hline
+\end{tabular}
+% 7x7 omitted for brevity as in slide
+\end{center}
+
+\subsubsection{Filtrage Aléatoire : Monte-Carlo Pondérée}
+Pour les échantillons aléatoires, une méthode consiste à utiliser un diagramme de Voronoï basé sur les points d'échantillonnage à l'intérieur du pixel. L'aire de la cellule de Voronoï de chaque échantillon peut être utilisée pour pondérer sa contribution à la couleur finale du pixel.
+
+\begin{verbatim}
+#save_to: voronoi_filter.png
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.spatial import Voronoi, voronoi_plot_2d
+
+# Points d'échantillonnage (exemple aléatoire)
+np.random.seed(0)
+points = np.random.rand(10, 2) # 10 points dans [0,1]x[0,1]
+
+# Ajouter des points "fantômes" pour limiter les régions infinies
+points_bordered = np.vstack([points,
+                             [-1, -1], [-1, 2], [2, -1], [2, 2],
+                             [0.5, -1], [0.5, 2], [-1, 0.5], [2, 0.5]])
+
+# Calculer le diagramme de Voronoi
+vor = Voronoi(points_bordered)
+
+# Afficher
+fig, ax = plt.subplots()
+voronoi_plot_2d(vor, ax=ax, show_vertices=False, line_colors='orange',
+                line_width=2, line_alpha=0.6, point_size=5)
+
+# Limiter à la zone du pixel [0,1]x[0,1]
+ax.set_xlim(0, 1)
+ax.set_ylim(0, 1)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xticks([])
+ax.set_yticks([])
+ax.set_title("Diagramme de Voronoï pour filtrage pondéré")
+
+# Dessiner la boîte du pixel
+rect = plt.Rectangle((0,0), 1, 1, fill=False, edgecolor='black', linewidth=2)
+ax.add_patch(rect)
+
+
+plt.savefig('voronoi_filter.png')
+plt.close()
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.5\textwidth, keepaspectratio]{voronoi_filter.png}
+\caption{Filtrage Monte-Carlo : pondération par l'aire des cellules de Voronoï.}
+\label{fig:voronoi_filter}
+\end{figure}
+
+\subsection{Antialiasing: Algorithmes de tracé de segments corrigés}
+
+Une alternative (ou un complément) au sur-échantillonnage est de modifier directement les algorithmes de tracé (comme Bresenham) pour qu'ils calculent une intensité ou une couverture pour chaque pixel proche de la ligne, au lieu de simplement l'allumer ou l'éteindre.
+
+Le principe est d'allumer plusieurs pixels à chaque itération, avec des intensités différentes suivant leur proximité par rapport à la primitive (ligne) idéale.
+
+\subsubsection{Approche par Aire de Recouvrement}
+On peut considérer le segment de droite comme ayant une épaisseur non nulle (par exemple, 1 pixel de large). L'intensité d'un pixel est alors proportionnelle à l'aire d'intersection entre ce pixel (carré) et le segment épaissi.
+
+\begin{verbatim}
+#save_to: thick_line_coverage.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots(figsize=(6,6))
+
+# Grille de pixels
+grid_size = 7
+for i in range(grid_size + 1):
+    ax.plot([0, grid_size], [i, i], color='lightgray', linestyle='-', linewidth=0.5)
+    ax.plot([i, i], [0, grid_size], color='lightgray', linestyle='-', linewidth=0.5)
+
+# Ligne idéale épaisse (parallélogramme)
+x1, y1 = 1.2, 1.5
+x2, y2 = 5.8, 4.5
+dx = x2 - x1
+dy = y2 - y1
+length = np.sqrt(dx**2 + dy**2)
+thickness = 0.8 # Largeur de la ligne
+# Vecteur normal normalisé à la ligne
+nx = -dy / length
+ny = dx / length
+half_w_x = nx * thickness / 2
+half_w_y = ny * thickness / 2
+
+# Coins du parallélogramme
+p1 = [x1 - half_w_x, y1 - half_w_y]
+p2 = [x2 - half_w_x, y2 - half_w_y]
+p3 = [x2 + half_w_x, y2 + half_w_y]
+p4 = [x1 + half_w_x, y1 + half_w_y]
+
+thick_line = patches.Polygon([p1, p2, p3, p4], closed=True, edgecolor='blue', facecolor='lightblue', alpha=0.6)
+ax.add_patch(thick_line)
+
+# Pixels avec intensité basée sur couverture (conceptuel)
+covered_intensity = {
+    (1,1): 0.4, (2,1): 0.1,
+    (1,2): 0.7, (2,2): 0.9, (3,2): 0.5, (4,2): 0.1,
+    (2,3): 0.4, (3,3): 0.9, (4,3): 0.8, (5,3): 0.2,
+    (3,4): 0.1, (4,4): 0.6, (5,4): 0.7,
+    (5,5): 0.1
+}
+
+for (px, py), intensity in covered_intensity.items():
+    if 0 <= px < grid_size and 0 <= py < grid_size:
+        # Couleur basée sur l'intensité (nuance de bleu)
+        color = plt.cm.Blues(intensity * 0.8 + 0.2) # Map intensity to color
+        rect = patches.Rectangle((px, py), 1, 1, linewidth=0.5, edgecolor='black', facecolor=color)
+        ax.add_patch(rect)
+
+
+ax.set_xlim(0, grid_size)
+ax.set_ylim(0, grid_size)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xticks([])
+ax.set_yticks([])
+ax.grid(False)
+plt.title("Anticrénelage par Aire de Recouvrement (conceptuel)")
+
+plt.savefig('thick_line_coverage.png')
+plt.close()
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.6\textwidth, keepaspectratio]{thick_line_coverage.png}
+\caption{Intensité des pixels proportionnelle à l'aire de recouvrement par une ligne épaisse.}
+\label{fig:thick_line_coverage}
+\end{figure}
+
+\subsubsection{Approche par Distance}
+Plutôt que de calculer des aires d'intersection (qui peuvent être complexes), on peut calculer l'intensité d'un pixel en fonction de sa distance à la ligne idéale. Plus le pixel est proche, plus son intensité est élevée.
+
+\begin{itemize}
+    \item \textbf{Approche non-pondérée (simplifiée) :} L'intensité pourrait être liée à la fraction de la ligne passant dans le pixel.
+    \item \textbf{Approche pondérée :} L'intensité est calculée par une fonction (souvent gaussienne) de la distance entre le centre du pixel et la ligne.
+\end{itemize}
+
+\subsubsection{Algorithme Gupta-Sproull}
+Cet algorithme est une modification de Bresenham qui implémente l'anticrénelage basé sur la distance.
+\begin{itemize}
+    \item À chaque itération de l'algorithme de Bresenham (qui détermine le pixel principal $(x, y)$), on active non seulement ce pixel, mais aussi ses voisins (généralement un voisinage 3x3).
+    \item Le niveau de gris (intensité) de chaque pixel activé (le pixel principal et ses voisins) est proportionnel (via une fonction, souvent de type cône ou gaussienne) à sa distance perpendiculaire à la ligne idéale.
+\end{itemize}
+
+L'équation de la droite peut s'écrire $ax + by + c = 0$. La distance $D$ d'un point $(x_p, y_p)$ à cette droite est donnée par :
+\[ D = \frac{|ax_p + by_p + c|}{\sqrt{a^2 + b^2}} \]
+L'intensité $I$ du pixel $(x_p, y_p)$ peut être calculée comme $I = f(D)$, où $f$ est une fonction décroissante (e.g., $f(D) = \max(0, 1 - kD)$ pour un filtre Cône, ou une gaussienne $f(D) = e^{-kD^2}$).
+
+\begin{verbatim}
+#save_to: gupta_sproull.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots(figsize=(6,6))
+
+# Grille 3x3 autour du pixel "en cours"
+center_x, center_y = 2, 2
+for i in range(center_x - 1, center_x + 2):
+    for j in range(center_y - 1, center_y + 2):
+        rect = patches.Rectangle((i, j), 1, 1, linewidth=0.5, edgecolor='gray', facecolor='lightyellow' if (i==center_x and j==center_y) else 'white')
+        ax.add_patch(rect)
+ax.text(center_x + 0.5, center_y + 0.5, 'Pixel\nen cours', ha='center', va='center', fontsize=8)
+
+
+# Ligne idéale
+x1, y1 = 0.5, 1.8
+x2, y2 = 4.5, 3.2
+ax.plot([x1, x2], [y1, y2], color='blue', linestyle='-', linewidth=2, label='Ligne idéale ax+by+c=0')
+
+# Exemple de pixel voisin et distance D
+neighbor_x, neighbor_y = center_x - 1, center_y + 1 # Voisin haut-gauche
+pixel_center_x, pixel_center_y = neighbor_x + 0.5, neighbor_y + 0.5
+ax.plot(pixel_center_x, pixel_center_y, 'ro', label='Centre Pixel voisin')
+ax.text(pixel_center_x, pixel_center_y + 0.1, 'Pixel voisin', ha='center', va='bottom', fontsize=8)
+
+
+# Calcul de D (conceptuel)
+a = y1 - y2
+b = x2 - x1
+c = -a * x1 - b * y1
+dist_num = np.abs(a * pixel_center_x + b * pixel_center_y + c)
+dist_den = np.sqrt(a**2 + b**2)
+D = dist_num / dist_den
+
+# Projection du centre sur la ligne
+# Param t de projection: t = -(a*px + b*py + c) / (a^2 + b^2)
+t = -(a * pixel_center_x + b * pixel_center_y + c) / (a**2 + b**2)
+proj_x = pixel_center_x + t * a
+proj_y = pixel_center_y + t * b
+ax.plot([pixel_center_x, proj_x], [pixel_center_y, proj_y], 'r--', label=f'Distance D = {D:.2f}')
+ax.text((pixel_center_x + proj_x)/2, (pixel_center_y + proj_y)/2 + 0.1, 'D', color='red')
+
+
+# Configuration
+ax.set_xlim(0, 4)
+ax.set_ylim(0, 4)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xticks(np.arange(0, 5, 1))
+ax.set_yticks(np.arange(0, 5, 1))
+ax.grid(True, linestyle=':')
+plt.title("Anticrénelage Gupta-Sproull (Voisinage 3x3)")
+plt.legend(fontsize=8, loc='upper right')
+
+plt.savefig('gupta_sproull.png')
+plt.close()
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.7\textwidth, keepaspectratio]{gupta_sproull.png}
+\caption{Calcul de l'intensité d'un pixel voisin basée sur sa distance D à la ligne idéale (Algorithme Gupta-Sproull).}
+\label{fig:gupta_sproull}
+\end{figure}
+
+Il est facile de modifier l'algorithme de trace de segments (Bresenham) pour calculer et appliquer ces intensités. Classiquement, on applique une fonction de filtrage Gaussienne pour passer de la distance $D$ à l'intensité.
+
+\subsection{Antialiasing: Résultats}
+Les techniques d'anticrénelage améliorent significativement la qualité visuelle des lignes et des contours dans les images rastérisées.
+\begin{itemize}
+    \item \textbf{Sans antialiasing :} Les lignes présentent des artefacts d'escalier ("jaggies").
+    \item \textbf{Avec antialiasing (Sur-échantillonnage / Moyennage) :} Les jaggies sont réduits, les lignes apparaissent plus lisses mais peuvent être légèrement floues, surtout avec un filtre Boîte ou un filtre Gaussien large.
+    \item \textbf{Avec antialiasing (Basé sur la distance / Gupta-Sproull) :} Les jaggies sont également réduits, donnant des lignes lisses. La netteté dépend de la fonction de distance utilisée.
+\end{itemize}
+Le choix de la méthode dépend du compromis souhaité entre qualité visuelle, performance et complexité de mise en œuvre.
+
+\begin{figure}[H]
+\centering
+% Placeholder: Ideally show three images: no AA, supersampling AA, distance AA
+\fbox{Image: Comparaison des Résultats d'Anticrénelage}
+\caption{Comparaison visuelle : (Gauche) Sans anticrénelage, (Centre) Anticrénelage par sur-échantillonnage, (Droite) Anticrénelage basé sur la distance.}
+\label{fig:antialiasing_results}
+\end{figure}
+
+\section{Conclusion}
+La rastérisation est le processus fondamental de conversion de la géométrie vectorielle en une image pixelisée. Les algorithmes de tracé de lignes, comme celui de Bresenham, sont optimisés pour effectuer cette tâche efficacement en utilisant des calculs entiers. Cependant, la nature discrète de la rastérisation introduit des artefacts de crénelage.
+
+L'anticrénelage vise à atténuer ces artefacts. Le sur-échantillonnage calcule une image à haute résolution puis la filtre, offrant diverses options (régulier, adaptatif, aléatoire) et filtres (boîte, cône, gaussien). Les algorithmes de tracé corrigés, comme Gupta-Sproull, modifient directement le tracé pour calculer des intensités de pixels basées sur la proximité de la primitive. Chaque approche présente des avantages et des inconvénients en termes de qualité, de performance et de complexité. Le choix dépend des exigences spécifiques de l'application graphique.
+
+\end{document}
+```

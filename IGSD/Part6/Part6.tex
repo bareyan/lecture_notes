@@ -1,0 +1,1694 @@
+```latex
+\documentclass{article}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{listings}
+\usepackage[french]{babel} % Add french language support
+\usepackage[utf8]{inputenc} % Add utf8 support
+
+\newtheorem{theorem}{Théorème}
+\newtheorem{lemma}{Lemme}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}{Définition}
+\newtheorem{remark}{Remarque}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Exemple}
+
+\usepackage[margin=1in]{geometry}
+
+\begin{document}
+\sloppy
+
+\section{Clipping (Découpage)}
+
+\subsection{Introduction}
+
+Le clipping, ou découpage, est une étape fondamentale du pipeline graphique. Il consiste à éliminer les parties des objets géométriques qui se trouvent en dehors d'une région spécifiée, appelée fenêtre de clipping.
+
+\begin{verbatim}
+#save_to: clipping_pipeline.png
+from graphviz import Digraph
+
+dot = Digraph(comment='Pipeline Graphique', graph_attr={'rankdir': 'TB'})
+
+dot.node('A', 'Transformations de\nmodélisation')
+dot.node('B', 'Illumination\n(Shading)')
+dot.node('C', 'Transformation\nd\'affichage')
+dot.node('D', 'Clipping', style='filled', fillcolor='lightblue')
+dot.node('E', 'Transformation écran\n(Projection)')
+dot.node('F', 'Pixelisation\n(Rasterization)')
+dot.node('G', 'Visibilité / Rendu')
+
+dot.edge('A', 'B')
+dot.edge('B', 'C')
+dot.edge('C', 'D')
+dot.edge('D', 'E')
+dot.edge('E', 'F')
+dot.edge('F', 'G')
+
+dot.render('clipping_pipeline', format='png', view=False, cleanup=True)
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.8\textwidth, max height=0.4\textheight, keepaspectratio]{clipping_pipeline.png}
+\caption{Le Clipping dans le Pipeline Graphique.}
+\label{fig:clipping_pipeline}
+\end{figure}
+
+Le processus implique souvent :
+\begin{itemize}
+    \item Le passage en coordonnées normalisées (NDC - Normalised Device Coordinates) : Les coordonnées des objets sont transformées dans un espace canonique, souvent un cube ou un carré unitaire, indépendant de la résolution de l'écran.
+    \item La suppression des parties hors du volume de vision : Seules les parties de la scène visibles depuis le point de vue de la caméra et situées à l'intérieur du volume de vision défini sont conservées.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+% Placeholder description for NDC diagram as drawing complex 3D views is hard without TikZ/advanced tools
+\fbox{\parbox{0.6\textwidth}{
+\centering \textit{Schéma conceptuel :}\\
+Espace Oeil (Pyramide/Tronc de vision) $\rightarrow$ Transformation $\rightarrow$ Espace NDC (Cube [-1,1] ou [0,1])
+}}
+\caption{Passage de l'espace Oeil à l'espace NDC.}
+\label{fig:ndc_transform}
+\end{figure}
+
+Le clipping d'écran est un traitement permettant de réduire le dessin d'un objet graphique à une région de l'écran. Cette région est classiquement un rectangle mais peut être de toute autre forme :
+\begin{itemize}
+    \item Carré : Écran standard
+    \item Trapèze : Pare-brise / Rétroviseur
+    \item Circulaire : Lunette / Jumelle
+\end{itemize}
+C'est un traitement de base de l'Infographie qui permet d'économiser des opérations inutiles en ne traitant pas les primitives ou parties de primitives invisibles. En 3D, cela permet d'éliminer les calculs en dehors de l'espace visible.
+
+\subsection{Familles d'algorithmes}
+Plusieurs familles d'algorithmes existent pour différents types de primitives :
+\begin{itemize}
+    \item Clipping Point / Fenêtre
+    \item Clipping Segment / Fenêtre
+    \begin{itemize}
+        \item Cohen-Sutherland
+        \item Liang-Barsky
+    \end{itemize}
+    \item Clipping Polygone / Fenêtre
+    \begin{itemize}
+        \item Sutherland-Hodgeman
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Clipping de points : Point / Fenêtre}
+Le test est très simple : un point $P(x, y)$ est conservé si et seulement s'il se trouve à l'intérieur des limites de la fenêtre rectangulaire définie par $(x_{min}, y_{min})$ et $(x_{max}, y_{max})$.
+\[
+(x_{min} < x < x_{max}) \quad \& \quad (y_{min} < y < y_{max})
+\]
+
+\begin{verbatim}
+#save_to: point_clipping.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots()
+
+xmin, xmax = 2, 8
+ymin, ymax = 3, 7
+px, py = 6, 5
+
+# Draw window
+rect = patches.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, linewidth=1, edgecolor='blue', facecolor='lightblue', alpha=0.5)
+ax.add_patch(rect)
+
+# Draw point
+ax.plot(px, py, 'ro', label='P(x,y)')
+
+# Add labels
+ax.text(xmin - 0.5, ymin, r'$y_{min}$', va='center', ha='right')
+ax.text(xmin - 0.5, ymax, r'$y_{max}$', va='center', ha='right')
+ax.text(xmin, ymin - 0.5, r'$x_{min}$', va='top', ha='center')
+ax.text(xmax, ymin - 0.5, r'$x_{max}$', va='top', ha='center')
+ax.text(px + 0.2, py, 'P(x,y)', va='bottom', ha='left')
+
+# Test condition text
+ax.text(xmin, ymax + 1, r'$x_{min} < x < x_{max}$', fontsize=10)
+ax.text(xmin, ymax + 0.5, r'\&', fontsize=10)
+ax.text(xmin, ymax + 0, r'$y_{min} < y < y_{max}$', fontsize=10)
+
+
+ax.set_xlim(0, 10)
+ax.set_ylim(1, 9)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xticks([])
+ax.set_yticks([])
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.spines['bottom'].set_visible(False)
+ax.spines['left'].set_visible(False)
+plt.title('Clipping de Point')
+
+plt.savefig('point_clipping.png')
+
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, max height=0.3\textheight, keepaspectratio]{point_clipping.png}
+\caption{Test de clipping pour un point.}
+\label{fig:point_clipping}
+\end{figure}
+
+\subsubsection{Clipping de segments : Segment / Fenêtre}
+L'objectif est de déterminer les portions de segments de droite qui se trouvent à l'intérieur de la fenêtre de clipping.
+
+\begin{verbatim}
+#save_to: segment_clipping_intro.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots()
+
+xmin, xmax = 3, 9
+ymin, ymax = 2, 6
+
+# Window
+rect = patches.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, linewidth=1, edgecolor='blue', facecolor='lightblue', alpha=0.5)
+ax.add_patch(rect)
+
+# Segments
+segments = [
+    ((1, 5), (4, 4)),  # P1-P2 (partially inside)
+    ((4, 7), (6, 5)),  # P3-P4 (partially inside)
+    ((7, 4), (10, 6)), # P5-P6 (partially inside)
+    ((1, 1), (5, 3)),  # P7-P8 (fully inside)
+    ((6, 1), (11, 3))  # P9-P10 (fully outside - potentially)
+]
+
+points = {
+    'P1': (1, 5), 'P2': (4, 4), 'P3': (4, 7), 'P4': (6, 5), 'P5': (7, 4),
+    'P6': (10, 6), 'P7': (1, 1), 'P8': (5, 3), 'P9': (6, 1), 'P10': (11, 3)
+}
+
+
+for i, (start, end) in enumerate(segments):
+    ax.plot([start[0], end[0]], [start[1], end[1]], 'r-o', markersize=3)
+    ax.text(start[0], start[1] + 0.2, f'P{2*i+1}', fontsize=9)
+    ax.text(end[0], end[1] + 0.2, f'P{2*i+2}', fontsize=9)
+
+
+ax.set_xlim(0, 12)
+ax.set_ylim(0, 8)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xticks([])
+ax.set_yticks([])
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.spines['bottom'].set_visible(False)
+ax.spines['left'].set_visible(False)
+plt.title('Clipping de Segments')
+
+plt.savefig('segment_clipping_intro.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, max height=0.4\textheight, keepaspectratio]{segment_clipping_intro.png}
+\caption{Exemples de segments par rapport à une fenêtre.}
+\label{fig:segment_clipping_intro}
+\end{figure}
+
+\paragraph{Algorithme de Cohen \& Sutherland}
+Cet algorithme (dû à Ivan Sutherland et collaborateurs) accélère le clipping de segments en utilisant des "codes de zones" (outcodes). L'espace est divisé en 9 régions par les lignes prolongeant les bords de la fenêtre. Chaque région a un code binaire de 4 bits.
+
+\begin{itemize}
+    \item Bit 1 (droite) : 1 si $x > x_{max}$
+    \item Bit 2 (gauche) : 1 si $x < x_{min}$
+    \item Bit 3 (bas) : 1 si $y < y_{min}$
+    \item Bit 4 (haut) : 1 si $y > y_{max}$
+\end{itemize}
+Le code pour la fenêtre elle-même est 0000.
+
+\begin{verbatim}
+#save_to: cs_zones.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots()
+
+xmin, xmax = 4, 10
+ymin, ymax = 3, 7
+
+# Window
+rect = patches.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, linewidth=1, edgecolor='blue', facecolor='lightblue', alpha=0.5)
+ax.add_patch(rect)
+
+# Zone lines
+ax.axhline(ymin, color='gray', linestyle='--')
+ax.axhline(ymax, color='gray', linestyle='--')
+ax.axvline(xmin, color='gray', linestyle='--')
+ax.axvline(xmax, color='gray', linestyle='--')
+
+# Zone codes
+codes = {
+    (2, 8.5): '1001', (7, 8.5): '1000', (12, 8.5): '1010',
+    (2, 5):   '0001', (7, 5):   '0000', (12, 5):   '0010',
+    (2, 1.5): '0101', (7, 1.5): '0100', (12, 1.5): '0110'
+}
+for pos, code in codes.items():
+    ax.text(pos[0], pos[1], code, ha='center', va='center', fontsize=10, color='black')
+
+# Bit labels
+ax.text(13, 5, 'bit 1', ha='center', va='center', fontsize=9) # Right
+ax.text(1, 5, 'bit 2', ha='center', va='center', fontsize=9) # Left
+ax.text(7, 1.5, 'bit 3', ha='center', va='center', fontsize=9) # Bottom
+ax.text(7, 8.5, 'bit 4', ha='center', va='center', fontsize=9) # Top
+
+# Example points from slide
+points = {
+    'P1': (2, 4), 'P2': (2, 2), 'P3': (7, 8.5), 'P4': (2, 8.5),
+    'P5': (7, 5), 'P6': (12, 5), 'P7': (7, 1.5), 'P8': (12, 1.5),
+    'P9': (12, 2), 'P10': (12, 8.5)
+}
+for name, (px, py) in points.items():
+    ax.plot(px, py, 'ko', markersize=3)
+    ax.text(px + 0.2, py + 0.2, name, fontsize=8)
+
+
+ax.set_xlim(0, 14)
+ax.set_ylim(0, 10)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xticks([])
+ax.set_yticks([])
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.spines['bottom'].set_visible(False)
+ax.spines['left'].set_visible(False)
+plt.title('Algorithme Cohen-Sutherland : Codes de Zones')
+# Add Ivan Sutherland text
+ax.text(1, 1.5, 'Ivan Sutherland', fontsize=8, style='italic')
+
+plt.savefig('cs_zones.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, max height=0.5\textheight, keepaspectratio]{cs_zones.png}
+\caption{Codes de zones utilisés par l'algorithme de Cohen-Sutherland.}
+\label{fig:cs_zones}
+\end{figure}
+
+L'algorithme traite chaque segment $[P_1, P_2]$ en calculant les codes $c_1 = \text{code}(P_1)$ et $c_2 = \text{code}(P_2)$. Il y a 4 cas :
+
+\begin{itemize}
+    \item \textbf{Cas 1 : Acceptation triviale.} Si $c_1 = 0$ et $c_2 = 0$ (ou $c_1 | c_2 = 0$), les deux points sont dans la fenêtre. Le segment est entièrement visible.
+    \item \textbf{Cas 3 : Rejet trivial.} Si $c_1 \& c_2 \neq 0$ (ET logique bit à bit), les deux points sont dans la même région extérieure (gauche, droite, haut, ou bas). Le segment est entièrement invisible.
+    \item \textbf{Cas 2 : Partiellement dedans.} Si un point est dehors ($c_1 \neq 0$ ou $c_2 \neq 0$) et l'autre est dedans ($c_1=0$ ou $c_2=0$), le segment coupe la fenêtre. Il faut calculer l'intersection.
+    \item \textbf{Cas 4 : Potentiellement dedans.} Si $c_1 \& c_2 = 0$ et aucun des points n'est dans la fenêtre, les extrémités sont dans des zones différentes, mais le segment pourrait traverser la fenêtre. Il faut calculer l'intersection.
+\end{itemize}
+
+% --- Diagrams for Cases 1-4 ---
+\begin{verbatim}
+#save_to: cs_case1.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots()
+xmin, xmax = 4, 10; ymin, ymax = 3, 7
+rect = patches.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, linewidth=1, edgecolor='blue', facecolor='lightblue', alpha=0.5)
+ax.add_patch(rect)
+ax.axhline(ymin, color='gray', linestyle='--'); ax.axhline(ymax, color='gray', linestyle='--')
+ax.axvline(xmin, color='gray', linestyle='--'); ax.axvline(xmax, color='gray', linestyle='--')
+codes = {(2, 8.5): '1001', (7, 8.5): '1000', (12, 8.5): '1010', (2, 5): '0001', (7, 5): '0000', (12, 5): '0010', (2, 1.5): '0101', (7, 1.5): '0100', (12, 1.5): '0110'}
+for pos, code in codes.items(): ax.text(pos[0], pos[1], code, ha='center', va='center', fontsize=10)
+ax.text(1, 8.5, 'bit 4'); ax.text(7, 1.5, 'bit 3'); ax.text(1, 5, 'bit 2'); ax.text(13, 5, 'bit 1')
+
+# Case 1 Segment
+p1 = (5, 4); p2 = (8, 6)
+ax.plot([p1[0], p2[0]], [p1[1], p2[1]], 'g-o', markersize=4, linewidth=2, label='Segment (Cas 1)')
+ax.text(p1[0]-0.5, p1[1], 'P1 (0000)', fontsize=8)
+ax.text(p2[0]+0.2, p2[1], 'P2 (0000)', fontsize=8)
+
+ax.set_xlim(0, 14); ax.set_ylim(0, 10); ax.set_aspect('equal', adjustable='box'); ax.set_xticks([]); ax.set_yticks([])
+ax.spines['top'].set_visible(False); ax.spines['right'].set_visible(False); ax.spines['bottom'].set_visible(False); ax.spines['left'].set_visible(False)
+plt.title('C-S : Cas 1 (Acceptation triviale)')
+plt.savefig('cs_case1.png')
+\end{verbatim}
+\begin{figure}[H] \centering \includegraphics[max width=0.6\textwidth, keepaspectratio]{cs_case1.png} \caption{Cas 1 : Segment entièrement dans la fenêtre.} \label{fig:cs_case1} \end{figure}
+
+\begin{verbatim}
+#save_to: cs_case2.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots()
+xmin, xmax = 4, 10; ymin, ymax = 3, 7
+rect = patches.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, linewidth=1, edgecolor='blue', facecolor='lightblue', alpha=0.5)
+ax.add_patch(rect)
+ax.axhline(ymin, color='gray', linestyle='--'); ax.axhline(ymax, color='gray', linestyle='--')
+ax.axvline(xmin, color='gray', linestyle='--'); ax.axvline(xmax, color='gray', linestyle='--')
+codes = {(2, 8.5): '1001', (7, 8.5): '1000', (12, 8.5): '1010', (2, 5): '0001', (7, 5): '0000', (12, 5): '0010', (2, 1.5): '0101', (7, 1.5): '0100', (12, 1.5): '0110'}
+for pos, code in codes.items(): ax.text(pos[0], pos[1], code, ha='center', va='center', fontsize=10)
+ax.text(1, 8.5, 'bit 4'); ax.text(7, 1.5, 'bit 3'); ax.text(1, 5, 'bit 2'); ax.text(13, 5, 'bit 1')
+
+# Case 2 Segment
+p1 = (2, 6); p2 = (7, 5) # P1(0001), P2(0000)
+ax.plot([p1[0], p2[0]], [p1[1], p2[1]], 'b-o', markersize=4, linewidth=2, label='Segment (Cas 2)')
+ax.text(p1[0]-0.5, p1[1], 'P1 (0001)', fontsize=8)
+ax.text(p2[0]+0.2, p2[1], 'P2 (0000)', fontsize=8)
+
+ax.set_xlim(0, 14); ax.set_ylim(0, 10); ax.set_aspect('equal', adjustable='box'); ax.set_xticks([]); ax.set_yticks([])
+ax.spines['top'].set_visible(False); ax.spines['right'].set_visible(False); ax.spines['bottom'].set_visible(False); ax.spines['left'].set_visible(False)
+plt.title('C-S : Cas 2 (Partiellement dedans)')
+plt.savefig('cs_case2.png')
+\end{verbatim}
+\begin{figure}[H] \centering \includegraphics[max width=0.6\textwidth, keepaspectratio]{cs_case2.png} \caption{Cas 2 : Segment partiellement dedans.} \label{fig:cs_case2} \end{figure}
+
+\begin{verbatim}
+#save_to: cs_case3.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots()
+xmin, xmax = 4, 10; ymin, ymax = 3, 7
+rect = patches.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, linewidth=1, edgecolor='blue', facecolor='lightblue', alpha=0.5)
+ax.add_patch(rect)
+ax.axhline(ymin, color='gray', linestyle='--'); ax.axhline(ymax, color='gray', linestyle='--')
+ax.axvline(xmin, color='gray', linestyle='--'); ax.axvline(xmax, color='gray', linestyle='--')
+codes = {(2, 8.5): '1001', (7, 8.5): '1000', (12, 8.5): '1010', (2, 5): '0001', (7, 5): '0000', (12, 5): '0010', (2, 1.5): '0101', (7, 1.5): '0100', (12, 1.5): '0110'}
+for pos, code in codes.items(): ax.text(pos[0], pos[1], code, ha='center', va='center', fontsize=10)
+ax.text(1, 8.5, 'bit 4'); ax.text(7, 1.5, 'bit 3'); ax.text(1, 5, 'bit 2'); ax.text(13, 5, 'bit 1')
+
+# Case 3 Segment
+p1 = (1, 8); p2 = (3, 9) # P1(1001), P2(1001). 1001 & 1001 = 1001 != 0
+ax.plot([p1[0], p2[0]], [p1[1], p2[1]], 'r-o', markersize=4, linewidth=2, label='Segment (Cas 3)')
+ax.text(p1[0]-0.5, p1[1], 'P1 (1001)', fontsize=8)
+ax.text(p2[0]+0.2, p2[1], 'P2 (1001)', fontsize=8)
+
+ax.set_xlim(0, 14); ax.set_ylim(0, 10); ax.set_aspect('equal', adjustable='box'); ax.set_xticks([]); ax.set_yticks([])
+ax.spines['top'].set_visible(False); ax.spines['right'].set_visible(False); ax.spines['bottom'].set_visible(False); ax.spines['left'].set_visible(False)
+plt.title('C-S : Cas 3 (Rejet trivial)')
+plt.savefig('cs_case3.png')
+\end{verbatim}
+\begin{figure}[H] \centering \includegraphics[max width=0.6\textwidth, keepaspectratio]{cs_case3.png} \caption{Cas 3 : Segment entièrement dehors.} \label{fig:cs_case3} \end{figure}
+
+\begin{verbatim}
+#save_to: cs_case4.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots()
+xmin, xmax = 4, 10; ymin, ymax = 3, 7
+rect = patches.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, linewidth=1, edgecolor='blue', facecolor='lightblue', alpha=0.5)
+ax.add_patch(rect)
+ax.axhline(ymin, color='gray', linestyle='--'); ax.axhline(ymax, color='gray', linestyle='--')
+ax.axvline(xmin, color='gray', linestyle='--'); ax.axvline(xmax, color='gray', linestyle='--')
+codes = {(2, 8.5): '1001', (7, 8.5): '1000', (12, 8.5): '1010', (2, 5): '0001', (7, 5): '0000', (12, 5): '0010', (2, 1.5): '0101', (7, 1.5): '0100', (12, 1.5): '0110'}
+for pos, code in codes.items(): ax.text(pos[0], pos[1], code, ha='center', va='center', fontsize=10)
+ax.text(1, 8.5, 'bit 4'); ax.text(7, 1.5, 'bit 3'); ax.text(1, 5, 'bit 2'); ax.text(13, 5, 'bit 1')
+
+# Case 4 Segment
+p1 = (2, 8); p2 = (12, 2) # P1(1001), P2(0110). 1001 & 0110 = 0000
+ax.plot([p1[0], p2[0]], [p1[1], p2[1]], 'm-o', markersize=4, linewidth=2, label='Segment (Cas 4)')
+ax.text(p1[0]-0.5, p1[1], 'P1 (1001)', fontsize=8)
+ax.text(p2[0]+0.2, p2[1]-0.4, 'P2 (0110)', fontsize=8)
+
+ax.set_xlim(0, 14); ax.set_ylim(0, 10); ax.set_aspect('equal', adjustable='box'); ax.set_xticks([]); ax.set_yticks([])
+ax.spines['top'].set_visible(False); ax.spines['right'].set_visible(False); ax.spines['bottom'].set_visible(False); ax.spines['left'].set_visible(False)
+plt.title('C-S : Cas 4 (Potentiellement dedans)')
+plt.savefig('cs_case4.png')
+\end{verbatim}
+\begin{figure}[H] \centering \includegraphics[max width=0.6\textwidth, keepaspectratio]{cs_case4.png} \caption{Cas 4 : Extrémités dans des zones différentes.} \label{fig:cs_case4} \end{figure}
+
+\textbf{Calcul d'intersection (Cas 2 et 4) :}
+Si un segment n'est ni trivialement accepté ni rejeté, on calcule son intersection avec les bords de la fenêtre. On choisit un point extérieur $P_{ext}(x, y)$ et on calcule l'intersection avec une ligne de clipping (par exemple, $y = y_{max}$). L'équation paramétrique du segment $[P_1(x_1, y_1), P_2(x_2, y_2)]$ est :
+\begin{align*} x(t) &= (1-t)x_1 + tx_2 \\ y(t) &= (1-t)y_1 + ty_2 \quad \text{avec } t \in [0, 1] \end{align*}
+Pour l'intersection avec $y = y_{max}$ :
+\[ (1-t)y_1 + ty_2 = y_{max} \implies t = \frac{y_{max} - y_1}{y_2 - y_1} \]
+On calcule ensuite le $x$ correspondant : $x = (1-t)x_1 + tx_2$. Le point $(x, y_{max})$ remplace $P_{ext}$. On recalcule le code du nouveau point et on réitère le test (Cas 1, 2, 3, 4) avec le segment réduit. Ce processus est répété jusqu'à ce que le segment soit trivialement accepté ou rejeté.
+
+\begin{verbatim}
+#save_to: cs_intersection.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots()
+xmin, xmax = 4, 10; ymin, ymax = 3, 7
+rect = patches.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, linewidth=1, edgecolor='blue', facecolor='lightblue', alpha=0.5)
+ax.add_patch(rect)
+ax.axhline(ymin, color='gray', linestyle='--'); ax.axhline(ymax, color='gray', linestyle='--')
+ax.axvline(xmin, color='gray', linestyle='--'); ax.axvline(xmax, color='gray', linestyle='--')
+codes = {(2, 8.5): '1001', (7, 8.5): '1000', (12, 8.5): '1010', (2, 5): '0001', (7, 5): '0000', (12, 5): '0010', (2, 1.5): '0101', (7, 1.5): '0100', (12, 1.5): '0110'}
+for pos, code in codes.items(): ax.text(pos[0], pos[1], code, ha='center', va='center', fontsize=10)
+ax.text(1, 8.5, 'bit 4'); ax.text(7, 1.5, 'bit 3'); ax.text(1, 5, 'bit 2'); ax.text(13, 5, 'bit 1')
+
+# Case 4 Segment from previous example
+p1 = (2, 8); p2 = (12, 2) # P1(1001), P2(0110)
+ax.plot([p1[0], p2[0]], [p1[1], p2[1]], 'm--o', markersize=4, linewidth=1, label='Original Segment (Cas 4)')
+ax.text(p1[0]-0.5, p1[1], 'P1', fontsize=8)
+ax.text(p2[0]+0.2, p2[1]-0.4, 'P2', fontsize=8)
+
+# Calculate intersections (approximate for diagram)
+# Intersect P1P2 with y=ymax=7: t = (7-8)/(2-8) = -1/-6 = 1/6. x = (5/6)*2 + (1/6)*12 = 10/6 + 12/6 = 22/6 = 11/3 approx 3.67. P_int1 = (3.67, 7) - OUTSIDE xmin=4
+# Intersect P1P2 with x=xmin=4: x(t) = (1-t)2 + t*12 = 4 -> 2 - 2t + 12t = 4 -> 10t = 2 -> t=0.2. y = 0.8*8 + 0.2*2 = 6.4 + 0.4 = 6.8. P_int1 = (4, 6.8) - INSIDE
+# Intersect P1P2 with y=ymin=3: y(t) = (1-t)8 + t*2 = 3 -> 8 - 8t + 2t = 3 -> 5 = 6t -> t=5/6. x = (1/6)*2 + (5/6)*12 = 2/6 + 60/6 = 62/6 = 31/3 approx 10.33 - OUTSIDE xmax=10
+# Intersect P1P2 with x=xmax=10: x(t) = (1-t)2 + t*12 = 10 -> 2 + 10t = 10 -> 10t = 8 -> t=0.8. y = 0.2*8 + 0.8*2 = 1.6 + 1.6 = 3.2. P_int2 = (10, 3.2) - INSIDE
+
+p_int1 = (4, 6.8)
+p_int2 = (10, 3.2)
+ax.plot([p_int1[0], p_int2[0]], [p_int1[1], p_int2[1]], 'm-o', markersize=5, linewidth=2, label='Clipped Segment')
+ax.plot(p_int1[0], p_int1[1], 'mo', markersize=5)
+ax.plot(p_int2[0], p_int2[1], 'mo', markersize=5)
+ax.text(p_int1[0]-0.2, p_int1[1]+0.3, "P1'", fontsize=8)
+ax.text(p_int2[0]+0.2, p_int2[1]-0.4, "P2'", fontsize=8)
+
+
+ax.set_xlim(0, 14); ax.set_ylim(0, 10); ax.set_aspect('equal', adjustable='box'); ax.set_xticks([]); ax.set_yticks([])
+ax.spines['top'].set_visible(False); ax.spines['right'].set_visible(False); ax.spines['bottom'].set_visible(False); ax.spines['left'].set_visible(False)
+plt.title("C-S : Calcul d'Intersection")
+plt.savefig('cs_intersection.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.6\textwidth, keepaspectratio]{cs_intersection.png}
+\caption{Calcul des intersections et réitération des tests.}
+\label{fig:cs_intersection}
+\end{figure}
+
+\textbf{Extension 3D :} L'algorithme se généralise en 3D avec 6 bits pour le code de zone (outcode) :
+\begin{itemize}
+    \item Bit 1: $x > x_{max}$ (RIGHT)
+    \item Bit 2: $x < x_{min}$ (LEFT)
+    \item Bit 3: $y > y_{max}$ (TOP)
+    \item Bit 4: $y < y_{min}$ (BOTTOM)
+    \item Bit 5: $z > z_{max}$ (FAR)
+    \item Bit 6: $z < z_{min}$ (NEAR)
+\end{itemize}
+Cela nécessite des pré-calculs supplémentaires pour les intersections avec les 6 plans du volume de vue.
+
+\begin{verbatim}
+#save_to: cs_3d_zones.png
+import matplotlib.pyplot as plt
+import numpy as np
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+
+xmin, xmax = -1, 1
+ymin, ymax = -1, 1
+zmin, zmax = -1, 1
+
+# Draw the clipping volume (a cube)
+verts = [
+    (xmin, ymin, zmin), (xmax, ymin, zmin), (xmax, ymax, zmin), (xmin, ymax, zmin),
+    (xmin, ymin, zmax), (xmax, ymin, zmax), (xmax, ymax, zmax), (xmin, ymax, zmax)
+]
+faces = [
+    [verts[0], verts[1], verts[2], verts[3]], # bottom
+    [verts[4], verts[5], verts[6], verts[7]], # top
+    [verts[0], verts[1], verts[5], verts[4]], # front
+    [verts[2], verts[3], verts[7], verts[6]], # back
+    [verts[1], verts[2], verts[6], verts[5]], # right
+    [verts[0], verts[3], verts[7], verts[4]]  # left
+]
+
+ax.add_collection3d(Poly3DCollection(faces, facecolors='cyan', linewidths=1, edgecolors='r', alpha=.25))
+
+# Example line segment going through the volume
+p1 = np.array([-2, -0.5, 0.5])
+p2 = np.array([1.5, 1.5, -1.5])
+ax.plot([p1[0], p2[0]], [p1[1], p2[1]], [p1[2], p2[2]], 'b-o', markersize=3)
+ax.text(p1[0], p1[1], p1[2], 'P1')
+ax.text(p2[0], p2[1], p2[2], 'P2')
+
+# Example labels (approximate positions for illustration)
+ax.text(0, 0, zmax + 0.2, 'z > zmax (b5)', ha='center')
+ax.text(0, 0, zmin - 0.2, 'z < zmin (b6)', ha='center')
+ax.text(xmax + 0.2, 0, 0, 'x > xmax (b1)', ha='center')
+ax.text(xmin - 0.2, 0, 0, 'x < xmin (b2)', ha='center')
+ax.text(0, ymax + 0.2, 0, 'y > ymax (b3)', ha='center')
+ax.text(0, ymin - 0.2, 0, 'y < ymin (b4)', ha='center')
+
+
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_zlabel('Z')
+ax.set_xlim(-2.5, 2.5)
+ax.set_ylim(-2.5, 2.5)
+ax.set_zlim(-2.5, 2.5)
+# Make panes transparent
+ax.xaxis.pane.fill = False
+ax.yaxis.pane.fill = False
+ax.zaxis.pane.fill = False
+# Make grid lines transparent
+ax.xaxis._axinfo["grid"]['color'] =  (1,1,1,0)
+ax.yaxis._axinfo["grid"]['color'] =  (1,1,1,0)
+ax.zaxis._axinfo["grid"]['color'] =  (1,1,1,0)
+
+
+plt.title('Clipping 3D - Volume de vue et bits de zone')
+plt.savefig('cs_3d_zones.png')
+
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, max height=0.4\textheight, keepaspectratio]{cs_3d_zones.png}
+\caption{Extension 3D de Cohen-Sutherland avec 6 bits.}
+\label{fig:cs_3d_zones}
+\end{figure}
+
+
+\paragraph{Algorithme de Liang \& Barsky}
+Cette approche découpe une droite en exploitant sa forme paramétrique $P(\alpha) = (1-\alpha)P_1 + \alpha P_2$.
+\begin{align*} x(\alpha) &= (1-\alpha)x_1 + \alpha x_2 \\ y(\alpha) &= (1-\alpha)y_1 + \alpha y_2 \end{align*}
+Le paramètre $\alpha$ indique la position sur la droite :
+\begin{itemize}
+    \item $\alpha \in [0, 1]$ : $P(\alpha)$ est sur le segment $[P_1, P_2]$.
+    \item $\alpha < 0$ : $P(\alpha)$ est sur la demi-droite à gauche de $P_1$.
+    \item $\alpha > 1$ : $P(\alpha)$ est sur la demi-droite à droite de $P_2$.
+\end{itemize}
+
+\begin{verbatim}
+#save_to: lb_intro.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, ax = plt.subplots()
+
+p1 = np.array([2, 3])
+p2 = np.array([8, 6])
+
+# Draw the infinite line
+alpha_range = np.linspace(-0.5, 1.5, 100)
+points = np.array([(1 - alpha) * p1 + alpha * p2 for alpha in alpha_range])
+ax.plot(points[:, 0], points[:, 1], 'gray', linestyle='--')
+
+# Draw the segment P1-P2
+ax.plot([p1[0], p2[0]], [p1[1], p2[1]], 'b-o', linewidth=2, markersize=5)
+ax.text(p1[0] - 0.2, p1[1] - 0.5, 'P1 (α=0)', ha='right')
+ax.text(p2[0] + 0.2, p2[1] - 0.5, 'P2 (α=1)', ha='left')
+
+# Points outside the segment
+p_neg = (1 - (-0.3)) * p1 + (-0.3) * p2
+p_pos = (1 - 1.2) * p1 + 1.2 * p2
+ax.plot(p_neg[0], p_neg[1], 'ro', markersize=4)
+ax.text(p_neg[0], p_neg[1] + 0.2, 'P(α < 0)', ha='center')
+ax.plot(p_pos[0], p_pos[1], 'go', markersize=4)
+ax.text(p_pos[0], p_pos[1] + 0.2, 'P(α > 1)', ha='center')
+
+# Example point on segment
+p_in = (1 - 0.5) * p1 + 0.5 * p2
+ax.plot(p_in[0], p_in[1], 'mo', markersize=4)
+ax.text(p_in[0], p_in[1] + 0.2, 'P(0 < α < 1)', ha='center')
+
+
+ax.set_xlim(0, 10)
+ax.set_ylim(1, 8)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xticks([])
+ax.set_yticks([])
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.spines['bottom'].set_visible(False)
+ax.spines['left'].set_visible(False)
+plt.title('Liang-Barsky : Représentation Paramétrique')
+plt.savefig('lb_intro.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, max height=0.3\textheight, keepaspectratio]{lb_intro.png}
+\caption{Signification du paramètre $\alpha$ dans l'algorithme de Liang-Barsky.}
+\label{fig:lb_intro}
+\end{figure}
+
+L'algorithme trouve les intersections de la droite infinie $P(\alpha)$ avec les quatre lignes de la fenêtre ($x=x_{min}, x=x_{max}, y=y_{min}, y=y_{max$). Cela donne jusqu'à quatre valeurs de $\alpha$. Ces valeurs définissent l'intervalle $[\alpha_{min}, \alpha_{max}]$ correspondant à la partie visible du segment. Initialement, $[\alpha_{min}, \alpha_{max}] = [0, 1]$.
+Deux cas peuvent se présenter pour les intersections avec les bords de la fenêtre :
+\begin{itemize}
+    \item La droite n'est parallèle à aucun côté de la fenêtre : 4 intersections potentielles.
+    \item La droite est parallèle à un des côtés de la fenêtre : 2 intersections potentielles.
+\end{itemize}
+
+\begin{verbatim}
+#save_to: lb_cases.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, axs = plt.subplots(1, 2, figsize=(10, 4))
+
+xmin, xmax = 3, 9
+ymin, ymax = 2, 6
+
+# Case 1: Non-parallel
+ax = axs[0]
+rect = patches.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, linewidth=1, edgecolor='blue', facecolor='lightblue', alpha=0.3)
+ax.add_patch(rect)
+p1 = np.array([1, 1]); p2 = np.array([11, 7])
+alpha_range = np.linspace(-0.1, 1.1, 100)
+points = np.array([(1 - alpha) * p1 + alpha * p2 for alpha in alpha_range])
+ax.plot(points[:, 0], points[:, 1], 'gray', linestyle='--')
+ax.plot([p1[0], p2[0]], [p1[1], p2[1]], 'b-o', markersize=4)
+ax.text(p1[0]-0.5, p1[1], 'P1')
+ax.text(p2[0]+0.2, p2[1], 'P2')
+# Intersection points (visual approximation)
+intersections = [(xmin, 2.2), (xmax, 6.2), (4.3, ymin), (7.7, ymax)]
+for pt in intersections: ax.plot(pt[0], pt[1], 'rx', markersize=6)
+ax.set_title('Cas 1: Non parallèle (4 intersections)')
+ax.set_xlim(0, 12); ax.set_ylim(0, 8); ax.set_aspect('equal', adjustable='box'); ax.set_xticks([]); ax.set_yticks([])
+
+# Case 2: Parallel
+ax = axs[1]
+rect = patches.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, linewidth=1, edgecolor='blue', facecolor='lightblue', alpha=0.3)
+ax.add_patch(rect)
+p1 = np.array([1, 4]); p2 = np.array([11, 4]) # Parallel to x-axis
+alpha_range = np.linspace(-0.1, 1.1, 100)
+points = np.array([(1 - alpha) * p1 + alpha * p2 for alpha in alpha_range])
+ax.plot(points[:, 0], points[:, 1], 'gray', linestyle='--')
+ax.plot([p1[0], p2[0]], [p1[1], p2[1]], 'b-o', markersize=4)
+ax.text(p1[0]-0.5, p1[1], 'P1')
+ax.text(p2[0]+0.2, p2[1], 'P2')
+# Intersection points (visual approximation)
+intersections = [(xmin, 4), (xmax, 4)]
+for pt in intersections: ax.plot(pt[0], pt[1], 'rx', markersize=6)
+ax.set_title('Cas 2: Parallèle (2 intersections)')
+ax.set_xlim(0, 12); ax.set_ylim(0, 8); ax.set_aspect('equal', adjustable='box'); ax.set_xticks([]); ax.set_yticks([])
+
+plt.tight_layout()
+plt.savefig('lb_cases.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, max height=0.3\textheight, keepaspectratio]{lb_cases.png}
+\caption{Cas d'intersection dans l'algorithme de Liang-Barsky.}
+\label{fig:lb_cases}
+\end{figure}
+
+\textbf{Exemple d'exécution :} Considérons le segment $P_0=(30, 20)$ à $P_1=(280, 160)$ et une fenêtre [70, 230] x [60, 150]. L'algorithme teste les intersections avec chaque bord, mettant à jour l'intervalle $[\alpha_{min}, \alpha_{max}]$ (initialement [0, 1]).
+
+*(Note : Les diagrammes suivants illustrent le processus, mais les calculs exacts ne sont pas détaillés ici.)*
+
+\begin{verbatim}
+#save_to: lb_example_seq.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+# Window and segment
+xmin, xmax = 70, 230
+ymin, ymax = 60, 150
+p0 = np.array([30, 20])
+p1 = np.array([280, 160])
+alpha_min, alpha_max = 0.0, 1.0 # Initial interval
+
+fig, axs = plt.subplots(2, 2, figsize=(10, 8))
+axs = axs.ravel()
+
+titles = [
+    f'a) Clip Gauche (x={xmin})',
+    f'b) Clip Droite (x={xmax})',
+    f'c) Clip Bas (y={ymin})',
+    f'd) Clip Haut (y={ymax})'
+]
+
+# Approximated clipped intervals for visualization based on slide
+intervals = [(0.16, 1.0), (0.16, 0.8), (0.28, 0.8), (0.28, 0.77)] # Approximate values visually inferred
+
+for i in range(4):
+    ax = axs[i]
+    rect = patches.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, linewidth=1, edgecolor='blue', facecolor='lightblue', alpha=0.1)
+    ax.add_patch(rect)
+    ax.axvline(xmin, color='gray', linestyle='--', lw=0.5)
+    ax.axvline(xmax, color='gray', linestyle='--', lw=0.5)
+    ax.axhline(ymin, color='gray', linestyle='--', lw=0.5)
+    ax.axhline(ymax, color='gray', linestyle='--', lw=0.5)
+
+    # Draw original segment dashed
+    ax.plot([p0[0], p1[0]], [p0[1], p1[1]], 'k--o', markersize=3, lw=1, label='Original')
+
+    # Draw currently clipped segment
+    current_alpha_min, current_alpha_max = intervals[i]
+    p_start = (1 - current_alpha_min) * p0 + current_alpha_min * p1
+    p_end = (1 - current_alpha_max) * p0 + current_alpha_max * p1
+    ax.plot([p_start[0], p_end[0]], [p_start[1], p_end[1]], 'r-o', markersize=4, lw=2, label=f'Clip {i+1}')
+
+    ax.text(p0[0]-5, p0[1], 'P0', fontsize=8)
+    ax.text(p1[0]+5, p1[1], 'P1', fontsize=8)
+
+    ax.set_title(titles[i] + f"\n[α_min, α_max] ≈ [{current_alpha_min:.2f}, {current_alpha_max:.2f}]")
+    ax.set_xlim(0, 300)
+    ax.set_ylim(0, 180)
+    ax.set_aspect('equal', adjustable='box')
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+plt.tight_layout()
+plt.savefig('lb_example_seq.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, max height=0.7\textheight, keepaspectratio]{lb_example_seq.png}
+\caption{Exemple de clipping successif avec Liang-Barsky.}
+\label{fig:lb_example_seq}
+\end{figure}
+
+L'ordre d'intersection avec les frontières peut varier (ex: Bas, Gauche, Haut, Droite). L'algorithme calcule les 4 paramètres d'intersection $\alpha_1, \alpha_2, \alpha_3, \alpha_4$. Il trie ensuite ces paramètres et les compare avec l'intervalle [0, 1] pour déterminer la portion visible finale $[\alpha_{vis\_min}, \alpha_{vis\_max}]$. Si $\alpha_{vis\_min} < \alpha_{vis\_max}$, le segment est (partiellement) visible, sinon il est rejeté.
+
+\begin{verbatim}
+#save_to: lb_intersection_order.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots()
+
+xmin, xmax = 3, 9
+ymin, ymax = 2, 6
+
+# Window
+rect = patches.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, linewidth=1, edgecolor='blue', facecolor='lightblue', alpha=0.5)
+ax.add_patch(rect)
+
+# Segment and line
+p1 = np.array([1, 7])
+p2 = np.array([11, 1])
+alpha_range = np.linspace(-0.1, 1.1, 100)
+points = np.array([(1 - alpha) * p1 + alpha * p2 for alpha in alpha_range])
+ax.plot(points[:, 0], points[:, 1], 'gray', linestyle='--')
+ax.plot([p1[0], p2[0]], [p1[1], p2[1]], 'r-o', markersize=4)
+ax.text(p1[0]-0.5, p1[1], 'P1')
+ax.text(p2[0]+0.2, p2[1], 'P2')
+
+# Intersections (approximate alpha values and points for illustration)
+# y=ymax=6: 7(1-a)+1a = 6 => 7-6a=6 => 1=6a => a=1/6 (t1) -> Point (1+10/6, 6) = (16/6, 6) = (8/3, 6) ~ (2.67, 6) OUTSIDE
+# x=xmin=3: 1(1-a)+11a = 3 => 1+10a=3 => 10a=2 => a=1/5 (t2) -> Point (3, 7 - 6/5) = (3, 29/5) = (3, 5.8) INSIDE
+# y=ymin=2: 7(1-a)+1a = 2 => 7-6a=2 => 5=6a => a=5/6 (t3) -> Point (1+10*5/6, 2) = (1+50/6, 2) = (56/6, 2) = (28/3, 2) ~ (9.33, 2) OUTSIDE
+# x=xmax=9: 1(1-a)+11a = 9 => 1+10a=9 => 10a=8 => a=4/5 (t4) -> Point (9, 7 - 6*4/5) = (9, 7-24/5) = (9, 11/5) = (9, 2.2) INSIDE
+
+intersections = {
+    't1 (y=ymax)': (1/6, (8/3, 6)),
+    't2 (x=xmin)': (1/5, (3, 5.8)),
+    't3 (y=ymin)': (5/6, (28/3, 2)),
+    't4 (x=xmax)': (4/5, (9, 2.2))
+}
+
+for i, (name, (alpha, pt)) in enumerate(intersections.items()):
+    ax.plot(pt[0], pt[1], 'kx', markersize=6)
+    ax.text(pt[0], pt[1]+0.3, f'{name}\nα≈{alpha:.2f}', fontsize=8, ha='center')
+
+# Clipped segment P1' P2'
+p1_prime = intersections['t2 (x=xmin)'][1]
+p2_prime = intersections['t4 (x=xmax)'][1]
+ax.plot([p1_prime[0], p2_prime[0]], [p1_prime[1], p2_prime[1]], 'g-o', markersize=5, linewidth=2)
+ax.text(p1_prime[0]-0.5, p1_prime[1], "P1'")
+ax.text(p2_prime[0]+0.2, p2_prime[1], "P2'")
+
+ax.set_xlim(0, 12)
+ax.set_ylim(0, 8)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xticks([])
+ax.set_yticks([])
+ax.spines['top'].set_visible(False); ax.spines['right'].set_visible(False); ax.spines['bottom'].set_visible(False); ax.spines['left'].set_visible(False)
+plt.title('Liang-Barsky : Tri des paramètres d\'intersection')
+
+plt.savefig('lb_intersection_order.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, max height=0.4\textheight, keepaspectratio]{lb_intersection_order.png}
+\caption{Ordre des intersections et détermination du segment visible.}
+\label{fig:lb_intersection_order}
+\end{figure}
+
+
+\subsubsection{Clipping de polygones : Polygone / Fenêtre}
+L'objectif est de déterminer la ou les parties d'un polygone qui se trouvent à l'intérieur de la fenêtre de clipping. Le résultat peut être un ou plusieurs polygones.
+
+\begin{verbatim}
+#save_to: polygon_clipping_intro.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots()
+
+xmin, xmax = 3, 9
+ymin, ymax = 2, 6
+
+# Window
+rect = patches.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, linewidth=1, edgecolor='blue', facecolor='lightblue', alpha=0.5)
+ax.add_patch(rect)
+
+# Example Polygon 1 (partially inside)
+poly1_verts = np.array([[2, 4], [5, 7], [8, 4], [5, 1], [2, 4]])
+poly1 = patches.Polygon(poly1_verts[:-1,:], closed=True, edgecolor='r', facecolor='red', alpha=0.3)
+ax.add_patch(poly1)
+ax.plot(poly1_verts[:,0], poly1_verts[:,1], 'r-o', markersize=3)
+
+# Example Polygon 2 (fully outside)
+poly2_verts = np.array([[10, 5], [11, 7], [12, 5], [10, 5]])
+poly2 = patches.Polygon(poly2_verts[:-1,:], closed=True, edgecolor='g', facecolor='green', alpha=0.3)
+ax.add_patch(poly2)
+ax.plot(poly2_verts[:,0], poly2_verts[:,1], 'g-o', markersize=3)
+
+# Example Polygon 3 (fully inside)
+poly3_verts = np.array([[4, 3], [6, 5], [8, 3], [4, 3]])
+poly3 = patches.Polygon(poly3_verts[:-1,:], closed=True, edgecolor='m', facecolor='magenta', alpha=0.3)
+ax.add_patch(poly3)
+ax.plot(poly3_verts[:,0], poly3_verts[:,1], 'm-o', markersize=3)
+
+
+ax.set_xlim(0, 13)
+ax.set_ylim(0, 8)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xticks([])
+ax.set_yticks([])
+ax.spines['top'].set_visible(False); ax.spines['right'].set_visible(False); ax.spines['bottom'].set_visible(False); ax.spines['left'].set_visible(False)
+plt.title('Clipping de Polygones')
+
+plt.savefig('polygon_clipping_intro.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, max height=0.4\textheight, keepaspectratio]{polygon_clipping_intro.png}
+\caption{Exemples de polygones par rapport à une fenêtre.}
+\label{fig:polygon_clipping_intro}
+\end{figure}
+
+\paragraph{Algorithme de Sutherland \& Hodgeman}
+Cet algorithme clippe un polygone en le testant successivement contre chaque frontière (bord) de la fenêtre de clipping (Gauche, Droite, Bas, Haut). Pour chaque frontière, l'algorithme prend une liste de sommets en entrée (le polygone original ou le résultat du clipping précédent) et produit une nouvelle liste de sommets en sortie.
+
+\begin{verbatim}
+#save_to: sh_clipping_seq.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+# Window and Polygon
+xmin, xmax = 3, 9
+ymin, ymax = 2, 6
+poly_verts_orig = np.array([[2, 4], [5, 8], [11, 5], [8, 1], [2, 4]])
+
+fig, axs = plt.subplots(1, 5, figsize=(15, 3.5)) # 5 stages
+axs = axs.ravel()
+titles = ['Original', 'Après Clip Gauche', 'Après Clip Droite', 'Après Clip Bas', 'Après Clip Haut (Final)']
+
+# Dummy clipped polygons for visualization (actual calculation is complex)
+poly_verts_clipped = [
+    poly_verts_orig,
+    np.array([[3, 4.7], [5, 8], [11, 5], [8, 1], [3, 2.2], [3, 4.7]]), # Approx after Left clip
+    np.array([[3, 4.7], [5, 8], [9, 5.7], [9, 3.2], [8, 1], [3, 2.2], [3, 4.7]]), # Approx after Right clip
+    np.array([[3, 4.7], [5, 8], [9, 5.7], [9, 3.2], [6.5, 2], [3, 2.2], [3, 4.7]]), # Approx after Bottom clip
+    np.array([[3, 4.7], [4.3, 6], [7.7, 6], [9, 5.7], [9, 3.2], [6.5, 2], [3, 2.2], [3, 4.7]]) # Approx after Top clip (Final)
+]
+
+clip_boundaries = [None, ('x', xmin), ('x', xmax), ('y', ymin), ('y', ymax)]
+
+for i in range(5):
+    ax = axs[i]
+    rect = patches.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, linewidth=1, edgecolor='blue', facecolor='none', alpha=0.5)
+    ax.add_patch(rect)
+
+    # Highlight current clip boundary
+    if clip_boundaries[i]:
+      axis, val = clip_boundaries[i]
+      if axis == 'x':
+          ax.axvline(val, color='red', linestyle='-', lw=1.5)
+          ax.fill_betweenx(np.linspace(0,10,2), val, val + (5 if i==1 else -5), color='red', alpha=0.1) # Shade clipped side
+      else:
+          ax.axhline(val, color='red', linestyle='-', lw=1.5)
+          ax.fill_between(np.linspace(0,12,2), val, val + (5 if i==4 else -5), color='red', alpha=0.1) # Shade clipped side
+
+    # Draw polygon state
+    current_verts = poly_verts_clipped[i]
+    if len(current_verts) > 0:
+        poly = patches.Polygon(current_verts[:-1,:], closed=True, edgecolor='g', facecolor='lightgreen', alpha=0.6)
+        ax.add_patch(poly)
+        ax.plot(current_verts[:,0], current_verts[:,1], 'g-o', markersize=3)
+
+    ax.set_title(titles[i])
+    ax.set_xlim(0, 12)
+    ax.set_ylim(0, 9)
+    ax.set_aspect('equal', adjustable='box')
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+plt.tight_layout()
+plt.savefig('sh_clipping_seq.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, max height=0.3\textheight, keepaspectratio]{sh_clipping_seq.png}
+\caption{Étapes successives du clipping avec Sutherland-Hodgeman.}
+\label{fig:sh_clipping_seq}
+\end{figure}
+
+Pour chaque frontière et chaque arête $(P_i, P_{i+1})$ du polygone en entrée :
+\begin{itemize}
+    \item Tester l'appartenance des extrémités $P_i$ et $P_{i+1}$ par rapport à la frontière (dedans ou dehors).
+    \item Il y a 4 cas pour l'arête $(P_i, P_{i+1})$:
+    \begin{enumerate}
+        \item $P_i$ dedans, $P_{i+1}$ dedans : Garder $P_{i+1}$.
+        \item $P_i$ dedans, $P_{i+1}$ dehors : Calculer l'intersection $P'$, garder $P'$. (Cas 2)
+        \item $P_i$ dehors, $P_{i+1}$ dehors : Ne rien garder.
+        \item $P_i$ dehors, $P_{i+1}$ dedans : Calculer l'intersection $P'$, garder $P'$ puis $P_{i+1}$. (Cas 4)
+    \end{enumerate}
+    \item Insérer les nouveaux points calculés (intersections) et les points conservés dans la liste de sortie.
+    \item Supprimer les points en dehors de la fenêtre.
+\end{itemize}
+La liste de sortie d'une étape devient l'entrée de l'étape suivante. Le résultat final est le polygone clippé.
+
+\begin{verbatim}
+#save_to: sh_clipping_detail.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, ax = plt.subplots()
+
+# Define a single clipping edge (e.g., left edge x=xmin)
+xmin = 3
+ax.axvline(xmin, color='red', linestyle='-', lw=1.5, label='Frontière de Clip (Gauche)')
+ax.fill_betweenx(np.linspace(0, 10, 2), 0, xmin, color='red', alpha=0.1) # Shade clipped side (outside)
+ax.text(xmin + 0.2, 9, 'Dedans', color='green')
+ax.text(xmin - 0.2, 9, 'Dehors', color='red', ha='right')
+
+# Example edge P4 -> P5 (crossing from inside to outside)
+p4 = np.array([4, 2])
+p5 = np.array([1, 3])
+p_intersect_45 = np.array([xmin, 2 + (3-2)*(xmin-4)/(1-4)]) # (3, 2.33)
+
+ax.plot([p4[0], p5[0]], [p4[1], p5[1]], 'b-o', markersize=4)
+ax.text(p4[0]+0.1, p4[1], 'P4 (Dedans)')
+ax.text(p5[0]-0.1, p5[1], 'P5 (Dehors)', ha='right')
+ax.plot(p_intersect_45[0], p_intersect_45[1], 'go', markersize=6)
+ax.text(p_intersect_45[0]+0.1, p_intersect_45[1]-0.4, "P4' (Intersection, Garder)")
+ax.annotate('Cas 2: Dedans -> Dehors\nSortie: Intersection P4\'', xy=(2, 6), xytext=(0.5, 7), arrowprops=dict(arrowstyle="->"))
+
+
+# Example edge P5 -> P6 (crossing from outside to inside)
+p6 = np.array([5, 5])
+p_intersect_56 = np.array([xmin, 3 + (5-3)*(xmin-1)/(5-1)]) # (3, 4)
+
+ax.plot([p5[0], p6[0]], [p5[1], p6[1]], 'm-o', markersize=4)
+ax.text(p5[0]-0.1, p5[1]+0.4, 'P5 (Dehors)', ha='right')
+ax.text(p6[0]+0.1, p6[1], 'P6 (Dedans)')
+ax.plot(p_intersect_56[0], p_intersect_56[1], 'go', markersize=6)
+ax.text(p_intersect_56[0]+0.1, p_intersect_56[1]+0.2, "P5' (Intersection, Garder)")
+ax.text(p6[0]+0.1, p6[1]+0.2, "(Garder P6 aussi)")
+ax.annotate('Cas 4: Dehors -> Dedans\nSortie: Intersection P5\', P6', xy=(2, 1), xytext=(3.5, 0.5), arrowprops=dict(arrowstyle="->"))
+
+
+ax.set_xlim(0, 7)
+ax.set_ylim(0, 10)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xticks([])
+ax.set_yticks([])
+ax.legend(loc='lower right')
+plt.title('Sutherland-Hodgeman : Traitement d\'une arête')
+
+plt.savefig('sh_clipping_detail.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, max height=0.4\textheight, keepaspectratio]{sh_clipping_detail.png}
+\caption{Détail du traitement d'une arête par Sutherland-Hodgeman (Cas 2 et 4).}
+\label{fig:sh_clipping_detail}
+\end{figure}
+
+\section{Élimination des Parties Cachées (Visibilité / Rendu)}
+
+\subsection{Introduction}
+L'élimination des parties cachées (ou détermination de la surface visible, HSR - Hidden Surface Removal) est une étape cruciale du rendu 3D. Elle consiste à déterminer quelles lignes, arêtes, surfaces ou volumes d'une scène 3D sont visibles depuis le point de vue de l'observateur (caméra).
+
+\begin{verbatim}
+#save_to: visibility_pipeline.png
+from graphviz import Digraph
+
+dot = Digraph(comment='Pipeline Graphique', graph_attr={'rankdir': 'TB'})
+
+dot.node('A', 'Transformations de\nmodélisation')
+dot.node('B', 'Illumination\n(Shading)')
+dot.node('C', 'Transformation\nd\'affichage')
+dot.node('D', 'Clipping')
+dot.node('E', 'Transformation écran\n(Projection)')
+dot.node('F', 'Pixelisation\n(Rasterization)')
+dot.node('G', 'Visibilité / Rendu', style='filled', fillcolor='lightblue')
+
+dot.edge('A', 'B')
+dot.edge('B', 'C')
+dot.edge('C', 'D')
+dot.edge('D', 'E')
+dot.edge('E', 'F')
+dot.edge('F', 'G')
+
+dot.render('visibility_pipeline', format='png', view=False, cleanup=True)
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.8\textwidth, max height=0.4\textheight, keepaspectratio]{visibility_pipeline.png}
+\caption{La Visibilité / Rendu dans le Pipeline Graphique.}
+\label{fig:visibility_pipeline}
+\end{figure}
+
+Le but est d'assurer la cohérence visuelle de la scène et de réduire le nombre de primitives traitées par le pipeline graphique, en ne dessinant que ce qui est réellement visible. Cela implique souvent de remplir le framebuffer (tampon d'image) avec la bonne couleur pour chaque pixel, en tenant compte de l'occultation.
+
+\begin{verbatim}
+#save_to: hsr_goal.png
+import matplotlib.pyplot as plt
+import numpy as np
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
+
+def plot_cube(ax, origin, size, color, alpha, wireframe=False):
+    x, y, z = origin
+    dx, dy, dz = size, size, size
+    verts = [
+        (x, y, z), (x+dx, y, z), (x+dx, y+dy, z), (x, y+dy, z),
+        (x, y, z+dz), (x+dx, y, z+dz), (x+dx, y+dy, z+dz), (x, y+dy, z+dz)
+    ]
+    faces = [
+        [verts[0], verts[1], verts[2], verts[3]], # bottom
+        [verts[4], verts[5], verts[6], verts[7]], # top
+        [verts[0], verts[1], verts[5], verts[4]], # front
+        [verts[2], verts[3], verts[7], verts[6]], # back
+        [verts[1], verts[2], verts[6], verts[5]], # right
+        [verts[0], verts[3], verts[7], verts[4]]  # left
+    ]
+    if wireframe:
+        lines = [
+            (verts[0], verts[1]), (verts[1], verts[2]), (verts[2], verts[3]), (verts[3], verts[0]),
+            (verts[4], verts[5]), (verts[5], verts[6]), (verts[6], verts[7]), (verts[7], verts[4]),
+            (verts[0], verts[4]), (verts[1], verts[5]), (verts[2], verts[6]), (verts[3], verts[7])
+         ]
+        ax.add_collection3d(Line3DCollection(lines, colors='k', linewidths=0.5))
+    else:
+        ax.add_collection3d(Poly3DCollection(faces, facecolors=color, linewidths=1, edgecolors='k', alpha=alpha))
+
+fig = plt.figure(figsize=(10, 5))
+
+# Left plot: Wireframe - ambiguous
+ax1 = fig.add_subplot(121, projection='3d')
+plot_cube(ax1, (0, 0, 0), 1, 'cyan', 0.1, wireframe=True)
+plot_cube(ax1, (0.5, 0.5, 0.5), 1, 'magenta', 0.1, wireframe=True)
+ax1.set_title('Scène Filaire (Ambigüe)')
+ax1.set_xlabel('X'); ax1.set_ylabel('Y'); ax1.set_zlabel('Z')
+ax1.view_init(elev=20, azim=30)
+ax1.set_xlim(-0.5, 2); ax1.set_ylim(-0.5, 2); ax1.set_zlim(-0.5, 2)
+ax1.xaxis.pane.fill = False; ax1.yaxis.pane.fill = False; ax1.zaxis.pane.fill = False
+ax1.xaxis._axinfo["grid"]['color'] = (1,1,1,0); ax1.yaxis._axinfo["grid"]['color'] = (1,1,1,0); ax1.zaxis._axinfo["grid"]['color'] = (1,1,1,0)
+
+
+# Right plot: Solid - occlusion resolved
+ax2 = fig.add_subplot(122, projection='3d')
+# Draw back cube first, then front cube
+plot_cube(ax2, (0, 0, 0), 1, 'cyan', 0.8)
+plot_cube(ax2, (0.5, 0.5, 0.5), 1, 'magenta', 0.8)
+ax2.set_title('Scène Solide (Visibilité Résolue)')
+ax2.set_xlabel('X'); ax2.set_ylabel('Y'); ax2.set_zlabel('Z')
+ax2.view_init(elev=20, azim=30)
+ax2.set_xlim(-0.5, 2); ax2.set_ylim(-0.5, 2); ax2.set_zlim(-0.5, 2)
+ax2.xaxis.pane.fill = False; ax2.yaxis.pane.fill = False; ax2.zaxis.pane.fill = False
+ax2.xaxis._axinfo["grid"]['color'] = (1,1,1,0); ax2.yaxis._axinfo["grid"]['color'] = (1,1,1,0); ax2.zaxis._axinfo["grid"]['color'] = (1,1,1,0)
+
+plt.tight_layout()
+plt.savefig('hsr_goal.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, max height=0.4\textheight, keepaspectratio]{hsr_goal.png}
+\caption{Objectif de l'élimination des parties cachées.}
+\label{fig:hsr_goal}
+\end{figure}
+
+\subsection{Familles d'algorithmes}
+Il existe deux grandes familles d'algorithmes HSR :
+
+\begin{itemize}
+    \item \textbf{Algorithmes Objet (Espace Scène) :}
+    \begin{itemize}
+        \item Le masquage se fait sur le modèle de données physiques (calcul en coordonnées du monde).
+        \item La détermination de la visibilité est valable quelle que soit l'échelle du dessin (résolution de l'image).
+        \item Caractéristiques : Test objet par objet (potentiellement $O(n^2)$), précision dépend de la résolution des objets, techniques souvent plus complexes à mettre en œuvre.
+        \item Méthodes : Backface Culling, Algorithme du peintre, Arbres BSP.
+    \end{itemize}
+    \item \textbf{Algorithmes Image (Espace Image) :}
+    \begin{itemize}
+        \item Le masquage se fait au niveau des pixels de l'écran (calcul en coordonnées fenêtre).
+        \item Caractéristiques : Test de visibilité en chaque pixel (souvent $O(n \times \text{pixels})$), précision dépend de la résolution de l'espace image, recalcul nécessaire si la caméra ou la scène change, techniques souvent plus simples.
+        \item Méthodes : Warnock, Ligne de balayage (Scan-line Watkins, Scan-line Z-buffer), Test de profondeur (Z-buffer).
+    \end{itemize}
+\end{itemize}
+
+\begin{verbatim}
+#save_to: hsr_object_algos.png
+from graphviz import Digraph
+
+dot = Digraph(comment='Algorithmes Objet', graph_attr={'rankdir': 'TB'})
+dot.node('Title', 'Algorithmes Objet (Espace Scène)', shape='plaintext')
+dot.node('A', 'Élimination de faces\narrières\n(Backface Culling)')
+dot.node('B', 'Algorithme du peintre')
+dot.node('C', 'Algorithme de tri par\narbre binaire (BSP\nTrees)')
+
+# No explicit connection shown in slide diagram between these 3, just listed under object-space
+# To make it a graph, we can link them from the category title implicitly
+# dot.edge('Title','A'); dot.edge('Title','B'); dot.edge('Title','C') # Not ideal
+
+dot.render('hsr_object_algos', format='png', view=False, cleanup=True)
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.8\textwidth, max height=0.2\textheight, keepaspectratio]{hsr_object_algos.png}
+\caption{Principaux algorithmes HSR dans l'espace objet.}
+\label{fig:hsr_object_algos}
+\end{figure}
+
+\begin{verbatim}
+#save_to: hsr_image_algos.png
+from graphviz import Digraph
+
+dot = Digraph(comment='Algorithmes Image', graph_attr={'rankdir': 'LR'})
+dot.node('Title', 'Algorithmes Image (Espace Image)', shape='plaintext')
+
+# Recreating the structure from the slide diagram (Slide 32)
+dot.node('Warnock', 'Subdivision récursive\nde l\'image (Warnock)')
+dot.node('DepthTest', 'Test de profondeur')
+dot.node('ZBuffer', 'Tampon de\nprofondeur - Zbuffer')
+dot.node('Scanline', 'Ligne de balayage')
+dot.node('ScanWatkins', 'Scan-line-\nWatkins')
+dot.node('ScanZbuffer', 'Scan-line-\nZbuffer')
+
+# Connect based on diagram structure/grouping
+dot.edge('DepthTest', 'ZBuffer')
+dot.edge('Scanline', 'ScanWatkins')
+dot.edge('Scanline', 'ScanZbuffer')
+
+# These seem like distinct top-level categories in the diagram
+# dot.edge('Title', 'Warnock') # Optional links from title
+# dot.edge('Title', 'DepthTest')
+# dot.edge('Title', 'Scanline')
+
+dot.render('hsr_image_algos', format='png', view=False, cleanup=True)
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.9\textwidth, max height=0.25\textheight, keepaspectratio]{hsr_image_algos.png}
+\caption{Principaux algorithmes HSR dans l'espace image.}
+\label{fig:hsr_image_algos}
+\end{figure}
+
+\subsubsection{Algorithmes Objet (Espace Scène)}
+
+\paragraph{Élimination des Faces Arrières (Backface Culling)}
+\begin{definition}
+Principe : Garder uniquement les parties de la surface (facettes) dont la normale pointe \textit{vers} l'observateur (ou dans une direction opposée au vecteur de vue). Les faces dont la normale pointe à l'opposé de l'observateur sont considérées comme "arrière" et sont éliminées.
+\end{definition}
+
+\begin{verbatim}
+#save_to: backface_culling_principle.png
+import matplotlib.pyplot as plt
+import numpy as np
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+
+# Simple object (e.g., pyramid base)
+verts = [(0,0,0), (2,0,0), (1,2,0), (1,1,2)]
+faces = [
+    [verts[0], verts[1], verts[2]], # Base (Normal -Z)
+    [verts[0], verts[1], verts[3]], # Side 1 (Normal ~+Y)
+    [verts[1], verts[2], verts[3]], # Side 2 (Normal ~+X)
+    [verts[2], verts[0], verts[3]], # Side 3 (Normal ~-X)
+]
+face_colors = ['gray', 'red', 'green', 'blue']
+face_normals = [
+    np.array([0, 0, -1]), # Base
+    np.cross(np.array(verts[1])-np.array(verts[0]), np.array(verts[3])-np.array(verts[0])), # Side 1
+    np.cross(np.array(verts[2])-np.array(verts[1]), np.array(verts[3])-np.array(verts[1])), # Side 2
+    np.cross(np.array(verts[0])-np.array(verts[2]), np.array(verts[3])-np.array(verts[2])), # Side 3
+]
+
+# Normalize normals
+face_normals = [n / np.linalg.norm(n) if np.linalg.norm(n) > 0 else n for n in face_normals]
+
+# Observer position and view vector
+eye = np.array([-2, 1, 1])
+ax.plot([eye[0]], [eye[1]], [eye[2]], 'ko', markersize=8, label='Observateur')
+
+# Calculate visibility and draw faces/normals
+visible_faces = []
+centers = []
+visible_normals = []
+invisible_normals = []
+
+for i, face in enumerate(faces):
+    center = np.mean(np.array(face), axis=0)
+    centers.append(center)
+    view_vec = center - eye
+    view_vec = view_vec / np.linalg.norm(view_vec)
+    normal = face_normals[i]
+    dot_product = np.dot(normal, view_vec)
+
+    if dot_product < 0: # Face is potentially visible (normal points away from view vector / towards eye)
+        visible_faces.append(face)
+        visible_normals.append((center, normal))
+        ax.add_collection3d(Poly3DCollection([face], facecolors=face_colors[i], linewidths=1, edgecolors='k', alpha=0.6))
+    else: # Face is back-facing
+        invisible_normals.append((center, normal))
+        # Optionally draw back faces transparently or wireframe
+        ax.add_collection3d(Poly3DCollection([face], facecolors='gray', linewidths=0.5, edgecolors='gray', alpha=0.1))
+
+
+# Draw normals
+for center, normal in visible_normals:
+    ax.quiver(center[0], center[1], center[2], normal[0], normal[1], normal[2], length=0.5, color='black', arrow_length_ratio=0.3)
+for center, normal in invisible_normals:
+     ax.quiver(center[0], center[1], center[2], normal[0], normal[1], normal[2], length=0.5, color='gray', linestyle='--', arrow_length_ratio=0.3)
+
+
+ax.set_xlabel('X'); ax.set_ylabel('Y'); ax.set_zlabel('Z')
+ax.set_xlim(-3, 3); ax.set_ylim(-1, 3); ax.set_zlim(-1, 3)
+ax.view_init(elev=25, azim=-50)
+ax.set_title('Backface Culling : Normales de Faces')
+ax.legend()
+plt.savefig('backface_culling_principle.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, max height=0.4\textheight, keepaspectratio]{backface_culling_principle.png}
+\caption{Principe du Backface Culling.}
+\label{fig:backface_culling_principle}
+\end{figure}
+
+\begin{remark}
+Conditions : La suppression des faces arrières suffit à éliminer les parties cachées si :
+\begin{itemize}
+    \item L'objet est seul dans la scène (pas d'occultation par d'autres objets).
+    \item L'objet est convexe. Pour un objet concave, des faces avant peuvent être masquées par d'autres parties de l'objet lui-même.
+\end{itemize}
+\end{remark}
+
+\begin{definition}
+Calcul : On utilise le produit scalaire entre la normale à la face $\vec{N}$ et le vecteur allant d'un point de la face (ou son centre) vers l'oeil (ou la caméra) $\vec{V} = \text{Oeil} - \text{Face}$.
+\begin{itemize}
+    \item Si $\vec{N} \cdot \vec{V} > 0$ : La face est visible (orientée vers l'oeil). On la garde. *(Note: La diapo dit $\le 0$ on garde, ce qui implique que V va de l'oeil vers la face ou que N est la normale intérieure. En suivant la convention usuelle Oeil->Face et normale extérieure, N.V > 0 est visible. Si V = Face - Oeil, N.V < 0 est visible. La diapo utilise (Oeil - Face) . Normale $\le 0$ => on garde. Adoptons cette convention.)*
+    \item Si $(\text{Oeil} - \text{Face}) \cdot \vec{N} \le 0$ : On garde le polygone.
+    \item Si $(\text{Oeil} - \text{Face}) \cdot \vec{N} > 0$ : On élimine le polygone (face arrière).
+\end{itemize}
+\end{definition}
+
+\begin{verbatim}
+#save_to: backface_culling_calc.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, ax = plt.subplots()
+
+# Represent a face edge-on and the eye
+face_p1 = np.array([2, 2])
+face_p2 = np.array([6, 2])
+face_center = np.mean([face_p1, face_p2], axis=0) # [4, 2]
+normal = np.array([0, 1]) # Normal pointing up
+
+eye = np.array([4, 5])
+view_vec = eye - face_center # Vector from face center to eye
+
+# Calculate dot product
+dot_product = np.dot(normal, view_vec) # Here (0,1) . (0,3) = 3 > 0 -> Visible using common convention
+# Let's use the slide convention: V = Oeil - Face. N . V > 0 => Eliminate.
+# V = (4,5) - (4,2) = (0,3). N = (0,1). N.V = 3 > 0. Eliminate? No, should be visible.
+# Let's re-read the slide: (Oeil - Face) . Normale <= 0 => Garde.
+# Here (Oeil - Face) . N = 3. 3 > 0 => Eliminate. This suggests the face IS back-facing in this setup.
+# Let's make the normal point down, or eye below the face.
+normal = np.array([0, -1]) # Normal pointing down
+dot_product = np.dot(view_vec, normal) # (0,3) . (0,-1) = -3.
+# Test: (Oeil - Face) . N <= 0? Yes, -3 <= 0. So we keep this face. Correct.
+
+ax.plot([face_p1[0], face_p2[0]], [face_p1[1], face_p2[1]], 'b-', linewidth=3, label='Face (vue de côté)')
+ax.quiver(face_center[0], face_center[1], normal[0], normal[1], scale=5, color='blue', label='Normale N')
+ax.plot(eye[0], eye[1], 'ro', markersize=8, label='Oeil')
+ax.quiver(face_center[0], face_center[1], view_vec[0], view_vec[1], scale=5, color='red', linestyle='--', label='Vecteur Vue (Oeil-Face)')
+
+ax.text(eye[0]+0.2, eye[1], f'Oeil ({eye[0]},{eye[1]})')
+ax.text(face_center[0], face_center[1]-0.5, f'Face Center ({face_center[0]},{face_center[1]})')
+ax.text(1, 6, f'V = Oeil - Face = ({view_vec[0]}, {view_vec[1]})', color='red')
+ax.text(1, 5.5, f'N = ({normal[0]}, {normal[1]})', color='blue')
+ax.text(1, 5, f'(Oeil - Face) . N = {dot_product:.1f}')
+result_text = "Garder (Visible)" if dot_product <= 0 else "Éliminer (Face Arrière)"
+ax.text(1, 4.5, f'Résultat: {result_text}')
+
+
+# Add another case: Back-facing
+eye2 = np.array([4, 1])
+view_vec2 = eye2 - face_center # (0, -1)
+dot_product2 = np.dot(view_vec2, normal) # (0, -1) . (0, -1) = 1 > 0. Eliminate. Correct.
+ax.plot(eye2[0], eye2[1], 'go', markersize=8, label='Oeil 2 (derrière)')
+ax.quiver(face_center[0], face_center[1], view_vec2[0], view_vec2[1], scale=5, color='green', linestyle='--', label='Vecteur Vue 2')
+ax.text(eye2[0]+0.2, eye2[1], f'Oeil 2 ({eye2[0]},{eye2[1]})')
+ax.text(1, 0.5, f'Cas Oeil 2: (Oeil - Face) . N = {dot_product2:.1f} > 0 => Éliminer')
+
+ax.set_xlim(0, 8)
+ax.set_ylim(0, 7)
+ax.set_aspect('equal', adjustable='box')
+ax.grid(True, linestyle=':')
+ax.legend()
+plt.title('Backface Culling : Calcul du Produit Scalaire')
+plt.savefig('backface_culling_calc.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, max height=0.4\textheight, keepaspectratio]{backface_culling_calc.png}
+\caption{Calcul pour déterminer si une face est visible.}
+\label{fig:backface_culling_calc}
+\end{figure}
+
+\begin{remark}
+Avantages :
+\begin{itemize}
+    \item Économise en moyenne 50\% du temps de calcul (pour des objets fermés).
+    \item Faible coût par polygone.
+    \item Souvent utilisé comme étape préliminaire pour d'autres algorithmes HSR plus complexes.
+\end{itemize}
+\end{remark}
+
+\paragraph{Algorithme du Peintre (Depth-Sort)}
+\begin{definition}
+Aussi appelé "Algorithme de Tri par la Profondeur" (Newell, Newell \& Sancha 1972).
+Principe :
+\begin{enumerate}
+    \item Trier les polygones de la scène en fonction de leur distance à l'observateur (profondeur, souvent coordonnée Z après projection). On trie du plus éloigné au plus proche.
+    \item Peindre (dessiner) les polygones dans la mémoire vidéo (framebuffer) dans cet ordre : du plus loin au plus près.
+\end{enumerate}
+Ainsi, les polygones plus proches recouvrent correctement les polygones plus éloignés qu'ils occultent.
+\end{definition}
+
+\begin{verbatim}
+#save_to: painter_algo_seq.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, axs = plt.subplots(1, 3, figsize=(12, 4))
+
+# Define polygons (representing depth by color intensity/order)
+# Assume sorted order: Blue (far), Green (middle), Red (near)
+poly_blue = np.array([[1, 1], [4, 1], [4, 4], [1, 4]])
+poly_green = np.array([[2, 2], [5, 2], [5, 5], [2, 5]])
+poly_red = np.array([[3, 3], [6, 3], [6, 6], [3, 6]])
+
+polygons = [(poly_blue, 'blue', 0.8), (poly_green, 'green', 0.8), (poly_red, 'red', 0.8)]
+
+titles = ["1. Peindre Bleu (loin)", "2. Peindre Vert (milieu)", "3. Peindre Rouge (près)"]
+
+# Simulate painting process
+current_polys = []
+for i in range(3):
+    ax = axs[i]
+    poly_verts, color, alpha = polygons[i]
+    current_polys.append((poly_verts, color, alpha))
+
+    # Draw all polygons painted so far
+    for verts, c, a in current_polys:
+        patch = patches.Polygon(verts, closed=True, facecolor=c, alpha=a, edgecolor='black')
+        ax.add_patch(patch)
+
+    ax.set_title(titles[i])
+    ax.set_xlim(0, 7)
+    ax.set_ylim(0, 7)
+    ax.set_aspect('equal', adjustable='box')
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+plt.tight_layout()
+plt.savefig('painter_algo_seq.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, max height=0.3\textheight, keepaspectratio]{painter_algo_seq.png}
+\caption{Principe de l'algorithme du peintre : peindre du fond vers l'avant.}
+\label{fig:painter_algo_seq}
+\end{figure}
+
+\begin{remark}
+Cas ambigu (chevauchement) : Le tri simple basé sur une seule valeur de profondeur (ex: Zmax) n'est pas toujours suffisant. Des polygones peuvent avoir des étendues en Z qui se chevauchent, ou des dépendances cycliques.
+\end{remark}
+
+\begin{verbatim}
+#save_to: painter_ambiguous.png
+import matplotlib.pyplot as plt
+import numpy as np
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+
+fig = plt.figure(figsize=(10,5))
+ax = fig.add_subplot(111, projection='3d')
+
+# Two intersecting polygons
+verts1 = [(-1, -1, 0), (1, -1, 0), (1, 1, 0), (-1, 1, 0)] # Polygon in Z=0 plane
+verts2 = [(0, -1.5, -0.5), (0, 1.5, -0.5), (0, 1.5, 0.5), (0, -1.5, 0.5)] # Polygon in X=0 plane
+
+poly1 = Poly3DCollection([verts1], facecolors='cyan', linewidths=1, edgecolors='k', alpha=0.7)
+poly2 = Poly3DCollection([verts2], facecolors='magenta', linewidths=1, edgecolors='k', alpha=0.7)
+
+ax.add_collection3d(poly1)
+ax.add_collection3d(poly2)
+
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_zlabel('Z')
+ax.set_xlim(-2, 2)
+ax.set_ylim(-2, 2)
+ax.set_zlim(-1, 1)
+ax.view_init(elev=20, azim=40)
+ax.set_title('Cas ambigu : Chevauchement / Intersection')
+
+# Indicate Z ranges visually (optional)
+ax.plot([-1, 1], [-1.8, -1.8], zs=0, color='cyan', lw=3)
+ax.text(0, -1.8, -0.2, 'Poly 1 (Z=0)', color='cyan')
+ax.plot([0.2, 0.2], [-1.5, 1.5], zs=-0.5, zdir='z', color='magenta', lw=2)
+ax.plot([0.2, 0.2], [-1.5, 1.5], zs=0.5, zdir='z', color='magenta', lw=2)
+ax.plot([0.2,0.2],[-1.5,-1.5], zs=[-0.5,0.5], zdir='z', color='magenta', lw=2)
+ax.plot([0.2,0.2],[1.5,1.5], zs=[-0.5,0.5], zdir='z', color='magenta', lw=2)
+
+ax.text(0.3, 0, 0.6, 'Poly 2 (Z=[-0.5, 0.5])', color='magenta')
+
+
+plt.savefig('painter_ambiguous.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, max height=0.4\textheight, keepaspectratio]{painter_ambiguous.png}
+\caption{Exemple de cas ambigu pour l'algorithme du peintre.}
+\label{fig:painter_ambiguous}
+\end{figure}
+
+\begin{remark}
+Résolution des cas ambigus :
+\begin{itemize}
+    \item Trier les polygones en fonction de leur plus grande coordonnée en Z (distance max à la caméra).
+    \item Si deux polygones P et Q ont des étendues en Z qui se recouvrent ($[Z_{min}^P, Z_{max}^P]$ et $[Z_{min}^Q, Z_{max}^Q]$ overlap) :
+    \begin{itemize}
+        \item Test des boîtes englobantes : Si les projections 2D (XY) des boîtes englobantes sont séparées, l'ordre n'importe pas.
+        \item Test d'orientation : Tester si P est entièrement "derrière" Q ou vice-versa par rapport au plan de l'autre polygone.
+        \item Test de projection : Si les projections 2D se chevauchent, vérifier si P occulte Q ou Q occulte P.
+        \item Si rien ne marche (intersection ou dépendance cyclique) : Couper l'un des polygones (ou les deux) par le plan de l'autre. On obtient de nouveaux polygones plus petits qu'il faut réinsérer dans la liste triée.
+    \end{itemize}
+\end{itemize}
+\end{remark}
+
+\begin{verbatim}
+#save_to: painter_resolve.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, ax = plt.subplots(1, 2, figsize=(10, 4))
+
+# Original overlapping polygons (projected view)
+poly1 = np.array([[-1, -1], [1, -1], [1, 1], [-1, 1]]) # Represents Z=0
+poly2 = np.array([[0, -1.5], [0, 1.5], [0.5, 1.5], [0.5, -1.5]]) # Represents part in front, part behind
+
+ax[0].add_patch(patches.Polygon(poly1, closed=True, facecolor='cyan', alpha=0.7, edgecolor='k'))
+ax[0].add_patch(patches.Polygon(poly2, closed=True, facecolor='magenta', alpha=0.7, edgecolor='k'))
+ax[0].set_title('Chevauchement ambigu (projection 2D)')
+ax[0].set_xlim(-2, 2); ax[0].set_ylim(-2, 2); ax[0].set_aspect('equal'); ax[0].set_xticks([]); ax[0].set_yticks([])
+
+# After splitting polygon 2 by polygon 1's plane (X=0 conceptually here)
+poly2_back = np.array([[0, -1.5], [0, 1.5], [-0.1, 1.5], [-0.1, -1.5]]) # Part behind poly1
+poly2_front = np.array([[0, -1.5], [0, 1.5], [0.5, 1.5], [0.5, -1.5]]) # Part in front
+
+# Simulate drawing order: poly2_back -> poly1 -> poly2_front
+ax[1].add_patch(patches.Polygon(poly2_back, closed=True, facecolor='darkmagenta', alpha=0.7, edgecolor='k')) # Draw back part first
+ax[1].add_patch(patches.Polygon(poly1, closed=True, facecolor='cyan', alpha=0.7, edgecolor='k')) # Draw middle part
+ax[1].add_patch(patches.Polygon(poly2_front, closed=True, facecolor='magenta', alpha=0.7, edgecolor='k')) # Draw front part
+ax[1].set_title('Résolution par découpage')
+ax[1].set_xlim(-2, 2); ax[1].set_ylim(-2, 2); ax[1].set_aspect('equal'); ax[1].set_xticks([]); ax[1].set_yticks([])
+
+
+plt.tight_layout()
+plt.savefig('painter_resolve.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, max height=0.3\textheight, keepaspectratio]{painter_resolve.png}
+\caption{Résolution des ambiguïtés par découpage de polygones.}
+\label{fig:painter_resolve}
+\end{figure}
+
+\begin{remark}
+Caractéristiques :
+\begin{itemize}
+    \item Le plus intuitif des algorithmes.
+    \item Coût en mémoire : Peut nécessiter de stocker tous les polygones. L'affichage direct à l'écran évite un grand buffer ($O(p)$ où p est le nombre de polygones).
+    \item Coût de calcul : Dominé par le tri ($O(n \log n)$ ou $O(n^2)$ en cas de tests complexes) et potentiellement le découpage.
+    \item Efficace surtout sur des petites scènes où les découpages sont rares.
+\end{itemize}
+\end{remark}
+
+
+\paragraph{Partition Binaire de l'Espace (BSP-Trees)}
+\begin{definition}
+Un arbre BSP (Binary Space Partition) est un arbre binaire utilisé pour trier des primitives (polygones) dans l'espace 3D. Il permet une détermination efficace de la visibilité.
+\end{definition}
+
+\paragraph{Principe (Construction de l'arbre - Schumaker 1969, Fuchs 1980)}
+\begin{enumerate}
+    \item Choisir un polygone (ou une face) de la scène comme plan séparateur (nœud racine).
+    \item Ce plan divise l'espace en deux demi-espaces : "avant" (in front) et "arrière" (behind) par rapport à l'orientation du plan/polygone.
+    \item Répartir tous les autres polygones de la scène dans ces deux demi-espaces :
+    \begin{itemize}
+        \item Ceux entièrement "devant" vont dans le sous-arbre "avant" (fils droit/gauche).
+        \item Ceux entièrement "derrière" vont dans le sous-arbre "arrière" (fils gauche/droit).
+        \item Ceux qui sont coupés ("à cheval") par le plan sont divisés en deux nouveaux polygones, chacun étant placé dans le demi-espace correspondant.
+    \end{itemize}
+    \item Réitérer le processus récursivement sur les ensembles de polygones dans chaque demi-espace, jusqu'à ce que chaque feuille de l'arbre contienne au plus un polygone (ou fragment).
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    % Placeholder description of BSP construction sequence
+    \fbox{\parbox{0.8\textwidth}{
+    \centering \textit{Schémas conceptuels (voir slides 42-47) :}\\
+    1. Ensemble initial d'objets.\\
+    2. Choix d'un plan (associé à un objet/polygone) $\rightarrow$ Nœud racine.\\
+    3. Répartition des objets : 'avant' (P - proche/positif) / 'arrière' (L - loin/négatif).\\
+    4. Objet coupé ('Ouch') $\rightarrow$ Division en deux, répartition.\\
+    5. Répétition récursive pour les sous-ensembles avant/arrière $\rightarrow$ Construction de l'arbre.
+    }}
+    \caption{Illustration conceptuelle de la construction d'un arbre BSP.}
+    \label{fig:bsp_construction}
+\end{figure}
+
+\paragraph{Utilisation pour le rendu (Parcours de l'arbre)}
+Le parcours de l'arbre BSP pour le rendu dépend de la position de l'observateur par rapport aux plans séparateurs des nœuds. L'ordre de parcours garantit que les objets sont dessinés du plus loin au plus près (similaire à l'algorithme du peintre, mais sans tri explicite à chaque frame).
+
+\paragraph{Algorithme de rendu récursif (`renderBSP(node, eye_pos)`):}
+\begin{enumerate}
+    \item Si `node` est vide (feuille), retourner.
+    \item Déterminer si `eye_pos` est "devant" ou "derrière" le plan du `node`.
+    \item Si `eye_pos` est devant :
+        \begin{itemize}
+            \item `Proche = node->avant`
+            \item `Loin = node->arriere`
+        \end{itemize}
+    \item Sinon (`eye_pos` est derrière) :
+        \begin{itemize}
+            \item `Proche = node->arriere`
+            \item `Loin = node->avant`
+        \end{itemize}
+    \item Appeler récursivement `renderBSP(Loin, eye_pos)` (traiter le sous-arbre lointain d'abord).
+    \item Dessiner la primitive (polygone) associée au `node` courant.
+    \item Appeler récursivement `renderBSP(Proche, eye_pos)` (traiter le sous-arbre proche ensuite).
+\end{enumerate}
+
+\begin{lstlisting}[language=C, caption={Pseudo-code du rendu avec un arbre BSP}, label=lst:bsp_render, breaklines=true]
+renderBSP(BSPtree *T, Point eye_pos) {
+  if (T == NULL) return; // Feuille vide
+
+  BSPtree *Proche, *Loin;
+  Plane plane = T->plane; // Plan du noeud courant
+
+  // Determiner si l'oeil est devant ou derriere le plan
+  if (is_in_front(eye_pos, plane)) {
+    Proche = T->front_child; // Sous-arbre avant
+    Loin = T->back_child;   // Sous-arbre arriere
+  } else {
+    Proche = T->back_child;   // Sous-arbre arriere
+    Loin = T->front_child; // Sous-arbre avant
+  }
+
+  // 1. Traiter le sous-arbre lointain
+  renderBSP(Loin, eye_pos);
+
+  // 2. Dessiner la primitive du noeud courant
+  if (T->polygon != NULL) { // Verifier si c'est un noeud interne ou feuille avec polygone
+     renderObject(T->polygon);
+  }
+
+  // 3. Traiter le sous-arbre proche
+  renderBSP(Proche, eye_pos);
+}
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    % Placeholder description of BSP rendering sequence
+     \fbox{\parbox{0.8\textwidth}{
+    \centering \textit{Schémas conceptuels (voir slides 49-64) :}\\
+    1. Position de l'observateur (Oeil) par rapport aux plans.\\
+    2. Parcours récursif : Loin $\rightarrow$ Dessin Nœud $\rightarrow$ Proche.\\
+    3. L'ordre de dessin final dépend du point de vue (Viewpoint A vs Viewpoint B).\\
+    4. Résultat : Scène rendue avec occultation correcte.
+    }}
+    \caption{Illustration conceptuelle du rendu avec un arbre BSP.}
+    \label{fig:bsp_render_seq}
+\end{figure}
+
+
+\subsubsection{Algorithmes Image (Espace Image)}
+Ces algorithmes opèrent au niveau des pixels dans l'espace image (fenêtre/écran).
+
+\begin{remark}
+Caractéristiques :
+\begin{itemize}
+    \item Test de visibilité effectué pour chaque pixel.
+    \item Précision limitée par la résolution de l'image.
+    \item Doit être recalculé si la caméra ou la scène change.
+    \item Souvent plus simples à implémenter que les algorithmes objet complexes.
+\end{itemize}
+\end{remark}
+
+\paragraph{Méthodes principales (voir Figure \ref{fig:hsr_image_algos}) :}
+\begin{itemize}
+    \item \textbf{Z-buffer (Tampon de profondeur)} : Le plus commun. Maintient un tampon stockant la profondeur (Z) du pixel visible le plus proche pour chaque pixel de l'écran. Chaque polygone est rastérisé (converti en pixels), et chaque pixel généré n'est écrit dans le framebuffer que si sa profondeur est inférieure à celle déjà stockée dans le Z-buffer.
+    \item \textbf{Algorithmes Scan-line} : Traitent l'image ligne par ligne. Pour chaque ligne de balayage, ils déterminent les segments visibles en calculant les intersections des polygones avec la ligne et en gérant les informations de profondeur le long de la ligne. (Watkins, Scan-line Z-buffer).
+    \item \textbf{Algorithme de Warnock} : Algorithme récursif de subdivision de l'image. Divise récursivement les régions de l'écran jusqu'à ce que la visibilité dans une région soit simple à déterminer (ex: région vide, couverte par un seul polygone, etc.).
+\end{itemize}
+
+
+\end{document}
+```
