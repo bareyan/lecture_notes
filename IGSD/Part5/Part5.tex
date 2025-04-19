@@ -64,13 +64,13 @@ from graphviz import Digraph
 
 dot = Digraph(comment='Pipeline Graphique', graph_attr={'rankdir': 'TB'})
 
-dot.node('A', 'Transformations de modélisation')
+dot.node('A', 'Transformations de modelisation')
 dot.node('B', 'Illumination (Shading)')
 dot.node('C', 'Transformation d\'affichage')
 dot.node('D', 'Clipping')
-dot.node('E', 'Transformation écran (Projection)')
+dot.node('E', 'Transformation ecran (Projection)')
 dot.node('F', 'Pixelisation (Rasterization)', style='filled', fillcolor='orange')
-dot.node('G', 'Visibilité / Rendu')
+dot.node('G', 'Visibilite / Rendu')
 
 dot.edges(['AB', 'BC', 'CD', 'DE', 'EF', 'FG'])
 
@@ -130,7 +130,7 @@ ax.set_yticks(np.arange(0.5, 10.5, 1))
 ax.set_xticklabels([])
 ax.set_yticklabels([])
 ax.grid(False)
-plt.title("Découpe d'un triangle en pixels")
+plt.title("Decoupe d'un triangle en pixels")
 
 plt.savefig('raster_triangle_grid.png')
 plt.close()
@@ -168,13 +168,13 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import numpy as np
 
-fig, ax = plt.subplots(figsize=(6, 2))
+fig, ax = plt.subplots(figsize=(6, 2.5)) # Increased height slightly
 
 # Point comme triangle dégénéré
 ax.plot(1, 1, 'bo', markersize=8, label='"Point"')
 # triangle_point = patches.Polygon([[0.9, 0.9], [1.1, 0.9], [1.0, 1.1]], closed=True, edgecolor='blue', facecolor='lightblue', alpha=0.5)
 # ax.add_patch(triangle_point)
-ax.text(1, 0.5, '"Point"', ha='center')
+ax.text(1, 0.3, '"Point"', ha='center', va='bottom') # Adjusted y position
 
 
 # Ligne comme deux triangles
@@ -183,7 +183,7 @@ triangle_line1 = patches.Polygon([[3, 0.9], [6, 0.9], [3, 1.1]], closed=True, ed
 triangle_line2 = patches.Polygon([[6, 0.9], [6, 1.1], [3, 1.1]], closed=True, edgecolor='blue', facecolor='lightblue', alpha=0.5)
 ax.add_patch(triangle_line1)
 ax.add_patch(triangle_line2)
-ax.text(4.5, 0.5, '"Line"', ha='center')
+ax.text(4.5, 0.3, '"Line"', ha='center', va='bottom') # Adjusted y position
 
 
 ax.set_xlim(0, 7)
@@ -229,7 +229,7 @@ import numpy as np
 fig, axs = plt.subplots(1, 2, figsize=(8, 4))
 
 # Input Triangle
-axs[0].set_title("Input:\nPosition projetée des sommets\ndu triangle: P0, P1, P2")
+axs[0].set_title("Input:\nPosition projetee des sommets\ndu triangle: P0, P1, P2")
 triangle_vertices = np.array([[1.5, 1.5], [8.5, 3.5], [5.5, 8.5]])
 triangle = patches.Polygon(triangle_vertices, closed=True, edgecolor='red', facecolor='lightcoral', alpha=0.7)
 axs[0].add_patch(triangle)
@@ -341,11 +341,11 @@ def draw_grid_and_pixels(ax, title, center_pixel, neighbors):
 # 4-Connexité
 center = (2, 2)
 neighbors_4 = [(2, 3), (2, 1), (3, 2), (1, 2)]
-draw_grid_and_pixels(axs[0], "4-Connexité", center, neighbors_4)
+draw_grid_and_pixels(axs[0], "4-Connexite", center, neighbors_4)
 
 # 8-Connexité
 neighbors_8 = [(2, 3), (2, 1), (3, 2), (1, 2), (1, 1), (1, 3), (3, 1), (3, 3)]
-draw_grid_and_pixels(axs[1], "8-Connexité", center, neighbors_8)
+draw_grid_and_pixels(axs[1], "8-Connexite", center, neighbors_8)
 
 
 plt.tight_layout()
@@ -435,7 +435,7 @@ ax.set_xticklabels(np.arange(0, grid_max_x + 1, 1))
 ax.set_yticklabels(np.arange(0, grid_max_y + 1, 1))
 ax.invert_yaxis() # Match slide layout
 ax.xaxis.tick_top() # Match slide layout
-plt.title("Incrémentation suivant x (1,1) à (5,4)")
+plt.title("Incrementation suivant x (1,1) a (5,4)") # Corrected title
 ax.set_xlabel("x")
 ax.set_ylabel("y")
 
@@ -531,7 +531,7 @@ ax.set_xticklabels(np.arange(0, grid_max_x + 1, 1))
 ax.set_yticklabels(np.arange(0, grid_max_y + 1, 1))
 ax.invert_yaxis() # Match slide layout
 ax.xaxis.tick_top() # Match slide layout
-plt.title("Incrémentation suivant y (1,1) à (5,6)")
+plt.title("Incrementation suivant y (1,1) a (5,6)") # Corrected title
 ax.set_xlabel("x")
 ax.set_ylabel("y")
 
@@ -681,8 +681,8 @@ L'\textbf{anticrénelage} (antialiasing) regroupe les techniques visant à rédu
 
 \begin{figure}[H]
 \centering
-% Placeholder: Ideally show two images, one aliased, one antialiased
-\fbox{Image: Comparaison Crénelage vs Anticrénelage}
+% Placeholder replaced with descriptive text
+\textit{Image: Side-by-side comparison showing aliased lines on the left and antialiased lines on the right.}
 \caption{Effet du crénelage (gauche) et résultat après anticrénelage (droite).}
 \label{fig:aliasing_vs_antialiasing}
 \end{figure}
@@ -715,8 +715,8 @@ axs[0].set_ylim(-0.2, 1.2)
 axs[0].set_aspect('equal', adjustable='box')
 axs[0].axis('off')
 
-# 2. Sur-échantillonnage (e.g., 3x3)
-axs[1].set_title("Sur-échantillonnage (e.g., 3x3)")
+# 2. Sur-echantillonnage (e.g., 3x3)
+axs[1].set_title("Sur-echantillonnage (e.g., 3x3)")
 for i in range(3):
     for j in range(3):
         rect_sub = patches.Rectangle((i/3, j/3), 1/3, 1/3, linewidth=0.5, edgecolor='gray', facecolor='lightblue' if (i+j)%2==0 else 'lightyellow')
@@ -729,12 +729,12 @@ axs[1].set_aspect('equal', adjustable='box')
 axs[1].axis('off')
 
 
-# 3. Filtrage (Retour à la résolution d'origine)
+# 3. Filtrage (Retour a la resolution d'origine)
 axs[2].set_title("Filtrage / Moyenne")
 # Calculer une couleur moyenne (conceptuel)
 # Supposons que la ligne rouge couvre certains sous-pixels
-# Exemple: 5 sous-pixels touchés -> intensité moyenne
-avg_color = np.mean([1 if (i+j)%2==0 else 0.8 for i in range(3) for j in range(3) if abs((j/3+1/6) - (0.8*(i/3+1/6) + 0.1)) < 0.2 ]) # Approximation grossière
+# Exemple: 5 sous-pixels touches -> intensite moyenne
+avg_color = np.mean([1 if (i+j)%2==0 else 0.8 for i in range(3) for j in range(3) if abs((j/3+1/6) - (0.8*(i/3+1/6) + 0.1)) < 0.2 ]) # Approximation grossiere
 face_color_final = plt.cm.Blues(avg_color * 0.5 + 0.3) # Map average to a color shade
 
 rect_final = patches.Rectangle((0, 0), 1, 1, linewidth=2, edgecolor='black', facecolor=face_color_final)
@@ -766,9 +766,9 @@ from graphviz import Digraph
 
 dot = Digraph(comment='Antialiasing Parameters', graph_attr={'rankdir': 'TB'})
 
-dot.node('Params', 'Paramètres', shape='box')
+dot.node('Params', 'Parametres', shape='box')
 dot.node('Type', 'Type', shape='box')
-dot.node('Res', 'Résolution', shape='box')
+dot.node('Res', 'Resolution', shape='box')
 dot.node('Filtre', 'Filtre', shape='box')
 
 dot.edge('Params', 'Type')
@@ -776,18 +776,18 @@ dot.edge('Params', 'Res')
 dot.edge('Params', 'Filtre')
 
 # Types
-dot.node('Det', 'Déterministe', shape='ellipse')
-dot.node('Alea', 'Aléatoire', shape='ellipse')
+dot.node('Det', 'Deterministe', shape='ellipse')
+dot.node('Alea', 'Aleatoire', shape='ellipse')
 dot.edge('Type', 'Det')
 dot.edge('Type', 'Alea')
 
-# Sous-types Déterministe
-dot.node('Reg', 'Régulier', shape='ellipse')
+# Sous-types Deterministe
+dot.node('Reg', 'Regulier', shape='ellipse')
 dot.node('Adap', 'Adaptatif', shape='ellipse')
 dot.edge('Det', 'Reg')
 dot.edge('Det', 'Adap')
 
-# Sous-types Aléatoire
+# Sous-types Aleatoire
 dot.node('Uni', 'Uniforme', shape='ellipse')
 dot.node('Jit', 'Jittering', shape='ellipse')
 dot.node('Poi', 'Disque de Poisson', shape='ellipse')
@@ -846,10 +846,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 fig, axs = plt.subplots(1, 4, figsize=(12, 3.5), sharex=True, sharey=True)
-titles = ['Déterministe: Régulier', 'Aléatoire: Uniforme', 'Aléatoire: Disque de Poisson (approx)', 'Aléatoire: Jittering']
-n_samples = 16 # Nombre d'échantillons par pixel
+titles = ['Deterministe: Regulier', 'Aleatoire: Uniforme', 'Aleatoire: Disque de Poisson (approx)', 'Aleatoire: Jittering']
+n_samples = 16 # Nombre d'echantillons par pixel
 
-# 1. Régulier (4x4 grid)
+# 1. Regulier (4x4 grid)
 grid_size = int(np.sqrt(n_samples))
 x_reg, y_reg = np.meshgrid(np.linspace(1/(2*grid_size), 1 - 1/(2*grid_size), grid_size),
                            np.linspace(1/(2*grid_size), 1 - 1/(2*grid_size), grid_size))
@@ -879,7 +879,7 @@ points = np.array(points)
 if len(points) > 0:
     axs[2].plot(points[:, 0], points[:, 1], 'bo', markersize=4)
 else:
-    axs[2].text(0.5, 0.5, "Échec approx.", ha='center', va='center')
+    axs[2].text(0.5, 0.5, "Echec approx.", ha='center', va='center')
 
 
 # 4. Jittering (4x4 grid)
@@ -897,7 +897,7 @@ for i, ax in enumerate(axs):
     ax.set_aspect('equal', adjustable='box')
     ax.set_xticks([])
     ax.set_yticks([])
-    # Dessiner la boîte du pixel
+    # Dessiner la boite du pixel
     rect = plt.Rectangle((0,0), 1, 1, fill=False, edgecolor='black')
     ax.add_patch(rect)
     if i > 0: # Dessiner les cellules de la grille pour Jittering
@@ -931,16 +931,16 @@ import numpy as np
 fig, axs = plt.subplots(1, 3, figsize=(12, 3), sharey=True)
 x = np.linspace(-1.5, 1.5, 300)
 
-# 1. Boîte
+# 1. Boite
 y_box = np.where(np.abs(x) <= 0.5, 1, 0)
 axs[0].plot(x, y_box)
-axs[0].set_title("Boîte (Box)")
+axs[0].set_title("Boite (Box)")
 axs[0].fill_between(x, 0, y_box, alpha=0.3)
 
-# 2. Cône (Tente)
+# 2. Cone (Tente)
 y_tent = np.maximum(0, 1 - np.abs(x))
 axs[1].plot(x, y_tent)
-axs[1].set_title("Cône / Tente (Tent)")
+axs[1].set_title("Cone / Tente (Tent)")
 axs[1].fill_between(x, 0, y_tent, alpha=0.3)
 
 
@@ -1002,11 +1002,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.spatial import Voronoi, voronoi_plot_2d
 
-# Points d'échantillonnage (exemple aléatoire)
+# Points d'echantillonnage (exemple aleatoire)
 np.random.seed(0)
 points = np.random.rand(10, 2) # 10 points dans [0,1]x[0,1]
 
-# Ajouter des points "fantômes" pour limiter les régions infinies
+# Ajouter des points "fantomes" pour limiter les regions infinies
 points_bordered = np.vstack([points,
                              [-1, -1], [-1, 2], [2, -1], [2, 2],
                              [0.5, -1], [0.5, 2], [-1, 0.5], [2, 0.5]])
@@ -1019,15 +1019,15 @@ fig, ax = plt.subplots()
 voronoi_plot_2d(vor, ax=ax, show_vertices=False, line_colors='orange',
                 line_width=2, line_alpha=0.6, point_size=5)
 
-# Limiter à la zone du pixel [0,1]x[0,1]
+# Limiter a la zone du pixel [0,1]x[0,1]
 ax.set_xlim(0, 1)
 ax.set_ylim(0, 1)
 ax.set_aspect('equal', adjustable='box')
 ax.set_xticks([])
 ax.set_yticks([])
-ax.set_title("Diagramme de Voronoï pour filtrage pondéré")
+ax.set_title("Diagramme de Voronoi pour filtrage pondere")
 
-# Dessiner la boîte du pixel
+# Dessiner la boite du pixel
 rect = plt.Rectangle((0,0), 1, 1, fill=False, edgecolor='black', linewidth=2)
 ax.add_patch(rect)
 
@@ -1066,20 +1066,20 @@ for i in range(grid_size + 1):
     ax.plot([0, grid_size], [i, i], color='lightgray', linestyle='-', linewidth=0.5)
     ax.plot([i, i], [0, grid_size], color='lightgray', linestyle='-', linewidth=0.5)
 
-# Ligne idéale épaisse (parallélogramme)
+# Ligne ideale epaisse (parallelogramme)
 x1, y1 = 1.2, 1.5
 x2, y2 = 5.8, 4.5
 dx = x2 - x1
 dy = y2 - y1
 length = np.sqrt(dx**2 + dy**2)
 thickness = 0.8 # Largeur de la ligne
-# Vecteur normal normalisé à la ligne
+# Vecteur normal normalise a la ligne
 nx = -dy / length
 ny = dx / length
 half_w_x = nx * thickness / 2
 half_w_y = ny * thickness / 2
 
-# Coins du parallélogramme
+# Coins du parallelogramme
 p1 = [x1 - half_w_x, y1 - half_w_y]
 p2 = [x2 - half_w_x, y2 - half_w_y]
 p3 = [x2 + half_w_x, y2 + half_w_y]
@@ -1088,7 +1088,7 @@ p4 = [x1 + half_w_x, y1 + half_w_y]
 thick_line = patches.Polygon([p1, p2, p3, p4], closed=True, edgecolor='blue', facecolor='lightblue', alpha=0.6)
 ax.add_patch(thick_line)
 
-# Pixels avec intensité basée sur couverture (conceptuel)
+# Pixels avec intensite basee sur couverture (conceptuel)
 covered_intensity = {
     (1,1): 0.4, (2,1): 0.1,
     (1,2): 0.7, (2,2): 0.9, (3,2): 0.5, (4,2): 0.1,
@@ -1099,7 +1099,7 @@ covered_intensity = {
 
 for (px, py), intensity in covered_intensity.items():
     if 0 <= px < grid_size and 0 <= py < grid_size:
-        # Couleur basée sur l'intensité (nuance de bleu)
+        # Couleur basee sur l'intensite (nuance de bleu)
         color = plt.cm.Blues(intensity * 0.8 + 0.2) # Map intensity to color
         rect = patches.Rectangle((px, py), 1, 1, linewidth=0.5, edgecolor='black', facecolor=color)
         ax.add_patch(rect)
@@ -1111,7 +1111,7 @@ ax.set_aspect('equal', adjustable='box')
 ax.set_xticks([])
 ax.set_yticks([])
 ax.grid(False)
-plt.title("Anticrénelage par Aire de Recouvrement (conceptuel)")
+plt.title("Anticrenelage par Aire de Recouvrement (conceptuel)")
 
 plt.savefig('thick_line_coverage.png')
 plt.close()
@@ -1160,16 +1160,17 @@ for i in range(center_x - 1, center_x + 2):
 ax.text(center_x + 0.5, center_y + 0.5, 'Pixel\nen cours', ha='center', va='center', fontsize=8)
 
 
-# Ligne idéale
+# Ligne ideale
 x1, y1 = 0.5, 1.8
 x2, y2 = 4.5, 3.2
-ax.plot([x1, x2], [y1, y2], color='blue', linestyle='-', linewidth=2, label='Ligne idéale ax+by+c=0')
+ax.plot([x1, x2], [y1, y2], color='blue', linestyle='-', linewidth=2, label='Ligne ideale ax+by+c=0')
 
 # Exemple de pixel voisin et distance D
 neighbor_x, neighbor_y = center_x - 1, center_y + 1 # Voisin haut-gauche
 pixel_center_x, pixel_center_y = neighbor_x + 0.5, neighbor_y + 0.5
 ax.plot(pixel_center_x, pixel_center_y, 'ro', label='Centre Pixel voisin')
-ax.text(pixel_center_x, pixel_center_y + 0.1, 'Pixel voisin', ha='center', va='bottom', fontsize=8)
+# Adjusted text position to avoid overlap with dashed line
+ax.text(pixel_center_x - 0.1, pixel_center_y + 0.2, 'Pixel voisin', ha='right', va='bottom', fontsize=8)
 
 
 # Calcul de D (conceptuel)
@@ -1186,7 +1187,7 @@ t = -(a * pixel_center_x + b * pixel_center_y + c) / (a**2 + b**2)
 proj_x = pixel_center_x + t * a
 proj_y = pixel_center_y + t * b
 ax.plot([pixel_center_x, proj_x], [pixel_center_y, proj_y], 'r--', label=f'Distance D = {D:.2f}')
-ax.text((pixel_center_x + proj_x)/2, (pixel_center_y + proj_y)/2 + 0.1, 'D', color='red')
+ax.text((pixel_center_x + proj_x)/2 + 0.1, (pixel_center_y + proj_y)/2, 'D', color='red', ha='left', va='center')
 
 
 # Configuration
@@ -1196,8 +1197,8 @@ ax.set_aspect('equal', adjustable='box')
 ax.set_xticks(np.arange(0, 5, 1))
 ax.set_yticks(np.arange(0, 5, 1))
 ax.grid(True, linestyle=':')
-plt.title("Anticrénelage Gupta-Sproull (Voisinage 3x3)")
-plt.legend(fontsize=8, loc='upper right')
+plt.title("Anticrenelage Gupta-Sproull (Voisinage 3x3)") # Corrected title
+plt.legend(fontsize=8, loc='lower right') # Adjusted legend position
 
 plt.savefig('gupta_sproull.png')
 plt.close()
@@ -1223,8 +1224,8 @@ Le choix de la méthode dépend du compromis souhaité entre qualité visuelle, 
 
 \begin{figure}[H]
 \centering
-% Placeholder: Ideally show three images: no AA, supersampling AA, distance AA
-\fbox{Image: Comparaison des Résultats d'Anticrénelage}
+% Placeholder replaced with descriptive text
+\textit{Image: Three images side-by-side: No antialiasing, Supersampling antialiasing, and Distance-based antialiasing.}
 \caption{Comparaison visuelle : (Gauche) Sans anticrénelage, (Centre) Anticrénelage par sur-échantillonnage, (Droite) Anticrénelage basé sur la distance.}
 \label{fig:antialiasing_results}
 \end{figure}

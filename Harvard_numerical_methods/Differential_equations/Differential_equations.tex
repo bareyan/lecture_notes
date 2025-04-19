@@ -1,155 +1,63 @@
 ```latex
 \documentclass{article}
-\usepackage{amsmath}
-\usepackage{amsfonts}
-\usepackage{amssymb}
+\usepackage{amssymb,amsmath,amsthm}
 \usepackage{graphicx}
-\usepackage{geometry}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
 \usepackage{listings}
-\usepackage{xcolor}
-\usepackage{verbatim}
-\usepackage{caption}
-\usepackage{amsthm}
-
-\geometry{a4paper, margin=1in}
-
-\definecolor{codegreen}{rgb}{0,0.6,0}
-\definecolor{codegray}{rgb}{0.5,0.5,0.5}
-\definecolor{codepurple}{rgb}{0.58,0,0.82}
-\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
-
-\lstdefinestyle{codestyle}{
-    backgroundcolor=\color{backcolour},
-    commentstyle=\color{codegreen},
-    keywordstyle=\color{magenta},
-    numberstyle=\tiny\color{codegray},
-    stringstyle=\color{codepurple},
-    basicstyle=\ttfamily\footnotesize,
-    breakatwhitespace=false,
-    breaklines=true,
-    captionpos=b,
-    keepspaces=true,
-    numbers=left,
-    numbersep=5pt,
-    showspaces=false,
-    showstringspaces=false,
-    showtabs=false,
-    tabsize=4
-}
-
-\lstset{style=codestyle}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
-\newtheorem{proposition}{Proposition}
+\newtheorem{proposition}[theorem]{Proposition}
 \newtheorem{definition}{Definition}
 \newtheorem{remark}{Remark}
 \newtheorem{solution}{Solution}
 \newtheorem{example}{Example}
 
+\usepackage[margin=1in]{geometry}
+
 \begin{document}
 \sloppy
 
-\section{Introduction to ODE Initial Value Problems}
+\section*{Méthodes Numériques pour les Problèmes de Valeurs Initiales d'EDO, Convergence et Stabilité}
 
-In this chapter, we begin our exploration of numerical methods for solving ordinary differential equations (ODEs). We will focus on initial value problems (IVPs).
+\subsection*{Introduction}
+Dans ce chapitre, nous allons aborder la résolution numérique des équations différentielles ordinaires (EDO), en nous concentrant particulièrement sur les problèmes de valeurs initiales. Nous introduirons la terminologie associée, les méthodes numériques de base, et analyserons deux propriétés cruciales de ces méthodes : la convergence et la stabilité.
 
-\begin{definition}[ODE Initial Value Problem]
-An ODE initial value problem is generally expressed in the form:
-\[
-y'(t) = f(t, y(t))
-\]
-subject to an initial condition:
-\[
-y(0) = y_0
-\]
-Here, $y(t)$ is the unknown function we want to find. $y(t)$ can be a scalar function or an $n$-dimensional vector function $y(t) = (y_1(t), y_2(t), \dots, y_n(t))^T$. In the vector case, the equation represents a system of $n$ coupled first-order ODEs:
-\begin{align*}
-y_1'(t) &= f_1(t, y_1, y_2, \dots, y_n) \\
-y_2'(t) &= f_2(t, y_1, y_2, \dots, y_n) \\
-&\vdots \\
-y_n'(t) &= f_n(t, y_1, y_2, \dots, y_n)
-\end{align*}
-The condition $y(0) = y_0$ specifies the state of the system at the initial time $t=0$.
-\end{definition}
+\subsection*{Problèmes de Valeurs Initiales d'EDO}
 
-\begin{definition}[Order of an ODE]
-The order of an ODE is determined by the highest-order derivative present in the equation. For the standard form $y'(t) = f(t, y)$, the order is 1.
-\end{definition}
+Nous nous intéressons aux problèmes de la forme :
+\[ y'(t) = f(t, y) \]
+avec une condition initiale :
+\[ y(t_0) = y_0 \]
+Ici, $y(t)$ est une fonction de dimension $n$. Nous pouvons écrire ce système sous forme vectorielle :
+\[ \begin{pmatrix} y_1'(t) \\ y_2'(t) \\ \vdots \\ y_n'(t) \end{pmatrix} = \begin{pmatrix} f_1(t, y_1, \dots, y_n) \\ f_2(t, y_1, \dots, y_n) \\ \vdots \\ f_n(t, y_1, \dots, y_n) \end{pmatrix} \]
+où $y_1, \dots, y_n$ sont les composantes du vecteur $y(t)$, et $f_1, \dots, f_n$ sont les composantes de la fonction vectorielle $f$. Ceci constitue un système de $n$ EDO couplées.
 
-Numerically, we primarily focus on methods for first-order ODEs. This is sufficient because higher-order ODEs can be converted into a system of first-order ODEs by introducing auxiliary variables.
+Le problème est dit un problème de valeurs initiales car la donnée initiale $y(t_0) = y_0$ est spécifiée à un instant précis $t_0$.
 
-\begin{example}[Reduction of Order: Newton's Second Law]
-Consider Newton's second law of motion for a particle of mass $m$:
-\[
-y''(t) = \frac{F(t, y(t), y'(t))}{m}
-\]
-This is a second-order ODE. We might have initial conditions for position and velocity:
-\[
-y(0) = y_0, \quad y'(0) = v_0
-\]
-To convert this into a first-order system, we introduce a new variable for velocity, $v(t) = y'(t)$. Then the system becomes:
-\begin{align*}
-v'(t) &= \frac{F(t, y(t), v(t))}{m} \\
-y'(t) &= v(t)
-\end{align*}
-This is a system of two first-order ODEs for the variables $y(t)$ and $v(t)$, with initial conditions $y(0) = y_0$ and $v(0) = v_0$. A numerical method capable of solving first-order systems can now be applied.
+L'ordre d'une EDO est donné par l'ordre le plus élevé de la dérivée apparaissant dans l'équation. L'équation $y'(t) = f(t, y)$ est du premier ordre car la dérivée la plus élevée est $y'$.
+
+D'un point de vue numérique, nous pouvons nous concentrer entièrement sur les équations du premier ordre. Les EDO d'ordre supérieur peuvent être converties en systèmes d'EDO du premier ordre en introduisant des variables supplémentaires.
+
+\begin{example}
+Considérons la deuxième loi de Newton pour la position $y(t)$:
+\[ y''(t) = \frac{f(t, y, y')}{m} \]
+avec les conditions initiales $y(0) = y_0$ et $y'(0) = v_0$.
+Pour convertir ceci en un système du premier ordre, introduisons une nouvelle variable $v = y'$. Alors $v' = y''$. Le système devient :
+\begin{align*} v'(t) &= \frac{f(t, y, v)}{m} \\ y'(t) &= v \end{align*}
+Les conditions initiales sont $y(0) = y_0$ et $v(0) = v_0$. Nous avons maintenant un système de deux EDO du premier ordre pour les variables $y$ et $v$.
 \end{example}
 
-\begin{example}[Lotka-Volterra Model]
-The Lotka-Volterra equations are a classic example of a non-linear system of first-order ODEs used to model predator-prey dynamics. Let $y_1(t)$ be the population of the prey (e.g., rabbits) and $y_2(t)$ be the population of the predator (e.g., foxes). The model is:
-\begin{align*}
-y_1'(t) &= \alpha_1 y_1 - \beta_1 y_1 y_2 \\
-y_2'(t) &= \beta_2 y_1 y_2 - \alpha_2 y_2
-\end{align*}
-Here, $\alpha_1, \beta_1, \alpha_2, \beta_2$ are positive parameters:
-\begin{itemize}
-    \item $\alpha_1 y_1$: Exponential growth rate of prey in the absence of predators.
-    \item $-\beta_1 y_1 y_2$: Decrease in prey population due to predation, proportional to the rate of encounters between predators and prey.
-    \item $\beta_2 y_1 y_2$: Growth of predator population due to consumption of prey.
-    \item $-\alpha_2 y_2$: Exponential decay rate of predators in the absence of prey.
-\end{itemize}
-We can solve this system numerically using Python libraries like SciPy.
+\subsection*{Exemple : Le Modèle de Lotka-Volterra}
 
-\begin{lstlisting}[language=Python, breaklines=true, caption={Python code (\texttt{l\_v.py}) for solving the Lotka-Volterra equations using \texttt{scipy.integrate.odeint}.}, label=lst:lotka_volterra]
-#!/usr/bin/python3
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.integrate import odeint
+Le modèle de Lotka-Volterra est un système non linéaire à deux composantes qui peut expliquer les interactions prédateur-proie. Soit $y_1$ la population d'une espèce proie (par exemple, lapins) et $y_2$ la population d'une espèce prédatrice (par exemple, renards). Le système d'EDO est donné par :
+\begin{align*} y_1'(t) &= \alpha_1 y_1 - \beta_1 y_1 y_2 \\ y_2'(t) &= \beta_2 y_1 y_2 - \alpha_2 y_2 \end{align*}
+où $\alpha_1, \beta_1, \alpha_2, \beta_2$ sont des constantes positives. Le terme $\alpha_1 y_1$ représente la croissance exponentielle des proies en l'absence de prédateurs. Le terme $-\beta_1 y_1 y_2$ représente la diminution de la population de proies due à la prédation. Le terme $\beta_2 y_1 y_2$ représente la croissance de la population de prédateurs due à la consommation de proies. Le terme $-\alpha_2 y_2$ représente la décroissance exponentielle des prédateurs en l'absence de proies.
 
-# Constants in model
-alpha1=1.2
-beta1=0.6
-alpha2=0.8
-beta2=0.3
-
-# Function that evaluates the RHS of the ODE. It has two components,
-# representing the changes in prey and predator populations.
-def f(y,t):
-    return np.array([alpha1*y[0]-beta1*y[0]*y[1], \
-           -alpha2*y[1]+beta2*y[0]*y[1]])
-
-# Specify the range of time values where the ODE should be solved at
-time=np.linspace(0,70,500)
-
-# Initial conditions, set to the initial populations of prey and predators
-yinit=np.array([1.0, 1.0])
-
-# Solve ODE using the "odeint" library in SciPy
-y=odeint(f,yinit,time)
-
-# Plot the solutions
-plt.figure()
-p1,=plt.plot(time,y[:,0])
-p2,=plt.plot(time,y[:,1])
-plt.legend([p1,p2],["Prey","Predators"])
-plt.xlabel('t')
-plt.ylabel('Population')
-# plt.show() # Removed for automated execution
-\end{lstlisting}
-
-The \texttt{odeint} function from \texttt{scipy.integrate} provides a convenient way to solve ODE initial value problems. It takes the function defining the right-hand side of the ODE system, the initial conditions, and the time points where the solution is desired. It returns an array containing the solution $y(t)$ at the requested time points.
-
+Voici un exemple de code Python utilisant la fonction `odeint` de `scipy.integrate` pour résoudre ce système :
 \begin{verbatim}
 #save_to: lotka_volterra_plot.png
 import matplotlib.pyplot as plt
@@ -157,995 +65,570 @@ import numpy as np
 from scipy.integrate import odeint
 
 # Constants in model
-alpha1=1.2
-beta1=0.6
-alpha2=0.8
-beta2=0.3
+alpha1=1.0
+beta1=0.1
+alpha2=0.4
+beta2=0.02
 
-# Function that evaluates the RHS of the ODE. It has two components,
-# representing the changes in prey and predator populations.
+# Function that evaluates the RHS of the ODE.
+# It has two components, representing the changes in prey and predator populations.
 def f(y,t):
-    return np.array([alpha1*y[0]-beta1*y[0]*y[1], \
-           -alpha2*y[1]+beta2*y[0]*y[1]])
+    return np.array([alpha1*y[0]-beta1*y[0]*y[1],                      beta2*y[0]*y[1]-alpha2*y[1]])
 
 # Specify the range of time values where the ODE should be solved at
-time=np.linspace(0,70,500)
+t=np.linspace(0,70,500)
 
-# Initial conditions, set to the initial populations of prey and predators
-yinit=np.array([1.0, 1.0]) # Adjusted initial conditions to match plot from video more closely
+# Initial conditions; set to the initial populations of prey and predators
+yinit=np.array([10,1])
 
 # Solve ODE using the "odeint" library in SciPy
-y=odeint(f,yinit,time)
+y=odeint(f,yinit,t)
 
 # Plot the solutions
 plt.figure()
-p1,=plt.plot(time,y[:,0])
-p2,=plt.plot(time,y[:,1])
-plt.legend([p1,p2],["Prey","Predators"])
-plt.xlabel('t')
-plt.ylabel('Population')
-plt.title('Figure 1')
-plt.grid(True)
-plt.savefig('lotka_volterra_plot.png')
+plt.plot(t,y[:,0], label="Proies")
+plt.plot(t,y[:,1], label="Prédateurs")
+plt.legend(loc="upper right")
+plt.xlabel("Temps")
+plt.ylabel("Population")
+plt.savefig("lotka_volterra_plot.png")
 \end{verbatim}
+\begin{lstlisting}[language=Python, caption=Code Python pour le modèle Lotka-Volterra, label=code:lotka_volterra]
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.integrate import odeint
 
-\begin{figure}[h]
-    \centering
-    \includegraphics[max width=\textwidth, max height=0.4\textheight, keepaspectratio]{lotka_volterra_plot.png}
-    \caption{Numerical solution of the Lotka-Volterra equations showing cyclical predator-prey population dynamics. When prey are abundant, predators increase, leading to a decrease in prey. With fewer prey, predators decline, allowing prey to recover, and the cycle repeats.}
-    \label{fig:lotka_volterra}
-\end{figure}
+# Constants in model
+alpha1=1.0
+beta1=0.1
+alpha2=0.4
+beta2=0.02
 
-The plot shows the characteristic oscillations of the Lotka-Volterra model. The predator and prey populations exhibit cyclical behavior, where peaks in the predator population lag behind peaks in the prey population.
+# Function that evaluates the RHS of the ODE.
+# It has two components, representing the changes in prey and predator populations.
+def f(y,t):
+    return np.array([alpha1*y[0]-beta1*y[0]*y[1],                      beta2*y[0]*y[1]-alpha2*y[1]])
 
-Python's \texttt{scipy.integrate} module offers powerful tools like \texttt{odeint} (based on LSODA from the FORTRAN library ODEPACK) and the more flexible \texttt{ode} class. MATLAB also provides excellent ODE solvers, with \texttt{ode45} (based on an explicit Runge-Kutta (4,5) formula) being very popular. These solvers often employ sophisticated techniques like adaptive time-stepping, where the step size $h$ is adjusted automatically during integration to meet accuracy requirements efficiently.
-\end{example}
+# Specify the range of time values where the ODE should be solved at
+t=np.linspace(0,70,500)
 
-\section{One-Step Integration Methods}
+# Initial conditions; set to the initial populations of prey and predators
+yinit=np.array([10,1])
 
-We now turn to developing our own numerical methods for solving $y'(t) = f(t, y)$. The goal is to generate a sequence of approximations $y_k$ to the true solution $y(t_k)$ at discrete time points $t_k = k \cdot h$, where $h$ is the step size, starting from $y_0 = y(t_0)$.
+# Solve ODE using the "odeint" library in SciPy
+y=odeint(f,yinit,t)
 
-\begin{definition}[One-Step Methods]
-One-step methods compute the approximation $y_{k+1}$ at time $t_{k+1}$ using only the information from the previous step, $y_k$ at time $t_k$. They have the general form:
-\[
-y_{k+1} = y_k + h \cdot \phi(t_k, y_k, t_{k+1}, y_{k+1}, h)
-\]
-where $\phi$ is an increment function that depends on the method.
-\end{definition}
-
-\subsection{Euler's Method (Forward Euler)}
-Euler's method is the simplest one-step method. It can be derived in two ways:
-
-\subsubsection{Derivation via Finite Difference}
-Approximate the derivative $y'(t_k)$ using a forward finite difference:
-\[
-y'(t_k) \approx \frac{y(t_{k+1}) - y(t_k)}{h}
-\]
-Substituting this into the ODE $y'(t_k) = f(t_k, y(t_k))$ and replacing the true solution $y(t_k)$ with its approximation $y_k$, we get:
-\[
-\frac{y_{k+1} - y_k}{h} = f(t_k, y_k)
-\]
-Rearranging gives the Forward Euler formula:
-\begin{equation} \label{eq:forward_euler}
-y_{k+1} = y_k + h f(t_k, y_k)
-\end{equation}
-
-\subsubsection{Derivation via Quadrature}
-Integrate the ODE $y'(s) = f(s, y(s))$ from $t_k$ to $t_{k+1}$:
-\[
-\int_{t_k}^{t_{k+1}} y'(s) ds = \int_{t_k}^{t_{k+1}} f(s, y(s)) ds
-\]
-By the Fundamental Theorem of Calculus, the left side is $y(t_{k+1}) - y(t_k)$. Thus:
-\[
-y(t_{k+1}) = y(t_k) + \int_{t_k}^{t_{k+1}} f(s, y(s)) ds
-\]
-We can approximate the integral using a numerical quadrature rule. The simplest rule is the $n=0$ Newton-Cotes formula (the rectangle rule) using the left endpoint $t_k$:
-\[
-\int_{t_k}^{t_{k+1}} f(s, y(s)) ds \approx (t_{k+1} - t_k) f(t_k, y(t_k)) = h f(t_k, y(t_k))
-\]
-Substituting this approximation and replacing $y(t_k)$ with $y_k$ gives the Forward Euler formula again:
-\[
-y_{k+1} = y_k + h f(t_k, y_k)
-\]
-
-\begin{example}[Python Implementation of Euler's Method]
-Let's apply Euler's method to the test equation $y' = \lambda y$ with $y(0) = 1$. The exact solution is $y(t) = e^{\lambda t}$. The Euler step is $y_{k+1} = y_k + h (\lambda y_k) = (1 + h\lambda) y_k$.
-
-\begin{lstlisting}[language=Python, breaklines=true, caption={Python code (\texttt{euler.py}) implementing Forward Euler for $y' = \lambda y$.}, label=lst:euler_py]
-#!/usr/bin/python3
-from math import exp
-
-# Initial variables and constants
-y=1
-t=0
-h=0.1
-lam=0.5
-
-# Apply Euler step until t=2:
-while t<=2:
-
-    # Analytical solution
-    yexact=exp(lam*t)
-    print(t,y,yexact,y-yexact)
-
-    # Euler step
-    y=y+h*(lam*y)
-
-    # Update time
-    t=t+h
+# Plot the solutions
+plt.figure()
+plt.plot(t,y[:,0], label="Proies")
+plt.plot(t,y[:,1], label="Prédateurs")
+plt.legend(loc="upper right")
+plt.xlabel("Temps")
+plt.ylabel("Population")
+plt.savefig("lotka_volterra_plot.png")
 \end{lstlisting}
 
-This code iteratively applies the Euler step, calculating the numerical solution `y` and comparing it to the exact solution `yexact` at each time step. The output prints the time, numerical solution, exact solution, and the error.
 
-Let's visualize the results for $h=0.1$ and $h=0.05$.
-
-\begin{verbatim}
-#save_to: euler_h01.png
-import matplotlib.pyplot as plt
-import numpy as np
-from math import exp
-
-# Parameters
-y=1.0
-t=0.0
-h=0.1
-lam=0.5
-t_end=2.0
-
-# Store results
-times = [t]
-y_numerical = [y]
-y_exact = [exp(lam*t)]
-
-# Apply Euler step until t=t_end:
-while t < t_end: # Use < to avoid potential floating point issue at exact t_end
-    # Euler step
-    y=y+h*(lam*y)
-    # Update time
-    t=t+h
-    # Store results
-    times.append(t)
-    y_numerical.append(y)
-    y_exact.append(exp(lam*t))
-
-# Plotting
-plt.figure()
-plt.plot(times, y_exact, label='Exact $e^{0.5t}$')
-plt.plot(times, y_numerical, 'o-', label=f'Numerical (h={h})')
-plt.xlabel('t')
-plt.ylabel('y')
-plt.title(f'Euler Method for $y\'=0.5y$, h={h}')
-plt.legend()
-plt.grid(True)
-plt.savefig('euler_h01.png')
-\end{verbatim}
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[max width=\textwidth, max height=0.4\textheight, keepaspectratio]{euler_h01.png}
-    \caption{Comparison of the exact solution and the numerical solution obtained using Euler's method with $h=0.1$ for $y' = 0.5y$.}
-    \label{fig:euler_h01}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{lotka_volterra_plot.png}
+\caption{Solution du modèle de Lotka-Volterra montrant le comportement cyclique des populations de proies et de prédateurs.}
+\label{fig:lotka_volterra_plot}
 \end{figure}
 
-\begin{verbatim}
-#save_to: euler_h005.png
-import matplotlib.pyplot as plt
-import numpy as np
-from math import exp
+L'exécution de ce code montre typiquement un comportement cyclique : lorsque la population de proies est élevée, les prédateurs ont de la nourriture et leur population augmente ; cela entraîne une diminution des proies ; la diminution des proies réduit la nourriture pour les prédateurs, entraînant une diminution de leur population ; cela permet aux proies de se rétablir, et le cycle se répète.
 
-# Parameters
-y=1.0
-t=0.0
-h=0.05 # Halved step size
-lam=0.5
-t_end=2.0
+\subsection*{Méthodes d'Intégration à Un Pas}
 
-# Store results
-times = [t]
-y_numerical = [y]
-y_exact = [exp(lam*t)]
+Pour résoudre numériquement l'EDO $y'(t) = f(t, y)$, nous cherchons à approximer la solution $y(t)$ à des points temporels discrets $t_k = t_0 + k h$, où $h$ est le pas de temps et $k = 0, 1, 2, \dots$. Nous notons $y_k$ notre approximation de la solution exacte $y(t_k)$.
 
-# Apply Euler step until t=t_end:
-while t < t_end: # Use < to avoid potential floating point issue at exact t_end
-    # Euler step
-    y=y+h*(lam*y)
-    # Update time
-    t=t+h
-    # Store results
-    times.append(t)
-    y_numerical.append(y)
-    y_exact.append(exp(lam*t))
+Une approche simple consiste à intégrer l'EDO sur l'intervalle $[t_k, t_{k+1}]$ :
+\[ \int_{t_k}^{t_{k+1}} y'(s) ds = \int_{t_k}^{t_{k+1}} f(s, y(s)) ds \]
+Par le Théorème Fondamental de l'Analyse, l'intégrale du côté gauche est $y(t_{k+1}) - y(t_k)$, d'où :
+\[ y(t_{k+1}) = y(t_k) + \int_{t_k}^{t_{k+1}} f(s, y(s)) ds \]
+Les méthodes numériques consistent à approximer l'intégrale du côté droit. Ces méthodes peuvent souvent être exprimées sous la forme générale d'une méthode à un pas :
+\[ y_{k+1} = y_k + h \Phi(t_k, y_k, t_{k+1}, y_{k+1}; h) \]
+où $\Phi$ est une fonction appelée incrément ou flux. Ces méthodes permettent de calculer $y_{k+1}$ en fonction de $y_k$ (et potentiellement de $y_{k+1}$ lui-même).
 
-# Plotting
-plt.figure()
-plt.plot(times, y_exact, label='Exact $e^{0.5t}$')
-plt.plot(times, y_numerical, 'o-', label=f'Numerical (h={h})')
-plt.xlabel('t')
-plt.ylabel('y')
-plt.title(f'Euler Method for $y\'=0.5y$, h={h}')
-plt.legend()
-plt.grid(True)
-plt.savefig('euler_h005.png')
-\end{verbatim}
+\subsubsection*{Méthode d'Euler Explicite (ou Forward Euler)}
 
-\begin{figure}[h]
-    \centering
-    \includegraphics[max width=\textwidth, max height=0.4\textheight, keepaspectratio]{euler_h005.png}
-    \caption{Comparison of the exact solution and the numerical solution obtained using Euler's method with $h=0.05$ for $y' = 0.5y$. Accuracy improves compared to $h=0.1$.}
-    \label{fig:euler_h005}
-\end{figure}
+En utilisant une quadrature de Newton-Cotes d'ordre 0 (point unique) au début de l'intervalle $[t_k, t_{k+1}]$, c'est-à-dire en approximant $f(s, y(s))$ par $f(t_k, y(t_k))$, l'intégrale devient :
+\[ \int_{t_k}^{t_{k+1}} f(s, y(s)) ds \approx (t_{k+1} - t_k) f(t_k, y_k) = h f(t_k, y_k) \]
+Ceci mène à la méthode d'Euler explicite :
+\[ y_{k+1} = y_k + h f(t_k, y_k) \]
+Cette méthode est *explicite* car $y_{k+1}$ est directement calculé en termes de $y_k$ et $t_k$.
 
-The plots show that the numerical solution approximates the exact solution. As the step size $h$ is decreased (from 0.1 to 0.05), the numerical solution becomes visibly closer to the exact solution. We will later analyze this convergence formally.
+\subsubsection*{Méthode d'Euler Implicite (ou Backward Euler)}
+
+En utilisant une quadrature de Newton-Cotes d'ordre 0 à la fin de l'intervalle $[t_k, t_{k+1}]$, c'est-à-dire en approximant $f(s, y(s))$ par $f(t_{k+1}, y(t_{k+1}))$, l'intégrale devient :
+\[ \int_{t_k}^{t_{k+1}} f(s, y(s)) ds \approx (t_{k+1} - t_k) f(t_{k+1}, y_{k+1}) = h f(t_{k+1}, y_{k+1}) \]
+Ceci mène à la méthode d'Euler implicite :
+\[ y_{k+1} = y_k + h f(t_{k+1}, y_{k+1}) \]
+Cette méthode est *implicite* car $y_{k+1}$ apparaît des deux côtés de l'équation et nécessite généralement la résolution d'une équation (potentiellement non linéaire) pour trouver $y_{k+1}$.
+
+\subsubsection*{Méthode du Trapèze}
+
+En utilisant une quadrature de Newton-Cotes d'ordre 1 (règle du trapèze) sur l'intervalle $[t_k, t_{k+1}]$, l'intégrale est approximée par :
+\[ \int_{t_k}^{t_{k+1}} f(s, y(s)) ds \approx \frac{t_{k+1} - t_k}{2} [f(t_k, y_k) + f(t_{k+1}, y_{k+1})] = \frac{h}{2} [f(t_k, y_k) + f(t_{k+1}, y_{k+1})] \]
+Ceci mène à la méthode du trapèze :
+\[ y_{k+1} = y_k + \frac{h}{2} [f(t_k, y_k) + f(t_{k+1}, y_{k+1})] \]
+Cette méthode est également *implicite*.
+
+\subsection*{Analyse de la Convergence}
+
+Nous voulons savoir si la solution numérique $y_k$ converge vers la solution exacte $y(t_k)$ lorsque le pas de temps $h$ tend vers zéro (et donc $k \to \infty$ pour atteindre un temps fixe $t_k$). La convergence est cruciale car elle garantit que nous pouvons atteindre une précision arbitraire en réduisant $h$.
+
+L'analyse de convergence est subtile car les erreurs s'accumulent au fil du temps.
+
+\begin{definition}[Erreur Globale]
+L'erreur globale au pas $k$ est définie comme la différence entre la solution exacte et la solution numérique au temps $t_k$:
+\[ E_k = y(t_k) - y_k \]
+\end{definition}
+
+\begin{definition}[Erreur de Troncature Locale]
+L'erreur de troncature locale au pas $k$, notée $h T_k$, est l'erreur introduite en un seul pas en appliquant la méthode numérique à la solution exacte. $T_k$ est cette erreur divisée par $h$. Pour une méthode à un pas explicite, elle est donnée par :
+\[ T_k = \frac{y(t_{k+1}) - y(t_k)}{h} - \Phi(t_k, y(t_k)) \]
+\end{definition}
+$h T_k$ représente l'erreur commise en passant de $y(t_k)$ à l'approximation $y(t_{k+1})$ en utilisant la méthode numérique, en partant de la solution exacte au temps $t_k$.
+
+Nous pouvons relier l'erreur globale d'un pas au suivant. Pour la méthode d'Euler explicite :
+$y_{k+1} = y_k + h f(t_k, y_k)$
+De la définition de l'erreur de troncature, nous avons :
+$y(t_{k+1}) = y(t_k) + h f(t_k, y(t_k)) + h T_k$
+En soustrayant la première équation de la seconde :
+$y(t_{k+1}) - y_{k+1} = (y(t_k) - y_k) + h (f(t_k, y(t_k)) - f(t_k, y_k)) + h T_k$
+$E_{k+1} = E_k + h (f(t_k, y(t_k)) - f(t_k, y_k)) + h T_k$
+Ceci montre comment l'erreur globale $E_{k+1}$ dépend de l'erreur globale précédente $E_k$ et de l'erreur de troncature locale $h T_k$. Le terme $h (f(t_k, y(t_k)) - f(t_k, y_k))$ représente l'amplification de l'erreur précédente par la fonction $f$.
+
+\begin{definition}[Condition de Lipschitz]
+Une fonction $f(t, y)$ satisfait une condition de Lipschitz par rapport à $y$ sur un domaine si il existe une constante $L_f > 0$ telle que pour tout $t$ dans un intervalle donné et pour tout $u, v$ dans le domaine de $y$:
+\[ \|f(t, u) - f(t, v)\| \le L_f \|u - v\| \]
+La constante $L_f$ est appelée constante de Lipschitz. Géométriquement, cela borne la pente de la fonction $f$ par rapport à $y$. Si $f$ est continûment différentiable par rapport à $y$, alors $L_f$ peut être choisi comme le maximum de $\|\partial f / \partial y\|$.
+\end{definition}
+
+\begin{example}
+\begin{itemize}
+    \item $g(x) = |x|$. $|g(x) - g(y)| = ||x| - |y|| \le |x - y|$ (par l'inégalité triangulaire inverse). Donc $L_f=1$.
+    \item $g(x) = \sqrt{x}$ sur $[0, 1]$. $|g(x) - g(0)| / |x - 0| = \sqrt{x}/x = 1/\sqrt{x}$. Lorsque $x \to 0^+$, ceci tend vers l'infini. La condition de Lipschitz n'est pas satisfaite sur un intervalle incluant 0.
+\end{itemize}
 \end{example}
 
-\subsection{Backward Euler Method}
-If we use the $n=0$ Newton-Cotes quadrature rule but evaluate the function at the right endpoint $t_{k+1}$ instead of the left, we get:
-\[
-\int_{t_k}^{t_{k+1}} f(s, y(s)) ds \approx h f(t_{k+1}, y(t_{k+1}))
-\]
-Substituting this into the integrated ODE form gives the Backward Euler formula:
-\begin{equation} \label{eq:backward_euler}
-y_{k+1} = y_k + h f(t_{k+1}, y_{k+1})
-\end{equation}
-
-\subsection{Explicit vs. Implicit Methods}
-The Forward Euler method \eqref{eq:forward_euler} is an \textbf{explicit} method. Given $y_k$, we can directly calculate $y_{k+1}$ because $y_{k+1}$ appears only on the left-hand side.
-
-The Backward Euler method \eqref{eq:backward_euler} is an \textbf{implicit} method. The unknown $y_{k+1}$ appears on both sides of the equation (inside the function $f$). To find $y_{k+1}$, we generally need to solve an equation at each time step.
-
-For example, applying Backward Euler to $y' = \sin(ty)$:
-\[
-y_{k+1} = y_k + h \sin(t_{k+1} y_{k+1})
-\]
-To find $y_{k+1}$, we need to solve the equation $F(y_{k+1}) = 0$, where $F(y_{k+1}) = y_{k+1} - y_k - h \sin(t_{k+1} y_{k+1})$. This is typically a non-linear equation that can be solved using root-finding methods like Newton's method.
-
-Implicit methods require more computational work per step than explicit methods. However, as we will see later, they often have superior stability properties, which can allow for much larger time steps $h$, especially for certain types of problems (stiff ODEs).
-
-\subsection{Trapezoid Method}
-If we use the $n=1$ Newton-Cotes quadrature rule (the trapezoid rule) to approximate the integral:
-\[
-\int_{t_k}^{t_{k+1}} f(s, y(s)) ds \approx \frac{h}{2} [f(t_k, y(t_k)) + f(t_{k+1}, y(t_{k+1}))]
-\]
-This leads to the Trapezoid Method:
-\begin{equation} \label{eq:trapezoid}
-y_{k+1} = y_k + \frac{h}{2} [f(t_k, y_k) + f(t_{k+1}, y_{k+1})]
-\end{equation}
-Like Backward Euler, the Trapezoid method is implicit, as $y_{k+1}$ appears on both sides.
-
-These three methods (Forward Euler, Backward Euler, Trapezoid) are fundamental examples of one-step methods. They form the basis for understanding more complex integration schemes.
-
-\section{ODE Convergence}
-
-A crucial property of any numerical method is convergence: does the numerical solution $y_k$ approach the true solution $y(t_k)$ as the step size $h$ tends to zero? Without convergence, a numerical method is unreliable.
-
-Analyzing convergence for ODEs is subtle because errors made at one step can propagate and affect subsequent steps. We need to distinguish between the error accumulated over many steps (global error) and the error introduced in a single step (local or truncation error).
-
-\begin{definition}[Global Error]
-The global error at step $k$ is the difference between the true solution and the numerical approximation at time $t_k$:
-\[
-e_k = y(t_k) - y_k
-\]
-\end{definition}
-
-\begin{definition}[Truncation Error (for explicit one-step methods)]
-The (local) truncation error $T_k$ at step $k$ measures how well the true solution satisfies the numerical formula, scaled by $h$. For an explicit one-step method $y_{k+1} = y_k + h \phi(t_k, y_k, h)$, the truncation error is defined by substituting the true solution $y(t)$ into the formula:
-\[
-T_k = \frac{y(t_{k+1}) - y(t_k)}{h} - \phi(t_k, y(t_k), h)
-\]
-This can be rearranged as:
-\[
-y(t_{k+1}) = y(t_k) + h \phi(t_k, y(t_k), h) + h T_k
-\]
-$h T_k$ represents the error introduced in a single step if we start the step exactly on the true solution ($y_k = y(t_k)$). The global error $e_k$ accumulates from these local truncation errors $T_0, T_1, \dots, T_{k-1}$.
-\end{definition}
-
-\subsection{Convergence Theorem for Euler's Method}
-To prove convergence, we often need an assumption about the function $f(t, y)$ defining the ODE.
-
-\begin{definition}[Lipschitz Condition]
-A function $f(t, y)$ satisfies a Lipschitz condition with respect to $y$ on an interval $[a,b]$ if there exists a constant $L_f \ge 0$ (the Lipschitz constant) such that for all $t \in [a,b]$ and all relevant $u, v$:
-\[
-\| f(t, u) - f(t, v) \| \le L_f \| u - v \|
-\]
-This condition essentially bounds how quickly the function $f$ can change as $y$ changes. It limits the "steepness" of $f$ with respect to $y$.
-\end{definition}
-
-\begin{theorem}[Convergence of Euler's Method]
-Suppose we apply Euler's method $y_{k+1} = y_k + h f(t_k, y_k)$ to solve $y' = f(t, y)$, $y(0)=y_0$ up to time $T = M h$. If $f(t, y)$ satisfies a Lipschitz condition with constant $L_f$ with respect to $y$, and the truncation error at step $j$ is $T_j$, then the global error $e_k = y(t_k) - y_k$ is bounded by:
-\[
-\|e_k\| \le \frac{e^{L_f t_k} - 1}{L_f} \max_{0 \le j \le k-1} \|T_j\|
-\]
-for $k=0, 1, \dots, M$. (If $L_f=0$, the bound is $\|e_k\| \le t_k \max \|T_j\|$).
+\begin{theorem}[Convergence de la Méthode d'Euler Explicite]
+Supposons que $f(t, y)$ satisfait la condition de Lipschitz par rapport à $y$ avec la constante $L_f$. Alors l'erreur globale de la méthode d'Euler explicite au pas $k$ est bornée par :
+\[ \|E_k\| \le e^{L_f(t_k - t_0)} \frac{1}{L_f} \max_{0 \le j < k} \|h T_j\| \]
+ou de manière équivalente (en utilisant la définition de $T_j$):
+\[ \|E_k\| \le e^{L_f(t_k - t_0)} \frac{h}{L_f} \max_{0 \le j < k} \|T_j\| \]
 \end{theorem}
 
-\begin{proof}
-We start with the definitions of global error and truncation error.
-The numerical scheme is $y_{k+1} = y_k + h f(t_k, y_k)$.
-The true solution satisfies $y(t_{k+1}) = y(t_k) + h f(t_k, y(t_k)) + h T_k$.
-
-Subtracting the numerical scheme from the true solution equation:
-\begin{align*}
-y(t_{k+1}) - y_{k+1} &= (y(t_k) - y_k) + h (f(t_k, y(t_k)) - f(t_k, y_k)) + h T_k \\
-e_{k+1} &= e_k + h (f(t_k, y(t_k)) - f(t_k, y_k)) + h T_k
-\end{align*}
-Take norms and apply the triangle inequality:
-\[
-\|e_{k+1}\| \le \|e_k\| + h \|f(t_k, y(t_k)) - f(t_k, y_k)\| + h \|T_k\|
-\]
-Apply the Lipschitz condition $\|f(t_k, y(t_k)) - f(t_k, y_k)\| \le L_f \|y(t_k) - y_k\| = L_f \|e_k\|$:
-\[
-\|e_{k+1}\| \le \|e_k\| + h L_f \|e_k\| + h \|T_k\|
-\]
-\[
-\|e_{k+1}\| \le (1 + h L_f) \|e_k\| + h \|T_k\|
-\]
-Let $T_{max} = \max_{0 \le j \le k-1} \|T_j\|$. Then $\|e_{k+1}\| \le (1 + h L_f) \|e_k\| + h T_{max}$.
-This is a difference inequality. We can unroll it, starting from $\|e_0\| = \|y(t_0) - y_0\| = 0$:
-\begin{align*}
-\|e_1\| &\le (1 + h L_f) \|e_0\| + h \|T_0\| = h \|T_0\| \le h T_{max} \\
-\|e_2\| &\le (1 + h L_f) \|e_1\| + h \|T_1\| \le (1 + h L_f) (h T_{max}) + h T_{max} \\
-\|e_k\| &\le h T_{max} \sum_{j=0}^{k-1} (1 + h L_f)^j
-\end{align*}
-This is a geometric series sum with $r = 1 + h L_f$. The sum is $\frac{r^k - 1}{r-1} = \frac{(1 + h L_f)^k - 1}{(1 + h L_f) - 1} = \frac{(1 + h L_f)^k - 1}{h L_f}$.
-So,
-\[
-\|e_k\| \le h T_{max} \frac{(1 + h L_f)^k - 1}{h L_f} = \frac{T_{max}}{L_f} [(1 + h L_f)^k - 1]
-\]
-We use the inequality $1+x \le e^x$ for $x \ge 0$. Let $x = h L_f$. Then $1 + h L_f \le e^{h L_f}$.
-Therefore, $(1 + h L_f)^k \le (e^{h L_f})^k = e^{k h L_f} = e^{L_f t_k}$.
-Substituting this back gives the final bound:
-\[
-\|e_k\| \le \frac{T_{max}}{L_f} (e^{L_f t_k} - 1)
-\]
+\begin{proof}[Esquisse de Preuve]
+Nous avons l'inégalité pour l'erreur globale :
+$E_{k+1} = E_k + h (f(t_k, y(t_k)) - f(t_k, y_k)) + h T_k$
+En prenant la norme et en utilisant l'inégalité triangulaire et la condition de Lipschitz ($y(t_k) - y_k = E_k$):
+$\|E_{k+1}\| \le \|E_k\| + h \|f(t_k, y_k + E_k) - f(t_k, y_k)\| + \|h T_k\|$
+$\|E_{k+1}\| \le \|E_k\| + h L_f \|E_k\| + h \|T_k\|$
+$\|E_{k+1}\| \le (1 + h L_f) \|E_k\| + h \max_{0 \le j \le k} \|T_j\|$
+En appliquant cette relation récursivement à partir de $E_0 = 0$:
+$\|E_1\| \le (1 + h L_f) \|E_0\| + h \max \|T_j\| = h \max \|T_j\|$
+$\|E_2\| \le (1 + h L_f) \|E_1\| + h \max \|T_j\| \le (1 + h L_f) h \max \|T_j\| + h \max \|T_j\| = h \max \|T_j\| (1 + 1 + h L_f)$
+Ceci ne semble pas exactement la dérivation montrée dans la vidéo. Reprenons à partir de $\|E_{k+1}\| \le (1 + h L_f) \|E_k\| + h \max_{0 \le j < k+1} \|T_j\|$. Soit $C = h \max_{0 \le j < k+1} \|T_j\|$.
+$\|E_{k+1}\| \le (1 + h L_f) \|E_k\| + C$.
+Pour $k=0$: $\|E_1\| \le (1 + h L_f) \|E_0\| + C = C$ (car $E_0=0$).
+Pour $k=1$: $\|E_2\| \le (1 + h L_f) \|E_1\| + C \le (1 + h L_f) C + C = C (1 + (1+hL_f))$.
+Pour $k=2$: $\|E_3\| \le (1 + h L_f) \|E_2\| + C \le (1 + h L_f) C (1 + (1+hL_f)) + C = C (1 + (1+hL_f) + (1+hL_f)^2)$.
+En général : $\|E_k\| \le C \sum_{j=0}^{k-1} (1 + h L_f)^j$.
+Cette somme est une série géométrique de raison $r = 1 + h L_f$.
+$\sum_{j=0}^{k-1} r^j = \frac{r^k - 1}{r - 1} = \frac{(1 + h L_f)^k - 1}{(1 + h L_f) - 1} = \frac{(1 + h L_f)^k - 1}{h L_f}$.
+Donc, $\|E_k\| \le h \max_{0 \le j < k} \|T_j\| \frac{(1 + h L_f)^k - 1}{h L_f} = \frac{1}{L_f} \max_{0 \le j < k} \|h T_j\| ((1 + h L_f)^k - 1)$.
+En utilisant l'inégalité $1+x \le e^x$, nous avons $(1+hL_f)^k \le (e^{hL_f})^k = e^{khL_f}$. De plus, $t_k = t_0 + kh$, donc $kh = t_k - t_0$.
+$(1 + h L_f)^k - 1 \le e^{L_f(t_k - t_0)} - 1 \le e^{L_f(t_k - t_0)}$ (pour $t_k \ge t_0$).
+Donc, $\|E_k\| \le \frac{e^{L_f(t_k - t_0)}}{L_f} \max_{0 \le j < k} \|h T_j\| = \frac{e^{L_f(t_k - t_0)} h}{L_f} \max_{0 \le j < k} \|T_j\|$.
+Ceci établit le théorème.
 \end{proof}
 
-\subsubsection{Examples of Lipschitz Conditions}
-
-\begin{verbatim}
-#save_to: lipschitz_geom.png
-import matplotlib.pyplot as plt
-import numpy as np
-
-def g(x):
-    return 0.1*x**2 + np.sin(x)
-
-x = np.linspace(0, 5, 100)
-y = g(x)
-
-x0 = 2.5
-y0 = g(x0)
-Lf = 0.1*2*x0 + np.cos(x0) # Approximate Lf using derivative at x0
-
-plt.figure()
-plt.plot(x, y, label='$g(x)$', color='blue', linewidth=2)
-plt.plot(x0, y0, 'ro', label='Point $(x, g(x))$')
-
-# Plot lines with slope +/- Lf
-x_cone = np.linspace(x0 - 1.5, x0 + 1.5, 50)
-line_upper = y0 + Lf * (x_cone - x0)
-line_lower = y0 - Lf * (x_cone - x0)
-plt.plot(x_cone, line_upper, 'g--', label=f'Slope +{Lf:.2f}')
-plt.plot(x_cone, line_lower, 'g--', label=f'Slope -{Lf:.2f}')
-
-# Fill the cone region
-plt.fill_between(x_cone, line_lower, line_upper, color='green', alpha=0.1, label='Cone region')
-
-
-plt.xlabel('x')
-plt.ylabel('g(x)')
-plt.title('Geometric Interpretation of Lipschitz Condition')
-plt.legend()
-plt.grid(True)
-plt.ylim(min(y)-1, max(y)+1)
-plt.savefig('lipschitz_geom.png')
-\end{verbatim}
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[max width=\textwidth, max height=0.4\textheight, keepaspectratio]{lipschitz_geom.png}
-    \caption{Geometric view of the Lipschitz condition. The graph of the function $g(x)$ must lie entirely within the "cone" formed by lines with slopes $\pm L_f$ emanating from any point $(x, g(x))$ on the curve.}
-    \label{fig:lipschitz_geom}
-\end{figure}
-
-\begin{example}
-If $g(x)$ is continuously differentiable on $[a, b]$, then by the Mean Value Theorem, for any $x, y \in [a, b]$, there exists $\theta$ between $x$ and $y$ such that $g(x) - g(y) = g'(\theta)(x-y)$. Therefore, $|g(x) - g(y)| = |g'(\theta)| |x-y|$. We can choose $L_f = \max_{\theta \in [a, b]} |g'(\theta)|$. If $g'$ is bounded, $g$ is Lipschitz.
-\end{example}
-
-\begin{example}
-$g(x) = |x|$. This function is not differentiable at $x=0$. However, by the reverse triangle inequality, $||x| - |y|| \le |x - y|$. Thus, $g(x)=|x|$ is Lipschitz continuous with $L_f = 1$.
-\end{example}
-
-\begin{example}
-$g(x) = \sqrt{x}$ on $[0, 1]$. Consider $y=0$. Then $|g(x) - g(0)| = |\sqrt{x}|$. We need $|\sqrt{x}| \le L_f |x - 0| = L_f |x|$. This requires $\frac{|\sqrt{x}|}{|x|} = \frac{1}{\sqrt{x}} \le L_f$. However, as $x \to 0^+$, $1/\sqrt{x} \to \infty$. No finite $L_f$ can satisfy this for all $x \in (0, 1]$. Therefore, $\sqrt{x}$ is not Lipschitz continuous on $[0, 1]$. Graphically, its slope becomes infinite at $x=0$, violating the finite-slope cone condition.
-
-\begin{verbatim}
-#save_to: sqrt_lipschitz.png
-import matplotlib.pyplot as plt
-import numpy as np
-
-def g(x):
-    return np.sqrt(x)
-
-x = np.linspace(0, 1, 100)
-y = g(x)
-
-x0 = 0.01 # Point close to 0
-y0 = g(x0)
-Lf = 2.0 # Arbitrary finite slope
-
-plt.figure()
-plt.plot(x, y, label='$g(x)=\sqrt{x}$', color='blue', linewidth=2)
-plt.plot(x0, y0, 'ro') # Point near 0
-
-# Plot lines with slope +/- Lf
-x_cone = np.linspace(x0 - 0.01, x0 + 0.05, 50)
-x_cone = x_cone[x_cone >= 0] # Ensure x >= 0
-line_upper = y0 + Lf * (x_cone - x0)
-line_lower = y0 - Lf * (x_cone - x0)
-plt.plot(x_cone, line_upper, 'g--', label=f'Slope $\pm${Lf}')
-plt.plot(x_cone, line_lower, 'g--')
-
-# Fill the cone region
-plt.fill_between(x_cone, line_lower, line_upper, color='green', alpha=0.1)
-
-plt.xlabel('x')
-plt.ylabel('g(x)')
-plt.title('$g(x)=\sqrt{x}$ is Not Lipschitz at $x=0$')
-plt.text(0.2, 0.1, 'Infinite slope at x=0\nviolates any finite Lf cone', ha='left')
-plt.legend()
-plt.grid(True)
-plt.xlim(-0.05, 1)
-plt.ylim(-0.1, 1.1)
-plt.savefig('sqrt_lipschitz.png')
-\end{verbatim}
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[max width=\textwidth, max height=0.4\textheight, keepaspectratio]{sqrt_lipschitz.png}
-    \caption{The function $g(x)=\sqrt{x}$ has an infinite slope at $x=0$. It cannot remain within the cone defined by any finite Lipschitz constant $L_f$ near the origin.}
-    \label{fig:sqrt_lipschitz}
-\end{figure}
-
-\end{example}
-
-\subsection{Order of Accuracy}
-The convergence theorem shows that if the truncation error $T_j$ goes to zero as $h \to 0$, then the global error $e_k$ also goes to zero. The rate at which $T_j$ approaches zero determines the rate of convergence.
-
-\begin{definition}[Order of Accuracy]
-A one-step method has order of accuracy $p$ if its local truncation error satisfies $T_k = O(h^p)$ as $h \to 0$.
+\begin{definition}[Ordre de Précision]
+Une méthode numérique a un ordre de précision $p$ si son erreur de troncature locale $h T_k$ est d'ordre $O(h^{p+1})$, ce qui signifie que $\|T_k\| = O(h^p)$ pour des pas de temps $h$ petits. Le théorème de convergence implique alors que l'erreur globale $\|E_k\|$ est d'ordre $O(h^p)$.
 \end{definition}
-For a method of order $p \ge 1$, the convergence theorem implies that the global error $e_k$ is also $O(h^p)$.
 
-\begin{example}[Order of Euler Methods]
-\textit{Forward Euler:} The truncation error is $T_k = \frac{y(t_{k+1}) - y(t_k)}{h} - f(t_k, y(t_k))$. Since $f(t_k, y(t_k)) = y'(t_k)$, we have $T_k = \frac{y(t_{k+1}) - y(t_k)}{h} - y'(t_k)$. By Taylor expansion, $y(t_{k+1}) = y(t_k) + h y'(t_k) + \frac{h^2}{2} y''( \theta_k)$ for some $\theta_k \in (t_k, t_{k+1})$. Substituting this gives:
-\[
-T_k = \frac{(y(t_k) + h y'(t_k) + \frac{h^2}{2} y''(\theta_k)) - y(t_k)}{h} - y'(t_k) = \frac{h}{2} y''(\theta_k)
-\]
-Assuming $y''$ is bounded, $T_k = O(h)$. Forward Euler is a first-order accurate method ($p=1$).
+\subsubsection*{Ordre de Précision des Méthodes}
 
-\textit{Backward Euler:} The truncation error is $T_k = \frac{y(t_{k+1}) - y(t_k)}{h} - f(t_{k+1}, y(t_{k+1})) = \frac{y(t_{k+1}) - y(t_k)}{h} - y'(t_{k+1})$. Taylor expanding $y(t_k)$ around $t_{k+1}$: $y(t_k) = y(t_{k+1}) - h y'(t_{k+1}) + \frac{h^2}{2} y''(\psi_k)$ for some $\psi_k \in (t_k, t_{k+1})$. Rearranging gives $\frac{y(t_{k+1}) - y(t_k)}{h} = y'(t_{k+1}) - \frac{h}{2} y''(\psi_k)$.
-\[
-T_k = (y'(t_{k+1}) - \frac{h}{2} y''(\psi_k)) - y'(t_{k+1}) = -\frac{h}{2} y''(\psi_k)
-\]
-Assuming $y''$ is bounded, $T_k = O(h)$. Backward Euler is also a first-order accurate method ($p=1$).
-\end{example}
+\begin{itemize}
+    \item \textbf{Méthode d'Euler Explicite :} $T_k = \frac{y(t_{k+1}) - y(t_k)}{h} - f(t_k, y(t_k))$. Utilisant $y'(t_k) = f(t_k, y(t_k))$ et un développement de Taylor de $y(t_{k+1})$ autour de $t_k$:
+    $y(t_{k+1}) = y(t_k) + h y'(t_k) + \frac{h^2}{2} y''(t_k) + O(h^3)$
+    $T_k = \frac{(y(t_k) + h y'(t_k) + h^2/2 y''(t_k) + O(h^3)) - y(t_k)}{h} - y'(t_k)$
+    $T_k = \frac{h y'(t_k) + h^2/2 y''(t_k)}{h} - y'(t_k) + O(h^2)$
+    $T_k = y'(t_k) + \frac{h}{2} y''(t_k) - y'(t_k) + O(h^2) = \frac{h}{2} y''(t_k) + O(h^2)$.
+    Donc $T_k = O(h)$, et l'erreur globale est $O(h)$. La méthode d'Euler explicite est d'ordre 1.
 
-\begin{example}[Order of Trapezoid Method]
-The truncation error is $T_k = \frac{y(t_{k+1}) - y(t_k)}{h} - \frac{1}{2} [f(t_k, y(t_k)) + f(t_{k+1}, y(t_{k+1}))]$. Replacing $f$ with $y'$:
-\[
-T_k = \frac{1}{h} \int_{t_k}^{t_{k+1}} y'(s) ds - \frac{1}{2} [y'(t_k) + y'(t_{k+1})]
-\]
-This expression is precisely the error of the trapezoid rule quadrature applied to the function $y'(s)$ over the interval $[t_k, t_{k+1}]$, divided by $h$. The error of the trapezoid rule for an integral $\int_a^b g(s) ds$ is known to be $-\frac{(b-a)^3}{12} g''(\xi)$ for some $\xi \in (a, b)$. Here $b-a = h$ and $g = y'$. So the integral error is $-\frac{h^3}{12} y'''(\xi)$.
-\[
-T_k = \frac{1}{h} \left( -\frac{h^3}{12} y'''(\xi) \right) = -\frac{h^2}{12} y'''(\xi)
-\]
-Assuming $y'''$ is bounded, $T_k = O(h^2)$. The Trapezoid method is a second-order accurate method ($p=2$).
-\end{example}
+    \item \textbf{Méthode d'Euler Implicite :} Par une analyse similaire utilisant un développement de Taylor autour de $t_{k+1}$, on trouve que $T_k = -\frac{h}{2} y''(t_{k+1}) + O(h^2)$. Donc $T_k = O(h)$, et l'erreur globale est $O(h)$. La méthode d'Euler implicite est également d'ordre 1.
 
-\begin{example}[Verification of Order]
-Consider $y'=y$, $y(0)=1$. We compute the global error at $t=1$ using Forward Euler and Trapezoid methods for decreasing step sizes $h$.
+    \item \textbf{Méthode du Trapèze :} L'erreur de troncature pour la méthode du trapèze peut être liée à l'erreur de la règle du trapèze pour l'intégration. L'erreur de la règle du trapèze pour $\int_a^b g(x) dx$ est $O((b-a)^3)$. Ici, l'intervalle est $[t_k, t_{k+1}]$, de longueur $h$. L'erreur de quadrature est donc $O(h^3)$. Comme la formule de la méthode du trapèze a un facteur $1/h$ devant l'intégrale approximée, l'erreur de troncature $T_k$ est $O(h^2)$. L'erreur globale est donc $O(h^2)$. La méthode du trapèze est d'ordre 2.
+\end{itemize}
 
-\begin{table}[h]
-\centering
-\caption{Global error at $t=1$ for $y'=y, y(0)=1$}
-\label{tab:convergence}
+\begin{example}
+Comparaison de l'erreur globale pour $y' = y, y(0)=1$ (solution exacte $y(t)=e^t$) à $t=1$.
+\begin{center}
 \begin{tabular}{|c|c|c|}
 \hline
-$h$ & $E_{\text{Euler}} = |y(1) - y_k|$ & $E_{\text{Trap}} = |y(1) - y_k|$ \\
+$h$ & Erreur Globale (Euler Explicite) & Erreur Globale (Méthode du Trapèze) \\
 \hline
-$2.0 \times 10^{-2}$ & $2.67 \times 10^{-2}$ & $9.06 \times 10^{-5}$ \\
-$1.0 \times 10^{-2}$ & $1.35 \times 10^{-2}$ & $2.26 \times 10^{-5}$ \\
-$5.0 \times 10^{-3}$ & $6.76 \times 10^{-3}$ & $5.66 \times 10^{-6}$ \\
-$2.5 \times 10^{-3}$ & $3.39 \times 10^{-3}$ & $1.41 \times 10^{-6}$ \\
-\hline
-Ratio ($h \to h/2$) & $\approx 2$ & $\approx 4$ \\
+0.1   & 0.0517 & 0.00177 \\
+0.05  & 0.0259 & 0.00044 \\
+0.025 & 0.0130 & 0.00011 \\
+0.0125 & 0.0065 & 0.000027 \\
 \hline
 \end{tabular}
-\end{table}
+\end{center}
 
-As seen in Table \ref{tab:convergence}, when we halve the step size $h$:
-\begin{itemize}
-    \item The error for Forward Euler ($E_{\text{Euler}}$) is roughly halved. This is consistent with $O(h^1)$ accuracy ($p=1$).
-    \item The error for the Trapezoid method ($E_{\text{Trap}}$) is roughly divided by four. This is consistent with $O(h^2)$ accuracy ($p=2$).
-\end{itemize}
-This numerical experiment supports the theoretical orders of accuracy. Higher-order methods generally provide much better accuracy for a given step size, or allow larger step sizes for a given accuracy target.
+Lorsque $h$ est divisé par 2 (passant de 0.1 à 0.05), l'erreur d'Euler est approximativement divisée par 2 (0.0517 / 2 $\approx$ 0.0259), ce qui est cohérent avec un ordre 1.
+Pour la méthode du trapèze, l'erreur est approximativement divisée par 4 (0.00177 / 4 $\approx$ 0.00044), ce qui est cohérent avec un ordre 2 ($2^2=4$).
 \end{example}
 
-\section{ODE Stability}
+\subsection*{Analyse de la Stabilité}
 
-While convergence analysis tells us what happens as $h \to 0$, stability analysis concerns the behavior of the numerical solution for a fixed, non-zero step size $h$. We want methods that produce bounded, non-growing solutions when the true solution of the ODE is itself bounded or decaying. Stability is crucial for practical computation, as we cannot take infinitely small steps. Ideally, the stability properties of the numerical method should mimic those of the underlying ODE.
+En plus de la convergence (précision pour $h \to 0$), il est crucial d'analyser la stabilité pour des valeurs finies de $h$. Idéalement, nous voulons que notre méthode numérique reproduise les propriétés de stabilité de l'EDO sous-jacente.
 
-\subsection{Mathematical ODE Stability}
-First, let's define stability for the ODE itself, $y' = f(t, y)$. Consider two solutions, $y(t)$ and $\hat{y}(t)$, originating from slightly different initial conditions $y(0) = y_0$ and $\hat{y}(0) = \hat{y}_0$.
+\subsubsection*{Stabilité d'une EDO}
 
-\begin{definition}[Stability of an ODE]
-The ODE solution is stable if small changes in the initial condition lead to only small changes in the solution for all future times. Formally: for every $\epsilon > 0$, there exists a $\delta > 0$ such that if $\|y_0 - \hat{y}_0\| < \delta$, then $\|y(t) - \hat{y}(t)\| < \epsilon$ for all $t \ge 0$.
+\begin{definition}[Stabilité d'une EDO]
+L'EDO $y'(t) = f(t, y)$ est stable si pour tout $\epsilon > 0$, il existe $\delta > 0$ tel que si $\|y(t_0) - \hat{y}(t_0)\| < \delta$, alors $\|y(t) - \hat{y}(t)\| < \epsilon$ pour tout $t \ge t_0$, où $y(t)$ et $\hat{y}(t)$ sont deux solutions de l'EDO avec des conditions initiales $y(t_0)$ et $\hat{y}(t_0)$.
 \end{definition}
+Une petite perturbation de la condition initiale entraîne seulement une petite perturbation de la solution à tout instant ultérieur.
 
-\begin{definition}[Asymptotic Stability of an ODE]
-The ODE solution is asymptotically stable if it is stable, and additionally, the difference between solutions eventually vanishes: $\|y(t) - \hat{y}(t)\| \to 0$ as $t \to \infty$.
+\begin{definition}[Stabilité Asymptotique d'une EDO]
+L'EDO est asymptotiquement stable si elle est stable et si de plus $\|y(t) - \hat{y}(t)\| \to 0$ lorsque $t \to \infty$.
 \end{definition}
+Dans ce cas, les petites perturbations décroissent au fil du temps.
 
-\begin{remark}
-In the context of ODEs and PDEs, the term "stability" often refers to the well-posedness or sensitivity of the mathematical problem itself, as defined above, as well as the behavior of the numerical method. This differs slightly from other areas of numerical analysis where "stability" usually refers only to the numerical algorithm's sensitivity to perturbations (like rounding errors), distinct from the problem's "conditioning".
-\end{remark}
+\subsubsection*{Le Problème Test : $y' = \lambda y$}
 
-\begin{example}[Stability of $y' = \lambda y$]
-For the scalar equation $y' = \lambda y$, the solution is $y(t) = y_0 e^{\lambda t}$. The difference between two solutions is $y(t) - \hat{y}(t) = (y_0 - \hat{y}_0) e^{\lambda t}$.
-Let's consider $\lambda \in \mathbb{C}$, $\lambda = a + ib$. Then $e^{\lambda t} = e^{at} e^{ibt} = e^{at}(\cos(bt) + i \sin(bt))$. The magnitude is $|e^{\lambda t}| = |e^{at}| |e^{ibt}| = e^{at} \cdot 1 = e^{at}$. The stability depends only on the real part of $\lambda$, $a = \text{Re}(\lambda)$.
-
+Pour analyser la stabilité numérique, on utilise classiquement le problème test scalaire $y' = \lambda y$, où $\lambda$ est un paramètre complexe. La solution exacte est $y(t) = y(0) e^{\lambda t}$. La différence entre deux solutions est $y(t) - \hat{y}(t) = (y(0) - \hat{y}(0)) e^{\lambda t}$. La stabilité dépend du comportement de $e^{\lambda t}$ lorsque $t \to \infty$. Soit $\lambda = a + ib$. $|e^{\lambda t}| = |e^{(a+ib)t}| = |e^{at} e^{ibt}| = e^{at} |e^{ibt}| = e^{at}$.
 \begin{itemize}
-    \item If $\text{Re}(\lambda) < 0$ ($a < 0$): Then $e^{at} \to 0$ as $t \to \infty$. The difference decays. The ODE is asymptotically stable.
-    \item If $\text{Re}(\lambda) = 0$ ($a = 0$): Then $e^{at} = 1$. The difference $|y(t) - \hat{y}(t)| = |y_0 - \hat{y}_0|$ remains constant. The ODE is stable (but not asymptotically stable).
-    \item If $\text{Re}(\lambda) > 0$ ($a > 0$): Then $e^{at} \to \infty$ as $t \to \infty$. The difference grows exponentially. The ODE is unstable.
+    \item Si Re($\lambda$) = $a < 0$, $e^{at} \to 0$ quand $t \to \infty$. La différence entre les solutions tend vers 0. L'EDO est asymptotiquement stable.
+    \item Si Re($\lambda$) = $a = 0$, $e^{at} = e^0 = 1$. La différence reste bornée (égale à la différence initiale). L'EDO est stable mais pas asymptotiquement stable.
+    \item Si Re($\lambda$) = $a > 0$, $e^{at} \to \infty$ quand $t \to \infty$. La différence entre les solutions croît de manière exponentielle. L'EDO est instable.
 \end{itemize}
 
-Plots for real $\lambda$:
-\begin{verbatim}
-#save_to: stability_lambda_neg1.png
-import matplotlib.pyplot as plt
-import numpy as np
+Pour un système linéaire $y' = Ay$, où $A$ est une matrice, la stabilité est déterminée par les valeurs propres $\lambda_i$ de $A$. Le système est stable si Re($\lambda_i$) $\le 0$ pour toutes les valeurs propres, et asymptotiquement stable si Re($\lambda_i$) $< 0$ pour toutes les valeurs propres.
 
-t = np.linspace(0, 5, 100)
-lam = -1.0
-y0_1 = 1.0
-y0_2 = 2.0
-y1 = y0_1 * np.exp(lam * t)
-y2 = y0_2 * np.exp(lam * t)
+\subsubsection*{Stabilité Numérique}
 
-plt.figure()
-plt.plot(t, y1, label=f'$y_0={y0_1}$')
-plt.plot(t, y2, label=f'$y_0={y0_2}$')
-plt.xlabel('t')
-plt.ylabel('y(t)')
-plt.title(f'$y\' = {lam}y$: Asymptotically Stable')
-plt.legend()
-plt.grid(True)
-plt.savefig('stability_lambda_neg1.png')
-\end{verbatim}
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[max width=0.5\textwidth, keepaspectratio]{stability_lambda_neg1.png}
-    \caption{Solutions to $y'=-y$. Solutions decay to 0. Asymptotically stable.}
-    \label{fig:stability_lambda_neg1}
-\end{figure}
-
-\begin{verbatim}
-#save_to: stability_lambda_0.png
-import matplotlib.pyplot as plt
-import numpy as np
-
-t = np.linspace(0, 5, 100)
-lam = 0.0
-y0_1 = 1.0
-y0_2 = 2.0
-y1 = y0_1 * np.exp(lam * t)
-y2 = y0_2 * np.exp(lam * t)
-
-plt.figure()
-plt.plot(t, y1, label=f'$y_0={y0_1}$')
-plt.plot(t, y2, label=f'$y_0={y0_2}$')
-plt.xlabel('t')
-plt.ylabel('y(t)')
-plt.title(f'$y\' = {lam}y$: Stable')
-plt.legend()
-plt.grid(True)
-# Adjust y-axis limits for better visualization
-plt.ylim(0, 3)
-plt.savefig('stability_lambda_0.png')
-\end{verbatim}
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[max width=0.5\textwidth, keepaspectratio]{stability_lambda_0.png}
-    \caption{Solutions to $y'=0$. Solutions remain constant. Stable.}
-    \label{fig:stability_lambda_0}
-\end{figure}
-
-\begin{verbatim}
-#save_to: stability_lambda_pos1.png
-import matplotlib.pyplot as plt
-import numpy as np
-
-t = np.linspace(0, 2, 100) # Shorter time for visibility
-lam = 1.0
-y0_1 = 0.1 # Use smaller values to keep on scale
-y0_2 = 0.2
-y1 = y0_1 * np.exp(lam * t)
-y2 = y0_2 * np.exp(lam * t)
-
-plt.figure()
-plt.plot(t, y1, label=f'$y_0={y0_1}$')
-plt.plot(t, y2, label=f'$y_0={y0_2}$')
-plt.xlabel('t')
-plt.ylabel('y(t)')
-plt.title(f'$y\' = {lam}y$: Unstable')
-plt.legend()
-plt.grid(True)
-plt.savefig('stability_lambda_pos1.png')
-\end{verbatim}
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[max width=0.5\textwidth, keepaspectratio]{stability_lambda_pos1.png}
-    \caption{Solutions to $y'=y$. Solutions grow exponentially. Unstable.}
-    \label{fig:stability_lambda_pos1}
-\end{figure}
-
-\end{example}
-
-\begin{example}[Stability of $y' = Ay$]
-Consider the linear system $y'(t) = Ay(t)$, where $y \in \mathbb{R}^n$ and $A$ is an $n \times n$ matrix. If $A$ is diagonalizable, $A = V \Lambda V^{-1}$, where $\Lambda$ is a diagonal matrix of eigenvalues $\lambda_i$ and $V$ is the matrix of corresponding eigenvectors. Let $z(t) = V^{-1} y(t)$. Then $z'(t) = V^{-1} y'(t) = V^{-1} A y(t) = V^{-1} (V \Lambda V^{-1}) y(t) = \Lambda (V^{-1} y(t)) = \Lambda z(t)$.
-This transforms the system into $n$ decoupled scalar equations: $z_i'(t) = \lambda_i z_i(t)$. The stability of the original system $y'=Ay$ is governed by the stability of these scalar equations. Assuming the eigenvector matrix $V$ is well-conditioned, the system $y'=Ay$ is stable if and only if all eigenvalues $\lambda_i$ satisfy $\text{Re}(\lambda_i) \le 0$, and asymptotically stable if $\text{Re}(\lambda_i) < 0$ for all $i$.
-\end{example}
-
-\subsection{Numerical Stability}
-We now define stability for a numerical method applied to an ODE.
-
-\begin{definition}[Stability of a Numerical Method]
-Let $y_k$ and $\hat{y}_k$ be two numerical solutions generated by a method, starting from initial conditions $y_0$ and $\hat{y}_0$. The method is stable if small perturbations in the initial condition lead to small perturbations in the numerical solution for all steps $k$. Formally: for every $\epsilon > 0$, there exists a $\delta > 0$ such that if $\|y_0 - \hat{y}_0\| < \delta$, then $\|y_k - \hat{y}_k\| < \epsilon$ for all $k \ge 0$.
+\begin{definition}[Stabilité Numérique]
+Une approximation numérique est stable si pour tout $\epsilon > 0$, il existe $\delta > 0$ tel que si $\|y_0 - \hat{y}_0\| < \delta$, alors $\|y_k(y_0) - y_k(\hat{y}_0)\| < \epsilon$ pour tout $k \ge 0$, où $y_k(y_0)$ et $y_k(\hat{y}_0)$ sont les solutions numériques pour les conditions initiales $y_0$ et $\hat{y}_0$.
 \end{definition}
+Nous souhaitons que notre méthode numérique soit stable lorsque l'EDO elle-même est stable, c'est-à-dire pour Re($\lambda$) $\le 0$ dans le cas du problème test.
 
-The goal is for the numerical method to be stable whenever the underlying ODE is stable. Since ODE stability is problem-dependent, we analyze numerical stability using a standard test problem.
+\subsubsection*{Stabilité de la Méthode d'Euler Explicite}
 
-\begin{definition}[Dahlquist Test Equation]
-The standard test equation for analyzing numerical stability is the scalar linear ODE:
-\[
-y' = \lambda y, \quad \lambda \in \mathbb{C}
-\]
-\end{definition}
-The behavior of a numerical method on this simple equation often reveals its stability properties for more general problems. We want the numerical method to be stable for all $\lambda$ where the ODE is stable, i.e., for $\text{Re}(\lambda) \le 0$.
+Appliquons la méthode d'Euler explicite au problème test $y' = \lambda y$:
+$y_{k+1} = y_k + h f(t_k, y_k) = y_k + h (\lambda y_k) = (1 + h\lambda) y_k$
+En partant de $y_0$, on obtient $y_k = (1 + h\lambda)^k y_0$.
+Le facteur d'amplification numérique est $G = 1 + h\lambda$. Pour que $y_k$ ne croisse pas indéfiniment lorsque l'EDO est stable (i.e., pour Re($\lambda$) $\le 0$), il faut que $|G| \le 1$.
+Soit $z = h\lambda$. La condition de stabilité est $|1 + z| \le 1$.
+Dans le plan complexe $z$, ceci correspond à un disque de rayon 1 centré en $(-1, 0)$. C'est la région de stabilité de la méthode d'Euler explicite.
+Pour que la méthode soit stable lorsque l'EDO est stable (c'est-à-dire pour tout $z$ tel que Re($z/h$) $\le 0$, soit Re($z$) $\le 0$), la région de stabilité numérique (le disque) doit contenir le demi-plan gauche (Re($z$) $\le 0$). Ce n'est pas le cas.
+La méthode d'Euler explicite est donc *conditionnellement stable*. Pour une valeur de $\lambda$ avec Re($\lambda$) $< 0$, la stabilité numérique n'est garantie que si $h$ est suffisamment petit pour que $h\lambda$ tombe dans le disque de stabilité. Si $\lambda$ est réel et négatif ($\lambda < 0$), alors $z = h\lambda < 0$. La condition $|1+z| \le 1$ pour $z < 0$ devient $|1+h\lambda| \le 1$. Si $1+h\lambda \ge 0$, $1+h\lambda \le 1 \implies h\lambda \le 0$, toujours vrai pour $\lambda < 0, h>0$. Si $1+h\lambda < 0$, $-(1+h\lambda) \le 1 \implies -1-h\lambda \le 1 \implies -2 \le h\lambda$. Donc, $-2 \le h\lambda \le 0$. Pour $\lambda < 0$, ceci implique $h \le -2/\lambda = 2/|\lambda|$. Le pas de temps $h$ est restreint.
 
-\subsection{Stability Analysis of Forward Euler}
-Applying Forward Euler $y_{k+1} = y_k + h f(t_k, y_k)$ to the test equation $y' = \lambda y$ gives:
-\[
-y_{k+1} = y_k + h (\lambda y_k) = (1 + h \lambda) y_k
-\]
-Iterating this gives $y_k = (1 + h \lambda)^k y_0$.
-The term $G(h\lambda) = 1 + h\lambda$ is called the \textbf{amplification factor}. For the numerical solution $y_k$ to remain bounded or decay (mimicking stable ODEs where $\text{Re}(\lambda) \le 0$), we require the magnitude of the amplification factor to be less than or equal to one:
-\[
-|G(h\lambda)| = |1 + h\lambda| \le 1
-\]
-Let $\bar{h} = h\lambda$. We need $|1 + \bar{h}| \le 1$. Let $\bar{h} = a + ib$. Then $|1 + a + ib| \le 1$, which means $\sqrt{(1+a)^2 + b^2} \le 1$, or $(1+a)^2 + b^2 \le 1$.
-This inequality describes the interior and boundary of a disk in the complex $\bar{h}$-plane with radius 1 centered at $(-1, 0)$.
-
+Voici un programme Python pour illustrer la stabilité/instabilité de la méthode d'Euler explicite :
 \begin{verbatim}
-#save_to: forward_euler_stability_region.png
+#save_to: euler_stab_lambda_neg5.png
 import matplotlib.pyplot as plt
-import matplotlib.patches as patches
 import numpy as np
-
-fig, ax = plt.subplots()
-
-# Region of absolute stability |1 + h*lambda| <= 1
-# This is a circle centered at (-1, 0) with radius 1
-stability_region = patches.Circle((-1, 0), radius=1, fill=True, color='lightgreen', alpha=0.7, label='Stable Region $|1+\overline{h}| \leq 1$')
-ax.add_patch(stability_region)
-
-# Indicate the left half-plane (where ODE is stable)
-ax.axvspan(-4, 0, alpha=0.1, color='gray', label='ODE Stable ($\mathrm{Re}(\overline{h}) \leq 0$)')
-
-# Axes
-ax.axhline(0, color='black', linewidth=0.5)
-ax.axvline(0, color='black', linewidth=0.5)
-ax.set_xlabel('Re($\overline{h}$) = Re($h \lambda$)')
-ax.set_ylabel('Im($\overline{h}$) = Im($h \lambda$)')
-ax.set_title('Stability Region of Forward Euler Method')
-
-# Set limits and aspect ratio
-ax.set_xlim(-3, 1)
-ax.set_ylim(-2, 2)
-ax.set_aspect('equal', adjustable='box')
-ax.grid(True)
-ax.legend()
-
-plt.savefig('forward_euler_stability_region.png')
-\end{verbatim}
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[max width=0.7\textwidth, keepaspectratio]{forward_euler_stability_region.png}
-    \caption{Stability region (green disk) for the Forward Euler method in the complex $\bar{h} = h\lambda$ plane. The method is stable only if $\bar{h}$ lies within this disk. The grey shaded area is the left half-plane where the test ODE $y'=\lambda y$ is mathematically stable.}
-    \label{fig:forward_euler_stability}
-\end{figure}
-
-The stability region for Forward Euler (Figure \ref{fig:forward_euler_stability}) only covers a part of the left half-plane where the ODE is stable. This means that even if $\text{Re}(\lambda) < 0$ (stable ODE), the Forward Euler method might be unstable if $h$ is too large, causing $\bar{h}=h\lambda$ to fall outside the green disk.
-Therefore, Forward Euler is called \textbf{conditionally stable}.
-
-For $\lambda$ real and negative ($\lambda < 0$), the stability condition $|1+h\lambda| \le 1$ becomes $-1 \le 1+h\lambda \le 1$, which simplifies to $-2 \le h\lambda \le 0$. Since $h>0$ and $\lambda<0$, the right inequality $h\lambda \le 0$ is always satisfied. The left inequality $-2 \le h\lambda$ implies $h \le -2/\lambda$. There is an upper bound on the step size $h$ for stability.
-The more negative $\lambda$ is (faster decay in the true solution), the smaller $h$ must be.
-\begin{itemize}
-    \item If $\lambda = -10$, need $h \le -2/(-10) = 0.2$.
-    \item If $\lambda = -200$, need $h \le -2/(-200) = 0.01$.
-\end{itemize}
-
-\begin{example}[Instability of Forward Euler]
-Let's use $h=0.1$ and examine the behavior for different negative $\lambda$. The stability limit is $h \le -2/\lambda$, or $\lambda \ge -2/h = -2/0.1 = -20$.
-
-\begin{lstlisting}[language=Python, breaklines=true, caption={Python code (\texttt{e\_stab.py}) to demonstrate stability/instability of Forward Euler.}, label=lst:e_stab_py]
-#!/usr/bin/python3
 from math import exp
-import numpy as np # Added for linspace if used for plotting later
-import matplotlib.pyplot as plt # Added for plotting
 
 # Initial variables and constants
 y=1.0
 t=0.0
 h=0.1
-# Choose the constant in the ODE, dy/dt=lam*y. We need -2<=h*lam<=0 for stability.
-# lam=-5   # h*lam = -0.5 (Stable)
-# lam=-12.5 # h*lam = -1.25 (Stable, oscillatory)
-lam=-21  # h*lam = -2.1 (Unstable)
 
-t_end = 1.0 # Integrate up to t=1
-times = [t]
-y_numerical = [y]
-y_exact_vals = [exp(lam*t)]
+# Choose the constant in the ODE, dy/dt=lambda*y.
+# We need -2 <= h*lambda <= 0 for stability for real lambda.
+lam=-5.0 # h*lambda = -0.5 (stable)
 
-print(f"Lambda = {lam}, h = {h}, h*lambda = {h*lam}")
+# Apply Forward Euler step until t>=1
+t_end = 1.0
+t_values = [t]
+y_values = [y]
+y_exact_values = [exp(lam*t)]
 
-# Apply forward Euler step until t=t_end:
-while t < t_end: # Use < to avoid potential floating point issue
-
+while t < t_end:
     # Analytical solution
-    yexact=exp(lam*(t+h)) # Exact solution at next step for comparison
-    # print(t,y,yexact,y-yexact) # Original print
+    yexact=exp(lam*t)
 
     # Euler step
-    y=y+h*(lam*y)
+    y = y+h*(lam*y)
 
     # Update time
     t=t+h
+    t_values.append(t)
+    y_values.append(y)
+    y_exact_values.append(exp(lam*t))
 
-    times.append(t)
-    y_numerical.append(y)
-    y_exact_vals.append(exp(lam*t))
+# Plot the solutions
+plt.figure()
+plt.plot(t_values, y_exact_values, label='Exact')
+plt.plot(t_values, y_values, 'o-', label='Numerical')
+plt.legend(loc="upper right")
+plt.xlabel("t")
+plt.ylabel("y")
+plt.savefig("euler_stab_lambda_neg5.png")
+\end{verbatim}
+\begin{lstlisting}[language=Python, caption=Code Python pour Euler Explicite stable, label=code:euler_stab_neg5]
+import matplotlib.pyplot as plt
+import numpy as np
+from math import exp
 
-# Plotting code can be added here or run separately
-# print("Final time:", t, " Final y:", y)
+# Initial variables and constants
+y=1.0
+t=0.0
+h=0.1
+
+# Choose the constant in the ODE, dy/dt=lambda*y.
+# We need -2 <= h*lambda <= 0 for stability for real lambda.
+lam=-5.0 # h*lambda = -0.5 (stable)
+
+# Apply Forward Euler step until t>=1
+t_end = 1.0
+t_values = [t]
+y_values = [y]
+y_exact_values = [exp(lam*t)]
+
+while t < t_end:
+    # Analytical solution
+    yexact=exp(lam*t)
+
+    # Euler step
+    y = y+h*(lam*y)
+
+    # Update time
+    t=t+h
+    t_values.append(t)
+    y_values.append(y)
+    y_exact_values.append(exp(lam*t))
+
+# Plot the solutions
+plt.figure()
+plt.plot(t_values, y_exact_values, label='Exact')
+plt.plot(t_values, y_values, 'o-', label='Numerical')
+plt.legend(loc="upper right")
+plt.xlabel("t")
+plt.ylabel("y")
+plt.savefig("euler_stab_lambda_neg5.png")
 \end{lstlisting}
 
-Running this code (or a plotting version) for different $\lambda$ values with $h=0.1$:
-
-\textit{Case 1: $\lambda = -5$ ($\bar{h} = -0.5$, inside stability region)}
-\begin{verbatim}
-#save_to: euler_stab_lam_neg5.png
-import matplotlib.pyplot as plt
-import numpy as np
-from math import exp
-
-# Parameters
-y=1.0
-t=0.0
-h=0.1
-lam=-5.0 # Stable case
-t_end=1.0
-
-# Store results
-times = [t]
-y_numerical = [y]
-
-# Apply Euler step until t=t_end:
-while t < t_end:
-    y=y+h*(lam*y)
-    t=t+h
-    times.append(t)
-    y_numerical.append(y)
-
-# Exact solution for plotting
-t_exact = np.linspace(0, t_end, 200)
-y_exact = np.exp(lam*t_exact)
-
-# Plotting
-plt.figure()
-plt.plot(t_exact, y_exact, label='Exact $e^{-5t}$')
-plt.plot(times, y_numerical, 'o-', label=f'Numerical (h={h}, $\overline{{h}}$={h*lam:.2f})')
-plt.xlabel('t')
-plt.ylabel('y')
-plt.title(f'Forward Euler: Stable Case ($\lambda={lam}$)')
-plt.legend()
-plt.grid(True)
-plt.savefig('euler_stab_lam_neg5.png')
-\end{verbatim}
-\begin{figure}[h] \centering \includegraphics[max width=0.6\textwidth, keepaspectratio]{euler_stab_lam_neg5.png} \caption{Forward Euler for $\lambda=-5$, $h=0.1$ ($\bar{h}=-0.5$). Stable numerical solution closely follows the decaying exact solution.} \label{fig:euler_stab_lam_neg5} \end{figure}
-
-\textit{Case 2: $\lambda = -12.5$ ($\bar{h} = -1.25$, inside stability region)}
-\begin{verbatim}
-#save_to: euler_stab_lam_neg125.png
-import matplotlib.pyplot as plt
-import numpy as np
-from math import exp
-
-# Parameters
-y=1.0
-t=0.0
-h=0.1
-lam=-12.5 # Stable case, oscillatory numerics
-t_end=1.0
-
-# Store results
-times = [t]
-y_numerical = [y]
-
-# Apply Euler step until t=t_end:
-while t < t_end:
-    y=y+h*(lam*y)
-    t=t+h
-    times.append(t)
-    y_numerical.append(y)
-
-# Exact solution for plotting
-t_exact = np.linspace(0, t_end, 200)
-y_exact = np.exp(lam*t_exact)
-
-# Plotting
-plt.figure()
-plt.plot(t_exact, y_exact, label='Exact $e^{-12.5t}$')
-plt.plot(times, y_numerical, 'o-', label=f'Numerical (h={h}, $\overline{{h}}$={h*lam:.2f})')
-plt.xlabel('t')
-plt.ylabel('y')
-plt.title(f'Forward Euler: Stable Oscillatory Case ($\lambda={lam}$)')
-plt.legend()
-plt.grid(True)
-plt.savefig('euler_stab_lam_neg125.png')
-\end{verbatim}
-\begin{figure}[h] \centering \includegraphics[max width=0.6\textwidth, keepaspectratio]{euler_stab_lam_neg125.png} \caption{Forward Euler for $\lambda=-12.5$, $h=0.1$ ($\bar{h}=-1.25$). Stable, but the numerical solution oscillates because the amplification factor $1+\bar{h} = -0.25$ is negative.} \label{fig:euler_stab_lam_neg125} \end{figure}
-
-\textit{Case 3: $\lambda = -21$ ($\bar{h} = -2.1$, outside stability region)}
-\begin{verbatim}
-#save_to: euler_stab_lam_neg21.png
-import matplotlib.pyplot as plt
-import numpy as np
-from math import exp
-
-# Parameters
-y=1.0
-t=0.0
-h=0.1
-lam=-21.0 # Unstable case
-t_end=1.0
-
-# Store results
-times = [t]
-y_numerical = [y]
-
-# Apply Euler step until t=t_end:
-while t < t_end:
-    y=y+h*(lam*y)
-    t=t+h
-    times.append(t)
-    y_numerical.append(y)
-
-# Exact solution for plotting
-t_exact = np.linspace(0, t_end, 200)
-y_exact = np.exp(lam*t_exact)
-
-# Plotting
-plt.figure()
-plt.plot(t_exact, y_exact, label='Exact $e^{-21t}$')
-plt.plot(times, y_numerical, 'o-', label=f'Numerical (h={h}, $\overline{{h}}$={h*lam:.2f})')
-plt.xlabel('t')
-plt.ylabel('y')
-plt.title(f'Forward Euler: Unstable Case ($\lambda={lam}$)')
-plt.legend()
-plt.grid(True)
-# Adjust y limits because solution grows
-plt.ylim(min(min(y_numerical), min(y_exact))-0.5, max(max(y_numerical), max(y_exact))+0.5)
-plt.savefig('euler_stab_lam_neg21.png')
-\end{verbatim}
-\begin{figure}[h] \centering \includegraphics[max width=0.6\textwidth, keepaspectratio]{euler_stab_lam_neg21.png} \caption{Forward Euler for $\lambda=-21$, $h=0.1$ ($\bar{h}=-2.1$). Unstable numerical solution grows exponentially with oscillations, while the exact solution decays rapidly. This occurs because $\bar{h}$ is outside the stability region.} \label{fig:euler_stab_lam_neg21} \end{figure}
-
-These examples clearly show that Forward Euler can produce unstable, growing numerical solutions even when the true solution decays, if the step size $h$ is too large relative to $|\lambda|$.
-\end{example}
-
-\subsection{Stability Analysis of Backward Euler}
-Applying Backward Euler $y_{k+1} = y_k + h f(t_{k+1}, y_{k+1})$ to $y' = \lambda y$ gives:
-\[
-y_{k+1} = y_k + h \lambda y_{k+1}
-\]
-Solving for $y_{k+1}$:
-\[
-y_{k+1} (1 - h \lambda) = y_k \implies y_{k+1} = \frac{1}{1 - h \lambda} y_k
-\]
-The amplification factor is $G(h\lambda) = \frac{1}{1 - h \lambda}$. For stability, we need $|G(h\lambda)| \le 1$, which means:
-\[
-\left| \frac{1}{1 - h \lambda} \right| \le 1 \implies |1 - h \lambda| \ge 1
-\]
-Let $\bar{h} = h\lambda = a + ib$. We need $|1 - (a+ib)| \ge 1$, or $|(1-a) - ib| \ge 1$. This means $\sqrt{(1-a)^2 + (-b)^2} \ge 1$, or $(1-a)^2 + b^2 \ge 1$.
-This inequality describes the exterior and boundary of a disk in the complex $\bar{h}$-plane with radius 1 centered at $(1, 0)$.
-
-\begin{verbatim}
-#save_to: backward_euler_stability_region.png
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-import numpy as np
-
-fig, ax = plt.subplots()
-
-# Region of instability |1 - h*lambda| < 1 (disk centered at (1,0) radius 1)
-# We shade the stable region which is the *exterior* of this disk
-
-# Define the axes limits first
-ax_lim = 4
-ax.set_xlim(-ax_lim, ax_lim)
-ax.set_ylim(-ax_lim, ax_lim)
-
-# Create a large rectangle covering the whole plot area
-rect = patches.Rectangle((-ax_lim, -ax_lim), 2*ax_lim, 2*ax_lim, linewidth=1, edgecolor='none', facecolor='lightgreen', alpha=0.7, label='Stable Region $|1-\overline{h}| \geq 1$')
-ax.add_patch(rect)
-
-# Create the unstable disk (hole in the stable region)
-unstable_region = patches.Circle((1, 0), radius=1, fill=True, color='white', alpha=1.0) # Use white to punch a hole
-ax.add_patch(unstable_region)
-# Add outline to the unstable disk for clarity
-unstable_outline = patches.Circle((1, 0), radius=1, fill=False, color='red', linewidth=1, linestyle='--')
-ax.add_patch(unstable_outline)
-
-
-# Indicate the left half-plane (where ODE is stable)
-ax.axvspan(-ax_lim, 0, alpha=0.1, color='gray', label='ODE Stable ($\mathrm{Re}(\overline{h}) \leq 0$)')
-
-# Axes
-ax.axhline(0, color='black', linewidth=0.5)
-ax.axvline(0, color='black', linewidth=0.5)
-ax.set_xlabel('Re($\overline{h}$) = Re($h \lambda$)')
-ax.set_ylabel('Im($\overline{h}$) = Im($h \lambda$)')
-ax.set_title('Stability Region of Backward Euler Method')
-
-# Set limits and aspect ratio
-ax.set_aspect('equal', adjustable='box')
-ax.grid(True)
-ax.legend()
-
-plt.savefig('backward_euler_stability_region.png')
-\end{verbatim}
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[max width=0.7\textwidth, keepaspectratio]{backward_euler_stability_region.png}
-    \caption{Stability region (green exterior) for the Backward Euler method in the complex $\bar{h} = h\lambda$ plane. The method is stable if $\bar{h}$ lies outside the open disk centered at $(1, 0)$. This region includes the entire left half-plane (grey) where the test ODE is mathematically stable.}
-    \label{fig:backward_euler_stability}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{euler_stab_lambda_neg5.png}
+\caption{Solution pour Euler Explicite avec $\lambda=-5$ ($h=0.1$, $h\lambda=-0.5$). Stable.}
+\label{fig:euler_stab_neg5}
 \end{figure}
 
-The stability region for Backward Euler (Figure \ref{fig:backward_euler_stability}) contains the entire left half-plane ($\text{Re}(\bar{h}) \le 0$). This means that if the ODE $y'=\lambda y$ is stable ($\text{Re}(\lambda) \le 0$), the Backward Euler method will produce a stable numerical solution for \textit{any} step size $h > 0$.
-Therefore, Backward Euler is called \textbf{unconditionally stable} (more precisely, A-stable, meaning its stability region contains the entire left half-plane).
+\begin{verbatim}
+#save_to: euler_stab_lambda_neg12_5.png
+import matplotlib.pyplot as plt
+import numpy as np
+from math import exp
 
-\subsection{Comparison and Trade-offs}
-\begin{itemize}
-    \item \textbf{Explicit Methods (e.g., Forward Euler):}
-        \begin{itemize}
-            \item Computationally cheap per step (no equation solving).
-            \item Often conditionally stable: require restrictions on $h$ for stability, especially when $|\lambda|$ is large (stiff problems).
-        \end{itemize}
-    \item \textbf{Implicit Methods (e.g., Backward Euler, Trapezoid):}
-        \begin{itemize}
-            \item Computationally expensive per step (require solving linear or non-linear equations).
-            \item Often have much larger stability regions (sometimes unconditionally stable).
-            \item Can allow significantly larger step sizes $h$ compared to explicit methods for stiff problems, potentially leading to overall higher efficiency despite the cost per step.
-        \end{itemize}
-\end{itemize}
-The choice between explicit and implicit methods depends on the specific problem, particularly its stiffness (presence of widely varying time scales or large negative $\text{Re}(\lambda)$ values) and the desired accuracy.
+# Initial variables and constants
+y=1.0
+t=0.0
+h=0.1
+
+# Choose the constant in the ODE, dy/dt=lambda*y.
+# We need -2 <= h*lambda <= 0 for stability for real lambda.
+lam=-12.5 # h*lambda = -1.25 (stable, but oscillatory)
+
+# Apply Forward Euler step until t>=1
+t_end = 1.0
+t_values = [t]
+y_values = [y]
+y_exact_values = [exp(lam*t)]
+
+while t < t_end:
+    # Analytical solution
+    yexact=exp(lam*t)
+
+    # Euler step
+    y = y+h*(lam*y)
+
+    # Update time
+    t=t+h
+    t_values.append(t)
+    y_values.append(y)
+    y_exact_values.append(exp(lam*t))
+
+# Plot the solutions
+plt.figure()
+plt.plot(t_values, y_exact_values, label='Exact')
+plt.plot(t_values, y_values, 'o-', label='Numerical')
+plt.legend(loc="upper right")
+plt.xlabel("t")
+plt.ylabel("y")
+plt.savefig("euler_stab_lambda_neg12_5.png")
+\end{verbatim}
+\begin{lstlisting}[language=Python, caption=Code Python pour Euler Explicite oscillatoire stable, label=code:euler_stab_neg12_5]
+import matplotlib.pyplot as plt
+import numpy as np
+from math import exp
+
+# Initial variables and constants
+y=1.0
+t=0.0
+h=0.1
+
+# Choose the constant in the ODE, dy/dt=lambda*y.
+# We need -2 <= h*lambda <= 0 for stability for real lambda.
+lam=-12.5 # h*lambda = -1.25 (stable, but oscillatory)
+
+# Apply Forward Euler step until t>=1
+t_end = 1.0
+t_values = [t]
+y_values = [y]
+y_exact_values = [exp(lam*t)]
+
+while t < t_end:
+    # Analytical solution
+    yexact=exp(lam*t)
+
+    # Euler step
+    y = y+h*(lam*y)
+
+    # Update time
+    t=t+h
+    t_values.append(t)
+    y_values.append(y)
+    y_exact_values.append(exp(lam*t))
+
+# Plot the solutions
+plt.figure()
+plt.plot(t_values, y_exact_values, label='Exact')
+plt.plot(t_values, y_values, 'o-', label='Numerical')
+plt.legend(loc="upper right")
+plt.xlabel("t")
+plt.ylabel("y")
+plt.savefig("euler_stab_lambda_neg12_5.png")
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{euler_stab_lambda_neg12_5.png}
+\caption{Solution pour Euler Explicite avec $\lambda=-12.5$ ($h=0.1$, $h\lambda=-1.25$). Stable mais avec oscillations.}
+\label{fig:euler_stab_neg12_5}
+\end{figure}
+
+\begin{verbatim}
+#save_to: euler_stab_lambda_neg21.png
+import matplotlib.pyplot as plt
+import numpy as np
+from math import exp
+
+# Initial variables and constants
+y=1.0
+t=0.0
+h=0.1
+
+# Choose the constant in the ODE, dy/dt=lambda*y.
+# We need -2 <= h*lambda <= 0 for stability for real lambda.
+lam=-21.0 # h*lambda = -2.1 (unstable)
+
+# Apply Forward Euler step until t>=1
+t_end = 1.0
+t_values = [t]
+y_values = [y]
+y_exact_values = [exp(lam*t)]
+
+while t < t_end:
+    # Analytical solution
+    yexact=exp(lam*t)
+
+    # Euler step
+    y = y+h*(lam*y)
+
+    # Update time
+    t=t+h
+    t_values.append(t)
+    y_values.append(y)
+    y_exact_values.append(exp(lam*t))
+
+# Plot the solutions
+plt.figure()
+plt.plot(t_values, y_exact_values, label='Exact')
+plt.plot(t_values, y_values, 'o-', label='Numerical')
+plt.legend(loc="upper right")
+plt.xlabel("t")
+plt.ylabel("y")
+plt.savefig("euler_stab_lambda_neg21.png")
+\end{verbatim}
+\begin{lstlisting}[language=Python, caption=Code Python pour Euler Explicite instable, label=code:euler_stab_neg21]
+import matplotlib.pyplot as plt
+import numpy as np
+from math import exp
+
+# Initial variables and constants
+y=1.0
+t=0.0
+h=0.1
+
+# Choose the constant in the ODE, dy/dt=lambda*y.
+# We need -2 <= h*lambda <= 0 for stability for real lambda.
+lam=-21.0 # h*lambda = -2.1 (unstable)
+
+# Apply Forward Euler step until t>=1
+t_end = 1.0
+t_values = [t]
+y_values = [y]
+y_exact_values = [exp(lam*t)]
+
+while t < t_end:
+    # Analytical solution
+    yexact=exp(lam*t)
+
+    # Euler step
+    y = y+h*(lam*y)
+
+    # Update time
+    t=t+h
+    t_values.append(t)
+    y_values.append(y)
+    y_exact_values.append(exp(lam*t))
+
+# Plot the solutions
+plt.figure()
+plt.plot(t_values, y_exact_values, label='Exact')
+plt.plot(t_values, y_values, 'o-', label='Numerical')
+plt.legend(loc="upper right")
+plt.xlabel("t")
+plt.ylabel("y")
+plt.savefig("euler_stab_lambda_neg21.png")
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{euler_stab_lambda_neg21.png}
+\caption{Solution pour Euler Explicite avec $\lambda=-21$ ($h=0.1$, $h\lambda=-2.1$). Instable.}
+\label{fig:euler_stab_neg21}
+\end{figure}
+
+Ces exemples montrent que lorsque $h\lambda$ est dans la région de stabilité (par exemple, $-0.5$ et $-1.25$), la solution numérique reste stable et converge vers la solution exacte (décroissance vers 0). Lorsque $h\lambda$ est en dehors de la région de stabilité (par exemple, $-2.1$), la solution numérique devient instable et diverge. L'oscillation observée pour $h\lambda = -1.25$ est due au fait que le facteur d'amplification $1+h\lambda$ est négatif, ce qui fait alterner le signe de $y_k$ à chaque pas, tout en décroissant en magnitude.
+
+\subsubsection*{Stabilité de la Méthode d'Euler Implicite}
+
+Appliquons la méthode d'Euler implicite au problème test $y' = \lambda y$:
+$y_{k+1} = y_k + h f(t_{k+1}, y_{k+1}) = y_k + h (\lambda y_{k+1})$
+$y_{k+1} (1 - h\lambda) = y_k$
+$y_{k+1} = \frac{1}{1 - h\lambda} y_k$
+Le facteur d'amplification numérique est $G = \frac{1}{1 - h\lambda}$. Pour la stabilité, il faut $|G| \le 1$, c'est-à-dire $|\frac{1}{1 - h\lambda}| \le 1 \iff |1 - h\lambda| \ge 1$.
+Soit $z = h\lambda$. La condition est $|1 - z| \ge 1$.
+Dans le plan complexe $z$, $|1 - z|$ représente la distance entre 1 et $z$. La condition $|1 - z| \ge 1$ signifie que $z$ doit être à l'extérieur ou sur le cercle de rayon 1 centré en $(1, 0)$. C'est la région de stabilité de la méthode d'Euler implicite.
+Cette région de stabilité ($|1 - z| \ge 1$) contient tout le demi-plan gauche (Re($z$) $\le 0$).
+La méthode d'Euler implicite est donc *inconditionnellement stable* pour les EDO stables (Re($\lambda$) $\le 0$). Cela signifie que pour toute EDO stable, nous n'avons pas de restriction sur le pas de temps $h$ pour garantir la stabilité numérique.
+
+\subsubsection*{Explicite vs Implicite pour la Stabilité}
+
+En général, les méthodes implicites ont souvent des régions de stabilité plus grandes (voire incluant tout le demi-plan gauche) que les méthodes explicites. Cela permet d'utiliser de plus grands pas de temps $h$ pour les problèmes stables, notamment les problèmes "raides" (stiff) où $|\lambda|$ est grand pour certaines composantes ou modes. Cependant, les méthodes implicites sont plus coûteuses par pas car elles nécessitent la résolution d'un système d'équations (linéaire ou non) pour $y_{k+1}$. Le choix de la méthode dépend souvent d'un compromis entre le coût par pas et la taille du pas permis par la stabilité.
+
+\subsection*{Conclusion}
+
+Ce chapitre a introduit les concepts fondamentaux des problèmes de valeurs initiales d'EDO et a présenté des méthodes numériques de base comme les méthodes d'Euler explicite et implicite et la méthode du trapèze. Nous avons défini et analysé la convergence, montrant comment l'erreur globale est liée à l'erreur de troncature locale et à la condition de Lipschitz. Enfin, nous avons examiné la stabilité numérique, en utilisant le problème test $y'=\lambda y$ pour comprendre les régions de stabilité et la différence cruciale entre les méthodes conditionnellement stables (comme Euler explicite) et inconditionnellement stables (comme Euler implicite) en fonction du pas de temps choisi.
 
 \end{document}
 ```

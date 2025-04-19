@@ -1,0 +1,328 @@
+```latex
+\begin{document}
+\sloppy
+
+\section*{Liste d’exercices pour le contrôle numéro 2}
+
+Le contrôle aura lieu soit la semaine du 22 avril (à vérifiez avec votre chargé de TD).
+La semaine du contrôle en fin de TD l’enseignant vous demandera des exercices ou des
+questions choisis dans la liste ci-dessous (on s’autorisera aussi de légères variantes).
+Vous disposerez alors de 30 minutes pour rédiger la solution de ces exercices.
+
+\section{Exercice 1}
+Calculer le déterminant
+\[
+\begin{vmatrix}
+-1 & 1 & 2 & 0 \\
+0 & 3 & 2 & 1 \\
+0 & 4 & 1 & 2 \\
+3 & 1 & 5 & 7
+\end{vmatrix}
+\]
+
+\begin{solution}
+Soit $D$ le déterminant à calculer. On peut utiliser la méthode de développement par rapport à une colonne ou une ligne, ou utiliser des opérations élémentaires sur les lignes ou les colonnes pour simplifier le calcul.
+Développons par rapport à la première colonne :
+\begin{align*} D &= (-1) \begin{vmatrix} 3 & 2 & 1 \\ 4 & 1 & 2 \\ 1 & 5 & 7 \end{vmatrix} - 0 \cdot \dots + 0 \cdot \dots - 3 \begin{vmatrix} 1 & 2 & 0 \\ 3 & 2 & 1 \\ 4 & 1 & 2 \end{vmatrix} \\ &= -1 \left( 3(1 \cdot 7 - 2 \cdot 5) - 2(4 \cdot 7 - 2 \cdot 1) + 1(4 \cdot 5 - 1 \cdot 1) \right) \\ & \quad - 3 \left( 1(2 \cdot 2 - 1 \cdot 1) - 2(3 \cdot 2 - 1 \cdot 4) + 0(\dots) \right) \\ &= -1 \left( 3(7 - 10) - 2(28 - 2) + 1(20 - 1) \right) - 3 \left( 1(4 - 1) - 2(6 - 4) \right) \\ &= -1 \left( 3(-3) - 2(26) + 1(19) \right) - 3 \left( 3 - 4 \right) \\ &= -1 \left( -9 - 52 + 19 \right) - 3 \left( -1 \right) \\ &= -1 (-42) - 3 (-1) \\ &= 42 + 3 \\ &= 45 \end{align*}
+Une autre méthode est d'ajouter 3 fois la ligne 1 à la ligne 4 ($L_4 \leftarrow L_4 + 3L_1$):
+\[
+D = \begin{vmatrix}
+-1 & 1 & 2 & 0 \\
+0 & 3 & 2 & 1 \\
+0 & 4 & 1 & 2 \\
+0 & 4 & 11 & 7
+\end{vmatrix}
+\]
+On développe ensuite par rapport à la première colonne :
+\[
+D = -1 \begin{vmatrix}
+3 & 2 & 1 \\
+4 & 1 & 2 \\
+4 & 11 & 7
+\end{vmatrix}
+\]
+On effectue des opérations sur les lignes pour simplifier: $L_2 \leftarrow L_2 - \frac{4}{3} L_1$, $L_3 \leftarrow L_3 - \frac{4}{3} L_1$.
+\[
+D = -1 \begin{vmatrix}
+3 & 2 & 1 \\
+0 & 1 - \frac{8}{3} & 2 - \frac{4}{3} \\
+0 & 11 - \frac{8}{3} & 7 - \frac{4}{3}
+\end{vmatrix} = -1 \begin{vmatrix}
+3 & 2 & 1 \\
+0 & -\frac{5}{3} & \frac{2}{3} \\
+0 & \frac{25}{3} & \frac{17}{3}
+\end{vmatrix}
+\]
+Développons par rapport à la première colonne:
+\[
+D = -1 \times 3 \times \begin{vmatrix}
+-\frac{5}{3} & \frac{2}{3} \\
+\frac{25}{3} & \frac{17}{3}
+\end{vmatrix} = -3 \left( (-\frac{5}{3})(\frac{17}{3}) - (\frac{2}{3})(\frac{25}{3}) \right)
+\]
+\[
+D = -3 \left( -\frac{85}{9} - \frac{50}{9} \right) = -3 \left( -\frac{135}{9} \right) = -3 (-15) = 45
+\]
+Le déterminant est 45.
+\end{solution}
+
+\section{Exercice 2}
+La matrice suivante est-elle diagonalisable dans $\mathbb{R}$ ? Est-elle diagonalisable dans $\mathbb{C}$ ?
+\[ A = \begin{pmatrix} 2 & 0 & 0 \\ 0 & 0 & -1 \\ 0 & 1 & 0 \end{pmatrix} \]
+
+\begin{solution}
+Pour déterminer si $A$ est diagonalisable, nous devons calculer son polynôme caractéristique $P_A(\lambda) = \det(A - \lambda I)$.
+\begin{align*} P_A(\lambda) &= \det \begin{pmatrix} 2-\lambda & 0 & 0 \\ 0 & -\lambda & -1 \\ 0 & 1 & -\lambda \end{pmatrix} \\ &= (2-\lambda) \det \begin{pmatrix} -\lambda & -1 \\ 1 & -\lambda \end{pmatrix} \\ &= (2-\lambda) ((-\lambda)(-\lambda) - (-1)(1)) \\ &= (2-\lambda) (\lambda^2 + 1) \end{align*}
+Les valeurs propres sont les racines du polynôme caractéristique.
+Dans $\mathbb{R}$: $P_A(\lambda) = 0 \implies (2-\lambda)(\lambda^2+1) = 0$. La seule racine réelle est $\lambda = 2$, car $\lambda^2+1 = 0$ n'a pas de solution réelle. Puisque le polynôme caractéristique n'est pas scindé sur $\mathbb{R}$, la matrice $A$ n'est pas diagonalisable dans $\mathbb{R}$.
+
+Dans $\mathbb{C}$: $P_A(\lambda) = 0 \implies (2-\lambda)(\lambda^2+1) = 0$. Les racines sont $\lambda_1 = 2$, $\lambda_2 = i$, $\lambda_3 = -i$.
+Le polynôme caractéristique est scindé sur $\mathbb{C}$ et a trois racines distinctes. Une matrice de taille $n$ qui a $n$ valeurs propres distinctes est toujours diagonalisable. Ici, $n=3$, et nous avons 3 valeurs propres distinctes ($2, i, -i$).
+Donc, la matrice $A$ est diagonalisable dans $\mathbb{C}$.
+\end{solution}
+
+\section{Exercice 3}
+Soit $n \geq 1$. Est-ce que les matrices suivantes de $M_n(\mathbb{R})$ sont semblables (autrement dit, existe-il une matrice $P \in GL_n(\mathbb{R})$ telle que $A = PBP^{-1}$) ?
+\[ A = \begin{pmatrix} 1 & 1 & \dots & 1 \\ 1 & 1 & \dots & 1 \\ \vdots & \vdots & \ddots & \vdots \\ 1 & 1 & \dots & 1 \end{pmatrix} \quad \text{et} \quad B = \begin{pmatrix} n & 0 & \dots & 0 \\ 0 & 0 & \dots & 0 \\ \vdots & \vdots & \ddots & \vdots \\ 0 & 0 & \dots & 0 \end{pmatrix} \]
+
+\begin{solution}
+Deux matrices sont semblables si et seulement si elles représentent le même endomorphisme dans des bases différentes. Les matrices semblables partagent plusieurs invariants, notamment le rang, le déterminant, la trace et le polynôme caractéristique (donc les valeurs propres avec les mêmes multiplicités algébriques et géométriques).
+
+Calculons le rang des matrices A et B.
+La matrice $A$ a toutes ses colonnes égales (et non nulles car $n \ge 1$). Le rang d'une matrice est la dimension de l'espace engendré par ses colonnes. Ici, toutes les colonnes sont le vecteur $(1, 1, \dots, 1)^T$, donc l'espace engendré est de dimension 1. Ainsi, $\text{rang}(A) = 1$ (si $n \ge 1$).
+
+La matrice $B$ est une matrice diagonale. Son rang est le nombre d'éléments non nuls sur la diagonale.
+Si $n=0$, la question n'a pas de sens. L'énoncé dit $n \ge 1$.
+Si $n \ge 1$, la matrice $B$ a un seul élément non nul sur la diagonale, qui est $n$. Donc, $\text{rang}(B) = 1$.
+
+Calculons la trace des matrices A et B.
+$\text{Tr}(A) = \sum_{i=1}^n a_{ii} = \sum_{i=1}^n 1 = n$.
+$\text{Tr}(B) = \sum_{i=1}^n b_{ii} = n + 0 + \dots + 0 = n$.
+
+Calculons les polynômes caractéristiques.
+Pour A: $P_A(\lambda) = \det(A - \lambda I)$. $A$ est une matrice de rang 1. Donc 0 est une valeur propre et la dimension du sous-espace propre associé $E_0(A) = \ker(A)$ est $n - \text{rang}(A) = n-1$. Donc, 0 est une valeur propre de multiplicité géométrique $n-1$. La multiplicité algébrique est donc au moins $n-1$.
+La somme des valeurs propres est la trace, qui est $n$. Soit $\lambda_1, \dots, \lambda_n$ les valeurs propres (comptées avec multiplicité algébrique). On a $\lambda_1 = \dots = \lambda_{n-1} = 0$. La dernière valeur propre $\lambda_n$ doit satisfaire $\sum \lambda_i = \text{Tr}(A)$, donc $0 + \dots + 0 + \lambda_n = n$. Ainsi $\lambda_n = n$.
+Les valeurs propres de A sont $0$ (avec multiplicité $n-1$) et $n$ (avec multiplicité $1$).
+Le polynôme caractéristique de A est $P_A(\lambda) = (-1)^n \lambda^{n-1} (\lambda - n)$.
+
+Pour B: $B$ est une matrice diagonale. Ses valeurs propres sont les éléments diagonaux. Les valeurs propres de B sont $n$ (avec multiplicité 1) et $0$ (avec multiplicité $n-1$).
+Le polynôme caractéristique de B est $P_B(\lambda) = \det(B - \lambda I) = (n-\lambda)(-\lambda)^{n-1} = (-1)^{n-1} \lambda^{n-1} (n-\lambda) = (-1)^n \lambda^{n-1} (\lambda - n)$.
+
+Les matrices A et B ont le même polynôme caractéristique.
+Pour déterminer si elles sont semblables, il faut vérifier si elles ont la même forme de Jordan. Comme les valeurs propres sont 0 et n, et que la multiplicité algébrique de chaque valeur propre est égale à sa multiplicité géométrique pour A, A est diagonalisable.
+La multiplicité géométrique de la valeur propre 0 pour A est $\dim(\ker(A)) = n - \text{rang}(A) = n-1$. La multiplicité algébrique est $n-1$.
+La multiplicité géométrique de la valeur propre n pour A est $\dim(\ker(A-nI))$.
+\[ A-nI = \begin{pmatrix} 1-n & 1 & \dots & 1 \\ 1 & 1-n & \dots & 1 \\ \vdots & \vdots & \ddots & \vdots \\ 1 & 1 & \dots & 1-n \end{pmatrix} \]
+La somme des lignes est $(1-n) + (n-1) \times 1 = 1-n+n-1 = 0$. Donc le vecteur $(1, 1, \dots, 1)^T$ est dans le noyau de $(A-nI)^T$, ce qui ne prouve rien directement sur le noyau de $A-nI$.
+Considérons le système $(A-nI)X = 0$. $x_1 + \dots + x_n = nx_i$ pour tout $i$. Donc $nx_1 = nx_2 = \dots = nx_n$. Si $n \ne 0$, alors $x_1 = x_2 = \dots = x_n$. Le vecteur $(1,1,\dots,1)^T$ est un vecteur propre associé à $n$. La dimension de l'espace propre $E_n(A)$ est 1. La multiplicité algébrique est 1.
+Comme les multiplicités algébriques et géométriques coïncident pour toutes les valeurs propres, $A$ est diagonalisable.
+La matrice B est déjà diagonale, donc elle est diagonalisable.
+Puisque A et B sont toutes deux diagonalisables et ont les mêmes valeurs propres avec les mêmes multiplicités, elles sont semblables. Il existe une matrice $P \in GL_n(\mathbb{R})$ telle que $A = P D P^{-1}$ et $B = Q D Q^{-1}$ où $D$ est la matrice diagonale avec $n$ et $n-1$ zéros. On peut prendre $D=B$. Donc $A = P B P^{-1}$.
+Oui, les matrices A et B sont semblables.
+\end{solution}
+
+\section{Exercice 4}
+Soit $A$ une matrice de $M_2(\mathbb{R})$ diagonalisable telle que $Sp(A) = \{0, 1\}$. Est-il vrai que $A^2 = A$ ?
+
+\begin{solution}
+Puisque $A$ est diagonalisable et $Sp(A) = \{0, 1\}$, il existe une matrice inversible $P \in GL_2(\mathbb{R})$ telle que $A = PDP^{-1}$, où $D$ est la matrice diagonale des valeurs propres.
+\[ D = \begin{pmatrix} 0 & 0 \\ 0 & 1 \end{pmatrix} \quad \text{ou} \quad D = \begin{pmatrix} 1 & 0 \\ 0 & 0 \end{pmatrix} \]
+Dans les deux cas, calculons $D^2$.
+\[ \begin{pmatrix} 0 & 0 \\ 0 & 1 \end{pmatrix}^2 = \begin{pmatrix} 0^2 & 0 \\ 0 & 1^2 \end{pmatrix} = \begin{pmatrix} 0 & 0 \\ 0 & 1 \end{pmatrix} = D \]
+\[ \begin{pmatrix} 1 & 0 \\ 0 & 0 \end{pmatrix}^2 = \begin{pmatrix} 1^2 & 0 \\ 0 & 0^2 \end{pmatrix} = \begin{pmatrix} 1 & 0 \\ 0 & 0 \end{pmatrix} = D \]
+Donc, dans tous les cas, $D^2 = D$.
+Maintenant, calculons $A^2$:
+\[ A^2 = (PDP^{-1})^2 = (PDP^{-1})(PDP^{-1}) = PD(P^{-1}P)DP^{-1} = PDIDP^{-1} = PDDP^{-1} = PD^2P^{-1} \]
+Puisque $D^2 = D$, nous avons :
+\[ A^2 = PD P^{-1} = A \]
+Donc, il est vrai que $A^2 = A$. Une telle matrice est appelée une matrice de projection (projecteur).
+\end{solution}
+
+\section{Exercice 5}
+Les matrices suivantes sont-elles diagonalisables ?
+\[ A = \begin{pmatrix} 1 & 0 & -1 \\ 0 & 2 & 1 \\ 0 & 0 & 1 \end{pmatrix}, \quad \text{et} \quad B = \begin{pmatrix} 1 & -1 & 0 \\ 0 & 2 & 0 \\ 0 & 0 & 1 \end{pmatrix} \]
+
+\begin{solution}
+Pour la matrice A:
+A est une matrice triangulaire supérieure. Ses valeurs propres sont les éléments diagonaux: $\lambda_1 = 1$ (multiplicité algébrique 2) et $\lambda_2 = 2$ (multiplicité algébrique 1).
+Pour que A soit diagonalisable, la multiplicité géométrique de chaque valeur propre doit être égale à sa multiplicité algébrique.
+Pour $\lambda_2 = 2$, la multiplicité géométrique est $\dim(\ker(A-2I))$, qui est au moins 1. Comme la multiplicité algébrique est 1, la multiplicité géométrique est exactement 1.
+Pour $\lambda_1 = 1$, nous devons calculer la multiplicité géométrique $\dim(\ker(A-I))$.
+\[ A-I = \begin{pmatrix} 1-1 & 0 & -1 \\ 0 & 2-1 & 1 \\ 0 & 0 & 1-1 \end{pmatrix} = \begin{pmatrix} 0 & 0 & -1 \\ 0 & 1 & 1 \\ 0 & 0 & 0 \end{pmatrix} \]
+Le rang de cette matrice est 2 (les deux premières colonnes sont linéairement indépendantes, mais la troisième est une combinaison linéaire des autres; ou les deux premières lignes non nulles sont linéairement indépendantes).
+La dimension du noyau est $n - \text{rang}(A-I) = 3 - 2 = 1$.
+La multiplicité géométrique de $\lambda_1 = 1$ est 1, ce qui est inférieur à sa multiplicité algébrique (qui est 2).
+Donc, la matrice A n'est pas diagonalisable.
+
+Pour la matrice B:
+B est une matrice triangulaire supérieure. Ses valeurs propres sont les éléments diagonaux: $\lambda_1 = 1$ (multiplicité algébrique 2) et $\lambda_2 = 2$ (multiplicité algébrique 1).
+Pour que B soit diagonalisable, la multiplicité géométrique de $\lambda_1 = 1$ doit être 2.
+Calculons $\dim(\ker(B-I))$.
+\[ B-I = \begin{pmatrix} 1-1 & -1 & 0 \\ 0 & 2-1 & 0 \\ 0 & 0 & 1-1 \end{pmatrix} = \begin{pmatrix} 0 & -1 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 0 \end{pmatrix} \]
+Cette matrice a clairement un rang de 1 (la deuxième ligne est $-1$ fois la première, la troisième est nulle).
+La dimension du noyau est $n - \text{rang}(B-I) = 3 - 1 = 2$.
+La multiplicité géométrique de $\lambda_1 = 1$ est 2, ce qui est égal à sa multiplicité algébrique.
+La multiplicité géométrique de $\lambda_2 = 2$ est 1 (car $1 \le mg(2) \le ma(2)=1$).
+Puisque les multiplicités géométriques sont égales aux multiplicités algébriques pour toutes les valeurs propres, la matrice B est diagonalisable.
+\end{solution}
+
+\section{Exercice 6}
+Déterminer la forme de toutes les matrices $A \in M_n(\mathbb{R})$ diagonalisables dans $\mathbb{R}$ et qui vérifient $A^3 + 2A = 12I_n$.
+
+\begin{solution}
+Soit $A$ une matrice diagonalisable dans $\mathbb{R}$. Alors il existe $P \in GL_n(\mathbb{R})$ et $D$ une matrice diagonale réelle telles que $A = PDP^{-1}$.
+L'équation $A^3 + 2A = 12I_n$ devient:
+\[ (PDP^{-1})^3 + 2(PDP^{-1}) = 12I_n \]
+\[ PD^3P^{-1} + 2PDP^{-1} = 12PI_nP^{-1} \]
+\[ P(D^3 + 2D)P^{-1} = P(12I_n)P^{-1} \]
+En multipliant par $P^{-1}$ à gauche et $P$ à droite, on obtient:
+\[ D^3 + 2D = 12I_n \]
+Soit $D = \text{diag}(\lambda_1, \dots, \lambda_n)$, où $\lambda_i \in \mathbb{R}$ sont les valeurs propres de $A$. L'équation matricielle devient un ensemble d'équations scalaires pour les valeurs propres:
+\[ \lambda_i^3 + 2\lambda_i = 12 \quad \text{pour tout } i=1, \dots, n \]
+Nous devons trouver les racines réelles de l'équation $x^3 + 2x - 12 = 0$.
+Soit $f(x) = x^3 + 2x - 12$. On cherche les racines réelles de $f(x)$.
+$f'(x) = 3x^2 + 2$. Puisque $x^2 \ge 0$, $f'(x) = 3x^2 + 2 \ge 2 > 0$ pour tout $x \in \mathbb{R}$.
+La fonction $f(x)$ est strictement croissante sur $\mathbb{R}$. Par conséquent, elle ne peut avoir qu'une seule racine réelle.
+Testons quelques valeurs entières:
+$f(1) = 1+2-12 = -9$
+$f(2) = 2^3 + 2(2) - 12 = 8 + 4 - 12 = 0$.
+Donc, $x=2$ est la seule racine réelle de l'équation.
+Puisque $A$ est diagonalisable dans $\mathbb{R}$, ses valeurs propres $\lambda_i$ doivent être réelles. La seule possibilité est donc $\lambda_i = 2$ pour tout $i=1, \dots, n$.
+La matrice diagonale $D$ doit donc être $D = \text{diag}(2, 2, \dots, 2) = 2I_n$.
+Alors, $A = P(2I_n)P^{-1} = 2P I_n P^{-1} = 2P P^{-1} = 2I_n$.
+La seule matrice $A \in M_n(\mathbb{R})$ diagonalisable dans $\mathbb{R}$ vérifiant $A^3 + 2A = 12I_n$ est $A = 2I_n$.
+Vérifions : Si $A=2I_n$, $A^3+2A = (2I_n)^3 + 2(2I_n) = 8I_n^3 + 4I_n = 8I_n + 4I_n = 12I_n$. C'est correct.
+\end{solution}
+
+\section{Exercice 7}
+Répondre par vrai ou faux. Si l’assertion est vraie, justifier votre réponse. Si elle est fausse, donnez un contre-exemple.
+
+\begin{enumerate}
+    \item Une matrice est diagonalisable si et seulement si son polynôme caractéristique est scindé.
+    \item Une matrice est diagonalisable si et seulement si son polynôme caractéristiques est scindé à racine simples.
+    \item Une matrice est diagonalisable si et seulement si elle est annulée par un polynôme scindé.
+    \item Soit $M \in M_n(\mathbb{C})$ une matrice telle que $P_M(X) = (1 - X)^n$. La matrice $M$ est diagonalisable si et seulement si $M = I_n$.
+    \item Soit $M \in M_4(\mathbb{C})$ telle que $P_M(X) = (X - 1)^2(X - 2)(X - 3)$. Alors $M$ n’est pas diagonalisable.
+    \item La matrice $A = \begin{pmatrix} 2 & -2 & 3 & 4 \\ 3 & -1 & -1 & 3 \\ 0 & 0 & 2 & -1 \\ 0 & 0 & 1 & -1 \end{pmatrix}$ est trigonalisable dans $M_n(\mathbb{R})$. (Ici $n=4$)
+    \item La matrice $A$ de la question précédente est diagonalisable dans $M_n(\mathbb{C})$. (Ici $n=4$)
+\end{enumerate}
+
+\begin{solution}
+\begin{enumerate}
+    \item \textbf{Faux.} Une matrice est diagonalisable sur un corps $K$ si et seulement si son polynôme caractéristique est scindé sur $K$ ET la multiplicité géométrique de chaque valeur propre est égale à sa multiplicité algébrique.
+    Contre-exemple: $A = \begin{pmatrix} 1 & 1 \\ 0 & 1 \end{pmatrix}$. Le polynôme caractéristique est $P_A(\lambda) = (1-\lambda)^2$, qui est scindé sur $\mathbb{R}$. Cependant, A n'est pas diagonalisable car la seule valeur propre est 1 avec multiplicité algébrique 2, mais la multiplicité géométrique est $\dim(\ker(A-I)) = \dim(\ker \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}) = 1$.
+
+    \item \textbf{Faux.} "Seulement si" est vrai: Si une matrice est diagonalisable, son polynôme minimal est scindé à racines simples. Le polynôme caractéristique est annulé par la matrice (Cayley-Hamilton), mais n'est pas nécessairement le polynôme minimal. Si le polynôme caractéristique est scindé à racines simples, alors la matrice est diagonalisable (car chaque valeur propre a multiplicité algébrique 1, donc multiplicité géométrique 1).
+    "Si" est vrai. Si le polynôme caractéristique est scindé à racines simples, alors pour chaque valeur propre $\lambda_i$, sa multiplicité algébrique est 1. Comme $1 \le mg(\lambda_i) \le ma(\lambda_i) = 1$, on a $mg(\lambda_i) = ma(\lambda_i) = 1$. Donc la matrice est diagonalisable.
+    L'énoncé "si et seulement si" est Faux.
+    Contre-exemple pour "seulement si": $A = I_n$. Son polynôme caractéristique est $P_A(\lambda) = (1-\lambda)^n$. Il est scindé mais n'a pas de racines simples (si $n>1$). Pourtant $A$ est diagonalisable (elle est déjà diagonale).
+
+    \item \textbf{Faux.} Une matrice est diagonalisable si et seulement si elle est annulée par un polynôme scindé à racines simples (c'est le critère du polynôme minimal). Le polynôme caractéristique est toujours un polynôme annulateur (Cayley-Hamilton) et il est scindé si la matrice est diagonalisable sur $\mathbb{C}$, mais pas nécessairement à racines simples.
+    Contre-exemple: $A = \begin{pmatrix} 1 & 1 \\ 0 & 1 \end{pmatrix}$. $P_A(X) = (X-1)^2$. $P_A(A) = (A-I)^2 = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}^2 = \begin{pmatrix} 0 & 0 \\ 0 & 0 \end{pmatrix}$. Donc $A$ est annulée par $P_A(X)$ qui est scindé. Mais $A$ n'est pas diagonalisable.
+
+    \item \textbf{Vrai.} Le polynôme caractéristique de $M$ est $P_M(X) = (1 - X)^n = (-1)^n(X-1)^n$. La seule valeur propre est $\lambda = 1$ avec multiplicité algébrique $n$.
+    Si $M$ est diagonalisable, elle doit être semblable à une matrice diagonale $D$. Les éléments diagonaux de $D$ sont les valeurs propres de $M$. Donc $D = \text{diag}(1, 1, \dots, 1) = I_n$.
+    Ainsi, si $M$ est diagonalisable, il existe $P \in GL_n(\mathbb{C})$ tel que $M = P I_n P^{-1} = P P^{-1} = I_n$.
+    Réciproquement, si $M = I_n$, alors $M$ est diagonale, donc diagonalisable.
+    Donc $M$ est diagonalisable si et seulement si $M = I_n$.
+
+    \item \textbf{Faux.} Le polynôme caractéristique de $M$ est $P_M(X) = (X - 1)^2(X - 2)(X - 3)$. Il est scindé sur $\mathbb{C}$. Les valeurs propres sont $\lambda_1 = 1$ (multiplicité algébrique 2), $\lambda_2 = 2$ (multiplicité algébrique 1), $\lambda_3 = 3$ (multiplicité algébrique 1).
+    $M$ est diagonalisable si et seulement si la multiplicité géométrique de chaque valeur propre est égale à sa multiplicité algébrique.
+    Pour $\lambda_2 = 2$ et $\lambda_3 = 3$, les multiplicités algébriques sont 1, donc les multiplicités géométriques sont aussi 1.
+    Pour $\lambda_1 = 1$, la multiplicité algébrique est 2. La matrice $M$ est diagonalisable si et seulement si la multiplicité géométrique de $\lambda_1 = 1$, $mg(1) = \dim(\ker(M-I))$, est égale à 2.
+    L'énoncé dit que $M$ n'est pas diagonalisable. Ceci est équivalent à dire que $mg(1) = 1$.
+    Cependant, on peut avoir $mg(1) = 2$. Par exemple, si $M = \text{diag}(1, 1, 2, 3)$. Alors $P_M(X) = (X-1)^2(X-2)(X-3)$, et $M$ est diagonale, donc diagonalisable ($mg(1)=2$).
+    L'affirmation est donc fausse.
+
+    \item \textbf{Faux.} Une matrice est trigonalisable dans $M_n(\mathbb{R})$ si et seulement si son polynôme caractéristique est scindé sur $\mathbb{R}$.
+    \[ A = \begin{pmatrix} 2 & -2 & 3 & 4 \\ 3 & -1 & -1 & 3 \\ 0 & 0 & 2 & -1 \\ 0 & 0 & 1 & -1 \end{pmatrix} \]
+    Le polynôme caractéristique est $P_A(\lambda) = \det(A-\lambda I)$.
+    \[ P_A(\lambda) = \det \begin{pmatrix} 2-\lambda & -2 & 3 & 4 \\ 3 & -1-\lambda & -1 & 3 \\ 0 & 0 & 2-\lambda & -1 \\ 0 & 0 & 1 & -1-\lambda \end{pmatrix} \]
+    On peut développer par blocs :
+    \[ P_A(\lambda) = \det \begin{pmatrix} 2-\lambda & -2 \\ 3 & -1-\lambda \end{pmatrix} \det \begin{pmatrix} 2-\lambda & -1 \\ 1 & -1-\lambda \end{pmatrix} \]
+    \[ P_A(\lambda) = ((2-\lambda)(-1-\lambda) - (-2)(3)) ((2-\lambda)(-1-\lambda) - (-1)(1)) \]
+    \[ P_A(\lambda) = (-2 - 2\lambda + \lambda + \lambda^2 + 6) (-2 - 2\lambda + \lambda + \lambda^2 + 1) \]
+    \[ P_A(\lambda) = (\lambda^2 - \lambda + 4) (\lambda^2 - \lambda - 1) \]
+    Les racines de $\lambda^2 - \lambda + 4 = 0$ sont $\lambda = \frac{1 \pm \sqrt{1 - 4(4)}}{2} = \frac{1 \pm \sqrt{-15}}{2}$. Ce ne sont pas des racines réelles.
+    Les racines de $\lambda^2 - \lambda - 1 = 0$ sont $\lambda = \frac{1 \pm \sqrt{1 - 4(-1)}}{2} = \frac{1 \pm \sqrt{5}}{2}$. Ce sont des racines réelles.
+    Puisque le polynôme caractéristique $P_A(\lambda)$ n'est pas scindé sur $\mathbb{R}$ (il a des racines complexes non réelles), la matrice A n'est pas trigonalisable dans $M_4(\mathbb{R})$.
+    L'affirmation est donc fausse. (Note: Une erreur dans l'énoncé ou ma compréhension de la question? "trigonalisable dans $M_n(\mathbb{R})$". Sur $\mathbb{C}$, toute matrice est trigonalisable). Assumons que l'énoncé voulait dire $\mathbb{C}$. Sur $\mathbb{C}$, le polynôme est scindé (car $\mathbb{C}$ est algébriquement clos). Donc toute matrice est trigonalisable sur $\mathbb{C}$. Si l'énoncé est bien sur $\mathbb{R}$, c'est Faux.
+
+    \item \textbf{Vrai.} La matrice A de la question précédente est diagonalisable dans $M_n(\mathbb{C})$ si son polynôme caractéristique est scindé à racines simples sur $\mathbb{C}$.
+    $P_A(\lambda) = (\lambda^2 - \lambda + 4) (\lambda^2 - \lambda - 1)$.
+    Les racines sont $\frac{1 \pm i\sqrt{15}}{2}$ et $\frac{1 \pm \sqrt{5}}{2}$.
+    Ce sont quatre racines complexes distinctes. Puisque la matrice $4 \times 4$ a 4 valeurs propres distinctes dans $\mathbb{C}$, elle est diagonalisable dans $M_4(\mathbb{C})$.
+    L'affirmation est donc vraie. (Il y a contradiction avec ma réponse à la 6. Si la 6 est Fausse, alors la 7 est Vraie).
+    Revisitons la question 6. Est-ce que j'ai fait une erreur de calcul?
+    Vérifions le calcul du déterminant par bloc. C'est correct.
+    Vérifions les polynômes. Correct.
+    Vérifions les racines. Correct.
+    Peut-être l'énoncé voulait-il "trigonalisable sur $\mathbb{C}$" à la question 6? Si oui, alors 6 est Vraie. Si l'énoncé est bien sur $\mathbb{R}$, alors 6 est Fausse.
+    Pour la 7, la matrice est diagonalisable sur $\mathbb{C}$ car elle a 4 valeurs propres distinctes. Donc 7 est Vraie.
+
+    (Récapitulons pour 6 et 7 en assumant les calculs corrects)
+    6. Faux (non trigonalisable sur $\mathbb{R}$ car $P_A(\lambda)$ non scindé sur $\mathbb{R}$).
+    7. Vrai (diagonalisable sur $\mathbb{C}$ car $P_A(\lambda)$ a 4 racines distinctes sur $\mathbb{C}$).
+\end{enumerate}
+\end{solution}
+
+\section{Exercice 8}
+Soit $A$ la matrice suivante :
+\[ A = \begin{pmatrix} 1 & a & b \\ 0 & 1 & c \\ 0 & 0 & 2 \end{pmatrix}. \]
+\begin{enumerate}
+    \item Montrer que $A$ est diagonalisable si et seulement si le polynôme $X^2 - 3X + 2$ annule $A$.
+    \item En déduire les valeurs de $a, b$ et $c$ pour lesquelles la matrice $A$ est diagonalisable.
+\end{enumerate}
+
+\begin{solution}
+\begin{enumerate}
+    \item La matrice A est triangulaire supérieure. Ses valeurs propres sont les éléments diagonaux : $\lambda_1 = 1$ (multiplicité algébrique 2) et $\lambda_2 = 2$ (multiplicité algébrique 1).
+    La matrice A est diagonalisable (sur $\mathbb{R}$ ou $\mathbb{C}$) si et seulement si la multiplicité géométrique de chaque valeur propre est égale à sa multiplicité algébrique.
+    Pour $\lambda_2 = 2$, $ma(2) = 1$, donc $mg(2)=1$.
+    Pour $\lambda_1 = 1$, $ma(1) = 2$. A est diagonalisable si et seulement si $mg(1) = \dim(\ker(A-I)) = 2$.
+    Le polynôme minimal $m_A(X)$ de A divise le polynôme caractéristique $P_A(X) = (\lambda-1)^2 (\lambda-2) = (X-1)^2(X-2)$.
+    Les facteurs irréductibles du polynôme minimal sont les mêmes que ceux du polynôme caractéristique. Donc $m_A(X)$ peut être $(X-1)(X-2)$ ou $(X-1)^2(X-2)$.
+    Une matrice est diagonalisable si et seulement si son polynôme minimal est scindé à racines simples.
+    Ici, les racines sont 1 et 2. Le seul polynôme scindé à racines simples qui pourrait être le polynôme minimal est $(X-1)(X-2)$.
+    Donc, A est diagonalisable si et seulement si son polynôme minimal est $m_A(X) = (X-1)(X-2)$.
+    Le polynôme minimal est le polynôme unitaire de plus bas degré qui annule A.
+    Ainsi, A est diagonalisable si et seulement si $(A-I)(A-2I) = 0$.
+    $(X-1)(X-2) = X^2 - 3X + 2$.
+    Donc, A est diagonalisable si et seulement si le polynôme $X^2 - 3X + 2$ annule A.
+
+    \item Calculons $(A-I)(A-2I)$.
+    \[ A-I = \begin{pmatrix} 0 & a & b \\ 0 & 0 & c \\ 0 & 0 & 1 \end{pmatrix} \]
+    \[ A-2I = \begin{pmatrix} -1 & a & b \\ 0 & -1 & c \\ 0 & 0 & 0 \end{pmatrix} \]
+    \[ (A-I)(A-2I) = \begin{pmatrix} 0 & a & b \\ 0 & 0 & c \\ 0 & 0 & 1 \end{pmatrix} \begin{pmatrix} -1 & a & b \\ 0 & -1 & c \\ 0 & 0 & 0 \end{pmatrix} \]
+    \[ (A-I)(A-2I) = \begin{pmatrix} 0 & -a & ac \\ 0 & 0 & 0 \\ 0 & 0 & 0 \end{pmatrix} \]
+    La matrice A est diagonalisable si et seulement si $(A-I)(A-2I) = 0$.
+    \[ \begin{pmatrix} 0 & -a & ac \\ 0 & 0 & 0 \\ 0 & 0 & 0 \end{pmatrix} = \begin{pmatrix} 0 & 0 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & 0 \end{pmatrix} \]
+    Ceci est vrai si et seulement si $-a = 0$ et $ac = 0$.
+    La condition $-a=0$ implique $a=0$.
+    Si $a=0$, alors $ac = 0 \cdot c = 0$ est toujours vrai, quelle que soit la valeur de $c$.
+    La condition pour que A soit diagonalisable est donc $a=0$. Les valeurs de $b$ et $c$ peuvent être quelconques.
+    Vérifions la multiplicité géométrique de $\lambda=1$ lorsque $a=0$.
+    \[ A-I = \begin{pmatrix} 0 & 0 & b \\ 0 & 0 & c \\ 0 & 0 & 0 \end{pmatrix} \]
+    Si $b=0$ et $c=0$, le rang est 0, $\dim(\ker(A-I))=3$. Mais $A$ est $3\times 3$. Le rang est 0, donc $A-I = 0$, $A=I$. $P_A(X)=(1-\lambda)^3$. Les valeurs propres sont 1 (mult 3) et 2 (mult 1)? Non, les VP sont 1,1,2. $P_A(X)=(X-1)^2(X-2)$.
+    Le rang de $\begin{pmatrix} 0 & 0 & b \\ 0 & 0 & c \\ 0 & 0 & 0 \end{pmatrix}$ est 1 si $b \ne 0$ ou $c \ne 0$. Dans ce cas, $\dim(\ker(A-I)) = 3 - 1 = 2$.
+    Si $b=0$ et $c=0$, le rang est 0. $\dim(\ker(A-I)) = 3 - 0 = 3$. Mais ceci est impossible car la multiplicité algébrique de 1 est 2.
+    Revoyons le calcul $(A-I)(A-2I)$.
+    $A-I = \begin{pmatrix} 0 & a & b \\ 0 & 0 & c \\ 0 & 0 & 1 \end{pmatrix}$
+    $A-2I = \begin{pmatrix} -1 & a & b \\ 0 & -1 & c \\ 0 & 0 & 0 \end{pmatrix}$
+    $(A-I)(A-2I)$ calcul:
+    Ligne 1: $(0)(-1) + (a)(0) + (b)(0) = 0$
+    $(0)(a) + (a)(-1) + (b)(0) = -a$
+    $(0)(b) + (a)(c) + (b)(0) = ac$
+    Ligne 2: $(0)(-1) + (0)(0) + (c)(0) = 0$
+    $(0)(a) + (0)(-1) + (c)(0) = 0$
+    $(0)(b) + (0)(c) + (c)(0) = 0$
+    Ligne 3: $(0)(-1) + (0)(0) + (1)(0) = 0$
+    $(0)(a) + (0)(-1) + (1)(0) = 0$
+    $(0)(b) + (0)(c) + (1)(0) = 0$
+    Le calcul est correct: $(A-I)(A-2I) = \begin{pmatrix} 0 & -a & ac \\ 0 & 0 & 0 \\ 0 & 0 & 0 \end{pmatrix}$.
+    Donc, A est diagonalisable ssi $a=0$. Les valeurs de $b$ et $c$ peuvent être quelconques réels (ou complexes).
+\end{enumerate}
+\end{solution}
+
+\end{document}
+```

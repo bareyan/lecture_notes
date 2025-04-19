@@ -1,0 +1,1275 @@
+```latex
+\documentclass{article}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{listings}
+\usepackage[french]{babel}
+
+\newtheorem{theorem}{Théorème}
+\newtheorem{lemma}{Lemme}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}{Définition}
+\newtheorem{remark}{Remarque}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Exemple}
+
+\usepackage[margin=1in]{geometry}
+
+% Listings configuration for code snippets
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    stringstyle=\color{red},
+    commentstyle=\color{green!50!black},
+    showstringspaces=false,
+    breaklines=true,
+    captionpos=b
+}
+
+\begin{document}
+\sloppy
+
+\section{Introduction à la Modélisation 3D}
+
+La modélisation 3D est un domaine fondamental de l'informatique graphique qui consiste à créer des représentations mathématiques d'objets ou de scènes tridimensionnelles. Elle trouve ses racines dans la géométrie.
+
+\begin{definition}[Géométrie]
+Le terme \textbf{géométrie} dérive du grec ancien γεωμέτρης (geômétrês), composé de "gê" (Terre) et "metron" (mesure). La géométrie peut être définie comme :
+\begin{enumerate}
+    \item L'étude des formes, des tailles, des motifs et des positions des objets.
+    \item L'étude des espaces où l'on peut mesurer certaines quantités, telles que les longueurs, les angles, etc.
+\end{enumerate}
+\end{definition}
+
+En modélisation 3D, nous cherchons à décrire numériquement la géométrie d'objets virtuels. Ces objets peuvent être simples (formes géométriques de base) ou complexes (personnages, terrains, bâtiments, scènes naturelles).
+
+\subsection{Comment décrire la géométrie ?}
+Il existe plusieurs manières de décrire une forme géométrique :
+\begin{itemize}
+    \item \textbf{Implicite :} Par une équation ou une condition que les points de la forme doivent satisfaire. Par exemple, un cercle unité dans le plan peut être décrit par l'équation $x^2 + y^2 = 1$.
+    \item \textbf{Explicite :} Par une paramétrisation, c'est-à-dire une fonction qui génère les points de la forme. Pour le cercle unité, une paramétrisation est $(\cos\theta, \sin\theta)$ pour $\theta$ variant de 0 à $2\pi$.
+    \item \textbf{Linguistique :} Par une description textuelle, comme "cercle unitaire".
+    \item \textbf{Discrète :} En approximant la forme par un ensemble fini de points ou de segments.
+    \item \textbf{Dynamique :} En décrivant le mouvement qui génère la forme, par exemple, un point tournant autour d'un centre $\frac{d^2\mathbf{x}}{dt^2} = -\mathbf{x}$.
+    \item \textbf{Par Symétrie :} En décrivant les opérations de symétrie qui laissent la forme inchangée.
+\end{itemize}
+
+\begin{verbatim}
+#save_to: geometrie_description.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+fig, axs = plt.subplots(2, 3, figsize=(12, 8)) # Increased figure size
+fig.suptitle('Comment décrire la géométrie ?', fontsize=14)
+
+# Implicite/Explicite/Linguistique (Cercle Unitaire)
+axs[0, 0].set_title('Implicite/Explicite\n$x^2+y^2=1$ / $(\cos\\theta, \sin\\theta)$')
+circle = patches.Circle((0, 0), 1, fill=False, color='red')
+axs[0, 0].add_patch(circle)
+axs[0, 0].set_xlim(-1.5, 1.5)
+axs[0, 0].set_ylim(-1.5, 1.5)
+axs[0, 0].set_aspect('equal', adjustable='box')
+axs[0, 0].grid(True)
+axs[0, 0].axis('off')
+axs[0, 0].text(0, -1.7, '"cercle unitaire"', ha='center') # Adjusted text position
+
+# Discrète
+axs[0, 1].set_title('Discrète')
+theta = np.linspace(0, 2*np.pi, 7) # Hexagon approximation
+x = np.cos(theta)
+y = np.sin(theta)
+axs[0, 1].plot(x, y, 'bo-')
+axs[0, 1].plot([x[-1], x[0]], [y[-1], y[0]], 'bo-') # Close the polygon
+circle = patches.Circle((0, 0), 1, fill=False, color='red', linestyle='dotted')
+axs[0, 1].add_patch(circle)
+axs[0, 1].set_xlim(-1.5, 1.5)
+axs[0, 1].set_ylim(-1.5, 1.5)
+axs[0, 1].set_aspect('equal', adjustable='box')
+axs[0, 1].grid(True)
+axs[0, 1].axis('off')
+
+# Dynamique
+axs[0, 2].set_title('Dynamique\n$d^2x/dt^2 = -x$')
+circle = patches.Circle((0, 0), 1, fill=False, color='red')
+axs[0, 2].add_patch(circle)
+axs[0, 2].plot(1, 0, 'bo') # Point on circle
+axs[0, 2].arrow(1, 0, 0, 0.5, head_width=0.1, head_length=0.15, fc='blue', ec='blue') # Velocity vector (example)
+axs[0, 2].arrow(0,0, 1, 0, head_width=0.1, head_length=0.1, fc='gray', ec='gray', linestyle='dashed') # Radius
+axs[0, 2].text(0.5, 0.1, 'x', color='gray')
+axs[0, 2].set_xlim(-1.5, 1.5)
+axs[0, 2].set_ylim(-1.5, 1.5)
+axs[0, 2].set_aspect('equal', adjustable='box')
+axs[0, 2].grid(True)
+axs[0, 2].axis('off')
+
+# Symétrique
+axs[1, 0].set_title('Symétrique')
+circle1 = patches.Circle((-0.7, 0), 0.5, fill=False, color='blue')
+circle2 = patches.Circle((0.7, 0), 0.5, fill=False, color='green')
+axs[1, 0].add_patch(circle1)
+axs[1, 0].add_patch(circle2)
+axs[1, 0].axvline(0, color='gray', linestyle='--') # Symmetry axis
+axs[1, 0].text(0, -0.8, 'rotate / reflect', ha='center')
+axs[1, 0].set_xlim(-1.5, 1.5)
+axs[1, 0].set_ylim(-1.5, 1.5)
+axs[1, 0].set_aspect('equal', adjustable='box')
+axs[1, 0].grid(True)
+axs[1, 0].axis('off')
+
+# Placeholder for other concepts if needed
+axs[1, 1].axis('off')
+axs[1, 2].axis('off')
+
+
+plt.tight_layout(rect=[0, 0.03, 1, 0.95], pad=1.5) # Adjust layout with padding
+plt.savefig('geometrie_description.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, keepaspectratio]{geometrie_description.png} % Increased max width
+\caption{Différentes manières de décrire la géométrie.}
+\label{fig:geom_description}
+\end{figure}
+
+\section{Représentations de la Géométrie}
+
+En informatique graphique, on distingue principalement deux types de représentations pour la géométrie 3D.
+
+\subsection{Représentations Implicites}
+\begin{definition}[Représentation Implicite]
+Une surface implicite est définie comme l'ensemble des points $(x, y, z)$ qui satisfont une équation de la forme $f(x, y, z) = 0$. Les points ne sont pas donnés directement, mais ils doivent vérifier une certaine relation.
+\end{definition}
+
+\begin{example}[Sphère Unitaire]
+La sphère unité est l'ensemble des points $(x, y, z)$ tels que $x^2 + y^2 + z^2 = 1$. Ici, $f(x, y, z) = x^2 + y^2 + z^2 - 1$. Pour un point donné, il est facile de vérifier s'il appartient à la surface (si $f(x,y,z)=0$), s'il est à l'intérieur ($f(x,y,z)<0$) ou à l'extérieur ($f(x,y,z)>0$). Cependant, il est plus difficile de générer directement des points se trouvant sur la surface.
+\end{example}
+
+\begin{verbatim}
+#save_to: sphere_implicit.png
+import matplotlib.pyplot as plt
+import numpy as np
+from mpl_toolkits.mplot3d import Axes3D
+
+fig = plt.figure(figsize=(7, 7)) # Increased figure size
+ax = fig.add_subplot(111, projection='3d')
+
+# Create data for the sphere
+u = np.linspace(0, 2 * np.pi, 100)
+v = np.linspace(0, np.pi, 100)
+x = np.outer(np.cos(u), np.sin(v))
+y = np.outer(np.sin(u), np.sin(v))
+z = np.outer(np.ones(np.size(u)), np.cos(v))
+
+# Plot the surface
+ax.plot_surface(x, y, z, color='b', alpha=0.6, rstride=4, cstride=4)
+
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_zlabel('Z')
+ax.set_title('Sphère Unitaire Implicite\n$x^2+y^2+z^2=1$')
+ax.set_xlim([-1.1, 1.1]) # Slightly larger limits
+ax.set_ylim([-1.1, 1.1])
+ax.set_zlim([-1.1, 1.1])
+ax.set_box_aspect([1,1,1]) # Enforce aspect ratio for 3D
+
+plt.tight_layout(pad=1.0) # Added tight layout
+plt.savefig('sphere_implicit.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.6\textwidth, keepaspectratio]{sphere_implicit.png} % Increased max width
+\caption{Représentation implicite d'une sphère unité.}
+\label{fig:sphere_implicit}
+\end{figure}
+
+\subsection{Représentations Explicites}
+\begin{definition}[Représentation Explicite]
+Une surface explicite (ou paramétrique) est définie par une fonction $f$ qui mappe un domaine de paramètres (souvent un sous-ensemble de $\mathbb{R}^2$) vers l'espace 3D ($\mathbb{R}^3$). Tous les points de la surface sont donnés directement par l'évaluation de la fonction $f(u, v) = (x(u, v), y(u, v), z(u, v))$ pour des valeurs de paramètres $(u, v)$ dans le domaine.
+\end{definition}
+
+\begin{example}[Sphère Unitaire]
+Les points sur la sphère unité peuvent être générés explicitement par la fonction $f(u, v) = (\cos(u)\sin(v), \sin(u)\sin(v), \cos(v))$ pour $0 \le u \le 2\pi$ et $0 \le v \le \pi$. Il est facile de générer des points sur la surface, mais il peut être plus complexe de vérifier si un point donné appartient à la surface ou de déterminer les relations spatiales (intérieur/extérieur).
+\end{example}
+
+\begin{verbatim}
+#save_to: parametric_surface.png
+import matplotlib.pyplot as plt
+import numpy as np
+from mpl_toolkits.mplot3d import Axes3D
+
+fig = plt.figure(figsize=(12, 6)) # Increased figure size
+fig.suptitle('Représentation Explicite $f: \mathbb{R}^2 \longrightarrow \mathbb{R}^3$', fontsize=14)
+
+# Domain D in R^2
+ax1 = fig.add_subplot(121)
+u_dom = np.linspace(0, 2, 20)
+v_dom = np.linspace(0, 1, 20)
+U_dom, V_dom = np.meshgrid(u_dom, v_dom)
+ax1.scatter(U_dom, V_dom, marker='.', s=10, color='blue')
+ax1.set_xlabel('u')
+ax1.set_ylabel('v')
+ax1.set_title('Domaine des paramètres D $\subset \mathbb{R}^2$')
+ax1.set_xlim([-0.1, 2.1]) # Adjusted limits
+ax1.set_ylim([-0.1, 1.1])
+ax1.set_aspect('equal', adjustable='box')
+ax1.grid(True)
+
+# Parametric surface M in R^3
+ax2 = fig.add_subplot(122, projection='3d')
+# Example parametric surface (e.g., a wavy plane)
+u_surf = np.linspace(0, 2, 50) # Use different variable names to avoid confusion
+v_surf = np.linspace(0, 1, 50)
+U_surf, V_surf = np.meshgrid(u_surf, v_surf)
+X = U_surf
+Y = V_surf
+Z = np.sin(np.pi * U_surf) * np.cos(np.pi * V_surf) * 0.5 # Example function
+ax2.plot_surface(X, Y, Z, cmap='viridis', edgecolor='none', alpha=0.8)
+ax2.set_xlabel('x')
+ax2.set_ylabel('y')
+ax2.set_zlabel('z')
+ax2.set_title('Surface paramétrique $M = f(D) \subset \mathbb{R}^3$')
+# ax2.text(1, 0.5, 1.0, '$f$', fontsize=14) # Function label (approximate position) - removed for clarity
+
+# Adjust axis limits for 3D plot if necessary
+ax2.set_xlim([0, 2])
+ax2.set_ylim([0, 1])
+ax2.set_zlim([-0.6, 0.6]) # Make sure Z range is visible
+
+plt.tight_layout(rect=[0, 0.03, 1, 0.93], pad=1.5, w_pad=2.0) # Adjusted rect and padding
+plt.savefig('parametric_surface.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, keepaspectratio]{parametric_surface.png}
+\caption{Représentation explicite : mapping d'un domaine 2D vers une surface 3D.}
+\label{fig:parametric_surface}
+\end{figure}
+
+
+\section{Encoder Numériquement la Géométrie}
+
+Pour utiliser la géométrie dans un ordinateur, nous devons l'encoder numériquement. Le choix de l'encodage dépend de l'application et du type de géométrie.
+
+Principales méthodes d'encodage :
+\begin{itemize}
+    \item \textbf{Explicite :}
+        \begin{itemize}
+            \item \textbf{Nuage de points :} Une collection de points $(x, y, z)$ dans l'espace. Simple mais sans information de connectivité ou de surface.
+            \item \textbf{Maillage polygonal :} Représentation par des sommets connectés pour former des polygones (souvent des triangles ou des quadrilatères) qui approximent la surface. Très courant en infographie.
+            \item \textbf{Subdivision :} Surfaces lisses générées en subdivisant récursivement un maillage de contrôle grossier.
+            \item \textbf{NURBS (Non-Uniform Rational B-Splines) :} Surfaces lisses définies mathématiquement, utilisées en CAO (Conception Assistée par Ordinateur).
+        \end{itemize}
+    \item \textbf{Implicite :}
+        \begin{itemize}
+            \item \textbf{Ensemble de niveaux (Level Set) :} La surface est définie comme le niveau zéro d'une fonction de distance signée définie sur une grille. Utile pour les formes complexes et les changements de topologie.
+            \item \textbf{Surface algébrique :} Définie par une équation polynomiale $P(x, y, z) = 0$.
+            \item \textbf{L-systems (Lindenmayer Systems) :} Grammaires formelles utilisées pour générer des structures fractales, souvent employées pour modéliser des plantes.
+        \end{itemize}
+\end{itemize}
+Chaque choix est mieux adapté à une tâche ou à un type de géométrie différent. Par exemple, les maillages sont polyvalents pour le rendu, tandis que les NURBS sont précis pour la conception industrielle.
+
+\section{Techniques de Modélisation 3D}
+
+La création de modèles 3D peut se faire selon différentes approches :
+
+\begin{itemize}
+    \item \textbf{Reconstruction :} Création d'un modèle 3D à partir d'un objet réel, souvent par scan 3D ou photogrammétrie (utilisation de multiples photos).
+    \item \textbf{Modélisation automatique :} Génération algorithmique de modèles, souvent pour des objets naturels complexes comme les arbres, ou des scènes étendues comme les terrains.
+    \item \textbf{Modélisation interactive :} Utilisation d'outils logiciels spécialisés (CAO, modeleurs 3D comme Blender, 3ds Max, Maya) où un utilisateur sculpte, assemble ou modifie la géométrie directement.
+\end{itemize}
+La plupart des objets virtuels (terrains, personnages, objets manufacturés, etc.) sont représentés par leur surface.
+
+\section{Modélisation Surfacique}
+
+La modélisation surfacique se concentre sur la représentation de la "peau" extérieure d'un objet.
+
+\subsection{Caractéristiques}
+\begin{itemize}
+    \item Représente l'extérieur visuel d'un objet et ses contours.
+    \item Ne définit intrinsèquement aucune propriété de masse ou d'épaisseur (les objets sont considérés comme creux).
+    \item Les modèles surfaciques ne peuvent pas être directement "découpés" comme des objets solides, car ils n'ont pas d'intérieur défini.
+\end{itemize}
+
+\subsection{Approches}
+Plusieurs techniques sont utilisées en modélisation surfacique :
+\begin{itemize}
+    \item \textbf{Primitives solides :} Utilisation de formes géométriques de base (sphères, cubes, cylindres...) qui sont ensuite combinées (voir CSG plus loin, bien que CSG soit souvent considérée volumique).
+    \item \textbf{Maillage (Mesh) :} L'approche la plus courante, décrite ci-dessous.
+    \item \textbf{Surfaces paramétrées :} Utilisation de fonctions mathématiques (comme les NURBS) pour définir des surfaces lisses.
+    \item \textbf{Balayage de surface (Sweep) :} Création d'une surface en déplaçant une courbe de profil le long d'une trajectoire.
+\end{itemize}
+
+\section{Maillage (Mesh)}
+
+\begin{definition}[Maillage]
+Un maillage (ou "mesh" en anglais) représente une forme 3D comme un ensemble de \textbf{sommets} (vertices), d'\textbf{arêtes} (edges) connectant ces sommets, et de \textbf{facettes} (faces) délimitées par les arêtes. Les facettes sont généralement des triangles ou des quadrilatères.
+\end{definition}
+
+Plus le nombre de polygones (souvent des triangles) est élevé, plus le réalisme de la surface peut être grand, mais plus le coût en calcul et en mémoire est important.
+
+\subsection{Avantages et Inconvénients}
+\begin{itemize}
+    \item \textbf{Avantages :}
+        \begin{itemize}
+            \item Permet de représenter des surfaces et des courbes complexes.
+            \item Très flexible et largement supporté par les logiciels et le matériel graphique.
+        \end{itemize}
+    \item \textbf{Désavantages :}
+        \begin{itemize}
+            \item Peut avoir un aspect angulaire ("facettisé") si la résolution est faible.
+            \item Une haute résolution (beaucoup de polygones) nécessite des performances de calcul élevées et une grande capacité mémoire.
+        \end{itemize}
+\end{itemize}
+
+\subsection{Représentation des Données : Énumération de Facettes}
+
+Une manière simple de stocker un maillage est d'énumérer toutes les facettes, en listant les coordonnées des sommets pour chaque facette.
+
+\begin{example}[Énumération simple]
+Considérons une pyramide simple à base triangulaire (tétraèdre) avec 4 sommets P0, P1, P2, P3.
+Les 4 facettes triangulaires seraient :
+F1 = (P0, P1, P2)
+F2 = (P0, P2, P3)
+F3 = (P3, P1, P0) % Attention à l'ordre pour l'orientation
+F4 = (P3, P2, P1) % Attention à l'ordre pour l'orientation
+
+Objet = (F1, F2, F3, F4)
+\end{example}
+
+\begin{verbatim}
+#save_to: mesh_enumeration_simple.png
+from graphviz import Digraph
+
+# Using dot layout engine (default) which doesn't support 'pos' attribute well.
+# Relying on automatic layout.
+
+dot = Digraph(comment='Enumération Simple')
+dot.attr(rankdir='TB', nodesep='0.5', ranksep='0.8') # Adjusted spacing
+
+# Description Node first
+dot.node('desc', shape='box',
+         label='F1 = (P0, P1, P2)\lF2 = (P0, P2, P3)\lF3 = (P3, P1, P0)\lF4 = (P3, P2, P1)\lObj = (F1, F2, F3, F4)\l\lProblemes:\l- Duplication des sommets\l- Coherence ?')
+
+# Conceptual mesh representation
+with dot.subgraph(name='cluster_mesh') as c:
+    c.attr(label='Maillage Conceptuel')
+    c.node('P0', 'P0', shape='point')
+    c.node('P1', 'P1', shape='point')
+    c.node('P2', 'P2', shape='point')
+    c.node('P3', 'P3', shape='point')
+
+    # Edges representing the tetrahedron structure
+    c.edge('P0', 'P1')
+    c.edge('P0', 'P2')
+    c.edge('P0', 'P3')
+    c.edge('P1', 'P2')
+    c.edge('P1', 'P3')
+    c.edge('P2', 'P3')
+
+# Link description to the mesh concept (optional)
+# dot.edge('desc', 'P0', style='invis') # Could add invisible edges for layout hints if needed
+
+dot.render('mesh_enumeration_simple', format='png', view=False, cleanup=True)
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.7\textwidth, keepaspectratio]{mesh_enumeration_simple.png} % Adjusted width
+\caption{Énumération simple des facettes d'un tétraèdre.}
+\label{fig:mesh_enum_simple}
+\end{figure}
+
+Cette approche simple a des inconvénients majeurs :
+\begin{itemize}
+    \item \textbf{Duplication de données :} Les coordonnées de chaque sommet sont stockées plusieurs fois (une fois pour chaque facette à laquelle il appartient).
+    \item \textbf{Problèmes de cohérence :} Il est difficile de garantir que les différentes copies d'un même sommet ont exactement les mêmes coordonnées, ou que les arêtes partagées sont définies de manière cohérente.
+\end{itemize}
+
+\subsection{Représentation avec Partage de Sommets}
+Une meilleure approche consiste à stocker une seule liste de sommets (avec leurs coordonnées) et à définir ensuite les facettes en utilisant les indices des sommets dans cette liste.
+
+\begin{example}[Partage de Sommets]
+Liste des Sommets (LS) : LS = \{P0, P1, P2, P3\} (chaque Pi a des coordonnées x,y,z)
+
+Facettes (indices dans LS, base 0) :
+F1 = (0, 1, 2) % utilise P0, P1, P2
+F2 = (0, 2, 3) % utilise P0, P2, P3
+F3 = (3, 1, 0) % utilise P3, P1, P0
+F4 = (3, 2, 1) % utilise P3, P2, P1
+
+Objet = (LS, {F1, F2, F3, F4})
+\end{example}
+
+\begin{verbatim}
+#save_to: mesh_shared_vertices.png
+from graphviz import Digraph
+
+# Using dot layout engine (default) which doesn't support 'pos' attribute well.
+# Relying on automatic layout.
+
+dot = Digraph(comment='Partage de Sommets')
+dot.attr(rankdir='TB', nodesep='0.5', ranksep='1.0') # Adjusted spacing
+
+# Vertex List Table
+dot.node('LS', shape='record', label='{LS | {<p0> P0 (idx 0) | <p1> P1 (idx 1) | <p2> P2 (idx 2) | <p3> P3 (idx 3)}}')
+
+# Face List Table (referencing vertex indices)
+dot.node('Faces', shape='record',
+         label='{Facettes | {<f1> F1 = (0, 1, 2) | <f2> F2 = (0, 2, 3) | <f3> F3 = (3, 1, 0) | <f4> F4 = (3, 2, 1)}}')
+
+# Conceptual links showing the relationship
+dot.edge('Faces:f1:c', 'LS:p0:n', style='dashed', arrowhead='none')
+dot.edge('Faces:f1:c', 'LS:p1:n', style='dashed', arrowhead='none')
+dot.edge('Faces:f1:c', 'LS:p2:n', style='dashed', arrowhead='none')
+dot.edge('Faces:f2:c', 'LS:p0:n', style='dashed', arrowhead='none')
+dot.edge('Faces:f2:c', 'LS:p2:n', style='dashed', arrowhead='none')
+dot.edge('Faces:f2:c', 'LS:p3:n', style='dashed', arrowhead='none')
+# ... add others if desired, or keep it simple
+
+# Mesh diagram (optional, could be omitted for clarity)
+with dot.subgraph(name='cluster_mesh_shared') as c:
+     c.attr(label='Maillage Conceptuel (Sommets Partagés)')
+     c.node('p0_s', label='P0 (0)', shape='point')
+     c.node('p1_s', label='P1 (1)', shape='point')
+     c.node('p2_s', label='P2 (2)', shape='point')
+     c.node('p3_s', label='P3 (3)', shape='point')
+     c.edge('p0_s', 'p1_s')
+     c.edge('p0_s', 'p2_s')
+     c.edge('p0_s', 'p3_s')
+     c.edge('p1_s', 'p2_s')
+     c.edge('p1_s', 'p3_s')
+     c.edge('p2_s', 'p3_s')
+     # Place the cluster separately if needed
+     c.attr(rank='sink') # Try to place it lower
+
+# Ensure tables are ranked higher
+dot.edge('LS', 'Faces', style='invis') # Invisible edge to influence rank
+
+
+dot.render('mesh_shared_vertices', format='png', view=False, cleanup=True)
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.9\textwidth, keepaspectratio]{mesh_shared_vertices.png} % Adjusted width
+\caption{Énumération des facettes avec partage de sommets.}
+\label{fig:mesh_shared_vertices}
+\end{figure}
+
+Cette méthode évite la duplication des données de sommets et facilite la manipulation de la topologie du maillage.
+
+\subsection{Orientation des Surfaces}
+La \textbf{normale} à une face est un vecteur perpendiculaire à cette face, indiquant son orientation (par exemple, vers l'"extérieur" de l'objet). L'ordre dans lequel les sommets d'une face sont listés détermine la direction de la normale, typiquement via la règle de la main droite.
+\begin{itemize}
+    \item \textbf{Convention Sens trigonométrique (counter-clockwise) :} Les sommets sont listés dans le sens inverse des aiguilles d'une montre lorsqu'on regarde la face de l'extérieur. La normale est alors "sortante".
+    \item \textbf{Convention Sens anti-trigonométrique (clockwise) :} Les sommets sont listés dans le sens des aiguilles d'une montre. La normale est alors "rentrante".
+\end{itemize}
+Il est crucial de maintenir une orientation cohérente sur tout le maillage pour des opérations comme l'éclairage et le rendu corrects.
+
+\section{Surfaces de Subdivision}
+
+Les surfaces de subdivision sont une technique pour créer des surfaces lisses à partir d'un maillage polygonal grossier, souvent appelé "maillage cage" ou "maillage de contrôle".
+Le principe est de subdiviser récursivement chaque polygone du maillage cage en polygones plus petits, et d'ajuster la position des nouveaux sommets (et éventuellement des anciens) selon des règles précises. Cela produit une surface qui converge vers une limite lisse.
+La forme finale de la surface est directement contrôlée par la géométrie du maillage cage initial (positions relatives des sommets et des segments). C'est une technique puissante pour combiner le contrôle polygonal avec la création de formes organiques lisses.
+
+\section{Surfaces Paramétrées}
+
+Comme mentionné précédemment (Représentations Explicites), une surface paramétrée est définie par une fonction $f: D \subset \mathbb{R}^2 \to \mathbb{R}^3$. La surface est calculée directement par l'évaluation de cette fonction $f(u, v) = (x(u, v), y(u, v), z(u, v))$.
+\begin{itemize}
+    \item \textbf{Avantages :} Permet de définir mathématiquement des surfaces lisses et précises (ex: NURBS).
+    \item \textbf{Inconvénients :} Peut être limité dans les types d'objets pouvant être générés facilement. La conversion vers un maillage polygonal est souvent nécessaire pour le rendu temps réel.
+\end{itemize}
+
+\begin{verbatim}
+#save_to: parametric_examples.png
+import matplotlib.pyplot as plt
+import numpy as np
+from mpl_toolkits.mplot3d import Axes3D
+
+fig = plt.figure(figsize=(12, 6)) # Increased figure size
+fig.suptitle('Exemples de Surfaces Paramétrées', fontsize=14)
+
+# Example 1: Seashell-like surface
+ax1 = fig.add_subplot(121, projection='3d')
+u = np.linspace(0, 2 * np.pi, 60)
+v = np.linspace(0, np.pi, 60) # Adjust range for desired shape
+U, V = np.meshgrid(u, v)
+
+a = 0.2
+b = 0.6
+c = 0.1
+n = 2.0
+
+X = (a + b * np.cos(V)) * np.cos(U)
+Y = (a + b * np.cos(V)) * np.sin(U)
+Z = b * np.sin(V) + c * np.cos(n*U) # Added variation
+
+ax1.plot_surface(X, Y, Z, cmap='magma', alpha=0.8)
+ax1.set_title('Surface Exemple 1')
+ax1.set_xlabel('X')
+ax1.set_ylabel('Y')
+ax1.set_zlabel('Z')
+# Set aspect ratio for 3D plot
+ax1.set_box_aspect([np.ptp(X), np.ptp(Y), np.ptp(Z)]) # Aspect ratio based on data ranges
+
+# Example 2: Another complex shape (e.g., Klein bottle inspired slice)
+ax2 = fig.add_subplot(122, projection='3d')
+u = np.linspace(0, 2 * np.pi, 50)
+v = np.linspace(-np.pi/2, np.pi/2, 50) # Adjust range
+U, V = np.meshgrid(u, v)
+
+R = 4 * (1 - np.cos(U) / 2)
+X = (R + np.cos(U) * np.cos(V)) * np.cos(2*V/3) # Modified Klein-like params
+Y = (R + np.cos(U) * np.cos(V)) * np.sin(2*V/3)
+Z = np.sin(U) * np.cos(V)
+
+
+ax2.plot_surface(X, Y, Z, cmap='viridis', alpha=0.8)
+ax2.set_title('Surface Exemple 2')
+ax2.set_xlabel('X')
+ax2.set_ylabel('Y')
+ax2.set_zlabel('Z')
+# Set aspect ratio for 3D plot
+ax2.set_box_aspect([np.ptp(X), np.ptp(Y), np.ptp(Z)]) # Aspect ratio based on data ranges
+
+plt.tight_layout(rect=[0, 0.03, 1, 0.93], pad=1.5, w_pad=2.0) # Adjusted layout
+plt.savefig('parametric_examples.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, keepaspectratio]{parametric_examples.png}
+\caption{Exemples de surfaces générées par des équations paramétriques.}
+\label{fig:parametric_examples}
+\end{figure}
+
+\section{Balayage de Surface (Sweep)}
+
+Le balayage (ou extrusion) est une technique de modélisation où une forme 2D (le profil) est déplacée le long d'une trajectoire (le chemin). La surface balayée est l'ensemble des points parcourus par le profil.
+\begin{itemize}
+    \item Si le profil est une ligne et le chemin est une ligne, on obtient un quadrilatère.
+    \item Si le profil est un cercle et le chemin est une ligne droite perpendiculaire au plan du cercle, on obtient un cylindre.
+    \item Si le profil est un cercle et le chemin est un cercle, on obtient un tore (donut).
+    \item Si le profil est une courbe et le chemin est une autre courbe, on obtient une surface plus complexe.
+\end{itemize}
+
+\begin{verbatim}
+#save_to: sweep_examples.png
+import matplotlib.pyplot as plt
+import numpy as np
+from mpl_toolkits.mplot3d import Axes3D
+
+fig = plt.figure(figsize=(18, 6)) # Increased figure size significantly
+fig.suptitle('Exemples de Balayage de Surface (Sweep)', fontsize=14)
+
+# Example 1: Square swept along Z
+ax1 = fig.add_subplot(131, projection='3d')
+# Define square profile in XY plane
+square_x = [-0.5, 0.5, 0.5, -0.5, -0.5]
+square_y = [-0.5, -0.5, 0.5, 0.5, -0.5]
+square_z = [0, 0, 0, 0, 0]
+ax1.plot(square_x, square_y, square_z, color='blue', label='Profil (Carré)') # Bottom square
+
+# Sweep path (line along Z)
+path_z = np.linspace(0, 1, 10)
+
+# Generate swept surface (sides of the cube)
+for i in range(len(square_x) - 1):
+    # Create grid for each side face
+    X_vert = np.array([square_x[i], square_x[i+1]])
+    Y_vert = np.array([square_y[i], square_y[i+1]])
+    Z_vert = np.array([0, 1])
+
+    # Generate surface grid for the side
+    X_side, Z_side = np.meshgrid(X_vert if X_vert[0]!=X_vert[1] else np.array([X_vert[0]]), path_z)
+    Y_side, _      = np.meshgrid(Y_vert if Y_vert[0]!=Y_vert[1] else np.array([Y_vert[0]]), path_z)
+
+    # Handle vertical sides correctly
+    if X_vert[0] == X_vert[1]: # Side parallel to YZ plane
+        Y_side_v, Z_side_v = np.meshgrid(np.array([square_y[i], square_y[i+1]]), path_z)
+        X_side_v = np.full_like(Y_side_v, square_x[i])
+        ax1.plot_surface(X_side_v, Y_side_v, Z_side_v, color='orange', alpha=0.5, linewidth=0, antialiased=False)
+    elif Y_vert[0] == Y_vert[1]: # Side parallel to XZ plane
+        X_side_h, Z_side_h = np.meshgrid(np.array([square_x[i], square_x[i+1]]), path_z)
+        Y_side_h = np.full_like(X_side_h, square_y[i])
+        ax1.plot_surface(X_side_h, Y_side_h, Z_side_h, color='orange', alpha=0.5, linewidth=0, antialiased=False)
+
+
+# Top square
+ax1.plot(square_x, square_y, [1]*len(square_z), color='blue')
+
+ax1.set_xlabel('X')
+ax1.set_ylabel('Y')
+ax1.set_zlabel('Z')
+ax1.set_title('Carré balayé -> Cube')
+ax1.set_xlim([-1, 1])
+ax1.set_ylim([-1, 1])
+ax1.set_zlim([-0.1, 1.1]) # Adjusted limits
+ax1.view_init(elev=20, azim=30)
+ax1.set_box_aspect([1,1,1]) # Aspect ratio
+
+# Example 2: Circle swept into Torus
+ax2 = fig.add_subplot(132, projection='3d')
+R = 1.0  # Major radius
+r = 0.3  # Minor radius
+u = np.linspace(0, 2 * np.pi, 50) # Path parameter (around large circle)
+v = np.linspace(0, 2 * np.pi, 30) # Profile parameter (around small circle)
+U, V = np.meshgrid(u, v)
+
+# Torus parametric equations
+X = (R + r * np.cos(V)) * np.cos(U)
+Y = (R + r * np.cos(V)) * np.sin(U)
+Z = r * np.sin(V)
+
+ax2.plot_surface(X, Y, Z, color='purple', alpha=0.7, linewidth=0, antialiased=False)
+# Draw profile and path conceptually
+theta = np.linspace(0, 2 * np.pi, 100)
+ax2.plot(R * np.cos(theta), R * np.sin(theta), 0, color='gray', linestyle='--', label='Chemin') # Path (approx)
+# Draw profile circle at u=0
+profile_x = (R + r * np.cos(theta))
+profile_y = np.zeros_like(theta)
+profile_z = r * np.sin(theta)
+ax2.plot(profile_x, profile_y, profile_z, color='red', label='Profil (approx)') # Profile (approx)
+
+ax2.set_xlabel('X')
+ax2.set_ylabel('Y')
+ax2.set_zlabel('Z')
+ax2.set_title('Cercle balayé -> Tore')
+ax2.set_xlim([-R-r-0.2, R+r+0.2])
+ax2.set_ylim([-R-r-0.2, R+r+0.2])
+ax2.set_zlim([-r-0.2, r+0.2])
+#ax2.set_aspect('equal') # May cause issues in some versions
+ax2.set_box_aspect([1,1, (r+0.2)*2 / (R+r+0.2)*2 ]) # Approximate equal aspect
+ax2.view_init(elev=20, azim=30)
+
+
+# Example 3: Curve swept along curve (Simplified visualization)
+ax3 = fig.add_subplot(133, projection='3d')
+# Define a path (e.g., helix)
+t_path = np.linspace(0, 2 * np.pi, 100)
+path_x = np.cos(t_path)
+path_y = np.sin(t_path)
+path_z = t_path / (2 * np.pi) * 1.5 # Make helix taller
+
+# Define a profile (e.g., a wavy line in local frame)
+t_prof = np.linspace(-0.5, 0.5, 20)
+prof_u = t_prof * 0.3 # Scale profile size
+prof_v = 0.1 * np.sin(2 * np.pi * t_prof) # Wavy profile
+
+# Plot the path
+ax3.plot(path_x, path_y, path_z, color='gray', linestyle='--', label='Chemin (Hélice)')
+
+# Show profile at start (approximated orientation)
+i=0
+tx = -np.sin(t_path[i]); ty = np.cos(t_path[i]); tz = 1.5 / (2 * np.pi)
+T = np.array([tx, ty, tz]); T /= np.linalg.norm(T)
+N = np.array([-np.cos(t_path[i]), -np.sin(t_path[i]), 0])
+if np.linalg.norm(N) > 1e-6: N /= np.linalg.norm(N)
+else: N = np.array([0,0,1]) # Fallback for vertical tangent
+B = np.cross(T, N)
+origin = np.array([path_x[i], path_y[i], path_z[i]])
+profile_coords = np.array([origin + prof_u[j] * N + prof_v[j] * B for j in range(len(t_prof))])
+ax3.plot(profile_coords[:,0], profile_coords[:,1], profile_coords[:,2], color='red', label='Profil (Courbe)')
+
+# Show profile at mid point (approximated orientation)
+i=len(t_path)//2
+tx = -np.sin(t_path[i]); ty = np.cos(t_path[i]); tz = 1.5 / (2 * np.pi)
+T = np.array([tx, ty, tz]); T /= np.linalg.norm(T)
+N = np.array([-np.cos(t_path[i]), -np.sin(t_path[i]), 0])
+if np.linalg.norm(N) > 1e-6: N /= np.linalg.norm(N)
+else: N = np.array([0,0,1])
+B = np.cross(T, N)
+origin = np.array([path_x[i], path_y[i], path_z[i]])
+profile_coords = np.array([origin + prof_u[j] * N + prof_v[j] * B for j in range(len(t_prof))])
+ax3.plot(profile_coords[:,0], profile_coords[:,1], profile_coords[:,2], color='red', alpha=0.5)
+
+
+ax3.set_xlabel('X')
+ax3.set_ylabel('Y')
+ax3.set_zlabel('Z')
+ax3.set_title('Courbe balayée -> Surface Complexe')
+ax3.set_xlim([-1.5, 1.5])
+ax3.set_ylim([-1.5, 1.5])
+ax3.set_zlim([0, 1.7]) # Adjusted Z limit
+ax3.view_init(elev=20, azim=60)
+ax3.set_box_aspect([1,1,1]) # Aspect ratio
+
+plt.tight_layout(rect=[0, 0.03, 1, 0.93], pad=1.5, w_pad=3.0) # Adjusted layout
+plt.savefig('sweep_examples.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, keepaspectratio]{sweep_examples.png}
+\caption{Exemples de surfaces générées par balayage.}
+\label{fig:sweep_examples}
+\end{figure}
+
+\section{Modélisation Volumique}
+
+Contrairement à la modélisation surfacique qui ne représente que l'extérieur, la modélisation volumique représente l'objet entier, y compris son intérieur.
+
+\subsection{Caractéristiques}
+\begin{itemize}
+    \item Le modèle contient des informations sur chaque point dans l'espace (ou du moins, permet de déterminer si un point est à l'intérieur, à l'extérieur ou sur la frontière de l'objet).
+    \item L'espace (ou l'objet) est souvent décrit en termes mathématiques purs, ou via des opérations booléennes (union, intersection, soustraction) et des mélanges ("blending") entre des formes de base.
+    \item Il n'y a pas nécessairement de géométrie explicite (sommets, faces) tant que le modèle n'a pas besoin d'être visualisé (rendu) ou exporté.
+\end{itemize}
+
+\subsection{Approches}
+
+\subsubsection{Voxélisation}
+\begin{definition}[Voxélisation]
+Représentation d'un objet 3D par une grille régulière de \textbf{voxels} (pixels volumiques). Chaque voxel contient une information indiquant s'il fait partie de l'objet (et potentiellement d'autres propriétés comme la couleur, la densité, etc.). C'est un modèle discret.
+\end{definition}
+\begin{itemize}
+    \item \textbf{Applications :} Imagerie médicale (IRM, CT scans), simulation de fluides (CFD), sculpture virtuelle.
+    \item \textbf{Paramètres :} Intérieur/extérieur, couleur, réfraction/absorption.
+    \item \textbf{Avantages :} Topologie abstraite facile à gérer, bon pour les données naturelles (scans), permet le rendu volumétrique direct (visualisation de l'intérieur).
+    \item \textbf{Désavantages :} Nécessite de grands ensembles de données (mémoire), peut être difficile de générer des données complexes non scannées, peut souffrir d'anisotropie (artefacts liés à l'orientation de la grille).
+\end{itemize}
+
+\subsubsection{Géométrie Solide Constructive (Constructive Solid Geometry – CSG)}
+\begin{definition}[CSG]
+Méthode de modélisation où des formes géométriques simples (\textbf{primitives} : sphères, cubes, cylindres, cônes, etc.) sont combinées à l'aide d'opérations booléennes ensemblistes (\textbf{union} $\cup$, \textbf{intersection} $\cap$, \textbf{différence} $-$).
+\end{definition}
+La structure est souvent représentée par un arbre binaire (CSG tree) où les feuilles sont les primitives et les nœuds internes sont les opérations booléennes.
+
+\begin{itemize}
+    \item \textbf{Applications :} CAO (SolidWorks, etc.), modélisation pour le rendu (Pov-Ray).
+\end{itemize}
+
+\begin{verbatim}
+#save_to: csg_tree_example.png
+from graphviz import Digraph
+
+dot = Digraph(comment='CSG Tree Example')
+dot.attr(rankdir='TB', nodesep='0.4', ranksep='0.6') # Adjusted spacing
+
+# Based on interpretation of slide 8 diagram:
+# Final Op (4): Union
+# Left branch: Cube 2 (3)
+# Right branch: Intersection of Cube 1 (1) and Sphere 1 (2)
+
+# Define nodes
+dot.node('Op4', 'Union (4)', shape='ellipse', style='filled', fillcolor='lightblue')
+dot.node('Op3', 'Cube 2 (3)', shape='box', style='filled', fillcolor='lightgrey')
+dot.node('Op_I', 'Intersection', shape='ellipse', style='filled', fillcolor='lightblue')
+dot.node('Op1', 'Cube 1 (1)', shape='box', style='filled', fillcolor='lightgrey')
+dot.node('Op2', 'Sphere 1 (2)', shape='box', style='filled', fillcolor='lightgrey')
+
+# Define edges
+dot.edge('Op4', 'Op3')
+dot.edge('Op4', 'Op_I')
+dot.edge('Op_I', 'Op1')
+dot.edge('Op_I', 'Op2')
+
+# Add a title to the graph
+dot.attr(label='Exemple Arbre CSG', labelloc='t', fontsize='14')
+
+dot.render('csg_tree_example', format='png', view=False, cleanup=True)
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.7\textwidth, keepaspectratio]{csg_tree_example.png} % Adjusted width
+\caption{Exemple d'arbre CSG représentant une combinaison d'opérations booléennes sur des primitives.}
+\label{fig:csg_tree}
+\end{figure}
+
+\begin{example}[Exercice]
+Identifier les opérations booléennes correspondant aux numéros 1 à 4 dans la figure CSG pour obtenir la forme finale.
+\textit{(Solution basée sur l'interprétation visuelle de la diapositive 8)}
+1: Cube A
+2: Sphère B
+3: Cube C (plus petit)
+Intersection(A, B) -> Forme intermédiaire D
+Union(C, D) -> Forme finale (4)
+\end{example}
+
+
+\subsubsection{Blobtree}
+\begin{definition}[Blobtree]
+Structure arborescente similaire à l'arbre CSG, mais qui combine des primitives (qui peuvent être implicites ou paramétriques) en utilisant non seulement des opérations booléennes, mais aussi des opérations de \textbf{mélange} (blending, smooth union) et des \textbf{déformations} globales (torsion, étirement, etc.).
+\end{definition}
+Permet de créer des formes organiques complexes tout en gardant une structure hiérarchique.
+
+\begin{verbatim}
+#save_to: blobtree_example.png
+from graphviz import Digraph
+
+dot = Digraph(comment='Blobtree Example')
+dot.attr(rankdir='TB', nodesep='0.4', ranksep='0.6') # Adjusted spacing
+
+# Operations (Internal Nodes) - using descriptive names based on slide 8 visual
+dot.node('Root', 'Blend', shape='ellipse', style='filled', fillcolor='lightcoral')
+dot.node('Op1', 'Twist', shape='ellipse', style='filled', fillcolor='lightcoral')
+dot.node('Op2', 'Union', shape='ellipse', style='filled', fillcolor='lightblue')
+dot.node('Op3', 'Scale', shape='ellipse', style='filled', fillcolor='lightcoral')
+dot.node('Op4', 'Twist', shape='ellipse', style='filled', fillcolor='lightcoral')
+
+# Primitives (Leaf Nodes)
+dot.node('Primitive1', 'Primitive A', shape='box', style='filled', fillcolor='lightgrey')
+dot.node('Primitive2', 'Primitive B', shape='box', style='filled', fillcolor='lightgrey')
+dot.node('Primitive3', 'Primitive C', shape='box', style='filled', fillcolor='lightgrey')
+
+# Tree structure (matching the visual hierarchy)
+dot.edge('Root', 'Op1')
+dot.edge('Root', 'Op2')
+
+dot.edge('Op1', 'Primitive1')
+
+dot.edge('Op2', 'Op3')
+dot.edge('Op2', 'Primitive3')
+
+dot.edge('Op3', 'Op4')
+dot.edge('Op4', 'Primitive2')
+
+# Add a title to the graph
+dot.attr(label='Exemple Blobtree', labelloc='t', fontsize='14')
+
+dot.render('blobtree_example', format='png', view=False, cleanup=True)
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.8\textwidth, keepaspectratio]{blobtree_example.png} % Adjusted width
+\caption{Exemple de structure Blobtree combinant primitives, opérations booléennes et déformations.}
+\label{fig:blobtree}
+\end{figure}
+
+
+\section{Nuage de Points 3D}
+
+\begin{definition}[Nuage de Points]
+Un nuage de points est une collection de points $(x, y, z)$ représentant des positions sur la surface d'objets dans l'espace 3D. Il ne contient généralement pas d'information explicite sur la connectivité entre les points ou sur les surfaces sous-jacentes.
+\end{definition}
+
+\subsection{Sources de Données}
+Les nuages de points sont souvent générés par :
+\begin{itemize}
+    \item \textbf{Scanner 3D :} Dispositifs utilisant la lumière structurée ou le laser (LiDAR) pour mesurer la distance à de nombreux points sur la surface d'un objet réel.
+    \item \textbf{Reconstruction à partir d'images/vidéos 2D :} Techniques comme la Stéréo Vision ou la Structure from Motion (SfM) qui estiment la géométrie 3D à partir de multiples vues 2D. (Exemple : VisualSFM).
+\end{itemize}
+
+\subsection{Traitements Courants sur les Nuages de Points}
+Une fois acquis, les nuages de points bruts nécessitent souvent des traitements pour être utilisables :
+\begin{itemize}
+    \item \textbf{Tâche 1 : Simplification :} Réduire le nombre de points tout en préservant la forme globale. Des approches locales (fusion de points proches) ou globales (ajustement de surface) existent.
+    \item \textbf{Tâche 2 : Classification / Reconnaissance d'objets :} Assigner une étiquette sémantique (ex: "chaise", "table", "mur") à l'ensemble du nuage ou à des sous-ensembles.
+    \item \textbf{Tâche 3 : Segmentation :} Diviser le nuage de points en différentes parties significatives (ex: ailes, fuselage, queue d'un avion).
+    \item \textbf{Tâche 4 : Estimation des normales :} Calculer un vecteur normal (perpendiculaire à la surface locale) pour chaque point, information cruciale pour le rendu et l'analyse de forme.
+\end{itemize}
+Ces tâches sont essentielles pour passer d'un nuage de points brut à un modèle 3D structuré et interprétable.
+
+\section{Transformations Géométriques}
+
+Les transformations géométriques sont des fonctions qui modifient la position, l'orientation ou la forme des objets dans l'espace.
+
+\begin{definition}[Transformation Spatiale]
+Une transformation spatiale $f: \mathbb{R}^n \to \mathbb{R}^n$ est une fonction qui assigne à chaque point de l'espace un nouvel emplacement.
+\end{definition}
+Nous nous concentrerons sur les transformations de l'espace $\mathbb{R}^3$. Celles-ci peuvent être décomposées en transformations \textbf{linéaires} (rotation, mise à l'échelle, cisaillement) et \textbf{non-linéaires} (la plus courante étant la translation).
+
+\subsection{Pipeline Graphique}
+Les transformations sont fondamentales dans le pipeline graphique standard, qui décrit les étapes pour afficher une scène 3D à l'écran :
+Transformations de modélisation $\longrightarrow$ Illumination (Shading) $\longrightarrow$ Transformation d'affichage $\longrightarrow$ Clipping $\longrightarrow$ Transformation écran (Projection) $\longrightarrow$ Pixelisation (Rasterization) $\longrightarrow$ Visibilité / Rendu.
+Les \textbf{transformations de modélisation} permettent de positionner et d'orienter chaque objet dans la scène globale (passage de l'"object space" au "world space").
+
+\subsection{Rappel : Transformation Linéaire}
+Une transformation $f: \mathbb{R}^n \to \mathbb{R}^n$ est dite \textbf{linéaire} si elle satisfait deux conditions :
+\begin{enumerate}
+    \item Additivité : $f(\mathbf{u} + \mathbf{v}) = f(\mathbf{u}) + f(\mathbf{v})$ pour tous vecteurs $\mathbf{u}, \mathbf{v}$.
+    \item Homogénéité : $f(c\mathbf{u}) = cf(\mathbf{u})$ pour tout scalaire $c$ et tout vecteur $\mathbf{u}$.
+\end{enumerate}
+Géométriquement, une transformation linéaire :
+\begin{itemize}
+    \item Fait correspondre des lignes droites à des lignes droites.
+    \item Préserve l'origine ( $f(\mathbf{0}) = \mathbf{0}$ ).
+\end{itemize}
+Algébriquement, elle préserve les opérations de l'espace vectoriel (addition de vecteurs et multiplication par un scalaire).
+
+\begin{verbatim}
+#save_to: linear_transform_prop.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, axs = plt.subplots(1, 2, figsize=(12, 6)) # Increased figure size
+fig.suptitle('Propriété d\'Additivité des Transformations Linéaires: $f(u+v) = f(u)+f(v)$', fontsize=14)
+
+# Vectors
+u = np.array([1, 2])
+v = np.array([3, 1])
+u_plus_v = u + v
+origin = np.array([0,0])
+
+# Linear Transformation Matrix (example: rotation + scale)
+angle = np.pi / 6
+scale = 0.8
+T = scale * np.array([[np.cos(angle), -np.sin(angle)],
+                      [np.sin(angle), np.cos(angle)]])
+
+# Apply transformation
+f_u = T @ u
+f_v = T @ v
+f_u_plus_v = T @ u_plus_v
+f_u_plus_f_v = f_u + f_v
+
+# Plot 1: Original space (u + v)
+axs[0].quiver(origin[0], origin[1], u[0], u[1], angles='xy', scale_units='xy', scale=1, color='r', label='u')
+axs[0].quiver(u[0], u[1], v[0], v[1], angles='xy', scale_units='xy', scale=1, color='b', label='v (depuis u)') # v starting from u
+axs[0].quiver(origin[0], origin[1], v[0], v[1], angles='xy', scale_units='xy', scale=1, color='b', alpha=0.3, linestyle='--') # v starting from origin
+axs[0].quiver(origin[0], origin[1], u_plus_v[0], u_plus_v[1], angles='xy', scale_units='xy', scale=1, color='g', label='u+v')
+axs[0].set_xlim(-0.5, 5) # Adjusted limits
+axs[0].set_ylim(-0.5, 4)
+axs[0].set_title('Espace Original: Calculer $u+v$')
+axs[0].grid(True)
+axs[0].set_aspect('equal', adjustable='box')
+axs[0].legend()
+axs[0].axhline(0, color='black',linewidth=0.5)
+axs[0].axvline(0, color='black',linewidth=0.5)
+
+
+# Plot 2: Transformed space (f(u) + f(v) vs f(u+v))
+axs[1].quiver(origin[0], origin[1], f_u[0], f_u[1], angles='xy', scale_units='xy', scale=1, color='r', label='f(u)')
+axs[1].quiver(f_u[0], f_u[1], f_v[0], f_v[1], angles='xy', scale_units='xy', scale=1, color='b', label='f(v) (depuis f(u))') # f(v) starting from f(u)
+axs[1].quiver(origin[0], origin[1], f_v[0], f_v[1], angles='xy', scale_units='xy', scale=1, color='b', alpha=0.3, linestyle='--') # f(v) starting from origin
+# Plot f(u)+f(v) slightly thicker or different style to ensure visibility if overlap is perfect
+axs[1].quiver(origin[0], origin[1], f_u_plus_f_v[0], f_u_plus_f_v[1], angles='xy', scale_units='xy', scale=1, color='purple', linestyle='-', linewidth=2, label='$f(u)+f(v)$')
+axs[1].quiver(origin[0], origin[1], f_u_plus_v[0], f_u_plus_v[1], angles='xy', scale_units='xy', scale=1, color='g', linestyle=':', alpha=0.8, label='$f(u+v)$') # Should overlap purple
+axs[1].set_xlim(-0.5, 5) # Adjusted limits
+axs[1].set_ylim(-0.5, 4)
+axs[1].set_title('Espace Transformé: $f(u)+f(v)$ vs $f(u+v)$')
+axs[1].grid(True)
+axs[1].set_aspect('equal', adjustable='box')
+axs[1].legend()
+axs[1].axhline(0, color='black',linewidth=0.5)
+axs[1].axvline(0, color='black',linewidth=0.5)
+
+plt.tight_layout(rect=[0, 0.03, 1, 0.93], pad=1.5) # Adjusted layout
+plt.savefig('linear_transform_prop.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, keepaspectratio]{linear_transform_prop.png}
+\caption{Illustration de la propriété d'additivité $f(\mathbf{u}+\mathbf{v}) = f(\mathbf{u}) + f(\mathbf{v})$ pour une transformation linéaire.}
+\label{fig:linear_prop}
+\end{figure}
+
+
+\subsection{Utilisations des Transformations}
+Les transformations géométriques sont utilisées pour de nombreuses opérations en modélisation 3D :
+\begin{itemize}
+    \item \textbf{Déplacement d'un objet} dans une scène (translation, rotation).
+    \item \textbf{Déplacement de l'observateur} (caméra) par rapport à une scène (équivalent à transformer la scène inversement).
+    \item \textbf{Réplication} d'un motif ou d'un objet (combinaison de translation, rotation, échelle).
+    \item \textbf{Déformation} d'un objet (mise à l'échelle non uniforme, cisaillement, ou transformations plus complexes).
+    \item \textbf{Projection :} Transformer la scène 3D en une image 2D vue depuis la caméra.
+\end{itemize}
+
+\subsection{Représentation des Objets pour la Transformation}
+Un objet 3D est souvent décrit par un ensemble de sommets (points). Appliquer une transformation à un objet revient à appliquer cette transformation à chacun de ses sommets. On utilise la notation vectorielle pour représenter les sommets : un point $P$ de coordonnées $(x, y, z)$ est représenté par un vecteur colonne $\begin{pmatrix} x \\ y \\ z \end{pmatrix}$.
+
+\section{Types de Transformations Élémentaires}
+
+Les transformations les plus courantes sont :
+
+\begin{itemize}
+    \item \textbf{Translation :} Déplacement de tous les points d'une distance et d'une direction constantes. Non linéaire car l'origine n'est pas fixe ($f(\mathbf{0}) \neq \mathbf{0}$).
+    \item \textbf{Rotation :} Pivotement des points autour d'un axe fixe ou d'un point fixe. Linéaire.
+    \item \textbf{Homothétie (Scaling) :} Agrandissement ou réduction des distances par rapport à un point fixe (souvent l'origine). Linéaire. Peut être uniforme (même facteur dans toutes les directions) ou non uniforme.
+    \item \textbf{Cisaillement (Shear) :} Déformation qui incline les points, comme si on poussait sur le côté d'un livre. Linéaire.
+\end{itemize}
+
+\begin{verbatim}
+#save_to: transformation_types.png
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, axs = plt.subplots(1, 4, figsize=(18, 5)) # Increased figure size
+fig.suptitle('Types de Transformations Élémentaires (appliquées à un carré)', fontsize=14)
+
+# Original Square vertices (counter-clockwise from bottom-left)
+square_orig = np.array([[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]).T
+
+# --- Translation ---
+T_vec = np.array([0.5, 0.3])
+square_trans = square_orig + T_vec[:, np.newaxis]
+axs[0].plot(square_orig[0, :], square_orig[1, :], 'k--', label='Original')
+axs[0].plot(square_trans[0, :], square_trans[1, :], 'b-', label='Translaté')
+axs[0].set_title('Translation')
+axs[0].set_xlim(-0.5, 2)
+axs[0].set_ylim(-0.5, 2)
+axs[0].set_aspect('equal', adjustable='box')
+axs[0].grid(True)
+axs[0].legend(fontsize='small') # Smaller font for legend
+axs[0].axhline(0, color='black',linewidth=0.5)
+axs[0].axvline(0, color='black',linewidth=0.5)
+
+# --- Rotation ---
+angle = np.pi / 4 # 45 degrees
+R_mat = np.array([[np.cos(angle), -np.sin(angle)],
+                  [np.sin(angle), np.cos(angle)]])
+square_rot = R_mat @ square_orig
+axs[1].plot(square_orig[0, :], square_orig[1, :], 'k--', label='Original')
+axs[1].plot(square_rot[0, :], square_rot[1, :], 'r-', label='Rotaté')
+axs[1].set_title('Rotation (45°)')
+axs[1].set_xlim(-1, 1.5) # Adjusted limits
+axs[1].set_ylim(-0.5, 1.5)
+axs[1].set_aspect('equal', adjustable='box')
+axs[1].grid(True)
+axs[1].legend(fontsize='small')
+axs[1].axhline(0, color='black',linewidth=0.5)
+axs[1].axvline(0, color='black',linewidth=0.5)
+
+# --- Scaling ---
+S_mat = np.array([[1.5, 0], [0, 0.8]]) # Non-uniform scaling
+square_scaled = S_mat @ square_orig
+axs[2].plot(square_orig[0, :], square_orig[1, :], 'k--', label='Original')
+axs[2].plot(square_scaled[0, :], square_scaled[1, :], 'g-', label='Mis à l\'échelle')
+axs[2].set_title('Homothétie (x1.5, x0.8)')
+axs[2].set_xlim(-0.5, 2)
+axs[2].set_ylim(-0.5, 1.5) # Adjusted limits
+axs[2].set_aspect('equal', adjustable='box')
+axs[2].grid(True)
+axs[2].legend(fontsize='small')
+axs[2].axhline(0, color='black',linewidth=0.5)
+axs[2].axvline(0, color='black',linewidth=0.5)
+
+# --- Shear ---
+Sh_mat = np.array([[1, 0.5], [0, 1]]) # Shear along X axis
+square_shear = Sh_mat @ square_orig
+axs[3].plot(square_orig[0, :], square_orig[1, :], 'k--', label='Original')
+axs[3].plot(square_shear[0, :], square_shear[1, :], 'm-', label='Cisaillé')
+axs[3].set_title('Cisaillement (X)')
+axs[3].set_xlim(-0.5, 2)
+axs[3].set_ylim(-0.5, 1.5) # Adjusted limits
+axs[3].set_aspect('equal', adjustable='box')
+axs[3].grid(True)
+axs[3].legend(fontsize='small')
+axs[3].axhline(0, color='black',linewidth=0.5)
+axs[3].axvline(0, color='black',linewidth=0.5)
+
+
+plt.tight_layout(rect=[0, 0.03, 1, 0.93], pad=1.0, w_pad=1.5) # Adjusted layout
+plt.savefig('transformation_types.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, keepaspectratio]{transformation_types.png}
+\caption{Illustration des transformations élémentaires.}
+\label{fig:trans_types}
+\end{figure}
+
+\section{Transformations : Représentation Matricielle}
+
+Les transformations linéaires (rotation, échelle, cisaillement) peuvent être représentées par des matrices. Si $P = \begin{pmatrix} x \\ y \\ z \end{pmatrix}$ est un point et $M$ est la matrice de transformation (3x3 pour les transformations linéaires en 3D), le point transformé $P'$ est donné par $P' = M \cdot P$.
+
+\subsection{Rotation}
+Les rotations sont définies par trois propriétés fondamentales :
+\begin{itemize}
+    \item L'origine (ou le centre de rotation) reste fixe.
+    \item Les distances entre les points sont conservées.
+    \item L'orientation (ex: règle de la main droite) est conservée.
+\end{itemize}
+Les deux premières propriétés impliquent que les rotations sont linéaires.
+
+\subsubsection{Rotation autour de l'axe Z}
+Une rotation d'un angle $\theta$ autour de l'axe Z transforme un point $(x, y, z)$ en $(x', y', z')$ selon :
+\begin{align*} x' &= x \cos \theta - y \sin \theta \\ y' &= x \sin \theta + y \cos \theta \\ z' &= z \end{align*}
+La matrice de rotation correspondante (en 3D) est :
+\[ R_z(\theta) = \begin{pmatrix} \cos \theta & -\sin \theta & 0 \\ \sin \theta & \cos \theta & 0 \\ 0 & 0 & 1 \end{pmatrix} \]
+Le point transformé est $P' = R_z(\theta) \cdot P$.
+
+\begin{verbatim}
+#save_to: rotation_z_axis.png
+import matplotlib.pyplot as plt
+import numpy as np
+import matplotlib.patches as patches
+
+fig, ax = plt.subplots(figsize=(7, 7)) # Increased figure size
+ax.set_title('Rotation autour de l\'axe Z (vue XY)')
+
+# Original point
+P = np.array([2, 1])
+ax.plot(P[0], P[1], 'bo', markersize=8, label='P (x, y)')
+ax.plot([0, P[0]], [0, P[1]], 'b--')
+
+# Rotation angle
+theta = np.pi / 3 # 60 degrees
+cos_t, sin_t = np.cos(theta), np.sin(theta)
+R_mat = np.array([[cos_t, -sin_t], [sin_t, cos_t]])
+
+# Rotated point
+P_prime = R_mat @ P
+ax.plot(P_prime[0], P_prime[1], 'ro', markersize=8, label='P\' (x\', y\')')
+ax.plot([0, P_prime[0]], [0, P_prime[1]], 'r--')
+
+# Add arcs for angle visualization
+radius_for_arc = 1.0
+angle_start_deg = np.arctan2(P[1], P[0])*180/np.pi
+angle_end_deg = np.arctan2(P_prime[1], P_prime[0])*180/np.pi
+# Ensure arc goes in the positive direction
+if angle_end_deg < angle_start_deg:
+    angle_end_deg += 360
+arc = patches.Arc((0, 0), 2*radius_for_arc, 2*radius_for_arc, angle=0,
+                  theta1=angle_start_deg, theta2=angle_end_deg,
+                  color='gray', linewidth=1.5, label=f'$\\theta = {int(np.degrees(theta))}^\circ$')
+ax.add_patch(arc)
+mid_angle_rad = np.deg2rad((angle_start_deg + angle_end_deg) / 2)
+ax.text(radius_for_arc * 1.1 * np.cos(mid_angle_rad), radius_for_arc * 1.1 * np.sin(mid_angle_rad),
+        '$\\theta$', fontsize=14, ha='center', va='center')
+
+# Annotations (adjust position slightly)
+ax.text(P[0] + 0.1, P[1] + 0.1, f'({P[0]:.1f}, {P[1]:.1f})', fontsize=10)
+ax.text(P_prime[0] + 0.1, P_prime[1] - 0.1, f'({P_prime[0]:.1f}, {P_prime[1]:.1f})', fontsize=10)
+
+
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_xlim(-1, 3.5) # Adjusted limits
+ax.set_ylim(-1, 3)
+ax.set_aspect('equal', adjustable='box')
+ax.grid(True)
+ax.axhline(0, color='black',linewidth=0.5)
+ax.axvline(0, color='black',linewidth=0.5)
+ax.legend(loc='lower right')
+
+plt.tight_layout(pad=1.0) # Added tight layout
+plt.savefig('rotation_z_axis.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.7\textwidth, keepaspectratio]{rotation_z_axis.png} % Adjusted width
+\caption{Rotation d'un point P autour de l'origine dans le plan XY (équivalent à une rotation autour de l'axe Z).}
+\label{fig:rot_z}
+\end{figure}
+
+
+\subsection{Homothétie (Scaling)}
+Une homothétie (mise à l'échelle) par des facteurs $S_x, S_y, S_z$ le long des axes transforme un point $(x, y, z)$ en $(x', y', z')$ :
+\begin{align*} x' &= S_x \cdot x \\ y' &= S_y \cdot y \\ z' &= S_z \cdot z \end{align*}
+La matrice d'homothétie est :
+\[ S = \begin{pmatrix} S_x & 0 & 0 \\ 0 & S_y & 0 \\ 0 & 0 & S_z \end{pmatrix} \]
+Le point transformé est $P' = S \cdot P$. L'homothétie est une transformation linéaire (elle satisfait $f(c\mathbf{u}) = cf(\mathbf{u})$ et $f(\mathbf{u} + \mathbf{v}) = f(\mathbf{u}) + f(\mathbf{v})$).
+
+\subsection{Translation}
+Une translation par un vecteur $T = (T_x, T_y, T_z)$ transforme un point $(x, y, z)$ en $(x', y', z')$ :
+\begin{align*} x' &= x + T_x \\ y' &= y + T_y \\ z' &= z + T_z \end{align*}
+En notation vectorielle : $P' = P + T$.
+La translation n'est \textbf{pas} une transformation linéaire car l'origine n'est pas préservée ($f(\mathbf{0}) = T \neq \mathbf{0}$ si $T \neq \mathbf{0}$). Elle ne peut donc pas être représentée par une simple multiplication matricielle 3x3.
+
+\begin{remark}
+Q: La translation est-elle une transformation linéaire ?
+R: Non, car elle ne préserve pas l'origine (sauf si le vecteur de translation est nul).
+\end{remark}
+
+\subsection{Coordonnées Homogènes}
+Pour unifier le traitement des transformations linéaires (rotation, échelle) et non-linéaires (translation) sous une forme matricielle unique, on utilise les \textbf{coordonnées homogènes}.
+Un point 3D $(x, y, z)$ est représenté par un vecteur 4D $(x, y, z, 1)$. Plus généralement, le point $(X, Y, Z, W)$ en coordonnées homogènes correspond au point 3D $(X/W, Y/W, Z/W)$ si $W \neq 0$. On utilise généralement $W=1$.
+
+Avec les coordonnées homogènes, les transformations 3D (y compris la translation) peuvent être représentées par des matrices 4x4.
+Si $P_h = \begin{pmatrix} x \\ y \\ z \\ 1 \end{pmatrix}$ est le point en coordonnées homogènes et $M_H$ est la matrice de transformation 4x4, le point transformé $P'_h = \begin{pmatrix} X' \\ Y' \\ Z' \\ W' \end{pmatrix}$ est donné par $P'_h = M_H \cdot P_h$. Le point 3D correspondant est $(X'/W', Y'/W', Z'/W')$.
+
+\subsubsection{Structure de la Matrice 4x4}
+Une matrice de transformation 4x4 $M_H$ peut être décomposée en sous-matrices :
+\[ M_H = \begin{pmatrix}
+M_{3x3} & T_{3x1} \\
+P_{1x3} & S_{1x1}
+\end{pmatrix} =
+\begin{pmatrix}
+R_{11} & R_{12} & R_{13} & T_x \\
+R_{21} & R_{22} & R_{23} & T_y \\
+R_{31} & R_{32} & R_{33} & T_z \\
+P_x & P_y & P_z & S
+\end{pmatrix}
+\]
+\begin{itemize}
+    \item $M_{3x3}$ (coin supérieur gauche) : Contient les effets linéaires (rotation, échelle, cisaillement).
+    \item $T_{3x1}$ (colonne de droite) : Contient les effets de translation $(T_x, T_y, T_z)$.
+    \item $P_{1x3}$ (ligne du bas) : Utilisée pour les projections perspectives. Souvent $(0, 0, 0)$ pour les transformations affines.
+    \item $S_{1x1}$ (coin inférieur droit) : Facteur d'échelle global homogène. Souvent 1 pour les transformations affines.
+\end{itemize}
+
+\section{Manipulations Géométriques avec Matrices Homogènes}
+
+Soit un point $p$ en 3D, représenté par $P_h = \begin{pmatrix} x \\ y \\ z \\ 1 \end{pmatrix}$ en coordonnées homogènes.
+Soit une transformation géométrique $M$ définie par une matrice 4x4 $M_H$.
+Le point transformé $p'$ (en coordonnées homogènes $P'_h$) est obtenu par multiplication matricielle :
+\[ P'_h = M_H \cdot P_h \]
+
+Cela permet de combiner plusieurs transformations (ex: translation, puis rotation, puis mise à l'échelle) en multipliant leurs matrices respectives. L'ordre des multiplications est important ! $M_3 \cdot M_2 \cdot M_1 \cdot P_h$ signifie appliquer $M_1$ d'abord, puis $M_2$, puis $M_3$.
+
+\subsection{Matrice de Translation}
+La translation par $(T_x, T_y, T_z)$ est représentée par la matrice 4x4 :
+\[ T(T_x, T_y, T_z) = \begin{pmatrix}
+1 & 0 & 0 & T_x \\
+0 & 1 & 0 & T_y \\
+0 & 0 & 1 & T_z \\
+0 & 0 & 0 & 1
+\end{pmatrix} \]
+En appliquant cette matrice à $P_h$:
+\[ T \cdot P_h = \begin{pmatrix}
+1 & 0 & 0 & T_x \\
+0 & 1 & 0 & T_y \\
+0 & 0 & 1 & T_z \\
+0 & 0 & 0 & 1
+\end{pmatrix} \begin{pmatrix} x \\ y \\ z \\ 1 \end{pmatrix} = \begin{pmatrix} x + T_x \\ y + T_y \\ z + T_z \\ 1 \end{pmatrix} \]
+Ce qui correspond bien au point translaté.
+
+\subsection{Matrice de Rotation (angles d'Euler)}
+Une rotation 3D quelconque peut être décomposée en une séquence de trois rotations autour des axes principaux (X, Y, Z). Les matrices de rotation 4x4 autour de chaque axe sont :
+\[ R_x(\alpha) = \begin{pmatrix} 1 & 0 & 0 & 0 \\ 0 & \cos \alpha & -\sin \alpha & 0 \\ 0 & \sin \alpha & \cos \alpha & 0 \\ 0 & 0 & 0 & 1 \end{pmatrix} \]
+\[ R_y(\beta) = \begin{pmatrix} \cos \beta & 0 & \sin \beta & 0 \\ 0 & 1 & 0 & 0 \\ -\sin \beta & 0 & \cos \beta & 0 \\ 0 & 0 & 0 & 1 \end{pmatrix} \]
+\[ R_z(\gamma) = \begin{pmatrix} \cos \gamma & -\sin \gamma & 0 & 0 \\ \sin \gamma & \cos \gamma & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{pmatrix} \]
+Une rotation composite $R$ est obtenue en multipliant ces matrices, par exemple $R = R_z(\gamma) R_y(\beta) R_x(\alpha)$. La matrice résultante $R$ (le bloc 3x3 supérieur gauche de la matrice 4x4 totale) contiendra les cosinus directeurs de la rotation combinée.
+\[ R = \begin{pmatrix} R_{11} & R_{12} & R_{13} & 0 \\ R_{21} & R_{22} & R_{23} & 0 \\ R_{31} & R_{32} & R_{33} & 0 \\ 0 & 0 & 0 & 1 \end{pmatrix} \]
+
+\subsubsection{Règles pour Construire les Matrices de Rotation Axiales}
+Pour construire la matrice 4x4 de rotation d'angle $\theta$ autour d'un axe principal (X, Y, ou Z) :
+\begin{itemize}
+    \item La ligne et la colonne correspondant à l'axe de rotation contiennent des 0, sauf un 1 sur la diagonale. (Ex: pour $R_z$, ligne 3 et colonne 3 sont $(0, 0, 1, 0)$ et $(0, 0, 1, 0)^T$).
+    \item Le 1 dans le coin inférieur droit (coordonnée homogène) reste 1. Les autres éléments de la 4ème ligne et 4ème colonne sont 0.
+    \item Dans le bloc 2x2 restant correspondant aux deux autres axes, on place $\cos\theta$ sur la diagonale.
+    \item On place $\sin\theta$ et $-\sin\theta$ sur l'anti-diagonale pour "compléter le carré". Le signe '-' est placé sur le $\sin\theta$ de la ligne correspondant à l'axe \textit{suivant} l'axe de rotation dans l'ordre cyclique (X $\to$ Y $\to$ Z $\to$ X).
+        \begin{itemize}
+            \item Rotation X : affecte Y, Z. L'axe suivant est Y. $-\sin\theta$ en ligne Y, colonne Z.
+            \item Rotation Y : affecte X, Z. L'axe suivant est Z. $-\sin\theta$ en ligne Z, colonne X.
+            \item Rotation Z : affecte X, Y. L'axe suivant est X. $-\sin\theta$ en ligne X, colonne Y.
+        \end{itemize}
+\end{itemize}
+
+\section{Autres Transformations}
+
+\subsection{Homothétie Isotrope}
+C'est une mise à l'échelle uniforme avec le même facteur $S$ dans toutes les directions. La matrice 3x3 est $S \cdot I$, où $I$ est la matrice identité. La matrice 4x4 est :
+\[ S_{iso}(S) = \begin{pmatrix} S & 0 & 0 & 0 \\ 0 & S & 0 & 0 \\ 0 & 0 & S & 0 \\ 0 & 0 & 0 & 1 \end{pmatrix} \]
+
+\subsection{Affinités Orthogonales (Homothétie Non-Uniforme)}
+Ce sont des mises à l'échelle avec des facteurs potentiellement différents le long des axes principaux $S_x, S_y, S_z$. La matrice 4x4 générale est :
+\[ S(S_x, S_y, S_z) = \begin{pmatrix} S_x & 0 & 0 & 0 \\ 0 & S_y & 0 & 0 \\ 0 & 0 & S_z & 0 \\ 0 & 0 & 0 & 1 \end{pmatrix} \]
+Des cas particuliers sont les affinités par rapport à un plan (mise à l'échelle le long d'un seul axe) :
+\begin{itemize}
+    \item Affinité d'axe X par rapport au plan yOz : $S(S_x, 1, 1)$
+    \[ \begin{pmatrix} S_x & 0 & 0 & 0 \\ 0 & 1 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{pmatrix} \]
+    \item Affinité d'axe Y par rapport au plan xOz : $S(1, S_y, 1)$
+    \[ \begin{pmatrix} 1 & 0 & 0 & 0 \\ 0 & S_y & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{pmatrix} \]
+    \item Affinité d'axe Z par rapport au plan xOy : $S(1, 1, S_z)$
+    \[ \begin{pmatrix} 1 & 0 & 0 & 0 \\ 0 & 1 & 0 & 0 \\ 0 & 0 & S_z & 0 \\ 0 & 0 & 0 & 1 \end{pmatrix} \]
+\end{itemize}
+
+
+\end{document}
+```
