@@ -1,0 +1,1894 @@
+```latex
+\begin{document}
+\sloppy
+\section{Introduction aux Transformations de Modélisation}
+Les transformations géométriques sont des opérations fondamentales en infographie. Elles permettent de manipuler la position, l'orientation, la taille et la forme des objets dans une scène 2D ou 3D.
+\subsection{Définition et objectif}
+Une transformation de modélisation est une fonction mathématique qui modifie les coordonnées des points définissant un objet. L'objectif principal est de positionner et d'arranger les objets dans une scène virtuelle (World Space) à partir de leurs définitions locales (Object Space). Elles sont essentielles pour créer des scènes complexes, animer des objets, et définir le point de vue de l'observateur.
+\subsection{Lien avec le pipeline graphique}
+Les transformations de modélisation constituent la première étape majeure du pipeline graphique. Après avoir défini la géométrie d'un objet dans son propre système de coordonnées (Object Space), ces transformations le placent dans la scène globale (World Space). Les étapes suivantes du pipeline incluent l'illumination, la transformation de vue, le clipping, la projection, et la rastérisation pour finalement afficher l'image à l'écran.
+\begin{verbatim}
+#save_to: pipeline_graphique.png
+from graphviz import Digraph
+dot = Digraph(comment='Pipeline Graphique', graph_attr={'rankdir': 'TB'})
+dot.node('A', 'Transformations de modélisation')
+dot.node('B', 'Illumination (Shading)')
+dot.node('C', 'Transformation d\'affichage')
+dot.node('D', 'Clipping')
+dot.node('E', 'Transformation écran (Projection)')
+dot.node('F', 'Pixelisation (Rasterization)')
+dot.node('G', 'Visibilité / Rendu')
+dot.edge('A', 'B')
+dot.edge('B', 'C')
+dot.edge('C', 'D')
+dot.edge('D', 'E')
+dot.edge('E', 'F')
+dot.edge('F', 'G')
+dot.render('pipeline_graphique', format='png', view=False)
+\end{verbatim}
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.8\textwidth, keepaspectratio]{pipeline_graphique.png}
+\caption{Étapes principales du pipeline graphique.}
+\label{fig:pipeline_graphique}
+\end{figure}
+\subsection{Transformation spatiale}
+Une transformation spatiale \( f: \mathbb{R}^n \to \mathbb{R}^n \) est une fonction qui assigne à chaque point de l'espace un nouvel emplacement. Nous nous concentrons principalement sur :
+\begin{itemize}
+    \item Les transformations \textbf{linéaires} : rotation, mise à l'échelle, cisaillement.
+    \item La transformation \textbf{non-linéaire} : translation.
+\end{itemize}
+L'utilisation de coordonnées homogènes permettra de représenter toutes ces transformations sous forme de multiplication matricielle.
+\begin{verbatim}
+#save_to: spatial_transform.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+fig, ax = plt.subplots()
+# Original points
+points_orig = np.array([[1, 1], [1.5, 2], [2.5, 1.5], [2, 0.5]])
+# Transformed points (example: rotation + translation)
+theta = np.pi / 4
+rotation_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+translation_vector = np.array([1, 0.5])
+points_transformed = points_orig @ rotation_matrix.T + translation_vector
+# Plot original points
+ax.plot(points_orig[:, 0], points_orig[:, 1], 'bo', label='Points Originaux')
+ax.plot(np.append(points_orig[:, 0], points_orig[0, 0]), np.append(points_orig[:, 1], points_orig[0, 1]), 'b--')
+# Plot transformed points
+ax.plot(points_transformed[:, 0], points_transformed[:, 1], 'ro', label='Points Transformés')
+ax.plot(np.append(points_transformed[:, 0], points_transformed[0, 0]), np.append(points_transformed[:, 1], points_transformed[0, 1]), 'r--')
+# Draw arrows indicating transformation
+for i in range(len(points_orig)):
+    ax.arrow(points_orig[i, 0], points_orig[i, 1],
+             points_transformed[i, 0] - points_orig[i, 0],
+             points_transformed[i, 1] - points_orig[i, 1],
+             head_width=0.1, head_length=0.15, fc='k', ec='k', length_includes_head=True)
+# Axes setup
+ax.spines['left'].set_position('zero')
+ax.spines['bottom'].set_position('zero')
+ax.spines['right'].set_color('none')
+ax.spines['top'].set_color('none')
+ax.xaxis.set_ticks_position('bottom')
+ax.yaxis.set_ticks_position('left')
+ax.set_xlim(-1, 4)
+ax.set_ylim(-1, 4)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xlabel('x')
+ax.set_ylabel('y', rotation=0)
+ax.legend()
+ax.set_title('Exemple de Transformation Spatiale $f: \mathbb{R}^2 \\to \mathbb{R}^2$')
+plt.grid(True)
+plt.savefig('spatial_transform.png')
+\end{verbatim}
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.7\textwidth, keepaspectratio]{spatial_transform.png}
+\caption{Illustration d'une transformation spatiale assignant de nouvelles positions aux points.}
+\label{fig:spatial_transform}
+\end{figure}
+\section{Rappels : Transformation Linéaire}
+\begin{definition}
+Une application \( f: \mathbb{R}^n \to \mathbb{R}^n \) est dite \textbf{linéaire} si elle satisfait les deux propriétés suivantes pour tous vecteurs \( \mathbf{u}, \mathbf{v} \in \mathbb{R}^n \) et tout scalaire \( c \in \mathbb{R} \):
+\begin{enumerate}
+    \item Additivité : \( f(\mathbf{u} + \mathbf{v}) = f(\mathbf{u}) + f(\mathbf{v}) \)
+    \item Homogénéité : \( f(c\mathbf{u}) = c f(\mathbf{u}) \)
+\end{enumerate}
+\end{definition}
+\subsection{Interprétation géométrique}
+Géométriquement, une transformation linéaire préserve certaines propriétés de l'espace :
+\begin{itemize}
+    \item Elle transforme les lignes droites en lignes droites (ou en un point si la transformation est dégénérée).
+    \item Elle préserve l'origine : \( f(\mathbf{0}) = \mathbf{0} \).
+    \item Elle préserve le parallélisme des lignes.
+\end{itemize}
+Les rotations et les mises à l'échelle centrées à l'origine sont des exemples de transformations linéaires. La translation ne l'est pas, car elle ne préserve pas l'origine (\( f(\mathbf{0}) \neq \mathbf{0} \)).
+\subsection{Propriétés algébriques}
+Algébriquement, une transformation linéaire préserve les opérations de base de l'espace vectoriel : l'addition de vecteurs et la multiplication par un scalaire. Cela signifie que l'on peut appliquer la transformation avant ou après avoir effectué ces opérations, le résultat sera le même.
+\begin{verbatim}
+#save_to: linear_additivity.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+fig, axes = plt.subplots(1, 2, figsize=(10, 5))
+# Define vectors u, v
+u = np.array([1, 2])
+v = np.array([3, 1])
+u_plus_v = u + v
+# Define a linear transformation (example: rotation by 30 deg)
+theta = np.pi / 6
+T = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+f_u = T @ u
+f_v = T @ v
+f_u_plus_v = T @ u_plus_v
+f_u_plus_f_v = f_u + f_v
+origin = np.array([0, 0])
+# Plot 1: Add first, then apply f
+ax = axes[0]
+ax.quiver(*origin, *u, angles='xy', scale_units='xy', scale=1, color='b', label='u')
+ax.quiver(*u, *v, angles='xy', scale_units='xy', scale=1, color='g', label='v')
+ax.quiver(*origin, *u_plus_v, angles='xy', scale_units='xy', scale=1, color='r', label='u+v')
+ax.quiver(*origin, *f_u_plus_v, angles='xy', scale_units='xy', scale=1, color='m', linestyle='dashed', label='f(u+v)')
+ax.set_xlim(-1, 5)
+ax.set_ylim(-1, 5)
+ax.set_aspect('equal', adjustable='box')
+ax.grid(True)
+ax.legend()
+ax.set_title('1. Addition (u+v), puis application f')
+ax.text(u_plus_v[0], u_plus_v[1] + 0.2, 'u+v', color='r')
+ax.text(f_u_plus_v[0], f_u_plus_v[1] + 0.2, 'f(u+v)', color='m')
+ax.spines['left'].set_position('zero')
+ax.spines['bottom'].set_position('zero')
+ax.spines['right'].set_color('none')
+ax.spines['top'].set_color('none')
+# Plot 2: Apply f first, then add
+ax = axes[1]
+ax.quiver(*origin, *f_u, angles='xy', scale_units='xy', scale=1, color='b', label='f(u)')
+ax.quiver(*origin, *f_v, angles='xy', scale_units='xy', scale=1, color='g', label='f(v)')
+ax.quiver(*f_u, *f_v, angles='xy', scale_units='xy', scale=1, color='grey', linestyle='dotted') # Helper
+ax.quiver(*origin, *f_u_plus_f_v, angles='xy', scale_units='xy', scale=1, color='m', label='f(u)+f(v)')
+ax.set_xlim(-1, 5)
+ax.set_ylim(-1, 5)
+ax.set_aspect('equal', adjustable='box')
+ax.grid(True)
+ax.legend()
+ax.set_title('2. Application f (f(u), f(v)), puis addition')
+ax.text(f_u[0], f_u[1] + 0.2, 'f(u)', color='b')
+ax.text(f_v[0], f_v[1] + 0.2, 'f(v)', color='g')
+ax.text(f_u_plus_f_v[0], f_u_plus_f_v[1] + 0.2, 'f(u)+f(v)', color='m')
+ax.spines['left'].set_position('zero')
+ax.spines['bottom'].set_position('zero')
+ax.spines['right'].set_color('none')
+ax.spines['top'].set_color('none')
+fig.suptitle('Propriété d\'additivité : $f(\mathbf{u} + \mathbf{v}) = f(\mathbf{u}) + f(\mathbf{v})$')
+plt.tight_layout(rect=[0, 0.03, 1, 0.95]) # Adjust layout to prevent title overlap
+plt.savefig('linear_additivity.png')
+\end{verbatim}
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, keepaspectratio]{linear_additivity.png}
+\caption{Illustration de la propriété d'additivité d'une transformation linéaire.}
+\label{fig:linear_additivity}
+\end{figure}
+\begin{verbatim}
+#save_to: linear_homogeneity.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+fig, axes = plt.subplots(1, 2, figsize=(10, 5))
+# Define vector u and scalar c
+u = np.array([1, 2])
+c = 1.5
+c_u = c * u
+# Define a linear transformation (example: scaling by (0.5, 1.2))
+T = np.array([[0.5, 0], [0, 1.2]])
+f_u = T @ u
+f_c_u = T @ c_u
+c_f_u = c * f_u
+origin = np.array([0, 0])
+# Plot 1: Scale first, then apply f
+ax = axes[0]
+ax.quiver(*origin, *u, angles='xy', scale_units='xy', scale=1, color='b', label='u')
+ax.quiver(*origin, *c_u, angles='xy', scale_units='xy', scale=1, color='r', label='cu')
+ax.quiver(*origin, *f_c_u, angles='xy', scale_units='xy', scale=1, color='m', linestyle='dashed', label='f(cu)')
+ax.set_xlim(-1, 3)
+ax.set_ylim(-1, 4)
+ax.set_aspect('equal', adjustable='box')
+ax.grid(True)
+ax.legend()
+ax.set_title('1. Multiplication (cu), puis application f')
+ax.text(c_u[0], c_u[1] + 0.2, 'cu', color='r')
+ax.text(f_c_u[0], f_c_u[1] + 0.2, 'f(cu)', color='m')
+ax.spines['left'].set_position('zero')
+ax.spines['bottom'].set_position('zero')
+ax.spines['right'].set_color('none')
+ax.spines['top'].set_color('none')
+# Plot 2: Apply f first, then scale
+ax = axes[1]
+ax.quiver(*origin, *f_u, angles='xy', scale_units='xy', scale=1, color='b', label='f(u)')
+ax.quiver(*origin, *c_f_u, angles='xy', scale_units='xy', scale=1, color='m', label='c * f(u)')
+ax.set_xlim(-1, 3)
+ax.set_ylim(-1, 4)
+ax.set_aspect('equal', adjustable='box')
+ax.grid(True)
+ax.legend()
+ax.set_title('2. Application f (f(u)), puis multiplication c')
+ax.text(f_u[0], f_u[1] + 0.2, 'f(u)', color='b')
+ax.text(c_f_u[0], c_f_u[1] + 0.2, 'c f(u)', color='m')
+ax.spines['left'].set_position('zero')
+ax.spines['bottom'].set_position('zero')
+ax.spines['right'].set_color('none')
+ax.spines['top'].set_color('none')
+fig.suptitle('Propriété d\'homogénéité : $f(c\mathbf{u}) = c f(\mathbf{u})$')
+plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+plt.savefig('linear_homogeneity.png')
+\end{verbatim}
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, keepaspectratio]{linear_homogeneity.png}
+\caption{Illustration de la propriété d'homogénéité d'une transformation linéaire.}
+\label{fig:linear_homogeneity}
+\end{figure}
+\section{Transformations Spatiales : Utilisations et Types}
+\subsection{Utilisations}
+Les transformations spatiales sont omniprésentes en infographie et modélisation :
+\begin{itemize}
+    \item \textbf{Placement d'objets} : Positionner des objets (meubles dans une pièce, personnages dans un décor).
+    \item \textbf{Animation} : Déplacer, tourner, ou déformer des objets au fil du temps.
+    \item \textbf{Point de vue} : Déplacer et orienter la caméra virtuelle pour définir ce qui est visible.
+    \item \textbf{Modélisation hiérarchique} : Construire des objets complexes en assemblant des parties plus simples (e.g., un bras composé d'une épaule, d'un coude, d'une main).
+    \item \textbf{Réplication} : Créer des motifs ou des structures répétitives (e.g., une forêt d'arbres identiques placés différemment).
+    \item \textbf{Déformation} : Modifier la forme d'un objet (souvent non-linéaire, mais peut inclure des cisaillements linéaires).
+    \item \textbf{Projection} : Transformer des coordonnées 3D en coordonnées 2D pour l'affichage (bien que la projection perspective ne soit pas linéaire, elle utilise des matrices et est souvent groupée avec ces transformations).
+\end{itemize}
+\subsection{Types de transformations fondamentales}
+Les transformations les plus courantes sont :
+\begin{itemize}
+    \item \textbf{Translation} : Déplace un objet sans changer son orientation ou sa taille.
+    \item \textbf{Rotation} : Tourne un objet autour d'un axe ou d'un point.
+    \item \textbf{Mise à l'échelle (Scaling)} : Agrandit ou réduit un objet. Peut être uniforme (même facteur dans toutes les directions) ou non uniforme.
+    \item \textbf{Cisaillement (Shear)} : Incline l'objet, comme si on poussait sur une face d'un livre.
+\end{itemize}
+\begin{verbatim}
+#save_to: transform_types.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+def plot_cube(ax, vertices, edges, color='b', alpha=0.1):
+    """Plots a 3D cube."""
+    poly = Poly3DCollection([vertices[verts] for verts in [
+        [0, 1, 2, 3], [4, 5, 6, 7], [0, 1, 5, 4],
+        [2, 3, 7, 6], [1, 2, 6, 5], [0, 3, 7, 4]
+    ]], facecolors=color, linewidths=1, edgecolors='k', alpha=alpha)
+    ax.add_collection3d(poly)
+    # Draw edges
+    #for edge in edges:
+    #    ax.plot3D(*zip(*vertices[edge]), color="k")
+def get_cube_vertices_edges():
+    """Returns vertices and edges for a unit cube centered at origin."""
+    v = 0.5
+    vertices = np.array([
+        [-v, -v, -v], [ v, -v, -v], [ v,  v, -v], [-v,  v, -v],
+        [-v, -v,  v], [ v, -v,  v], [ v,  v,  v], [-v,  v,  v]
+    ])
+    edges = [
+        [0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4],
+        [0, 4], [1, 5], [2, 6], [3, 7]
+    ]
+    return vertices, edges
+fig = plt.figure(figsize=(12, 3))
+# Original
+vertices, edges = get_cube_vertices_edges()
+ax1 = fig.add_subplot(151, projection='3d')
+plot_cube(ax1, vertices, edges, color='gray', alpha=0.3)
+ax1.set_title('Original')
+ax1.set_axis_off()
+ax1.view_init(elev=20, azim=30)
+ax1.set_xlim([-1, 1])
+ax1.set_ylim([-1, 1])
+ax1.set_zlim([-1, 1])
+# Translation
+t = np.array([0.8, 0.3, -0.2])
+vertices_t = vertices + t
+ax2 = fig.add_subplot(152, projection='3d')
+plot_cube(ax2, vertices_t, edges)
+ax2.set_title('Translation')
+ax2.set_axis_off()
+ax2.view_init(elev=20, azim=30)
+ax2.set_xlim([-1, 2])
+ax2.set_ylim([-1, 2])
+ax2.set_zlim([-1, 1])
+# Rotation (around Z)
+theta = np.pi / 4
+Rz = np.array([[np.cos(theta), -np.sin(theta), 0],
+               [np.sin(theta), np.cos(theta), 0],
+               [0, 0, 1]])
+vertices_r = vertices @ Rz.T
+ax3 = fig.add_subplot(153, projection='3d')
+plot_cube(ax3, vertices_r, edges)
+ax3.set_title('Rotation')
+ax3.set_axis_off()
+ax3.view_init(elev=20, azim=30)
+ax3.set_xlim([-1, 1])
+ax3.set_ylim([-1, 1])
+ax3.set_zlim([-1, 1])
+# Scaling
+S = np.array([[1.5, 0, 0], [0, 0.8, 0], [0, 0, 1.2]])
+vertices_s = vertices @ S.T
+ax4 = fig.add_subplot(154, projection='3d')
+plot_cube(ax4, vertices_s, edges)
+ax4.set_title('Scaling')
+ax4.set_axis_off()
+ax4.view_init(elev=20, azim=30)
+ax4.set_xlim([-1, 1])
+ax4.set_ylim([-1, 1])
+ax4.set_zlim([-1, 1])
+# Shear (x by y)
+Sh = np.array([[1, 0.5, 0], [0, 1, 0], [0, 0, 1]])
+vertices_sh = vertices @ Sh.T
+ax5 = fig.add_subplot(155, projection='3d')
+plot_cube(ax5, vertices_sh, edges)
+ax5.set_title('Shear')
+ax5.set_axis_off()
+ax5.view_init(elev=20, azim=30)
+ax5.set_xlim([-1, 1])
+ax5.set_ylim([-1, 1])
+ax5.set_zlim([-1, 1])
+plt.tight_layout()
+plt.savefig('transform_types.png')
+\end{verbatim}
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, keepaspectratio]{transform_types.png}
+\caption{Types de transformations fondamentales appliquées à un cube.}
+\label{fig:transform_types}
+\end{figure}
+\subsection{Représentation des objets}
+Un objet 3D est typiquement décrit par un ensemble de sommets (vertices) qui définissent sa forme. Appliquer une transformation à un objet revient à appliquer cette transformation à chacun de ses sommets.
+On utilise la notation vectorielle pour représenter les sommets :
+\[ \mathbf{p}_i = \begin{pmatrix} x_i \\ y_i \\ z_i \end{pmatrix} \]
+\section{Transformations de Base : Rotation}
+\subsection{Propriétés fondamentales}
+Les rotations sont des transformations linéaires définies par trois propriétés essentielles :
+\begin{itemize}
+    \item \textbf{Origine fixe} : Le point origine (0,0,0) ne bouge pas.
+    \item \textbf{Distances conservées} : La distance entre deux points quelconques reste la même après rotation (isométrie).
+    \item \textbf{Orientation conservée} : L'orientation relative des axes est maintenue (pas de "retournement" comme un miroir). Une base orthonormée directe reste directe.
+\end{itemize}
+Les deux premières propriétés (origine fixe et conservation des distances) impliquent que les rotations (autour de l'origine) sont des transformations linéaires.
+\subsection{Rotation autour de l'axe Z}
+Considérons une rotation d'un angle \( \theta \) autour de l'axe Z dans un repère orthonormé direct. Un point \( \mathbf{p} = (x, y, z) \) est transformé en \( \mathbf{p'} = (x', y', z') \).
+\subsubsection{Calcul vectoriel}
+En projetant le point sur le plan xy, on voit une rotation 2D standard. La coordonnée z reste inchangée.
+\begin{align*} x' &= x \cos \theta - y \sin \theta \\ y' &= x \sin \theta + y \cos \theta \\ z' &= z \end{align*}
+\subsubsection{Matrice de rotation}
+Cette transformation peut s'écrire sous forme matricielle \( \mathbf{p'} = R_z(\theta) \mathbf{p} \):
+\[ \begin{pmatrix} x' \\ y' \\ z' \end{pmatrix} = \begin{pmatrix} \cos \theta & -\sin \theta & 0 \\ \sin \theta & \cos \theta & 0 \\ 0 & 0 & 1 \end{pmatrix} \begin{pmatrix} x \\ y \\ z \end{pmatrix} \]
+La matrice \( R_z(\theta) \) est la matrice de rotation autour de l'axe Z.
+\begin{verbatim}
+#save_to: rotation_z.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+fig = plt.figure(figsize=(6, 6))
+ax = fig.add_subplot(111)
+# Original point
+p = np.array([2, 1])
+# Rotation angle
+theta_deg = 30
+theta_rad = np.radians(theta_deg)
+# Rotation matrix
+R = np.array([[np.cos(theta_rad), -np.sin(theta_rad)],
+              [np.sin(theta_rad), np.cos(theta_rad)]])
+# Rotated point
+p_prime = R @ p
+origin = np.array([0, 0])
+# Plot vectors
+ax.quiver(*origin, p[0], p[1], angles='xy', scale_units='xy', scale=1, color='b', label='p(x,y)')
+ax.quiver(*origin, p_prime[0], p_prime[1], angles='xy', scale_units='xy', scale=1, color='r', label="p'(x',y')")
+# Plot rotation arc
+radius = np.linalg.norm(p)
+arc = patches.Arc(origin, radius*0.8, radius*0.8, angle=0,
+                  theta1=np.arctan2(p[1], p[0]) * 180/np.pi,
+                  theta2=np.arctan2(p_prime[1], p_prime[0]) * 180/np.pi,
+                  color='k', linestyle='--')
+ax.add_patch(arc)
+angle_text_pos = R @ np.array([radius*0.5, 0]) * 1.1 # Position text along bisector approx
+mid_angle_rad = (np.arctan2(p[1],p[0]) + np.arctan2(p_prime[1],p_prime[0])) / 2
+ax.text(radius*0.4*np.cos(mid_angle_rad), radius*0.4*np.sin(mid_angle_rad), f'$\\theta={theta_deg}^\\circ$', ha='center', va='center')
+# Projections for original point
+ax.plot([p[0], p[0]], [0, p[1]], 'k:')
+ax.plot([0, p[0]], [p[1], p[1]], 'k:')
+ax.text(p[0], -0.3, 'x', ha='center', va='top')
+ax.text(-0.3, p[1], 'y', ha='right', va='center')
+# Projections for rotated point
+ax.plot([p_prime[0], p_prime[0]], [0, p_prime[1]], 'k:')
+ax.plot([0, p_prime[0]], [p_prime[1], p_prime[1]], 'k:')
+ax.text(p_prime[0], -0.3, "x'", ha='center', va='top', color='r')
+ax.text(-0.3, p_prime[1], "y'", ha='right', va='center', color='r')
+# Setup axes
+ax.spines['left'].set_position('zero')
+ax.spines['bottom'].set_position('zero')
+ax.spines['right'].set_color('none')
+ax.spines['top'].set_color('none')
+ax.xaxis.set_ticks_position('bottom')
+ax.yaxis.set_ticks_position('left')
+ax.set_xlim(-1, 3)
+ax.set_ylim(-1, 3)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xlabel('X')
+ax.set_ylabel('Y', rotation=0, labelpad=10)
+ax.set_title(f'Rotation 2D autour de l\'origine (équivalent à Z en 3D)')
+ax.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.savefig('rotation_z.png')
+\end{verbatim}
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.7\textwidth, keepaspectratio]{rotation_z.png}
+\caption{Rotation d'un point \( p \) autour de l'axe Z (vue dans le plan xy).}
+\label{fig:rotation_z}
+\end{figure}
+\begin{example}[Rotation 3D]
+Calculer les coordonnées du point \( \mathbf{p} = (3, 4, 5) \) après une rotation de \( 90^\circ \) autour de l'axe Z.
+\begin{solution}
+Ici \( \theta = 90^\circ \), donc \( \cos \theta = 0 \) et \( \sin \theta = 1 \). La matrice est :
+\[ R_z(90^\circ) = \begin{pmatrix} 0 & -1 & 0 \\ 1 & 0 & 0 \\ 0 & 0 & 1 \end{pmatrix} \]
+Appliquons la matrice au point \( \mathbf{p} \):
+\[ \begin{pmatrix} x' \\ y' \\ z' \end{pmatrix} = \begin{pmatrix} 0 & -1 & 0 \\ 1 & 0 & 0 \\ 0 & 0 & 1 \end{pmatrix} \begin{pmatrix} 3 \\ 4 \\ 5 \end{pmatrix} = \begin{pmatrix} (0)(3) + (-1)(4) + (0)(5) \\ (1)(3) + (0)(4) + (0)(5) \\ (0)(3) + (0)(4) + (1)(5) \end{pmatrix} = \begin{pmatrix} -4 \\ 3 \\ 5 \end{pmatrix} \]
+Le point transformé est \( \mathbf{p'} = (-4, 3, 5) \).
+\end{solution}
+\end{example}
+\section{Transformations de Base : Homothétie (Mise à l'échelle)}
+L'homothétie, ou mise à l'échelle (scaling), modifie la taille d'un objet. Elle peut être uniforme (même facteur dans toutes les directions) ou non uniforme.
+\subsection{Multiplication par les facteurs d'échelle}
+Une homothétie de facteurs \( S_x, S_y, S_z \) appliquée à un point \( \mathbf{p} = (x, y, z) \) donne le point \( \mathbf{p'} = (x', y', z') \) où :
+\begin{align*} x' &= S_x \cdot x \\ y' &= S_y \cdot y \\ z' &= S_z \cdot z \end{align*}
+\subsection{Matrice d'homothétie}
+Cette transformation peut s'écrire sous forme matricielle \( \mathbf{p'} = S(S_x, S_y, S_z) \mathbf{p} \):
+\[ \begin{pmatrix} x' \\ y' \\ z' \end{pmatrix} = \begin{pmatrix} S_x & 0 & 0 \\ 0 & S_y & 0 \\ 0 & 0 & S_z \end{pmatrix} \begin{pmatrix} x \\ y \\ z \end{pmatrix} \]
+Si \( S_x = S_y = S_z = S \), l'homothétie est dite \textbf{isotrope}. Sinon, elle est \textbf{anisotrope}.
+\begin{verbatim}
+#save_to: scaling_2d.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+fig = plt.figure(figsize=(6, 6))
+ax = fig.add_subplot(111)
+# Original point
+p = np.array([2, 1])
+# Scaling factors
+Sx = 1.5
+Sy = 0.8
+# Scaling matrix
+S = np.array([[Sx, 0], [0, Sy]])
+# Scaled point
+p_prime = S @ p
+origin = np.array([0, 0])
+# Plot vectors
+ax.quiver(*origin, p[0], p[1], angles='xy', scale_units='xy', scale=1, color='b', label='p(x,y)')
+ax.quiver(*origin, p_prime[0], p_prime[1], angles='xy', scale_units='xy', scale=1, color='r', label="p'(x',y')")
+# Projections for original point
+ax.plot([p[0], p[0]], [0, p[1]], 'k:')
+ax.plot([0, p[0]], [p[1], p[1]], 'k:')
+ax.text(p[0], -0.3, 'x', ha='center', va='top')
+ax.text(-0.3, p[1], 'y', ha='right', va='center')
+# Projections for scaled point
+ax.plot([p_prime[0], p_prime[0]], [0, p_prime[1]], 'k:')
+ax.plot([0, p_prime[0]], [p_prime[1], p_prime[1]], 'k:')
+ax.text(p_prime[0], -0.3, f"x'={Sx}x", ha='center', va='top', color='r')
+ax.text(-0.3, p_prime[1], f"y'={Sy}y", ha='right', va='center', color='r')
+# Setup axes
+ax.spines['left'].set_position('zero')
+ax.spines['bottom'].set_position('zero')
+ax.spines['right'].set_color('none')
+ax.spines['top'].set_color('none')
+ax.xaxis.set_ticks_position('bottom')
+ax.yaxis.set_ticks_position('left')
+ax.set_xlim(-1, 4)
+ax.set_ylim(-1, 3)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xlabel('X')
+ax.set_ylabel('Y', rotation=0, labelpad=10)
+ax.set_title(f'Mise à l\'échelle 2D (Sx={Sx}, Sy={Sy})')
+ax.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.savefig('scaling_2d.png')
+\end{verbatim}
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.7\textwidth, keepaspectratio]{scaling_2d.png}
+\caption{Mise à l'échelle (homothétie) non uniforme d'un point \( p \).}
+\label{fig:scaling_2d}
+\end{figure}
+\subsection{Linéarité de la mise à l'échelle}
+La mise à l'échelle (centrée à l'origine) est une transformation linéaire. Elle satisfait les propriétés d'additivité et d'homogénéité.
+\begin{itemize}
+    \item \( S( \mathbf{u} + \mathbf{v} ) = S \mathbf{u} + S \mathbf{v} \)
+    \item \( S( c \mathbf{u} ) = c (S \mathbf{u}) \)
+\end{itemize}
+Les figures \ref{fig:linear_additivity_scale} et \ref{fig:linear_homogeneity_scale} illustrent ces propriétés pour la mise à l'échelle.
+\begin{verbatim}
+#save_to: linear_additivity_scale.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+fig, axes = plt.subplots(1, 2, figsize=(10, 5))
+# Define vectors u, v
+u = np.array([1, 2])
+v = np.array([2, 0.5])
+u_plus_v = u + v
+# Define a scaling transformation
+S = np.array([[1.5, 0], [0, 0.5]])
+f_u = S @ u
+f_v = S @ v
+f_u_plus_v = S @ u_plus_v
+f_u_plus_f_v = f_u + f_v
+origin = np.array([0, 0])
+# Plot 1: Add first, then apply f (scale)
+ax = axes[0]
+ax.quiver(*origin, *u, angles='xy', scale_units='xy', scale=1, color='b', label='u')
+ax.quiver(*u, *v, angles='xy', scale_units='xy', scale=1, color='g', label='v')
+ax.quiver(*origin, *u_plus_v, angles='xy', scale_units='xy', scale=1, color='r', label='u+v')
+ax.quiver(*origin, *f_u_plus_v, angles='xy', scale_units='xy', scale=1, color='m', linestyle='dashed', label='f(u+v)')
+ax.set_xlim(-1, 5)
+ax.set_ylim(-1, 5)
+ax.set_aspect('equal', adjustable='box')
+ax.grid(True)
+ax.legend()
+ax.set_title('1. Addition (u+v), puis mise à l\'échelle f')
+ax.text(u_plus_v[0], u_plus_v[1] + 0.2, 'u+v', color='r')
+ax.text(f_u_plus_v[0], f_u_plus_v[1] + 0.2, 'f(u+v)', color='m')
+ax.spines['left'].set_position('zero')
+ax.spines['bottom'].set_position('zero')
+ax.spines['right'].set_color('none')
+ax.spines['top'].set_color('none')
+# Plot 2: Apply f (scale) first, then add
+ax = axes[1]
+ax.quiver(*origin, *f_u, angles='xy', scale_units='xy', scale=1, color='b', label='f(u)')
+ax.quiver(*origin, *f_v, angles='xy', scale_units='xy', scale=1, color='g', label='f(v)')
+ax.quiver(*f_u, *f_v, angles='xy', scale_units='xy', scale=1, color='grey', linestyle='dotted') # Helper
+ax.quiver(*origin, *f_u_plus_f_v, angles='xy', scale_units='xy', scale=1, color='m', label='f(u)+f(v)')
+ax.set_xlim(-1, 5)
+ax.set_ylim(-1, 5)
+ax.set_aspect('equal', adjustable='box')
+ax.grid(True)
+ax.legend()
+ax.set_title('2. Mise à l\'échelle f (f(u), f(v)), puis addition')
+ax.text(f_u[0], f_u[1] + 0.2, 'f(u)', color='b')
+ax.text(f_v[0], f_v[1] + 0.2, 'f(v)', color='g')
+ax.text(f_u_plus_f_v[0], f_u_plus_f_v[1] + 0.2, 'f(u)+f(v)', color='m')
+ax.spines['left'].set_position('zero')
+ax.spines['bottom'].set_position('zero')
+ax.spines['right'].set_color('none')
+ax.spines['top'].set_color('none')
+fig.suptitle('Linéarité de la mise à l\'échelle : Additivité')
+plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+plt.savefig('linear_additivity_scale.png')
+\end{verbatim}
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, keepaspectratio]{linear_additivity_scale.png}
+\caption{Illustration de l'additivité pour la mise à l'échelle.}
+\label{fig:linear_additivity_scale}
+\end{figure}
+\begin{verbatim}
+#save_to: linear_homogeneity_scale.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+fig, axes = plt.subplots(1, 2, figsize=(10, 5))
+# Define vector u and scalar c
+u = np.array([1, 2])
+c = 1.5
+c_u = c * u
+# Define a scaling transformation
+S = np.array([[1.5, 0], [0, 0.5]])
+f_u = S @ u
+f_c_u = S @ c_u
+c_f_u = c * f_u
+origin = np.array([0, 0])
+# Plot 1: Scale (scalar mult) first, then apply f (scale)
+ax = axes[0]
+ax.quiver(*origin, *u, angles='xy', scale_units='xy', scale=1, color='b', label='u')
+ax.quiver(*origin, *c_u, angles='xy', scale_units='xy', scale=1, color='r', label='cu')
+ax.quiver(*origin, *f_c_u, angles='xy', scale_units='xy', scale=1, color='m', linestyle='dashed', label='f(cu)')
+ax.set_xlim(-1, 3)
+ax.set_ylim(-1, 4)
+ax.set_aspect('equal', adjustable='box')
+ax.grid(True)
+ax.legend()
+ax.set_title('1. Multiplication (cu), puis mise à l\'échelle f')
+ax.text(c_u[0], c_u[1] + 0.2, 'cu', color='r')
+ax.text(f_c_u[0], f_c_u[1] + 0.2, 'f(cu)', color='m')
+ax.spines['left'].set_position('zero')
+ax.spines['bottom'].set_position('zero')
+ax.spines['right'].set_color('none')
+ax.spines['top'].set_color('none')
+# Plot 2: Apply f (scale) first, then scale (scalar mult)
+ax = axes[1]
+ax.quiver(*origin, *f_u, angles='xy', scale_units='xy', scale=1, color='b', label='f(u)')
+ax.quiver(*origin, *c_f_u, angles='xy', scale_units='xy', scale=1, color='m', label='c * f(u)')
+ax.set_xlim(-1, 3)
+ax.set_ylim(-1, 4)
+ax.set_aspect('equal', adjustable='box')
+ax.grid(True)
+ax.legend()
+ax.set_title('2. Mise à l\'échelle f (f(u)), puis multiplication c')
+ax.text(f_u[0], f_u[1] + 0.2, 'f(u)', color='b')
+ax.text(c_f_u[0], c_f_u[1] + 0.2, 'c f(u)', color='m')
+ax.spines['left'].set_position('zero')
+ax.spines['bottom'].set_position('zero')
+ax.spines['right'].set_color('none')
+ax.spines['top'].set_color('none')
+fig.suptitle('Linéarité de la mise à l\'échelle : Homogénéité')
+plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+plt.savefig('linear_homogeneity_scale.png')
+\end{verbatim}
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, keepaspectratio]{linear_homogeneity_scale.png}
+\caption{Illustration de l'homogénéité pour la mise à l'échelle.}
+\label{fig:linear_homogeneity_scale}
+\end{figure}
+\section{Transformations de Base : Translation}
+La translation déplace un objet d'une certaine distance dans une direction donnée, sans changer sa taille ni son orientation.
+\subsection{Ajout des valeurs de translation aux coordonnées}
+Une translation par un vecteur \( \mathbf{T} = (T_x, T_y, T_z) \) appliquée à un point \( \mathbf{p} = (x, y, z) \) donne le point \( \mathbf{p'} = (x', y', z') \) où :
+\begin{align*} x' &= x + T_x \\ y' &= y + T_y \\ z' &= z + T_z \end{align*}
+Ceci peut s'écrire comme une addition vectorielle : \( \mathbf{p'} = \mathbf{p} + \mathbf{T} \).
+\begin{verbatim}
+#save_to: translation_2d.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+fig = plt.figure(figsize=(6, 6))
+ax = fig.add_subplot(111)
+# Original point
+p = np.array([1, 0.5])
+# Translation vector
+T = np.array([1.5, 1])
+# Translated point
+p_prime = p + T
+origin = np.array([0, 0])
+# Plot points
+ax.plot(p[0], p[1], 'bo', label='p(x,y)')
+ax.plot(p_prime[0], p_prime[1], 'ro', label="p'(x',y')")
+# Plot translation vector T from origin (for visualization)
+ax.quiver(*origin, T[0], T[1], angles='xy', scale_units='xy', scale=1, color='g', label='T(Tx, Ty)')
+# Plot translation vector from p to p'
+ax.quiver(p[0], p[1], T[0], T[1], angles='xy', scale_units='xy', scale=1, color='k', linestyle='--')
+# Projections for original point
+ax.plot([p[0], p[0]], [0, p[1]], 'b:')
+ax.plot([0, p[0]], [p[1], p[1]], 'b:')
+ax.text(p[0], -0.3, 'x', ha='center', va='top', color='b')
+ax.text(-0.3, p[1], 'y', ha='right', va='center', color='b')
+# Projections for translated point
+ax.plot([p_prime[0], p_prime[0]], [0, p_prime[1]], 'r:')
+ax.plot([0, p_prime[0]], [p_prime[1], p_prime[1]], 'r:')
+ax.text(p_prime[0], -0.3, "x'=x+Tx", ha='center', va='top', color='r')
+ax.text(-0.3, p_prime[1], "y'=y+Ty", ha='right', va='center', color='r')
+# Setup axes
+ax.spines['left'].set_position('zero')
+ax.spines['bottom'].set_position('zero')
+ax.spines['right'].set_color('none')
+ax.spines['top'].set_color('none')
+ax.xaxis.set_ticks_position('bottom')
+ax.yaxis.set_ticks_position('left')
+ax.set_xlim(-1, 4)
+ax.set_ylim(-1, 3)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xlabel('X')
+ax.set_ylabel('Y', rotation=0, labelpad=10)
+ax.set_title(f'Translation 2D par T=({T[0]},{T[1]})')
+ax.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.savefig('translation_2d.png')
+\end{verbatim}
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.7\textwidth, keepaspectratio]{translation_2d.png}
+\caption{Translation d'un point \( p \) par un vecteur \( \mathbf{T} \).}
+\label{fig:translation_2d}
+\end{figure}
+\subsection{Notation matricielle}
+La translation, étant une addition \( \mathbf{p'} = \mathbf{p} + \mathbf{T} \), ne peut pas être représentée par une multiplication matricielle \( \mathbf{p'} = M \mathbf{p} \) en utilisant des matrices 3x3 et des vecteurs 3D standards. C'est une des motivations principales pour introduire les coordonnées homogènes.
+\subsection{Non-linéarité de la translation}
+La translation n'est pas une transformation linéaire car elle ne respecte pas les propriétés d'additivité et d'homogénéité, et surtout, elle ne laisse pas l'origine invariante (sauf si \( \mathbf{T} = \mathbf{0} \)).
+\[ f(\mathbf{0}) = \mathbf{0} + \mathbf{T} = \mathbf{T} \neq \mathbf{0} \quad (\text{si } \mathbf{T} \neq \mathbf{0}) \]
+\section{Coordonnées Homogènes}
+\subsection{Utilité}
+Les coordonnées homogènes sont un système de coordonnées utilisé en géométrie projective et en infographie pour simplifier la représentation et la composition des transformations géométriques. Leur principal avantage est de permettre de représenter \textbf{toutes} les transformations affines (y compris la translation) sous forme de \textbf{multiplication matricielle unique}.
+\subsection{Représentation des points}
+En coordonnées homogènes, un point 3D \( \mathbf{p} = (x, y, z) \) est représenté par un vecteur 4D \( \mathbf{P} \):
+\[ \mathbf{P} = \begin{pmatrix} x \\ y \\ z \\ 1 \end{pmatrix} \]
+Plus généralement, un point \( (X, Y, Z, W) \) avec \( W \neq 0 \) en coordonnées homogènes correspond au point cartésien \( (X/W, Y/W, Z/W) \). La composante \( W \) est appelée coordonnée homogène. Pour les points de l'espace affine, on utilise conventionnellement \( W=1 \). Les points avec \( W=0 \) représentent des points à l'infini (directions).
+\subsection{Représentation matricielle unifiée}
+Avec les coordonnées homogènes, les transformations de rotation, mise à l'échelle et translation peuvent toutes être exprimées par une multiplication avec une matrice 4x4.
+\begin{itemize}
+    \item \textbf{Translation} \( T(T_x, T_y, T_z) \):
+    \[ M_T = \begin{pmatrix} 1 & 0 & 0 & T_x \\ 0 & 1 & 0 & T_y \\ 0 & 0 & 1 & T_z \\ 0 & 0 & 0 & 1 \end{pmatrix} \]
+    \item \textbf{Mise à l'échelle} \( S(S_x, S_y, S_z) \):
+    \[ M_S = \begin{pmatrix} S_x & 0 & 0 & 0 \\ 0 & S_y & 0 & 0 \\ 0 & 0 & S_z & 0 \\ 0 & 0 & 0 & 1 \end{pmatrix} \]
+    \item \textbf{Rotation} autour de Z \( R_z(\theta) \):
+    \[ M_{Rz} = \begin{pmatrix} \cos \theta & -\sin \theta & 0 & 0 \\ \sin \theta & \cos \theta & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{pmatrix} \]
+    (Matrices de rotation autour de X et Y sont similaires).
+\end{itemize}
+Un point \( \mathbf{p} \) transformé devient \( \mathbf{p'} \) en calculant \( \mathbf{P'} = M \mathbf{P} \), où \( M \) est la matrice 4x4 de la transformation et \( \mathbf{P}, \mathbf{P'} \) sont les représentations homogènes de \( \mathbf{p}, \mathbf{p'} \).
+\[ \mathbf{P'} = \begin{pmatrix} x' \\ y' \\ z' \\ 1 \end{pmatrix} = M \begin{pmatrix} x \\ y \\ z \\ 1 \end{pmatrix} \]
+\subsection{Structure de la matrice 4x4}
+La matrice 4x4 générale pour les transformations affines a la structure suivante :
+\[ M_H = \begin{pmatrix}
+R_{11} & R_{12} & R_{13} & T_x \\
+R_{21} & R_{22} & R_{23} & T_y \\
+R_{31} & R_{32} & R_{33} & T_z \\
+0 & 0 & 0 & 1
+\end{pmatrix}
+=
+\begin{pmatrix}
+\mathbf{R}_{3 \times 3} & \mathbf{T}_{3 \times 1} \\
+\mathbf{0}_{1 \times 3} & 1
+\end{pmatrix}
+\]
+Où \( \mathbf{R}_{3 \times 3} \) représente la partie linéaire (rotation, échelle, cisaillement) et \( \mathbf{T}_{3 \times 1} \) représente la translation.
+Les transformations de projection (perspective) utiliseront également la dernière ligne de la matrice.
+\begin{verbatim}
+#save_to: homogeneous_matrix_structure.png
+from graphviz import Digraph
+dot = Digraph(comment='Structure Matrice 4x4 Homogène', node_attr={'shape': 'record', 'style': 'filled', 'fillcolor': 'lightblue'})
+label_str = ('{ Matrice 4x4 | { { Rotation, Echelle, Cisaillement (3x3) } | { Translation (3x1) } } | { { Perspective (1x3) } | { Echelle Globale (1x1) } } }')
+# Simplified version as per slides
+label_str_affine = ('{ Matrice Affine 4x4 | { { Rotation, Echelle, Cisaillement\\n(Linéaire) \\n 3x3 } | { Translation \\n 3x1 } } | { { 0 0 0 } | { 1 } } }')
+dot.node('Matrix', label=label_str_affine)
+dot.render('homogeneous_matrix_structure', format='png', view=False, cleanup=True)
+\end{verbatim}
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.5\textwidth, keepaspectratio]{homogeneous_matrix_structure.png}
+\caption{Structure typique d'une matrice de transformation affine 4x4 en coordonnées homogènes.}
+\label{fig:homogeneous_matrix_structure}
+\end{figure}
+\section{Manipulations Géométriques}
+En utilisant les coordonnées homogènes et les matrices 4x4, toute transformation affine (et même projective) peut être représentée par une unique matrice \( M \).
+\begin{itemize}
+    \item Soit un point \( \mathbf{p} \), représenté par \( \mathbf{P} \) en coordonnées homogènes.
+    \item Soit une transformation géométrique définie par la matrice \( M \).
+    \item Le point transformé \( \mathbf{p'} \), représenté par \( \mathbf{P'} \), est obtenu par :
+    \[ \mathbf{P'} = M \cdot \mathbf{P} \]
+\end{itemize}
+Ceci inclut les transformations de Translation, Rotation, Changement d'échelle, Projection, Symétries, Affinités orthogonales, etc.
+\begin{example}[Translation via Matrice 4x4]
+Calculer la translation du point \( \mathbf{p} = (2, 3, 4) \) par le vecteur \( \mathbf{T} = (5, -1, 2) \) en utilisant les coordonnées homogènes.
+\begin{solution}
+Le point en coordonnées homogènes est \( \mathbf{P} = (2, 3, 4, 1)^T \). La matrice de translation est :
+\[ M_T = \begin{pmatrix} 1 & 0 & 0 & 5 \\ 0 & 1 & 0 & -1 \\ 0 & 0 & 1 & 2 \\ 0 & 0 & 0 & 1 \end{pmatrix} \]
+Calculons \( \mathbf{P'} = M_T \mathbf{P} \):
+\[ \begin{pmatrix} x' \\ y' \\ z' \\ 1 \end{pmatrix} = \begin{pmatrix} 1 & 0 & 0 & 5 \\ 0 & 1 & 0 & -1 \\ 0 & 0 & 1 & 2 \\ 0 & 0 & 0 & 1 \end{pmatrix} \begin{pmatrix} 2 \\ 3 \\ 4 \\ 1 \end{pmatrix} = \begin{pmatrix} 1(2) + 0(3) + 0(4) + 5(1) \\ 0(2) + 1(3) + 0(4) + (-1)(1) \\ 0(2) + 0(3) + 1(4) + 2(1) \\ 0(2) + 0(3) + 0(4) + 1(1) \end{pmatrix} = \begin{pmatrix} 7 \\ 2 \\ 6 \\ 1 \end{pmatrix} \]
+Le point translaté est \( \mathbf{p'} = (7, 2, 6) \).
+\end{solution}
+\end{example}
+\section{Rotation (Angles d'Euler)}
+Une rotation 3D quelconque autour de l'origine peut être décomposée en une séquence de trois rotations autour des axes principaux (X, Y, Z). Les angles de ces rotations sont appelés angles d'Euler. Une convention courante est Z-Y-X. La matrice de rotation globale \( R \) est obtenue en multipliant les matrices des rotations individuelles :
+\[ R = R_x(\alpha) R_y(\beta) R_z(\gamma) \]
+(Attention, l'ordre de multiplication est important et dépend de la convention choisie : axes fixes ou axes mobiles).
+La matrice de rotation 4x4 \( M_R \) s'obtient en plaçant la matrice de rotation 3x3 \( R \) dans le coin supérieur gauche et en complétant avec des 0 et un 1 :
+\[ M_R = \begin{pmatrix}
+R_{11} & R_{12} & R_{13} & 0 \\
+R_{21} & R_{22} & R_{23} & 0 \\
+R_{31} & R_{32} & R_{33} & 0 \\
+0 & 0 & 0 & 1
+\end{pmatrix}
+=
+\begin{pmatrix}
+\mathbf{R}_{3 \times 3} & \mathbf{0}_{3 \times 1} \\
+\mathbf{0}_{1 \times 3} & 1
+\end{pmatrix}
+\]
+\subsection{Règles de construction des matrices de rotation de base}
+Pour construire la matrice 3x3 (et par extension 4x4) d'une rotation d'angle \( \theta \) autour d'un axe principal (X, Y ou Z) :
+\begin{enumerate}
+    \item La ligne et la colonne correspondant à l'axe de rotation contiennent un 1 sur la diagonale et des 0 ailleurs. (En 4x4, le 1 de la coordonnée homogène est aussi présent).
+    \item Pour les deux autres axes, on place \( \cos(\theta) \) sur la diagonale.
+    \item On place \( \pm \sin(\theta) \) dans les positions hors diagonale pour "compléter le carré" 2x2 correspondant à ces deux axes.
+    \item Le signe du sinus : pour une rotation anti-horaire (sens direct), le sinus est positif lorsqu'on passe de l'axe \( i \) à l'axe \( j \) si (i, j, k) forme une permutation directe des axes (e.g., X vers Y pour rotation Z, Y vers Z pour rotation X, Z vers X pour rotation Y). Le signe est négatif pour le terme symétrique (\( M_{ji} = -M_{ij} \)). Une règle mnémotechnique issue des slides est : "Sur la ligne suivant celle de l'axe de rotation, le sinus est précédé d'un signe '-'".
+\end{enumerate}
+\textbf{Matrices de base (3x3)} :
+\[ R_x(\theta) = \begin{pmatrix} 1 & 0 & 0 \\ 0 & \cos \theta & -\sin \theta \\ 0 & \sin \theta & \cos \theta \end{pmatrix} \]
+\[ R_y(\theta) = \begin{pmatrix} \cos \theta & 0 & \sin \theta \\ 0 & 1 & 0 \\ -\sin \theta & 0 & \cos \theta \end{pmatrix} \]
+\[ R_z(\theta) = \begin{pmatrix} \cos \theta & -\sin \theta & 0 \\ \sin \theta & \cos \theta & 0 \\ 0 & 0 & 1 \end{pmatrix} \]
+L'image des slides montre la composition \( R = R_z R_y R_x \) (attention, l'ordre peut varier).
+% Note: recreating the colored matrix might be complex without TikZ. Describing it.
+La matrice finale \( R \) (partie 3x3) s'obtient par multiplication de ces matrices de base. L'image illustre visuellement comment les termes \( \cos \) et \( \sin \) des angles \( \theta_x, \theta_y, \theta_z \) (correspondant aux rotations autour de x, y, z) se combinent dans la matrice résultante 4x4.
+\section{Homothétie et Affinités Orthogonales}
+\subsection{Homothétie isotrope}
+C'est une mise à l'échelle uniforme avec le même facteur \( S \) dans toutes les directions (\( S_x=S_y=S_z=S \)).
+La matrice 4x4 est :
+\[ M_{S_{iso}} = \begin{pmatrix} S & 0 & 0 & 0 \\ 0 & S & 0 & 0 \\ 0 & 0 & S & 0 \\ 0 & 0 & 0 & 1 \end{pmatrix} \]
+L'application à un point \( \mathbf{P} \) donne \( \mathbf{P'} = M_{S_{iso}} \mathbf{P} = (S x, S y, S z, 1)^T \).
+\subsection{Affinités orthogonales}
+Ce sont des mises à l'échelle non uniformes le long des axes principaux. Elles sont parfois appelées "homothéties axiales" ou simplement "mises à l'échelle non uniformes".
+La matrice générale est \( M_S \) vue précédemment.
+\[ M_S = \begin{pmatrix} S_x & 0 & 0 & 0 \\ 0 & S_y & 0 & 0 \\ 0 & 0 & S_z & 0 \\ 0 & 0 & 0 & 1 \end{pmatrix} \]
+Les slides montrent des cas particuliers où l'échelle n'est appliquée que sur un ou deux axes (affinité d'axe X par rapport au plan yOz, etc.) :
+\begin{itemize}
+    \item Affinité d'axe X (mise à l'échelle en X seulement) : \( S_y=1, S_z=1 \)
+    \[ M_{S_x} = \begin{pmatrix} S_x & 0 & 0 & 0 \\ 0 & 1 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{pmatrix} \]
+    \item Affinité d'axe Y (mise à l'échelle en Y seulement) : \( S_x=1, S_z=1 \)
+    \[ M_{S_y} = \begin{pmatrix} 1 & 0 & 0 & 0 \\ 0 & S_y & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{pmatrix} \]
+    \item Affinité d'axe Z (mise à l'échelle en Z seulement) : \( S_x=1, S_y=1 \)
+    \[ M_{S_z} = \begin{pmatrix} 1 & 0 & 0 & 0 \\ 0 & 1 & 0 & 0 \\ 0 & 0 & S_z & 0 \\ 0 & 0 & 0 & 1 \end{pmatrix} \]
+\end{itemize}
+\section{Glissement (Shear)}
+Le glissement, ou cisaillement (shear), est une transformation qui incline les objets. Les coordonnées d'un point sont modifiées proportionnellement à une ou plusieurs autres coordonnées.
+\begin{definition}
+Un \textbf{glissement parallèle à un axe} modifie la coordonnée de cet axe en fonction d'une autre coordonnée. Par exemple, un glissement parallèle à l'axe X avec un rapport \( k \) par rapport à Y modifie la coordonnée x : \( x' = x + k \cdot y \). Les autres coordonnées (y, z) restent inchangées.
+\end{definition}
+\subsection{Matrice de glissement}
+\begin{itemize}
+    \item Glissement de X par Y (rapport \( k \)) : \( x' = x + k y \)
+    \[ M_{Sh_{XY}} = \begin{pmatrix} 1 & k & 0 & 0 \\ 0 & 1 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{pmatrix} \]
+    \item Glissement de X par Z (rapport \( k \)) : \( x' = x + k z \)
+    \[ M_{Sh_{XZ}} = \begin{pmatrix} 1 & 0 & k & 0 \\ 0 & 1 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{pmatrix} \]
+    \item Glissement de Y par X (rapport \( k \)) : \( y' = y + k x \)
+    \[ M_{Sh_{YX}} = \begin{pmatrix} 1 & 0 & 0 & 0 \\ k & 1 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{pmatrix} \]
+    (Et ainsi de suite pour les autres combinaisons YZ, ZX, ZY).
+\end{itemize}
+L'image des slides montre un glissement 2D parallèle à x, avec rapport k :
+\[ M = \begin{pmatrix} 1 & k & 0 & 0 \\ 0 & 1 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{pmatrix} \]
+Elle montre aussi un glissement parallèle à x, de rapport k, dont l'intensité dépend de la distance à une ligne de base \( y = y_{ref} \): \( x' = x + k (y - y_{ref}) = x + k y - k y_{ref} \). Cela combine un cisaillement \( (x' = x+ky) \) et une translation \( (x'' = x' - k y_{ref}) \).
+La matrice devient:
+\[ M = \begin{pmatrix} 1 & k & 0 & -k \cdot y_{ref} \\ 0 & 1 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{pmatrix} \]
+\begin{verbatim}
+#save_to: shear_x_by_y.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+fig, ax = plt.subplots(figsize=(5, 5))
+# Original square vertices
+vertices_orig = np.array([[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]])
+# Shear factor k
+k = 0.5
+# Shear matrix (homogeneous equivalent for 2D)
+# x' = x + ky
+# y' = y
+M_shear = np.array([[1, k], [0, 1]])
+# Apply shear
+vertices_sheared = vertices_orig[:, :2] @ M_shear.T
+# Plot original square
+ax.plot(vertices_orig[:, 0], vertices_orig[:, 1], 'b-', label='Original')
+ax.fill(vertices_orig[:, 0], vertices_orig[:, 1], 'b', alpha=0.1)
+# Plot sheared square
+ax.plot(vertices_sheared[:, 0], vertices_sheared[:, 1], 'r-', label=f'Shear (k={k})')
+ax.fill(vertices_sheared[:, 0], vertices_sheared[:, 1], 'r', alpha=0.1)
+# Indicate shear direction
+ax.arrow(0.5, 1, k*0.5, 0, head_width=0.05, head_length=0.1, fc='k', ec='k', length_includes_head=True)
+ax.text(0.5 + k*0.25, 1.05, 'Glissement', ha='center')
+# Setup axes
+ax.spines['left'].set_position('zero')
+ax.spines['bottom'].set_position('zero')
+ax.spines['right'].set_color('none')
+ax.spines['top'].set_color('none')
+ax.xaxis.set_ticks_position('bottom')
+ax.yaxis.set_ticks_position('left')
+ax.set_xlim(-0.5, 2)
+ax.set_ylim(-0.5, 2)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xlabel('X')
+ax.set_ylabel('Y', rotation=0, labelpad=10)
+ax.set_title('Glissement (Shear) parallèle à X par Y')
+ax.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.savefig('shear_x_by_y.png')
+\end{verbatim}
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.6\textwidth, keepaspectratio]{shear_x_by_y.png}
+\caption{Exemple de glissement (shear) parallèle à l'axe X, proportionnel à Y.}
+\label{fig:shear_x_by_y}
+\end{figure}
+\section{Composition de Transformations}
+Souvent, on souhaite appliquer plusieurs transformations successivement à un objet (par exemple, une mise à l'échelle, puis une rotation, puis une translation). Grâce aux coordonnées homogènes, la composition de transformations se réduit à la multiplication des matrices correspondantes.
+Si on applique d'abord la transformation \( M_1 \), puis \( M_2 \), puis \( M_3 \) à un point \( \mathbf{P} \), le point final \( \mathbf{P'} \) est :
+\[ \mathbf{P'} = M_3 ( M_2 ( M_1 \mathbf{P} ) ) = (M_3 M_2 M_1) \mathbf{P} \]
+La matrice de transformation composite \( M = M_3 M_2 M_1 \) peut être pré-calculée et appliquée directement à tous les points de l'objet.
+\subsection{Ordre d'application}
+\textbf{Important :} La multiplication de matrices n'est pas commutative (\( M_1 M_2 \neq M_2 M_1 \) en général). L'ordre dans lequel les transformations sont appliquées est crucial.
+La convention est que les transformations sont appliquées dans l'ordre où elles sont multipliées de \textbf{droite à gauche}. Dans l'expression \( M = M_3 M_2 M_1 \), la transformation \( M_1 \) est appliquée en premier, suivie de \( M_2 \), puis \( M_3 \).
+\subsection{Exemple : Scale puis Translate vs Translate puis Scale}
+Considérons un point \( \mathbf{p} = (1, 1) \) (donc \( \mathbf{P}=(1, 1, 1)^T \) en 2D homogène).
+Appliquons une mise à l'échelle \( S(2, 2) \) et une translation \( T(3, 1) \).
+\textbf{Cas 1 : Scale(2,2) puis Translate(3,1)}
+La matrice composite est \( M = M_T \cdot M_S \).
+\[ M_S = \begin{pmatrix} 2 & 0 & 0 \\ 0 & 2 & 0 \\ 0 & 0 & 1 \end{pmatrix}, \quad M_T = \begin{pmatrix} 1 & 0 & 3 \\ 0 & 1 & 1 \\ 0 & 0 & 1 \end{pmatrix} \]
+\[ M = M_T M_S = \begin{pmatrix} 1 & 0 & 3 \\ 0 & 1 & 1 \\ 0 & 0 & 1 \end{pmatrix} \begin{pmatrix} 2 & 0 & 0 \\ 0 & 2 & 0 \\ 0 & 0 & 1 \end{pmatrix} = \begin{pmatrix} 2 & 0 & 3 \\ 0 & 2 & 1 \\ 0 & 0 & 1 \end{pmatrix} \]
+Appliquons à \( \mathbf{P} \):
+\[ \mathbf{P'} = M \mathbf{P} = \begin{pmatrix} 2 & 0 & 3 \\ 0 & 2 & 1 \\ 0 & 0 & 1 \end{pmatrix} \begin{pmatrix} 1 \\ 1 \\ 1 \end{pmatrix} = \begin{pmatrix} 2+3 \\ 2+1 \\ 1 \end{pmatrix} = \begin{pmatrix} 5 \\ 3 \\ 1 \end{pmatrix} \]
+Le point final est \( \mathbf{p'} = (5, 3) \).
+\textbf{Cas 2 : Translate(3,1) puis Scale(2,2)}
+La matrice composite est \( M' = M_S \cdot M_T \).
+\[ M' = M_S M_T = \begin{pmatrix} 2 & 0 & 0 \\ 0 & 2 & 0 \\ 0 & 0 & 1 \end{pmatrix} \begin{pmatrix} 1 & 0 & 3 \\ 0 & 1 & 1 \\ 0 & 0 & 1 \end{pmatrix} = \begin{pmatrix} 2 & 0 & 6 \\ 0 & 2 & 2 \\ 0 & 0 & 1 \end{pmatrix} \]
+Appliquons à \( \mathbf{P} \):
+\[ \mathbf{P''} = M' \mathbf{P} = \begin{pmatrix} 2 & 0 & 6 \\ 0 & 2 & 2 \\ 0 & 0 & 1 \end{pmatrix} \begin{pmatrix} 1 \\ 1 \\ 1 \end{pmatrix} = \begin{pmatrix} 2+6 \\ 2+2 \\ 1 \end{pmatrix} = \begin{pmatrix} 8 \\ 4 \\ 1 \end{pmatrix} \]
+Le point final est \( \mathbf{p''} = (8, 4) \).
+Les résultats sont différents, illustrant la non-commutativité.
+\begin{verbatim}
+#save_to: composition_non_commutative.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+fig, axes = plt.subplots(1, 2, figsize=(10, 5), sharex=True, sharey=True)
+p0 = np.array([1, 1])
+S = np.array([[2, 0], [0, 2]])
+T = np.array([3, 1])
+# Case 1: Scale then Translate
+p1_s = S @ p0
+p1_st = p1_s + T
+# Case 2: Translate then Scale
+p2_t = p0 + T
+p2_ts = S @ p2_t
+# Plot Case 1
+ax = axes[0]
+ax.plot(p0[0], p0[1], 'ko', label='p (1,1)')
+ax.plot(p1_s[0], p1_s[1], 'bo', label='p_s = S.p (2,2)')
+ax.plot(p1_st[0], p1_st[1], 'ro', label='p_st = T.(S.p) (5,3)')
+ax.arrow(p0[0], p0[1], p1_s[0]-p0[0], p1_s[1]-p0[1], head_width=0.2, fc='b', ec='b', length_includes_head=True, label='Scale(2,2)')
+ax.arrow(p1_s[0], p1_s[1], p1_st[0]-p1_s[0], p1_st[1]-p1_s[1], head_width=0.2, fc='r', ec='r', length_includes_head=True, label='Translate(3,1)')
+ax.set_title('Cas 1: Scale puis Translate')
+ax.text(p1_s[0]+0.2, p1_s[1], 'Scale(2,2)', color='b', va='bottom')
+ax.text(p1_st[0], p1_st[1]+0.2, 'Translate(3,1)', color='r', ha='center')
+# Plot Case 2
+ax = axes[1]
+ax.plot(p0[0], p0[1], 'ko', label='p (1,1)')
+ax.plot(p2_t[0], p2_t[1], 'go', label='p_t = T.p (4,2)')
+ax.plot(p2_ts[0], p2_ts[1], 'mo', label='p_ts = S.(T.p) (8,4)')
+ax.arrow(p0[0], p0[1], p2_t[0]-p0[0], p2_t[1]-p0[1], head_width=0.2, fc='g', ec='g', length_includes_head=True, label='Translate(3,1)')
+ax.arrow(p2_t[0], p2_t[1], p2_ts[0]-p2_t[0], p2_ts[1]-p2_t[1], head_width=0.2, fc='m', ec='m', length_includes_head=True, label='Scale(2,2)')
+ax.set_title('Cas 2: Translate puis Scale')
+ax.text(p2_t[0], p2_t[1]+0.2, 'Translate(3,1)', color='g', ha='center')
+ax.text(p2_ts[0]-0.2, p2_ts[1], 'Scale(2,2)', color='m', va='bottom', ha='right')
+# Setup axes
+for ax in axes:
+    ax.spines['left'].set_position('zero')
+    ax.spines['bottom'].set_position('zero')
+    ax.spines['right'].set_color('none')
+    ax.spines['top'].set_color('none')
+    ax.xaxis.set_ticks_position('bottom')
+    ax.yaxis.set_ticks_position('left')
+    ax.set_xlim(-1, 9)
+    ax.set_ylim(-1, 5)
+    ax.set_aspect('equal', adjustable='box')
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y', rotation=0, labelpad=10)
+    ax.grid(True)
+    #ax.legend() # Legends overlap arrows, better use text
+fig.suptitle('Non-commutativité de la composition des transformations')
+plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+plt.savefig('composition_non_commutative.png')
+\end{verbatim}
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, keepaspectratio]{composition_non_commutative.png}
+\caption{Illustration de la non-commutativité : l'ordre des transformations importe.}
+\label{fig:composition_non_commutative}
+\end{figure}
+\subsection{Composition pour transformations complexes}
+Les transformations élémentaires (Translation, Rotation, Echelle) sont souvent définies par rapport à l'origine et aux axes globaux. Pour effectuer une rotation ou une mise à l'échelle par rapport à un point arbitraire \( P \) ou un axe arbitraire, on utilise une composition :
+\begin{enumerate}
+    \item Translater pour amener le point \( P \) (ou l'axe) à l'origine. \( T(-P) \)
+    \item Effectuer la rotation ou la mise à l'échelle voulue (par rapport à l'origine). \( R(\theta) \) ou \( S(s) \)
+    \item Translater inversement pour remettre le point \( P \) (ou l'axe) à sa position initiale. \( T(P) \)
+\end{enumerate}
+La matrice composite est \( M = T(P) \cdot R(\theta) \cdot T(-P) \).
+\begin{example}[Rotation autour d'un point P]
+Trouver la matrice qui effectue une rotation d'angle \( \theta_z \) autour de l'axe Z passant par le point \( P = (T_x, T_y, T_z) \).
+\begin{solution}
+La séquence est :
+\begin{enumerate}
+    \item Translation \( T(-T_x, -T_y, -T_z) \) pour amener P à l'origine.
+    \item Rotation \( R_z(\theta_z) \) autour de l'axe Z (qui passe maintenant par l'origine "locale" de l'objet translaté).
+    \item Translation \( T(T_x, T_y, T_z) \) pour revenir.
+\end{enumerate}
+La matrice composite \( M \) est :
+\[ M = T(T_x, T_y, T_z) \cdot R_z(\theta_z) \cdot T(-T_x, -T_y, -T_z) \]
+En multipliant les matrices 4x4 correspondantes :
+\[ M = \begin{pmatrix} 1 & 0 & 0 & T_x \\ 0 & 1 & 0 & T_y \\ 0 & 0 & 1 & T_z \\ 0 & 0 & 0 & 1 \end{pmatrix} \begin{pmatrix} \cos\theta_z & -\sin\theta_z & 0 & 0 \\ \sin\theta_z & \cos\theta_z & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{pmatrix} \begin{pmatrix} 1 & 0 & 0 & -T_x \\ 0 & 1 & 0 & -T_y \\ 0 & 0 & 1 & -T_z \\ 0 & 0 & 0 & 1 \end{pmatrix} \]
+Le calcul donne (comme montré dans les slides) :
+\[ M = \begin{pmatrix} \cos\theta_z & -\sin\theta_z & 0 & -T_x \cos\theta_z + T_y \sin\theta_z + T_x \\ \sin\theta_z & \cos\theta_z & 0 & -T_x \sin\theta_z - T_y \cos\theta_z + T_y \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{pmatrix} \]
+(Note: la coordonnée Z de translation \(T_z\) n'intervient pas car la rotation est autour de Z).
+\end{solution}
+\end{example}
+\begin{verbatim}
+#save_to: rotation_around_point.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+fig, axes = plt.subplots(1, 4, figsize=(16, 4), sharex=True, sharey=True)
+# Initial setup
+obj_center = np.array([2, 1])
+obj_points_rel = np.array([[0,0], [0.5, 0], [0.5, 0.5], [0, 0.5], [0,0]]) - np.array([0.25, 0.25]) # Small square relative to center
+obj_points_abs = obj_points_rel + obj_center
+pivot_point = obj_center
+theta_deg = 45
+theta_rad = np.radians(theta_deg)
+T_p = pivot_point
+T_minus_p = -pivot_point
+R = np.array([[np.cos(theta_rad), -np.sin(theta_rad)], [np.sin(theta_rad), np.cos(theta_rad)]])
+# Plotting function
+def plot_state(ax, points, pivot, title, color='k'):
+    ax.plot(points[:, 0], points[:, 1], marker='o', linestyle='-', color=color)
+    ax.plot(pivot[0], pivot[1], 'rx', markersize=10, label='Pivot P')
+    ax.set_title(title)
+    ax.grid(True)
+    ax.set_aspect('equal', adjustable='box')
+    ax.spines['left'].set_position('zero')
+    ax.spines['bottom'].set_position('zero')
+    ax.spines['right'].set_color('none')
+    ax.spines['top'].set_color('none')
+    ax.set_xlim(-2, 4)
+    ax.set_ylim(-2, 3)
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y', rotation=0)
+# 1. Initial State
+plot_state(axes[0], obj_points_abs, pivot_point, '1. État Initial', color='k')
+# 2. Translate to Origin: T(-P)
+obj_points_Tneg = obj_points_abs + T_minus_p
+pivot_Tneg = pivot_point + T_minus_p
+plot_state(axes[1], obj_points_Tneg, pivot_Tneg, '2. T(-P)', color='b')
+# 3. Rotate around Origin: R(theta)
+obj_points_R = obj_points_Tneg @ R.T
+pivot_R = pivot_Tneg # Origin doesn't move
+plot_state(axes[2], obj_points_R, pivot_R, '3. R($\\theta$)', color='g')
+# 4. Translate back: T(P)
+obj_points_final = obj_points_R + T_p
+pivot_final = pivot_R + T_p
+plot_state(axes[3], obj_points_final, pivot_final, f'4. T(P) - Rotation de {theta_deg}$^\\circ$ autour de P', color='m')
+fig.suptitle('Composition: Rotation autour d\'un point P = T(P) R($\\theta$) T(-P)')
+plt.tight_layout(rect=[0, 0.03, 1, 0.93])
+plt.savefig('rotation_around_point.png')
+\end{verbatim}
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, keepaspectratio]{rotation_around_point.png}
+\caption{Étapes de la rotation d'un objet autour d'un point pivot P.}
+\label{fig:rotation_around_point}
+\end{figure}
+\section{Modélisation Hiérarchique}
+Pour représenter des objets complexes composés de plusieurs parties (par exemple, un personnage, un véhicule, un bâtiment), on utilise souvent une structure hiérarchique, typiquement un arbre ou un graphe orienté acyclique (DAG).
+\subsection{Définition et principe}
+\begin{itemize}
+    \item La scène est organisée comme une structure arborescente (ou DAG).
+    \item Les nœuds internes représentent des groupes ou des sous-objets.
+    \item Les nœuds feuilles (terminaux) représentent des primitives géométriques simples (cubes, sphères, polygones...).
+    \item Chaque nœud (sauf la racine) est défini par rapport au système de coordonnées de son nœud parent.
+    \item Chaque arc (ou lien parent-enfant) est associé à une matrice de transformation qui positionne l'enfant par rapport au parent.
+\end{itemize}
+Le repère associé à la racine est le repère global de la scène (World Space). La transformation absolue d'un objet dans la scène est obtenue en composant (multipliant) toutes les matrices de transformation rencontrées en descendant depuis la racine jusqu'au nœud de l'objet.
+\subsection{Arbre de scène (Scene Graph)}
+C'est la structure de données (arbre ou DAG) qui représente la hiérarchie des objets et leurs transformations relatives.
+\begin{itemize}
+    \item \textbf{Avantages} :
+        \item Facilite la manipulation d'objets complexes (déplacer un bras entier en bougeant juste le nœud "épaule").
+        \item Permet l'instanciation (réutilisation d'une même géométrie à plusieurs endroits avec des transformations différentes).
+        \item Simplifie l'animation (animer les transformations associées aux arcs).
+    \item \textbf{Structure DAG} : Si un objet (comme une roue) est utilisé plusieurs fois dans la scène, on peut utiliser un DAG où plusieurs nœuds parents pointent vers le même nœud enfant (la définition de la roue).
+\end{itemize}
+\begin{verbatim}
+#save_to: scene_graph_simple.png
+from graphviz import Digraph
+dot = Digraph(comment='Scene Graph Simple', graph_attr={'rankdir': 'TB'})
+dot.node('Root', 'Univers Virtuel (Racine)', shape='box', style='filled', fillcolor='lightgrey')
+dot.node('GroupA', 'Groupe A (e.g., Table)', shape='ellipse')
+dot.node('GroupB', 'Groupe B (e.g., Chaise)', shape='ellipse')
+dot.node('LeafA1', 'Pied 1', shape='triangle', style='filled', fillcolor='lightblue')
+dot.node('LeafA2', 'Pied 2', shape='triangle', style='filled', fillcolor='lightblue')
+dot.node('LeafA3', 'Plateau', shape='triangle', style='filled', fillcolor='lightblue')
+dot.node('LeafB1', 'Pied C', shape='triangle', style='filled', fillcolor='lightgreen')
+dot.node('LeafB2', 'Assise', shape='triangle', style='filled', fillcolor='lightgreen')
+dot.edge('Root', 'GroupA', label=' T_Table')
+dot.edge('Root', 'GroupB', label=' T_Chaise')
+dot.edge('GroupA', 'LeafA1', label=' T_Pied1')
+dot.edge('GroupA', 'LeafA2', label=' T_Pied2')
+dot.edge('GroupA', 'LeafA3', label=' T_Plateau')
+dot.edge('GroupB', 'LeafB1', label=' T_PiedC')
+dot.edge('GroupB', 'LeafB2', label=' T_Assise')
+# Example of DAG (instancing)
+dot.node('LeafWheel', 'Roue', shape='diamond', style='filled', fillcolor='orange')
+dot.node('Car', 'Voiture', shape='ellipse')
+dot.edge('Root', 'Car', label='T_Voiture')
+dot.edge('Car', 'LeafWheel', label=' T_Roue_AV_G')
+dot.edge('Car', 'LeafWheel', label=' T_Roue_AV_D') # Same geometry, different transform
+dot.edge('Car', 'LeafWheel', label=' T_Roue_AR_G')
+dot.edge('Car', 'LeafWheel', label=' T_Roue_AR_D')
+dot.render('scene_graph_simple', format='png', view=False, cleanup=True)
+\end{verbatim}
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, keepaspectratio]{scene_graph_simple.png}
+\caption{Exemple simplifié d'un graphe de scène (DAG).}
+\label{fig:scene_graph_simple}
+\end{figure}
+\subsection{Construction et utilisation}
+On construit le graphe généralement "top-down" (de la racine vers les feuilles), en décomposant récursivement les objets complexes en parties plus simples. Pour obtenir la transformation globale (World Transform) \( M_{world} \) d'un nœud \( N \), on multiplie sa transformation locale \( M_{local} \) (associée à l'arc entrant) par la transformation globale de son parent \( M_{parent\_world} \):
+\[ M_{world} = M_{parent\_world} \cdot M_{local} \]
+On calcule cela récursivement depuis la racine, dont la transformation globale est l'identité.
+\subsection{Exemple : Modélisation d'une maison}
+L'image des slides montre un graphe de scène pour une maison simple.
+\begin{enumerate}
+\item Racine (Maison, Tm)
+    \begin{enumerate} 
+        \item Garage (Tg)
+        \begin{enumerate}
+            \item Porte A (Tga) - $>$ Feuille
+            \item Porte B (Tgb) - $>$ Feuille
+        \end{enumerate}
+        \item Corps Principal (Tc)
+        \begin{enumerate}
+            \item Façade (Tfa)
+                \begin{enumerate}
+                    \item Fenêtre 1 (Tf1)
+                    \item Fenêtre 2 - $>$ Feuille
+                    \item ...
+                    \item Fenêtre 5 - $>$ Feuille
+                \end{enumerate}
+            \item Toit - $>$ Feuille
+        \end{enumerate}
+    \end{enumerate}
+\end{enumerate}
+Pour trouver la transformation de la Vitre A dans le repère monde, on calcule :
+\( M_{VitreA} = Tm \cdot Tc \cdot Tfa \cdot Tf1 \cdot Tva \)
+\begin{verbatim}
+#save_to: house_scene_graph.png
+from graphviz import Digraph
+dot = Digraph(comment='Graphe Maison', graph_attr={'rankdir': 'TB'})
+dot.node('Maison', 'Maison\nTm')
+dot.node('Garage', 'Garage\nTg')
+dot.node('Corps', 'Corps principal\nTc')
+dot.node('PorteA', 'Porte a\nTga', shape='box')
+dot.node('PorteB', 'Porte b\nTgb', shape='box')
+dot.node('Facade', 'Facade\nTfa')
+dot.node('Toit', 'Toit', shape='box')
+dot.node('Fenetre1', 'Fenetre 1\nTf1')
+dot.node('Fenetre2', 'Fenetre 2', shape='box')
+dot.node('Fenetre3', 'Fenetre 3', shape='box')
+dot.node('Fenetre4', 'Fenetre 4', shape='box')
+dot.node('Fenetre5', 'Fenetre 5', shape='box')
+dot.node('VitreA', 'Vitre a\nTva', shape='box')
+dot.edge('Maison', 'Garage')
+dot.edge('Maison', 'Corps')
+dot.edge('Garage', 'PorteA')
+dot.edge('Garage', 'PorteB')
+dot.edge('Corps', 'Facade')
+dot.edge('Corps', 'Toit')
+dot.edge('Facade', 'Fenetre1')
+dot.edge('Facade', 'Fenetre2')
+dot.edge('Facade', 'Fenetre3')
+dot.edge('Facade', 'Fenetre4')
+dot.edge('Facade', 'Fenetre5')
+dot.edge('Fenetre1', 'VitreA')
+dot.render('house_scene_graph', format='png', view=False, cleanup=True)
+\end{verbatim}
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.9\textwidth, keepaspectratio]{house_scene_graph.png}
+\caption{Exemple de graphe de scène pour une maison.}
+\label{fig:house_scene_graph}
+\end{figure}
+\section{Instanciation}
+L'instanciation est une technique clé en modélisation hiérarchique qui permet de réutiliser la définition géométrique d'un objet (une "instance maîtresse" ou "prototype") à plusieurs endroits dans la scène.
+\subsection{Principe}
+Plutôt que de dupliquer la géométrie (sommets, faces) pour chaque copie d'un objet (comme chaque arbre dans une forêt, ou chaque roue sur une voiture), on stocke la géométrie une seule fois. Dans le graphe de scène, les nœuds qui représentent les copies de cet objet contiennent simplement une référence (un "pointeur") vers la géométrie maîtresse.
+Chaque arc menant à une instance peut avoir sa propre matrice de transformation, permettant de positionner, orienter et dimensionner chaque copie différemment.
+\subsection{Utilisation dans l'arbre de scène}
+Dans un DAG, plusieurs nœuds "parents" peuvent pointer vers le même nœud "enfant" qui définit la géométrie. Chaque chemin depuis la racine vers cet enfant via différents parents correspondra à une instance différente de l'objet, avec une transformation globale potentiellement unique.
+\begin{verbatim}
+#save_to: instancing_graph.png
+from graphviz import Digraph
+dot = Digraph(comment='Instanciation Graphe', graph_attr={'rankdir': 'TB'})
+dot.node('Root', 'root', shape='ellipse')
+dot.node('A', 'A', shape='ellipse')
+dot.node('A1', 'A1', shape='ellipse')
+dot.node('A2', 'A2', shape='ellipse')
+dot.node('Dandelion', 'dandelion', shape='diamond', style='filled', fillcolor='yellow') # Geometry node
+dot.edge('Root', 'A', label=' T_A')
+dot.edge('Root', 'A1', label=' T_A1')
+dot.edge('Root', 'A2', label=' T_A2')
+# Instancing: A, A1, A2 all point to the Dandelion geometry
+dot.edge('A', 'Dandelion', label=' T_d1')
+dot.edge('A1', 'Dandelion', label=' T_d2')
+dot.edge('A2', 'Dandelion', label=' T_d3')
+dot.render('instancing_graph', format='png', view=False, cleanup=True)
+\end{verbatim}
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.5\textwidth, keepaspectratio]{instancing_graph.png}
+\caption{Graphe de scène (DAG) illustrant l'instanciation : plusieurs nœuds (A, A1, A2) utilisent la même définition géométrique (dandelion) via des transformations différentes (Td1, Td2, Td3).}
+\label{fig:instancing_graph}
+\end{figure}
+\section{Changement de Repère}
+Il est souvent nécessaire d'exprimer les coordonnées d'un point ou la description d'un objet dans différents systèmes de coordonnées (repères). Par exemple :
+\begin{itemize}
+    \item Repère objet (Object Space) : Coordonnées locales définissant la géométrie de l'objet.
+    \item Repère scène (World Space) : Repère global où tous les objets sont positionnés.
+    \item Repère caméra (View Space / Camera Space) : Repère lié à l'observateur.
+\end{itemize}
+Le passage d'un repère à un autre est une transformation géométrique.
+\subsection{Définition et objectif}
+Transformer les coordonnées d'un point \( \mathbf{p} \) exprimées dans un repère \( R_2 \) en coordonnées équivalentes dans un repère \( R_1 \).
+\subsection{Transformation des coordonnées}
+Soit \( M \) la matrice 4x4 qui transforme les vecteurs de base et l'origine du repère \( R_2 \) pour les aligner avec ceux de \( R_1 \). Si \( \mathbf{P}_2 = (x_2, y_2, z_2, 1)^T \) sont les coordonnées d'un point dans \( R_2 \), alors ses coordonnées \( \mathbf{P}_1 = (x_1, y_1, z_1, 1)^T \) dans \( R_1 \) sont données par :
+\[ \mathbf{P}_1 = M \cdot \mathbf{P}_2 \]
+La matrice \( M \) est appelée \textbf{matrice de passage} de \( R_2 \) à \( R_1 \).
+Inversement, pour passer de \( R_1 \) à \( R_2 \), on utilise la matrice inverse \( M^{-1} \):
+\[ \mathbf{P}_2 = M^{-1} \cdot \mathbf{P}_1 \]
+\subsection{Matrice de passage}
+Si le repère \( R_2 \) (origine \( O_2 \), axes \( \mathbf{u}_2, \mathbf{v}_2, \mathbf{w}_2 \)) est exprimé dans les coordonnées de \( R_1 \), la matrice de passage \( M \) de \( R_2 \) vers \( R_1 \) est construite comme suit :
+\[ M = \begin{pmatrix}
+u_{2x} & v_{2x} & w_{2x} & O_{2x} \\
+u_{2y} & v_{2y} & w_{2y} & O_{2y} \\
+u_{2z} & v_{2z} & w_{2z} & O_{2z} \\
+0 & 0 & 0 & 1
+\end{pmatrix} \]
+Où \( (u_{2x}, u_{2y}, u_{2z}) \) sont les coordonnées du vecteur \( \mathbf{u}_2 \) dans \( R_1 \), etc., et \( (O_{2x}, O_{2y}, O_{2z}) \) sont les coordonnées de l'origine \( O_2 \) dans \( R_1 \).
+Cette matrice \( M \) transforme un point dont les coordonnées sont connues dans \( R_2 \) pour donner ses coordonnées dans \( R_1 \).
+\begin{verbatim}
+#save_to: change_of_basis.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+fig, ax = plt.subplots(figsize=(7, 6))
+# Repere R1 (World) - Black
+o1 = np.array([0, 0])
+ux1 = np.array([1, 0])
+uy1 = np.array([0, 1])
+ax.quiver(*o1, *ux1, angles='xy', scale_units='xy', scale=1, color='k', label='X1')
+ax.quiver(*o1, *uy1, angles='xy', scale_units='xy', scale=1, color='k', label='Y1')
+ax.text(o1[0]-0.1, o1[1]-0.1, 'O1', color='k', ha='right', va='top')
+ax.text(ux1[0], ux1[1]-0.1, 'X1', color='k', ha='center', va='top')
+ax.text(uy1[0]-0.1, uy1[1], 'Y1', color='k', ha='right', va='center')
+# Repere R2 (Object) - Red
+# R2 is rotated by theta and translated by o2 (coordinates in R1)
+theta = np.radians(30)
+o2 = np.array([2, 1]) # Origin of R2 in R1 coordinates
+ux2_local = np.array([1, 0])
+uy2_local = np.array([0, 1])
+R = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+ux2 = R @ ux2_local
+uy2 = R @ uy2_local
+ax.quiver(*o2, *ux2, angles='xy', scale_units='xy', scale=1, color='r', label='X2')
+ax.quiver(*o2, *uy2, angles='xy', scale_units='xy', scale=1, color='r', label='Y2')
+ax.text(o2[0]-0.1, o2[1]-0.1, 'O2', color='r', ha='right', va='top')
+ax.text(o2[0]+ux2[0], o2[1]+ux2[1]-0.1, 'X2', color='r', ha='center', va='top')
+ax.text(o2[0]+uy2[0]-0.1, o2[1]+uy2[1], 'Y2', color='r', ha='right', va='center')
+# Point P
+# Coordinates in R2: p2 = (1.5, 0.5)
+p2 = np.array([1.5, 0.5])
+# Calculate coordinates in R1: p1 = o2 + R @ p2
+p1 = o2 + R @ p2
+ax.plot(p1[0], p1[1], 'bo', markersize=8, label='Point P')
+ax.text(p1[0]+0.1, p1[1]+0.1, 'P', color='b')
+# Show coordinates visually (approx)
+# In R2
+ax.plot([o2[0], p1[0]], [o2[1], p1[1]], 'r:') # vector O2->P
+ax.text(o2[0]+0.5*ux2[0], o2[1]+0.5*ux2[1], f'({p2[0]}, {p2[1]}) in R2', color='r', rotation=np.degrees(theta)-90)
+# In R1
+ax.plot([o1[0], p1[0]], [o1[1], p1[1]], 'k:') # vector O1->P
+ax.text(p1[0]*0.5, p1[1]*0.5+0.1, f'({p1[0]:.2f}, {p1[1]:.2f}) in R1', color='k', rotation=np.degrees(np.arctan2(p1[1], p1[0])))
+# Setup axes
+ax.spines['left'].set_position('zero')
+ax.spines['bottom'].set_position('zero')
+ax.spines['right'].set_color('none')
+ax.spines['top'].set_color('none')
+ax.xaxis.set_ticks_position('bottom')
+ax.yaxis.set_ticks_position('left')
+ax.set_xlim(-1, 4)
+ax.set_ylim(-1, 3)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xlabel('X1')
+ax.set_ylabel('Y1', rotation=0, labelpad=10)
+ax.set_title('Changement de Repère : Coordonnées de P dans R1 et R2')
+ax.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.savefig('change_of_basis.png')
+\end{verbatim}
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.8\textwidth, keepaspectratio]{change_of_basis.png}
+\caption{Illustration du changement de repère. Le même point P a des coordonnées différentes dans le repère \( R_1 \) (noir) et le repère \( R_2 \) (rouge).}
+\label{fig:change_of_basis}
+\end{figure}
+\section{Projection}
+La projection est l'étape du pipeline graphique qui transforme les objets 3D de l'espace caméra (ou espace vue) en une représentation 2D sur le plan image. C'est une réduction du nombre de dimensions.
+\subsection{Introduction}
+Imaginez regarder une scène 3D à travers une fenêtre. La projection détermine comment cette scène apparaît sur la surface plane de la fenêtre. Les lignes allant de l'œil (ou centre de projection) aux points de l'objet sont appelées \textbf{projecteurs}. L'image projetée est formée par les intersections de ces projecteurs avec le \textbf{plan de projection} (la fenêtre).
+\subsection{Types de projection}
+Il existe deux grandes familles de projections géométriques planes :
+\begin{itemize}
+    \item \textbf{Projection Perspective} : Le centre de projection (CP) est à une distance finie du plan de projection. Les projecteurs sont des lignes convergentes (comme les rayons de lumière entrant dans un appareil photo ou l'œil). C'est la projection la plus réaliste, car elle simule la façon dont nous percevons la profondeur (les objets éloignés apparaissent plus petits).
+    \item \textbf{Projection Parallèle} : Le centre de projection est à l'infini. Les projecteurs sont des lignes parallèles entre elles. Moins réaliste, mais utile en dessin technique, architecture, ou jeux vidéo (vues isométriques) car elle préserve certaines propriétés comme le parallélisme et les rapports de longueurs le long des directions principales.
+\end{itemize}
+\begin{verbatim}
+#save_to: projection_types_parallel_perspective.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+fig, axes = plt.subplots(1, 2, figsize=(10, 5))
+# --- Perspective Projection ---
+ax = axes[0]
+cp = np.array([-3, 0.5]) # Center of Projection
+plane_x = 0
+plane_y = [-1, 2]
+obj_points = np.array([[1, 0.2], [1.5, 0.8], [1.2, 1.2]]) # Object points (2D analogy)
+proj_points = []
+ax.plot([plane_x, plane_x], plane_y, 'k-', linewidth=2, label='Plan de Projection')
+ax.plot(obj_points[:, 0], obj_points[:, 1], 'bo', label='Objet 3D')
+ax.plot(cp[0], cp[1], 'ro', markersize=8, label='Centre de Projection (CP)')
+# Draw projectors and find intersection
+for p in obj_points:
+    # Line equation from CP to p: y = cp[1] + (p[1]-cp[1])/(p[0]-cp[0]) * (x - cp[0])
+    slope = (p[1] - cp[1]) / (p[0] - cp[0])
+    # Intersection with plane x=plane_x:
+    y_proj = cp[1] + slope * (plane_x - cp[0])
+    proj_points.append([plane_x, y_proj])
+    # Draw projector
+    ax.plot([cp[0], p[0]], [cp[1], p[1]], 'r--', linewidth=0.8)
+proj_points = np.array(proj_points)
+ax.plot(proj_points[:, 0], proj_points[:, 1], 'go', label='Projection')
+ax.set_title('Projection Perspective (CP Fini)')
+ax.set_xlabel('Z (Profondeur)')
+ax.set_ylabel('Y (Hauteur)')
+ax.set_xlim(-4, 2)
+ax.set_ylim(-1, 2)
+ax.legend()
+ax.grid(True)
+# --- Parallel Projection ---
+ax = axes[1]
+plane_x = 0
+plane_y = [-1, 2]
+obj_points = np.array([[1, 0.2], [1.5, 0.8], [1.2, 1.2]])
+# Projectors are parallel (e.g., horizontal here, representing orthographic side view)
+proj_dir = np.array([-1, 0]) # Direction of projection
+ax.plot([plane_x, plane_x], plane_y, 'k-', linewidth=2, label='Plan de Projection')
+ax.plot(obj_points[:, 0], obj_points[:, 1], 'bo', label='Objet 3D')
+proj_points_par = []
+# Draw projectors and find intersection
+for p in obj_points:
+    # Projector line: P + t*proj_dir = (p[0] + t*(-1), p[1] + t*0)
+    # Intersection with x=plane_x: p[0] - t = plane_x => t = p[0] - plane_x
+    t = p[0] - plane_x
+    intersect = p + t * proj_dir # This is incorrect, intersection is just (plane_x, p[1]) for ortho
+    intersect_y = p[1]
+    proj_points_par.append([plane_x, intersect_y])
+    # Draw projector segment
+    ax.plot([p[0], plane_x], [p[1], p[1]], 'r--', linewidth=0.8) # Orthographic side view
+proj_points_par = np.array(proj_points_par)
+ax.plot(proj_points_par[:, 0], proj_points_par[:, 1], 'go', label='Projection')
+ax.text(1.5, -0.5, 'Projecteurs parallèles', color='r', ha='center')
+ax.set_title('Projection Parallèle (CP Infini)')
+ax.set_xlabel('Z (Profondeur)')
+ax.set_ylabel('Y (Hauteur)')
+ax.set_xlim(-4, 2)
+ax.set_ylim(-1, 2)
+ax.legend()
+ax.grid(True)
+fig.suptitle('Comparaison des types de projection')
+plt.tight_layout(rect=[0, 0, 1, 0.95])
+plt.savefig('projection_types_parallel_perspective.png')
+\end{verbatim}
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, keepaspectratio]{projection_types_parallel_perspective.png}
+\caption{Projection perspective (projecteurs convergents vers CP) vs. Projection parallèle (projecteurs parallèles).}
+\label{fig:projection_types_parallel_perspective}
+\end{figure}
+\section{Projection Parallèle}
+Dans ce type de projection, les projecteurs sont parallèles entre eux. La direction de ces projecteurs est appelée \textbf{direction de projection (DP)}.
+\subsection{Définition et propriétés}
+\begin{itemize}
+    \item Le centre de projection est à l'infini.
+    \item Les lignes parallèles dans l'espace 3D restent parallèles dans l'image 2D projetée (sauf si elles sont parallèles à la direction de projection).
+    \item Les rapports des longueurs sur des lignes parallèles à un plan donné sont conservés.
+    \item Moins réaliste que la perspective (pas d'effet de raccourci avec la distance).
+    \item Utile pour les dessins techniques, les mesures, certaines vues de jeux (isométrique).
+\end{itemize}
+\subsection{Types de projection parallèle}
+On distingue deux sous-catégories selon l'angle entre la direction de projection (DP) et la normale au plan de projection :
+\begin{itemize}
+    \item \textbf{Projection Orthographique} : La direction de projection est \textbf{perpendiculaire} au plan de projection. Les projecteurs sont orthogonaux au plan.
+    \item \textbf{Projection Oblique} : La direction de projection est \textbf{non perpendiculaire} au plan de projection. Les projecteurs coupent le plan de manière oblique.
+\end{itemize}
+\begin{verbatim}
+#save_to: parallel_projections_types.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
+fig = plt.figure(figsize=(12, 5))
+# --- Orthographic Projection ---
+ax1 = fig.add_subplot(121, projection='3d')
+ax1.set_title('Projection Orthographique (DP $\perp$ Plan)')
+# Projection Plane (xy plane at z=0)
+plane_verts = np.array([[-2, -2, 0], [2, -2, 0], [2, 2, 0], [-2, 2, 0]])
+plane = Poly3DCollection([plane_verts], alpha=0.1, facecolor='g')
+ax1.add_collection3d(plane)
+ax1.text(0, 0, -0.5, "Plan de projection", color='g', ha='center')
+# Object (Cube)
+v = 0.5
+obj_verts = np.array([
+    [0.5-v, 0.5-v, 1-v], [0.5+v, 0.5-v, 1-v], [0.5+v, 0.5+v, 1-v], [0.5-v, 0.5+v, 1-v],
+    [0.5-v, 0.5-v, 1+v], [0.5+v, 0.5-v, 1+v], [0.5+v, 0.5+v, 1+v], [0.5-v, 0.5+v, 1+v]
+])
+edges = [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]]
+obj = Line3DCollection([obj_verts[edge] for edge in edges], colors='b', linewidths=1)
+ax1.add_collection3d(obj)
+ax1.scatter(obj_verts[:,0], obj_verts[:,1], obj_verts[:,2], color='b')
+# Projectors (Orthogonal to xy plane, i.e., parallel to Z axis)
+proj_verts = []
+for p in obj_verts:
+    proj_p = [p[0], p[1], 0] # Project onto z=0
+    proj_verts.append(proj_p)
+    ax1.plot([p[0], proj_p[0]], [p[1], proj_p[1]], [p[2], proj_p[2]], 'r--', linewidth=0.8) # Projector line
+proj_verts = np.array(proj_verts)
+proj_img = Line3DCollection([proj_verts[edge] for edge in edges], colors='k', linewidths=1.5)
+ax1.add_collection3d(proj_img)
+ax1.scatter(proj_verts[:,0], proj_verts[:,1], proj_verts[:,2], color='k')
+ax1.text(0.5, 0.5, 1.5, "DP $\perp$", color='r')
+# --- Oblique Projection ---
+ax2 = fig.add_subplot(122, projection='3d')
+ax2.set_title('Projection Oblique (DP non $\perp$ Plan)')
+# Projection Plane
+ax2.add_collection3d(Poly3DCollection([plane_verts], alpha=0.1, facecolor='g'))
+ax2.text(0, 0, -0.5, "Plan de projection", color='g', ha='center')
+# Object
+ax2.add_collection3d(Line3DCollection([obj_verts[edge] for edge in edges], colors='b', linewidths=1))
+ax2.scatter(obj_verts[:,0], obj_verts[:,1], obj_verts[:,2], color='b')
+# Projectors (Oblique, e.g., direction (-1, -1, -1))
+dp = np.array([-0.5, -0.5, -1])
+dp_norm = dp / np.linalg.norm(dp)
+proj_verts_obl = []
+for p in obj_verts:
+    # Line: p + t*dp_norm. Intersect with z=0: p[2] + t*dp_norm[2] = 0 => t = -p[2]/dp_norm[2]
+    t = -p[2] / dp_norm[2]
+    proj_p = p + t * dp_norm
+    proj_verts_obl.append(proj_p)
+    ax1.plot([p[0], proj_p[0]], [p[1], proj_p[1]], [p[2], proj_p[2]], 'r--', linewidth=0.8) # Projector line
+proj_verts_obl = np.array(proj_verts_obl)
+proj_img_obl = Line3DCollection([proj_verts_obl[edge] for edge in edges], colors='k', linewidths=1.5)
+ax2.add_collection3d(proj_img_obl)
+ax2.scatter(proj_verts_obl[:,0], proj_verts_obl[:,1], proj_verts_obl[:,2], color='k')
+ax2.text(0, 0, 1.5, "DP oblique", color='r')
+# Common settings for both plots
+for ax in [ax1, ax2]:
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    ax.set_xlim([-2, 2])
+    ax.set_ylim([-2, 2])
+    ax.set_zlim([0, 2])
+    ax.view_init(elev=20, azim=-60)
+plt.tight_layout()
+plt.savefig('parallel_projections_types.png')
+\end{verbatim}
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, keepaspectratio]{parallel_projections_types.png}
+\caption{Projection parallèle orthographique (projecteurs rouges perpendiculaires au plan vert) vs. oblique (projecteurs rouges non perpendiculaires).}
+\label{fig:parallel_projections_types}
+\end{figure}
+\section{Projection Orthographique}
+C'est le type le plus simple de projection parallèle. La direction de projection est orthogonale au plan de projection.
+\subsection{Principe}
+La projection orthographique consiste essentiellement à "écraser" l'objet sur le plan de projection en supprimant une dimension (celle correspondant à la direction de projection). Si le plan de projection est l'un des plans principaux (xy, yz, xz), cela revient simplement à mettre à zéro la coordonnée correspondante.
+\subsection{Vues orthographiques}
+Les projections orthographiques sur les plans principaux sont très utilisées en dessin technique et CAO :
+\begin{itemize}
+    \item \textbf{Vue de face (Front View)} : Projection sur le plan XY (DP = axe Z). On ignore la coordonnée Z.
+    \item \textbf{Vue de dessus (Top View)} : Projection sur le plan XZ (DP = axe Y). On ignore la coordonnée Y.
+    \item \textbf{Vue de côté (Side View)} : Projection sur le plan YZ (DP = axe X). On ignore la coordonnée X.
+\end{itemize}
+\begin{verbatim}
+#save_to: orthographic_views.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
+fig = plt.figure(figsize=(12, 8))
+# --- 3D Object ---
+ax_3d = fig.add_subplot(221, projection='3d')
+ax_3d.set_title('Objet 3D Original')
+v = 0.5
+obj_verts = np.array([
+    [-v, -v, -v], [+v, -v, -v], [+v, +v, -v], [-v, +v, -v], # Bottom face z=-v (0,1,2,3)
+    [-v, -v, +v], [+v, -v, +v], [+v, +v, +v], [-v, +v, +v]  # Top face    z=+v (4,5,6,7)
+]) + np.array([0,0,0.1]) # Shift up slightly for visibility
+edges = [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]]
+faces = [
+    [0, 1, 2, 3], [4, 5, 6, 7], [0, 1, 5, 4],
+    [2, 3, 7, 6], [1, 2, 6, 5], [0, 3, 7, 4]
+]
+obj_poly = Poly3DCollection([obj_verts[face] for face in faces], facecolors='cyan', linewidths=1, edgecolors='k', alpha=0.2)
+ax_3d.add_collection3d(obj_poly)
+ax_3d.scatter(obj_verts[:,0], obj_verts[:,1], obj_verts[:,2], color='b')
+ax_3d.set_xlabel('X')
+ax_3d.set_ylabel('Y')
+ax_3d.set_zlabel('Z')
+ax_3d.set_xlim([-1, 1])
+ax_3d.set_ylim([-1, 1])
+ax_3d.set_zlim([-1, 1])
+ax_3d.view_init(elev=20, azim=30)
+# --- Front View (Projection onto XY) ---
+ax_front = fig.add_subplot(222)
+ax_front.set_title('Vue de Face (Projection XY)')
+proj_xy = obj_verts[:, :2] # Keep x, y
+# Draw the projected faces (only those visible from front, approx)
+front_face_indices = [[0, 1, 5, 4], [1,2,6,5]] # Faces roughly facing +Z
+for face_idx in faces: # Draw all edges
+     ax_front.plot(proj_xy[face_idx+[face_idx[0]], 0], proj_xy[face_idx+[face_idx[0]], 1], 'k-')
+ax_front.set_xlabel('X')
+ax_front.set_ylabel('Y')
+ax_front.set_aspect('equal', adjustable='box')
+ax_front.grid(True)
+ax_front.set_xlim([-1, 1])
+ax_front.set_ylim([-1, 1])
+# --- Top View (Projection onto XZ) ---
+ax_top = fig.add_subplot(223)
+ax_top.set_title('Vue de Dessus (Projection XZ)')
+proj_xz = obj_verts[:, [0, 2]] # Keep x, z
+top_face_indices = [[4,5,6,7], [3,0,4,7]] # Faces roughly facing +Y
+for face_idx in faces:
+     ax_top.plot(proj_xz[face_idx+[face_idx[0]], 0], proj_xz[face_idx+[face_idx[0]], 1], 'k-')
+ax_top.set_xlabel('X')
+ax_top.set_ylabel('Z')
+ax_top.set_aspect('equal', adjustable='box')
+ax_top.grid(True)
+ax_top.set_xlim([-1, 1])
+ax_top.set_ylim([-1, 1])
+# --- Side View (Projection onto YZ) ---
+ax_side = fig.add_subplot(224)
+ax_side.set_title('Vue de Côté (Projection YZ)')
+proj_yz = obj_verts[:, [1, 2]] # Keep y, z
+side_face_indices = [[1,2,6,5], [5,6,7,4]] # Faces roughly facing +X
+for face_idx in faces:
+     ax_side.plot(proj_yz[face_idx+[face_idx[0]], 0], proj_yz[face_idx+[face_idx[0]], 1], 'k-')
+ax_side.set_xlabel('Y')
+ax_side.set_ylabel('Z')
+ax_side.set_aspect('equal', adjustable='box')
+ax_side.grid(True)
+ax_side.set_xlim([-1, 1])
+ax_side.set_ylim([-1, 1])
+plt.tight_layout()
+plt.savefig('orthographic_views.png')
+\end{verbatim}
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.9\textwidth, keepaspectratio]{orthographic_views.png}
+\caption{Objet 3D et ses vues orthographiques principales.}
+\label{fig:orthographic_views}
+\end{figure}
+\subsection{Forme matricielle}
+En coordonnées homogènes, la projection orthographique sur le plan \( z=0 \) (vue de face) est représentée par la matrice \( M_{PZ} \) qui met la coordonnée Z à zéro :
+\[ M_{PZ} = \begin{pmatrix} 1 & 0 & 0 & 0 \\ 0 & 1 & 0 & 0 \\ 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 1 \end{pmatrix} \]
+Appliquer cette matrice à un point \( \mathbf{P} = (x, y, z, 1)^T \) donne :
+\[ \mathbf{P'} = M_{PZ} \mathbf{P} = \begin{pmatrix} 1 & 0 & 0 & 0 \\ 0 & 1 & 0 & 0 \\ 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 1 \end{pmatrix} \begin{pmatrix} x \\ y \\ z \\ 1 \end{pmatrix} = \begin{pmatrix} x \\ y \\ 0 \\ 1 \end{pmatrix} \]
+Le point projeté a les coordonnées \( (x, y) \) dans le plan de projection.
+De même pour les autres vues :
+\begin{itemize}
+    \item Projection sur XZ (Vue de dessus, ignorer Y) : \( M_{PY} = \begin{pmatrix} 1 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{pmatrix} \)
+    \item Projection sur YZ (Vue de côté, ignorer X) : \( M_{PX} = \begin{pmatrix} 0 & 0 & 0 & 0 \\ 0 & 1 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{pmatrix} \)
+\end{itemize}
+\subsection{Projection axonométrique}
+C'est une projection orthographique où le plan de projection n'est \textbf{pas} parallèle à l'un des plans principaux (XY, YZ, XZ). Le vecteur normal au plan de projection n'est parallèle à aucun des axes de coordonnées. Cela permet de montrer plusieurs facettes de l'objet simultanément. Les vues isométriques, dimétriques et trimétriques sont des types de projections axonométriques.
+\section{Projection Oblique}
+Dans ce type de projection parallèle, la direction de projection (DP) n'est pas perpendiculaire au plan de projection.
+\subsection{Définition}
+Les projecteurs sont parallèles entre eux mais coupent le plan de projection selon un angle \( \phi \neq 90^\circ \). Cela a pour effet de décaler les points projetés par rapport à une projection orthographique.
+La matrice d'une projection oblique est souvent obtenue en combinant une transformation de cisaillement (shear) suivie d'une projection orthographique.
+\subsection{Types courants}
+Deux types de projections obliques sont fréquemment mentionnés :
+\begin{itemize}
+    \item \textbf{Projection Cavalière} : L'angle \( \phi \) entre les projecteurs et le plan est souvent de 45°. Les longueurs le long de l'axe perpendiculaire au plan de projection sont conservées (pas de raccourci). Cela donne une apparence un peu déformée.
+    \item \textbf{Projection Cabinet} : L'angle \( \phi \) est tel que \( \tan(\phi) = 2 \) (soit \( \phi \approx 63.4^\circ \)). Les longueurs le long de l'axe perpendiculaire au plan de projection sont réduites de moitié. Cela donne une apparence plus réaliste que la projection cavalière.
+\end{itemize}
+\begin{verbatim}
+#save_to: oblique_projections.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
+fig = plt.figure(figsize=(10, 5))
+def plot_oblique(ax, title, angle_deg):
+    ax.set_title(title)
+    # Projection Plane (xy plane at z=0)
+    plane_verts = np.array([[-1, -1, 0], [1, -1, 0], [1, 1, 0], [-1, 1, 0]])
+    plane = Poly3DCollection([plane_verts], alpha=0.1, facecolor='g')
+    ax.add_collection3d(plane)
+    # Object (Unit Cube at origin)
+    v = 0.5
+    obj_verts = np.array([
+        [-v, -v, -v], [+v, -v, -v], [+v, +v, -v], [-v, +v, -v],
+        [-v, -v, +v], [+v, -v, +v], [+v, +v, +v], [-v, +v, +v]
+    ])
+    edges = [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]]
+    obj = Line3DCollection([obj_verts[edge] for edge in edges], colors='b', linewidths=1)
+    ax.add_collection3d(obj)
+    #ax.scatter(obj_verts[:,0], obj_verts[:,1], obj_verts[:,2], color='b')
+    # Projectors and Projected Image
+    # Oblique projection matrix (onto z=0) simulation:
+    # x_p = x + L * z * cos(alpha)
+    # y_p = y + L * z * sin(alpha)
+    # L = 1 for Cavalier (often at alpha=45)
+    # L = 0.5 for Cabinet (often at alpha=arctan(1/0.5) but we just use L=0.5)
+    alpha_rad = np.radians(45) # Angle of the receding lines in 2D
+    L = 1.0 if 'Cavaliere' in title else 0.5
+    proj_verts = []
+    for p in obj_verts:
+        x_p = p[0] + L * p[2] * np.cos(alpha_rad)
+        y_p = p[1] + L * p[2] * np.sin(alpha_rad)
+        proj_p = [x_p, y_p, 0]
+        proj_verts.append(proj_p)
+        # Draw projector (visual guide, not geometrically exact representation of DP)
+        ax.plot([p[0], proj_p[0]], [p[1], proj_p[1]], [p[2], proj_p[2]], 'r--', linewidth=0.8)
+    proj_verts = np.array(proj_verts)
+    proj_img = Line3DCollection([proj_verts[edge] for edge in edges], colors='k', linewidths=1.5)
+    ax.add_collection3d(proj_img)
+    ax.scatter(proj_verts[:,0], proj_verts[:,1], proj_verts[:,2], color='k')
+    ax.text(0, 0, 1.0, f'$\\phi = {angle_deg}^\\circ$', color='r')
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    ax.set_xlim([-1, 1.5])
+    ax.set_ylim([-1, 1.5])
+    ax.set_zlim([-1, 1.5])
+    ax.view_init(elev=90, azim=-90) # Look straight down at XY plane
+    ax.set_box_aspect((1, 1, 1)) # Ensure Z scale matches X,Y visually
+# Plot Cavalier
+ax1 = fig.add_subplot(121, projection='3d')
+plot_oblique(ax1, 'Projection Cavaliere ($\\phi=45^\\circ$, L=1)', 45)
+# Plot Cabinet
+ax2 = fig.add_subplot(122, projection='3d')
+plot_oblique(ax2, 'Projection Cabinet ($\\phi=63.4^\\circ$, L=0.5)', 63.4)
+plt.tight_layout()
+plt.savefig('oblique_projections.png')
+\end{verbatim}
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, keepaspectratio]{oblique_projections.png}
+\caption{Exemples de projections obliques : Cavalière et Cabinet (vues du dessus du plan de projection XY).}
+\label{fig:oblique_projections}
+\end{figure}
+\section{Projection Perspective}
+C'est le type de projection le plus réaliste, simulant la vision humaine ou l'objectif d'un appareil photo.
+\subsection{Définition et fonctionnement}
+\begin{itemize}
+    \item Le centre de projection (CP), souvent appelé "œil" ou "caméra", est situé à une distance finie du plan de projection.
+    \item Les projecteurs sont les lignes droites passant par le CP et chaque point de l'objet 3D.
+    \item L'image projetée est l'ensemble des points d'intersection de ces projecteurs avec le plan de projection.
+    \item \textbf{Effet de perspective} : Les objets plus éloignés du CP apparaissent plus petits sur le plan de projection. Les objets de même taille à des distances différentes auront des tailles projetées différentes.
+    \item \textbf{Non-conservation du parallélisme} : Les lignes parallèles dans l'espace 3D ne restent parallèles sur l'image 2D que si elles sont parallèles au plan de projection. Les autres ensembles de lignes parallèles semblent converger vers un point appelé \textbf{point de fuite}.
+\end{itemize}
+\subsection{Calcul (Vue de côté simple)}
+Considérons une configuration simple : le CP est à l'origine (0,0,0), le plan de projection est à \( z = f \) (où \( f \) est la distance focale ou distance au plan image), et on projette un point \( P = (x, y, z) \) sur ce plan en \( q = (x_p, y_p, f) \).
+Par similarité des triangles (vu de côté, en considérant l'axe Y et Z par exemple) :
+\[ \frac{y_p}{f} = \frac{y}{z} \implies y_p = \frac{y \cdot f}{z} = \frac{y}{z/f} \]
+De même, vu de dessus (en considérant X et Z) :
+\[ \frac{x_p}{f} = \frac{x}{z} \implies x_p = \frac{x \cdot f}{z} = \frac{x}{z/f} \]
+Si le plan de projection est à \( z=1 \) (caméra normalisée), alors \( x_p = x/z \) et \( y_p = y/z \).
+On voit que les coordonnées projetées dépendent inversement de la profondeur \( z \).
+\begin{verbatim}
+#save_to: perspective_side_view.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+fig, ax = plt.subplots(figsize=(8, 5))
+# Setup
+cp = np.array([0, 0]) # Center of Projection at origin (in YZ view)
+z_plane = 3 # Distance to projection plane (focal length 'f')
+p = np.array([5, 2]) # Point P (z, y coordinates)
+# Projected point q calculation
+# y_p / z_plane = p[1] / p[0] => y_p = p[1] * z_plane / p[0]
+y_p = p[1] * z_plane / p[0]
+q = np.array([z_plane, y_p])
+# Plot CP, P, q
+ax.plot(cp[0], cp[1], 'ro', markersize=8, label='Centre Projection (CP)')
+ax.plot(p[0], p[1], 'bo', markersize=8, label='Point P (z, y)')
+ax.plot(q[0], q[1], 'go', markersize=8, label='Point Projeté q (f, y_p)')
+# Plot Projection Plane
+ax.plot([z_plane, z_plane], [-1, 3], 'k-', linewidth=2, label='Plan Projection (z=f)')
+ax.text(z_plane + 0.1, 2.8, 'z=f', ha='left')
+# Plot Projector Line (from CP through P)
+ax.plot([cp[0], p[0]], [cp[1], p[1]], 'r--', linewidth=1)
+# Show similar triangles visually
+# Triangle CP-P-Pz
+ax.plot([cp[0], p[0], p[0], cp[0]], [cp[1], p[1], cp[1], cp[1]], 'b:', linewidth=0.8) # Pz = (p[0],0)
+# Triangle CP-q-qz
+ax.plot([cp[0], q[0], q[0], cp[0]], [cp[1], q[1], cp[1], cp[1]], 'g:', linewidth=0.8) # qz = (q[0],0)
+# Add labels
+ax.text(p[0], 0.1, 'z', color='b', ha='center')
+ax.text(p[0]+0.1, p[1]/2, 'y', color='b', va='center')
+ax.text(q[0], 0.1, 'f', color='g', ha='center')
+ax.text(q[0]+0.1, q[1]/2, '$y_p = y \\cdot f / z$', color='g', va='center')
+# Setup axes
+ax.spines['left'].set_position('zero')
+ax.spines['bottom'].set_position('zero')
+ax.spines['right'].set_color('none')
+ax.spines['top'].set_color('none')
+ax.xaxis.set_ticks_position('bottom')
+ax.yaxis.set_ticks_position('left')
+ax.set_xlim(-1, 6)
+ax.set_ylim(-1, 3)
+#ax.set_aspect('equal', adjustable='box') # Aspect ratio might make it hard to see
+ax.set_xlabel('Z (Profondeur)')
+ax.set_ylabel('Y (Hauteur)', rotation=90, labelpad=10)
+ax.set_title('Projection Perspective - Vue de Côté (Similitude des triangles)')
+ax.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.savefig('perspective_side_view.png')
+\end{verbatim}
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.8\textwidth, keepaspectratio]{perspective_side_view.png}
+\caption{Calcul de la projection perspective par similarité des triangles (vue de côté, plan YZ).}
+\label{fig:perspective_side_view}
+\end{figure}
+\subsection{Point de fuite}
+Un ensemble de lignes parallèles dans l'espace 3D qui ne sont pas parallèles au plan de projection convergera vers un unique point sur l'image projetée, appelé point de fuite.
+\begin{itemize}
+    \item \textbf{Perspective à 1 point de fuite} : Seulement un des axes principaux (généralement la profondeur Z) converge. Les lignes parallèles aux axes X et Y restent parallèles sur l'image.
+    \item \textbf{Perspective à 2 points de fuite} : Deux axes (e.g., X et Z) convergent vers deux points de fuite distincts. Les lignes parallèles à l'axe Y restent verticales. Courant pour les vues architecturales.
+    \item \textbf{Perspective à 3 points de fuite} : Les trois axes X, Y, Z convergent vers trois points de fuite distincts. Donne une vue plus dramatique, souvent utilisée pour regarder des objets hauts depuis le bas ou inversement.
+\end{itemize}
+\subsection{Représentation matricielle}
+La projection perspective peut être représentée par une matrice 4x4 en coordonnées homogènes. La matrice de projection perspective la plus simple (CP à l'origine, projection sur \( z=f \)) est :
+\[ M_{persp} = \begin{pmatrix} 1 & 0 & 0 & 0 \\ 0 & 1 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 1/f & 0 \end{pmatrix} \]
+Appliquons cette matrice à \( \mathbf{P} = (x, y, z, 1)^T \) :
+\[ \mathbf{P'} = M_{persp} \mathbf{P} = \begin{pmatrix} 1 & 0 & 0 & 0 \\ 0 & 1 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 1/f & 0 \end{pmatrix} \begin{pmatrix} x \\ y \\ z \\ 1 \end{pmatrix} = \begin{pmatrix} x \\ y \\ z \\ z/f \end{pmatrix} \]
+Les coordonnées homogènes résultantes sont \( (x, y, z, z/f) \). Pour retrouver les coordonnées cartésiennes, on divise par la 4ème composante \( W = z/f \):
+\[ \mathbf{p'} = \left( \frac{x}{z/f}, \frac{y}{z/f}, \frac{z}{z/f} \right) = \left( \frac{x \cdot f}{z}, \frac{y \cdot f}{z}, f \right) \]
+On retrouve bien les coordonnées projetées \( x_p, y_p \) sur le plan \( z=f \). La profondeur \( z \) est "perdue" au profit de \( f \), mais l'information de profondeur originale est stockée dans la coordonnée \( W \) avant la division (division perspective).
+Une matrice de projection plus générale prenant en compte un frustum de vue (pyramide tronquée définissant le volume visible) est présentée plus loin (Section \ref{sec:perspective_transform}).
+\section{Plans de Clipping}
+Avant la projection finale et la rastérisation, il est nécessaire de délimiter le volume d'espace qui sera effectivement visible et affiché. Les primitives géométriques (triangles, lignes) qui se trouvent partiellement ou totalement en dehors de ce volume doivent être découpées (clipped).
+\subsection{Utilité et fonctionnement}
+\begin{itemize}
+    \item \textbf{View Frustum} : Le volume visible en projection perspective est généralement une pyramide tronquée appelée "frustum de vue". Il est défini par 6 plans :
+        \begin{itemize}
+            \item \textbf{Near Plane (Plan proche, z-near)} : Empêche les objets trop proches de la caméra d'être affichés (évite division par zéro ou erreurs de Z-buffer).
+            \item \textbf{Far Plane (Plan lointain, z-far)} : Empêche les objets trop éloignés d'être affichés (limite la profondeur de champ, économise calculs).
+            \item \textbf{Left, Right, Top, Bottom Planes} : Définissent les limites latérales du champ de vision.
+        \end{itemize}
+    \item \textbf{Clipping} : Algorithmes (e.g., Sutherland-Hodgman pour les polygones, Cohen-Sutherland pour les lignes) qui éliminent les parties des primitives situées en dehors du frustum de vue.
+    \item \textbf{Problèmes sans Clipping} :
+        \item Rastérisation incorrecte de primitives traversant le plan z-near (triangles derrière l'œil).
+        \item Problèmes de précision du Z-buffer (tampon de profondeur) si la plage [z-near, z-far] est trop grande, surtout près de z=0 où la précision des flottants est limitée. Une valeur très petite (proche de 0) pour z-near concentre une grande partie de la précision du Z-buffer très près de l'œil, laissant peu de précision pour le reste de la scène.
+\end{itemize}
+\begin{verbatim}
+#save_to: view_frustum.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+fig = plt.figure(figsize=(8, 6))
+ax = fig.add_subplot(111, projection='3d')
+# Frustum parameters (example)
+near = 1.0
+far = 5.0
+fov_y_deg = 60
+aspect_ratio = 1.5 # width / height
+# Calculate half heights and widths at near and far planes
+h_near = near * np.tan(np.radians(fov_y_deg / 2.0))
+w_near = h_near * aspect_ratio
+h_far = far * np.tan(np.radians(fov_y_deg / 2.0))
+w_far = h_far * aspect_ratio
+# Define frustum vertices
+v = [
+    # Near plane (z = -near, assuming camera looks down -Z)
+    [-w_near, -h_near, -near], [+w_near, -h_near, -near], [+w_near, +h_near, -near], [-w_near, +h_near, -near],
+    # Far plane (z = -far)
+    [-w_far, -h_far, -far], [+w_far, -h_far, -far], [+w_far, +h_far, -far], [-w_far, +h_far, -far]
+]
+vertices = np.array(v)
+# Define faces
+faces = [
+    [vertices[0], vertices[1], vertices[2], vertices[3]], # Near
+    [vertices[4], vertices[5], vertices[6], vertices[7]], # Far
+    [vertices[0], vertices[1], vertices[5], vertices[4]], # Bottom
+    [vertices[2], vertices[3], vertices[7], vertices[6]], # Top
+    [vertices[0], vertices[3], vertices[7], vertices[4]], # Left
+    [vertices[1], vertices[2], vertices[6], vertices[5]]  # Right
+]
+# Plot frustum faces
+frustum_poly = Poly3DCollection(faces, facecolors='cyan', linewidths=1, edgecolors='k', alpha=0.15)
+ax.add_collection3d(frustum_poly)
+# Camera position (eye)
+eye = np.array([0, 0, 0])
+ax.scatter(*eye, color='r', marker='o', s=50, label='Oeil (CP)')
+# Lines from eye to near plane corners (projectors guide)
+for i in range(4):
+    ax.plot([eye[0], vertices[i,0]], [eye[1], vertices[i,1]], [eye[2], vertices[i,2]], 'r--', linewidth=0.8)
+# Add labels
+ax.text(0, 0, -near, ' Near', color='k')
+ax.text(0, 0, -far, ' Far', color='k')
+ax.text(vertices[3,0], vertices[3,1], vertices[3,2], ' Top-Left-Near', color='k', ha='right')
+ax.text(vertices[6,0], vertices[6,1], vertices[6,2], ' Top-Right-Far', color='k', ha='left')
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_zlabel('Z')
+ax.set_title('Frustum de Vue (Pyramide Tronquée)')
+ax.view_init(elev=20, azim=-70)
+ax.set_xlim(-5, 5)
+ax.set_ylim(-5, 5)
+ax.set_zlim(-6, 1)
+ax.legend()
+plt.tight_layout()
+plt.savefig('view_frustum.png')
+\end{verbatim}
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.8\textwidth, keepaspectratio]{view_frustum.png}
+\caption{Visualisation du frustum de vue défini par les plans Near, Far, Top, Bottom, Left, Right.}
+\label{fig:view_frustum}
+\end{figure}
+\section{Passage en Coordonnées Normalisées (NDC)}
+Après le clipping dans l'espace caméra (ou parfois après la projection), le frustum de vue est transformé en un volume canonique simple, généralement un cube unitaire centré à l'origine, appelé \textbf{Normalized Device Coordinates (NDC)}. Ce cube a typiquement des coordonnées allant de -1 à +1 pour X, Y et Z.
+\subsection{Objectif}
+\begin{itemize}
+    \item Simplifier les étapes ultérieures comme le clipping (clipping contre un cube est plus simple) et le mapping vers l'écran (Viewport Transform).
+    \item Standardiser le volume visible indépendamment des paramètres de la caméra (FOV, aspect ratio, near/far).
+\end{itemize}
+\subsection{Transformation}
+La transformation qui mappe le frustum de vue perspectif vers le cube NDC [-1, 1]^3 est réalisée par la \textbf{matrice de projection perspective} (souvent appelée \( M_{proj} \)). Cette matrice combine la projection elle-même et la déformation (warp) de l'espace pour transformer le frustum en cube.
+Les slides montrent un exemple de dérivation de la matrice \( A \) qui transforme 8 points \( x_i \) (coins du frustum) en 8 points \( y_i \) (coins du cube NDC). Cette matrice \( A \) est la matrice de projection \( M_{proj} \). Le but est de trouver \( A \) telle que \( y_i = A x_i \) pour tous les coins \( i \). (Attention : les \( x_i, y_i \) dans les slides sont des vecteurs homogènes 4D).
+La dérivation aboutit à la matrice \( A \) (qui est \( M_{proj} \)) suivante (pour une caméra regardant vers -Z, et un mapping NDC de [-1, 1]) :
+\[ A = \begin{pmatrix}
+\frac{2n}{r-l} & 0 & \frac{r+l}{r-l} & 0 \\
+0 & \frac{2n}{t-b} & \frac{t+b}{t-b} & 0 \\
+0 & 0 & -\frac{f+n}{f-n} & -\frac{2fn}{f-n} \\
+0 & 0 & -1 & 0
+\end{pmatrix} \]
+où \( l, r, b, t, n, f \) sont les coordonnées des plans Left, Right, Bottom, Top, Near, Far du frustum dans l'espace caméra (\( n, f \) sont des distances, donc positives, mais souvent utilisées comme coordonnées \( z=-n, z=-f \)).
+\section{Transformation de la Perspective}
+La matrice \( M = A \) dérivée ci-dessus est la \textbf{matrice de transformation de perspective} complète. Elle prend un point \( \mathbf{P}_{view} \) en coordonnées caméra (dans le frustum) et le transforme en coordonnées normalisées \( \mathbf{P}_{NDC} \):
+\[ \mathbf{P}_{NDC} = M \cdot \mathbf{P}_{view} \]
+Après multiplication par \( M \), les coordonnées \( (x', y', z', w') \) de \( \mathbf{P}_{NDC} \) sont encore homogènes. La division par \( w' \) (division perspective) donne les coordonnées finales dans le cube [-1, 1]^3.
+\[ (x_{ndc}, y_{ndc}, z_{ndc}) = (x'/w', y'/w', z'/w') \]
+La coordonnée \( z_{ndc} \) est particulièrement importante car elle est souvent utilisée comme valeur de profondeur dans le Z-buffer. La transformation non-linéaire de \( z_{view} \) en \( z_{ndc} \) (due à la division par \( w' \), qui dépend de \( z_{view} \)) fait que la précision de la profondeur n'est pas uniforme dans l'espace NDC.
+\section{Transformations Géométriques (Synthèse)}
+Pour afficher un objet défini dans son propre repère (Object Space) sur l'écran, une série de transformations est appliquée :
+\begin{itemize}
+\item  \textbf{Modèle vers Scène (Model to World)} : \( M_{model} \)
+    Placer l'objet dans la scène globale. Utilise les transformations de modélisation (translation, rotation, échelle) stockées dans le graphe de scène.
+    \( \mathbf{P}_{world} = M_{model} \cdot \mathbf{P}_{object} \)
+\item  \textbf{Scène vers Caméra (World to View)} : \( M_{view} \)
+    Transformer les coordonnées de la scène dans le repère lié à la caméra. C'est l'inverse de la transformation qui placerait la caméra dans la scène. Si \( M_{cam} \) positionne la caméra dans le monde, alors \( M_{view} = (M_{cam})^{-1} \).
+    \( \mathbf{P}_{view} = M_{view} \cdot \mathbf{P}_{world} \)
+\item  \textbf{Caméra vers NDC (Projection)} : \( M_{proj} \)
+    Appliquer la projection (perspective ou orthographique) et normaliser les coordonnées dans le cube $[-1, 1]^3$.
+    \( \mathbf{P}_{clip} = M_{proj} \cdot \mathbf{P}_{view} \)
+    (Les coordonnées sont souvent appelées "clip coordinates" avant la division perspective).
+\item  \textbf{Division Perspective} :
+    Diviser par la composante W pour obtenir les coordonnées NDC.
+    \( (x_{ndc}, y_{ndc}, z_{ndc}) = (x_{clip}/w_{clip}, y_{clip}/w_{clip}, z_{clip}/w_{clip}) \)
+\item  \textbf{Transformation Fenêtre (Viewport Transform)} : \( M_{viewport} \)
+    Mapper les coordonnées NDC $[-1, 1]^2$ (on ignore souvent Z ici pour le mapping 2D) vers les coordonnées de la fenêtre d'affichage (pixels) sur l'écran.
+    \( (x_{screen}, y_{screen}) = M_{viewport} \cdot (x_{ndc}, y_{ndc}) \)
+\end{itemize}
+La transformation totale de l'objet à l'écran peut être vue comme la composition de ces matrices :
+\( M_{total} = M_{viewport} \cdot M_{proj} \cdot M_{view} \cdot M_{model} \) (en ignorant la division perspective pour le moment).
+\subsection{Exemple de transformations combinées (Caméra)}
+Les slides (page 75) montrent un exemple où l'on veut placer l'objet dans le repère caméra.
+Considérons une caméra située en \( (4, 2, 0) \) dans le repère monde, regardant vers l'origine le long de l'axe -X (donc sa direction de vue est (-1, 0, 0)). On veut transformer un objet du repère monde vers le repère caméra, où la caméra est à l'origine et regarde le long de l'axe -Z.
+Il faut deux transformations :
+1.  \textbf{Translation} \( T(-4, -2, 0) \) pour amener la caméra (et le monde avec elle) à l'origine.
+2.  \textbf{Rotation} pour aligner l'axe de vue (-X monde) avec l'axe de vue caméra (-Z caméra). Il faut tourner de +90° autour de l'axe Y (pour amener -X vers -Z).
+La matrice de vue \( M_{view} \) est la composition \( M_{view} = R_y(90^\circ) \cdot T(-4, -2, 0) \).
+\[ R_y(90^\circ) = \begin{pmatrix} 0 & 0 & 1 \\ 0 & 1 & 0 \\ -1 & 0 & 0 \end{pmatrix} \]
+\[ M_{view} = \begin{pmatrix} 0 & 0 & 1 & 0 \\ 0 & 1 & 0 & 0 \\ -1 & 0 & 0 & 0 \\ 0 & 0 & 0 & 1 \end{pmatrix} \begin{pmatrix} 1 & 0 & 0 & -4 \\ 0 & 1 & 0 & -2 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{pmatrix} = \begin{pmatrix} 0 & 0 & 1 & 0 \\ 0 & 1 & 0 & -2 \\ -1 & 0 & 0 & 4 \\ 0 & 0 & 0 & 1 \end{pmatrix} \]
+Appliquer \( M_{view} \) à un point en coordonnées monde \( \mathbf{P}_{world} \) donne ses coordonnées \( \mathbf{P}_{view} \) dans le repère caméra.
+\end{document}
+```
