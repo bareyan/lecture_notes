@@ -1,0 +1,521 @@
+```latex
+\documentclass{article}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{listings}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Example}
+
+\usepackage[margin=1in]{geometry}
+\usepackage[french]{babel}
+
+\begin{document}
+\sloppy
+
+\section*{TD 6}
+
+\section*{Exercice 1}
+Une suite réelle sera notée $u : \mathbb{N} \to \mathbb{R}$, son $n$-ième terme sera noté $u(n)$. Soit $l^{\infty}(\mathbb{N})$ l' espace vectoriel des suites réelles bornées, muni de la norme
+\[ ||u||_{\infty} = \sup_{n \in \mathbb{N}} |u(n)|. \]
+On note par $l_0^{\infty}(\mathbb{N})$ le sous ensemble de $l^{\infty}(\mathbb{N})$ formé des suites nulles à partir d' un certain rang et par $l_c^{\infty}(\mathbb{N})$ le sous ensemble des suites $u$ telles que $\lim_{n \to \infty} u(n) = 0$.
+
+1) Déterminer si les ensembles $l_0^{\infty}(\mathbb{N})$ et $l_c^{\infty}(\mathbb{N})$ sont ouverts, resp. fermés.
+2) Montrer que $l_0^{\infty}(\mathbb{N})$ est dense dans $l_c^{\infty}(\mathbb{N})$ pour la norme $|| \cdot ||_{\infty}$.
+3) Soit $A \subset l^{\infty}(\mathbb{N})$ l' ensemble des suites croissantes bornées. Montrer que $A$ est fermé pour la norme $|| \cdot ||_{\infty}$.
+4) Soit $u_1, u_2 \in l^{\infty}(\mathbb{N})$ deux suites convergentes, c'est à dire telles que $\lim_{n \to \infty} u_i(n) = l_i \in \mathbb{R}$ existe pour $i=1,2$. Montrer que
+\[ |l_1 - l_2| \le ||u_1 - u_2||_{\infty}. \]
+Soit $C$ l'ensemble des suites convergentes. Montrer que $C \subset l^{\infty}(\mathbb{N})$ et que $C$ est un fermé de $l^{\infty}(\mathbb{N})$.
+5) Construire une suite $(u_p)_{p \in \mathbb{N}}$ d' éléments de $l_0^{\infty}(\mathbb{N})$ telle que pour tout $n \in \mathbb{N}$ la suite réelle $(u_p(n))_{p \in \mathbb{N}}$ est convergente dans $\mathbb{R}$ mais la suite $(u_p)_{p \in \mathbb{N}}$ ne converge pas dans $l^{\infty}(\mathbb{N})$.
+
+\begin{solution}
+1) $l_0^{\infty}(\mathbb{N})$ n'est pas fermé. C'est en effet ce qu'on a montré dans l'ex 12 du TD5, sur cette même page (?)
+$l_0^{\infty}(\mathbb{N})$ est-il ouvert ?
+Soit $u \in l_0^{\infty}(\mathbb{N})$ tq $u=0$.
+Soit $\epsilon > 0$. On définit $v \in l^{\infty}(\mathbb{N})$ par $\forall n \in \mathbb{N}, v(n) = \frac{\epsilon}{2}$.
+Alors $||u-v||_{\infty} = \frac{\epsilon}{2} < \epsilon$. Donc $v \in B(u, \epsilon)$.
+Mais $v(n) = \frac{\epsilon}{2} > 0$ donc $v \notin l_0^{\infty}(\mathbb{N})$.
+Ainsi, $\forall \epsilon > 0, B(u, \epsilon) \not\subset l_0^{\infty}(\mathbb{N})$.
+Donc $l_0^{\infty}(\mathbb{N})$ n'est pas ouvert.
+
+On peut procéder de la même façon pour montrer que $l_c^{\infty}(\mathbb{N})$ n'est pas ouvert.
+
+$l_c^{\infty}(\mathbb{N})$ n'est pas fermé. En effet, en considérant la suite $(u_k)_{k \in \mathbb{N}}$ définie par $\forall k \in \mathbb{N}, u_k = e_k$ (suite nulle sauf au $k$-ième terme qui vaut 1).
+Alors $\forall k \in \mathbb{N}, u_k \in l_0^{\infty}(\mathbb{N}) \subset l_c^{\infty}(\mathbb{N})$.
+$||u_k - u_j||_\infty = \sup_{n \in \mathbb{N}} | \delta_{k,n} - \delta_{j,n} | = 1$ si $k \ne j$.
+Donc $(u_k)$ n'est pas de Cauchy, donc ne converge pas.
+(Autre argument) Si on considère la suite $(v_k)$ tq $v_k(n) = \frac{1}{n+1}$ si $n \le k$ et $0$ sinon.
+Alors $\forall k \in \mathbb{N}, v_k \in l_0^{\infty}(\mathbb{N}) \subset l_c^{\infty}(\mathbb{N})$.
+$\lim_{k \to \infty} v_k = v$ avec $v(n) = \frac{1}{n+1}$.
+$\lim_{n \to \infty} v(n) = 0$. Donc $v \in l_c^{\infty}(\mathbb{N})$.
+On a une suite d'éléments de $l_0^{\infty}(\mathbb{N})$ convergeante dans $(l^\infty(\mathbb{N}), ||\cdot||_\infty)$ vers $v \in l_c^{\infty}(\mathbb{N})$.
+
+Est-ce que $l_c^{\infty}(\mathbb{N})$ est fermé ?
+Soit $(u^{(k)})_{k \in \mathbb{N}}$ une suite d'éléments de $l_c^{\infty}(\mathbb{N})$ qui converge vers $u \in l^\infty(\mathbb{N})$. Montrons que $u \in l_c^{\infty}(\mathbb{N})$.
+$\forall k \in \mathbb{N}$, $\lim_{n \to \infty} u^{(k)}(n) = 0$.
+On a $u^{(k)} \to u$ dans $(l^\infty(\mathbb{N}), ||\cdot||_\infty)$, i.e. $||u^{(k)} - u||_\infty \xrightarrow{k \to \infty} 0$.
+Soit $\epsilon > 0$.
+$\exists K \in \mathbb{N}$ tel que $\forall k \ge K$, $||u^{(k)} - u||_\infty \le \epsilon/2$.
+Donc $\forall n \in \mathbb{N}$, $|u^{(k)}(n) - u(n)| \le \epsilon/2$.
+On fixe $k=K$. $u^{(K)} \in l_c^{\infty}(\mathbb{N})$, donc $\lim_{n \to \infty} u^{(K)}(n) = 0$.
+Donc $\exists N \in \mathbb{N}$ tel que $\forall n \ge N$, $|u^{(K)}(n)| \le \epsilon/2$.
+Alors $\forall n \ge N$, $|u(n)| \le |u(n) - u^{(K)}(n)| + |u^{(K)}(n)| \le \epsilon/2 + \epsilon/2 = \epsilon$.
+Donc $\lim_{n \to \infty} u(n) = 0$.
+Donc $u \in l_c^{\infty}(\mathbb{N})$.
+Ainsi, $l_c^{\infty}(\mathbb{N})$ est fermé.
+
+2) Il faut montrer que $\text{Adh}(l_0^\infty(\mathbb{N})) \supset l_c^\infty(\mathbb{N})$.
+Soit $u \in l_c^\infty(\mathbb{N})$. Montrons qu'il existe une suite $(u_k)_{k \in \mathbb{N}}$ d'éléments de $l_0^\infty(\mathbb{N})$ telle que $||u_k - u||_\infty \to 0$.
+Soit $u \in l_c^\infty(\mathbb{N})$. On a $\lim_{n \to \infty} u(n) = 0$.
+Soit $\epsilon > 0$. $\exists N \in \mathbb{N}$ tel que $\forall n \ge N, |u(n)| \le \epsilon$.
+On considère la suite $(u_k)_{k \in \mathbb{N}}$ définie par $\forall k \in \mathbb{N}, u_k(n) = u(n)$ si $n \le k$ et $0$ sinon.
+$\forall k \in \mathbb{N}$, $u_k \in l_0^\infty(\mathbb{N})$.
+Montrons que $u_k \to u$ dans $(l^\infty(\mathbb{N}), ||\cdot||_\infty)$.
+$||u_k - u||_\infty = \sup_{n \in \mathbb{N}} |u_k(n) - u(n)| = \sup_{n > k} |u(n)|$.
+Comme $\lim_{n \to \infty} u(n) = 0$, on a $\lim_{k \to \infty} \sup_{n > k} |u(n)| = 0$.
+(Soit $\epsilon > 0$. $\exists N$ tel que $\forall n \ge N$, $|u(n)| \le \epsilon$.
+Alors pour $k \ge N$, $\sup_{n > k} |u(n)| \le \sup_{n \ge N} |u(n)| \le \epsilon$).
+Donc $||u_k - u||_\infty \xrightarrow{k \to \infty} 0$.
+Donc $l_0^\infty(\mathbb{N})$ est dense dans $l_c^\infty(\mathbb{N})$.
+
+4) Soit $u_1, u_2 \in C$. $\lim_{n \to \infty} u_1(n) = l_1$, $\lim_{n \to \infty} u_2(n) = l_2$.
+Montrons que $|l_1 - l_2| \le ||u_1 - u_2||_\infty$.
+Soit $\epsilon > 0$.
+$\exists N_1$ tel que $\forall n \ge N_1$, $|u_1(n) - l_1| \le \epsilon/2$.
+$\exists N_2$ tel que $\forall n \ge N_2$, $|u_2(n) - l_2| \le \epsilon/2$.
+Soit $N = \max(N_1, N_2)$. Pour $n=N$:
+$|l_1 - l_2| \le |l_1 - u_1(N)| + |u_1(N) - u_2(N)| + |u_2(N) - l_2|$
+$|l_1 - l_2| \le \epsilon/2 + |u_1(N) - u_2(N)| + \epsilon/2$
+$|l_1 - l_2| \le \epsilon + \sup_{n \in \mathbb{N}} |u_1(n) - u_2(n)|$
+$|l_1 - l_2| \le \epsilon + ||u_1 - u_2||_\infty$.
+Ceci étant vrai pour tout $\epsilon > 0$, on a $|l_1 - l_2| \le ||u_1 - u_2||_\infty$.
+
+Montrons que $C \subset l^\infty(\mathbb{N})$ et $C$ est fermé.
+Soit $u \in C$. $\lim_{n \to \infty} u(n) = l$. Toute suite convergente est bornée. Donc $u \in l^\infty(\mathbb{N})$. Donc $C \subset l^\infty(\mathbb{N})$.
+Montrons que $C$ est fermé.
+Soit $(u_p)_{p \in \mathbb{N}}$ une suite d'éléments de $C$, qui converge vers $u \in l^\infty(\mathbb{N})$.
+Il faut montrer que $u \in C$.
+$\forall p \in \mathbb{N}, u_p \in C$, donc $\lim_{n \to \infty} u_p(n) = l_p$.
+$u_p \to u$ dans $(l^\infty(\mathbb{N}), ||\cdot||_\infty)$, i.e. $||u_p - u||_\infty \xrightarrow{p \to \infty} 0$.
+La suite $(u_p)$ converge dans $l^\infty(\mathbb{N})$, donc elle est de Cauchy.
+$||u_p - u_q||_\infty \xrightarrow{p,q \to \infty} 0$.
+D'après ce qui précède, $|l_p - l_q| \le ||u_p - u_q||_\infty$.
+Donc $(l_p)_{p \in \mathbb{N}}$ est une suite de Cauchy dans $\mathbb{R}$ qui est complet, donc $(l_p)$ converge. Soit $l$ sa limite.
+Il reste à montrer que $u_n \to l$.
+Pour cela, on peut utiliser l'inégalité triangulaire :
+$|u(n) - l| \le |u(n) - u_p(n)| + |u_p(n) - l_p| + |l_p - l|$.
+$|u(n) - l| \le ||u - u_p||_\infty + |u_p(n) - l_p| + |l_p - l|$.
+Soit $\epsilon > 0$.
+$||u - u_p||_\infty \xrightarrow{p \to \infty} 0 \implies \exists P_1$ tel que $\forall p \ge P_1, ||u - u_p||_\infty \le \epsilon/3$.
+$l_p \to l \implies \exists P_2$ tel que $\forall p \ge P_2, |l_p - l| \le \epsilon/3$.
+Soit $p = \max(P_1, P_2)$.
+On a $u_p \in C$, donc $\lim_{n \to \infty} u_p(n) = l_p$.
+$\exists N_p$ tel que $\forall n \ge N_p, |u_p(n) - l_p| \le \epsilon/3$.
+Alors $\forall n \ge N_p$, $|u(n) - l| \le \epsilon/3 + \epsilon/3 + \epsilon/3 = \epsilon$.
+Donc $\lim_{n \to \infty} u(n) = l$.
+Donc $u \in C$.
+Ainsi, $C$ est fermé.
+
+5) On cherche une suite $(u_p)_{p \in \mathbb{N}}$ d'éléments de $l_0^\infty(\mathbb{N})$ 'simplement convergente' mais pas convergente dans $l^\infty(\mathbb{N})$.
+On peut considérer la suite $(u_p)$ définie par $u_p = e_p$ (la suite qui vaut 1 en $p$ et 0 sinon).
+$\forall p \in \mathbb{N}, u_p \in l_0^\infty(\mathbb{N})$.
+Pour $n$ fixé, la suite $(u_p(n))_{p \in \mathbb{N}} = (\delta_{p,n})_{p \in \mathbb{N}}$.
+$\lim_{p \to \infty} u_p(n) = 0$. La suite $(u_p)$ converge simplement vers la suite nulle.
+Mais $||u_p - 0||_\infty = ||e_p||_\infty = 1$. Donc $u_p$ ne converge pas vers 0 dans $l^\infty(\mathbb{N})$.
+$||u_p - u_q||_\infty = ||e_p - e_q||_\infty = 1$ si $p \ne q$. La suite $(u_p)$ n'est pas de Cauchy, donc ne converge pas dans $l^\infty(\mathbb{N})$.
+
+Autre exemple (celui des notes):
+Soit $u_p(n) = \frac{n}{n+p}$ si $n \le p$ et $\frac{p}{n}$ si $n > p$. (Attention, cette suite n'est pas dans $l_0^\infty(\mathbb{N})$).
+Considérons $u_p(n) = 1 - \frac{n}{p}$ si $n \le p$ et $0$ si $n > p$.
+Alors $\forall p, u_p \in l_0^\infty(\mathbb{N})$.
+Pour $n$ fixé, $\lim_{p \to \infty} u_p(n) = 1$. La suite $(u_p)$ converge simplement vers la suite constante $u(n)=1$.
+La suite $u=(1,1,1,...)$ n'est pas dans $l_c^\infty(\mathbb{N})$ et n'est pas la limite de $(u_p)$ dans $l^\infty$.
+$||u_p - u||_\infty = \sup_{n \in \mathbb{N}} |u_p(n) - 1| = \sup_{n \le p} |1 - n/p - 1| = \sup_{n \le p} |n/p| = p/p = 1$.
+Donc $(u_p)$ ne converge pas vers $u$ dans $l^\infty$. Elle ne converge pas du tout dans $l^\infty$.
+
+Prenons la suite $(u_p)_{p \in \mathbb{N}}$ où $u_p(n) = \frac{1}{n}$ si $p \le n \le 2p$ et $0$ sinon.
+$\forall p \in \mathbb{N}, u_p \in l_0^\infty(\mathbb{N})$.
+Pour $n$ fixé, $u_p(n) = 0$ pour $p > n$. Donc $\lim_{p \to \infty} u_p(n) = 0$. La suite $(u_p)$ converge simplement vers $0$.
+$||u_p - 0||_\infty = \sup_{n \in \mathbb{N}} |u_p(n)| = \sup_{p \le n \le 2p} \frac{1}{n} = \frac{1}{p}$.
+Donc $||u_p||_\infty \to 0$. Donc $(u_p)$ converge vers $0$ dans $l^\infty(\mathbb{N})$.
+
+Essayons $u_p(n) = \frac{n}{p^2}$ si $n \le p$, $0$ si $n > p$.
+$u_p \in l_0^\infty(\mathbb{N})$.
+$\lim_{p \to \infty} u_p(n) = 0$ pour tout $n$. Convergence simple vers $0$.
+$||u_p||_\infty = \sup_{n \le p} \frac{n}{p^2} = \frac{p}{p^2} = \frac{1}{p}$.
+Converge vers $0$ dans $l^\infty$.
+
+Il faut une suite $(u_p)$ de $l_0^\infty(\mathbb{N})$ telle que $\forall n, (u_p(n))_{p}$ converge mais $(u_p)_p$ ne converge pas dans $l^\infty$.
+On a vu que $u_p = e_p$ fonctionne.
+$\forall p, u_p \in l_0^\infty(\mathbb{N})$.
+$\forall n$, $\lim_{p \to \infty} u_p(n) = 0$.
+$(u_p)$ ne converge pas dans $l^\infty(\mathbb{N})$ car $||u_p||_\infty = 1$.
+\end{solution}
+
+\section*{Exercice 2}
+Soit $(E, || \cdot ||)$ un espace vectoriel normé et $A \subset E$ une partie de $E$. On note par $\text{Vect}(A)$ l' espace vectoriel engendré par $A$, c'est à dire l'ensemble des combinaisons linéaires (finies) d' éléments de $A$. Montrer que
+\[ \text{Vect}(\text{Adh}(A)) \subset \text{Adh}(\text{Vect}(A)). \]
+
+\begin{solution}
+Soit $x \in \text{Vect}(\text{Adh}(A))$.
+Par définition, $x$ peut s'écrire comme une combinaison linéaire finie d'éléments de $\text{Adh}(A)$.
+$x = \sum_{i=1}^n \alpha_i a_i$, où $n \in \mathbb{N}^*$, $\alpha_i \in \mathbb{K}$ (corps de base, $\mathbb{R}$ ou $\mathbb{C}$) et $a_i \in \text{Adh}(A)$ pour $i=1,...,n$.
+Comme $a_i \in \text{Adh}(A)$, pour tout $i \in \{1,...,n\}$, il existe une suite $(a_i^{(k)})_{k \in \mathbb{N}}$ d'éléments de $A$ telle que $\lim_{k \to \infty} a_i^{(k)} = a_i$.
+
+Considérons la suite $(x^{(k)})_{k \in \mathbb{N}}$ définie par $x^{(k)} = \sum_{i=1}^n \alpha_i a_i^{(k)}$.
+Pour tout $k \in \mathbb{N}$, $x^{(k)}$ est une combinaison linéaire d'éléments de $A$, donc $x^{(k)} \in \text{Vect}(A)$.
+Montrons que $x^{(k)}$ converge vers $x$.
+\begin{align*} ||x^{(k)} - x|| &= \left\| \sum_{i=1}^n \alpha_i a_i^{(k)} - \sum_{i=1}^n \alpha_i a_i \right\| \\ &= \left\| \sum_{i=1}^n \alpha_i (a_i^{(k)} - a_i) \right\| \\ &\le \sum_{i=1}^n |\alpha_i| ||a_i^{(k)} - a_i|| \end{align*}
+Comme $\lim_{k \to \infty} a_i^{(k)} = a_i$, on a $\lim_{k \to \infty} ||a_i^{(k)} - a_i|| = 0$ pour tout $i$.
+Donc, $\lim_{k \to \infty} \sum_{i=1}^n |\alpha_i| ||a_i^{(k)} - a_i|| = 0$.
+Par le théorème des gendarmes, $\lim_{k \to \infty} ||x^{(k)} - x|| = 0$.
+Donc $x^{(k)} \to x$.
+
+On a construit une suite $(x^{(k)})_{k \in \mathbb{N}}$ d'éléments de $\text{Vect}(A)$ qui converge vers $x$.
+Par définition de l'adhérence, cela signifie que $x \in \text{Adh}(\text{Vect}(A))$.
+Ainsi, $\text{Vect}(\text{Adh}(A)) \subset \text{Adh}(\text{Vect}(A))$.
+\end{solution}
+
+\section*{Exercice 3}
+Soit $A, B, C \subset E$ des parties d' un espace vectoriel normé $E$.
+1) Montrer que si $C \subset B$ alors $d(A, B) \le d(A, C)$.
+2) On note par $\bar{A}$ l' adhérence d' un ensemble $A$. Montrer que $d(\bar{A}, \bar{B}) = d(A, B)$ pour tous $A, B \subset E$.
+
+\begin{solution}
+1) $d(A, C) = \inf \{ ||a-c|| ; a \in A, c \in C \}$.
+$d(A, B) = \inf \{ ||a-b|| ; a \in A, b \in B \}$.
+L'ensemble $\{ ||a-b|| ; a \in A, b \in B \}$ contient l'ensemble $\{ ||a-c|| ; a \in A, c \in C \}$ car $C \subset B$.
+Donc $\inf \{ ||a-b|| ; a \in A, b \in B \} \le \inf \{ ||a-c|| ; a \in A, c \in C \}$.
+C'est-à-dire $d(A, B) \le d(A, C)$.
+
+2) Montrons $d(\bar{A}, \bar{B}) \le d(A, B)$.
+On a $A \subset \bar{A}$ et $B \subset \bar{B}$.
+D'après 1), comme $B \subset \bar{B}$, on a $d(A, \bar{B}) \le d(A, B)$.
+D'après 1), comme $A \subset \bar{A}$, on a $d(\bar{A}, \bar{B}) \le d(A, \bar{B})$.
+(On applique 1) avec $A'=\bar{B}$, $B'=E$, $C'=A$. On a $d(A', A) \le d(A', \bar{A})$ ? Non.
+La distance est symétrique: $d(X,Y)=d(Y,X)$.
+$d(\bar{A}, \bar{B}) = \inf \{ ||\bar{a}-\bar{b}|| ; \bar{a} \in \bar{A}, \bar{b} \in \bar{B} \}$.
+$d(A, \bar{B}) = \inf \{ ||a-\bar{b}|| ; a \in A, \bar{b} \in \bar{B} \}$.
+$d(\bar{A}, B) = \inf \{ ||\bar{a}-b|| ; \bar{a} \in \bar{A}, b \in B \}$.
+Comme $A \subset \bar{A}$, l'ensemble $\{ ||\bar{a}-\bar{b}|| ; \bar{a} \in \bar{A}, \bar{b} \in \bar{B} \}$ contient $\{ ||a-\bar{b}|| ; a \in A, \bar{b} \in \bar{B} \}$.
+Donc $d(\bar{A}, \bar{B}) \le d(A, \bar{B})$.
+Comme $B \subset \bar{B}$, l'ensemble $\{ ||a-\bar{b}|| ; a \in A, \bar{b} \in \bar{B} \}$ contient $\{ ||a-b|| ; a \in A, b \in B \}$.
+Donc $d(A, \bar{B}) \le d(A, B)$.
+Combinant les deux, $d(\bar{A}, \bar{B}) \le d(A, B)$.
+
+Montrons $d(A, B) \le d(\bar{A}, \bar{B})$.
+Soit $\epsilon > 0$. Par définition de l'infimum, il existe $\bar{a} \in \bar{A}$ et $\bar{b} \in \bar{B}$ tels que $||\bar{a}-\bar{b}|| < d(\bar{A}, \bar{B}) + \epsilon/2$.
+Comme $\bar{a} \in \bar{A}$, il existe $a \in A$ tel que $||\bar{a}-a|| < \epsilon/4$.
+Comme $\bar{b} \in \bar{B}$, il existe $b \in B$ tel que $||\bar{b}-b|| < \epsilon/4$.
+Alors $||a-b|| \le ||a-\bar{a}|| + ||\bar{a}-\bar{b}|| + ||\bar{b}-b||$
+$||a-b|| < \epsilon/4 + d(\bar{A}, \bar{B}) + \epsilon/2 + \epsilon/4$
+$||a-b|| < d(\bar{A}, \bar{B}) + \epsilon$.
+On a trouvé $a \in A, b \in B$ tels que $||a-b|| < d(\bar{A}, \bar{B}) + \epsilon$.
+Ceci implique que $d(A, B) = \inf \{ ||a-b|| ; a \in A, b \in B \} \le d(\bar{A}, \bar{B}) + \epsilon$.
+Ceci étant vrai pour tout $\epsilon > 0$, on conclut que $d(A, B) \le d(\bar{A}, \bar{B})$.
+
+Ayant montré les deux inégalités, on a $d(A, B) = d(\bar{A}, \bar{B})$.
+\end{solution}
+
+\section*{Exercice 4}
+Soit $E$ un espace vectoriel normé et $F$ un sous espace vectoriel de $E$.
+1) Montrer que $\text{Adh}(F)$ est un sous espace vectoriel de $E$.
+2) Montrer que si $\text{Int}(F) \neq \emptyset$ alors $F = E$.
+
+\begin{solution}
+1) Soient $x, y \in \text{Adh}(F)$ et $\lambda \in \mathbb{K}$ (corps de base). Montrons que $x+y \in \text{Adh}(F)$ et $\lambda x \in \text{Adh}(F)$.
+Comme $x \in \text{Adh}(F)$, il existe une suite $(x_n)_{n \in \mathbb{N}}$ d'éléments de $F$ telle que $x_n \to x$.
+Comme $y \in \text{Adh}(F)$, il existe une suite $(y_n)_{n \in \mathbb{N}}$ d'éléments de $F$ telle que $y_n \to y$.
+Considérons la suite $(x_n + y_n)_{n \in \mathbb{N}}$. Comme $F$ est un SEV, $x_n + y_n \in F$ pour tout $n$.
+De plus, $x_n + y_n \to x + y$ car l'addition est continue.
+Donc $x+y \in \text{Adh}(F)$.
+Considérons la suite $(\lambda x_n)_{n \in \mathbb{N}}$. Comme $F$ est un SEV, $\lambda x_n \in F$ pour tout $n$.
+De plus, $\lambda x_n \to \lambda x$ car la multiplication par un scalaire est continue.
+Donc $\lambda x \in \text{Adh}(F)$.
+Enfin, $0_E \in F \subset \text{Adh}(F)$, donc $\text{Adh}(F)$ est non vide.
+Ainsi, $\text{Adh}(F)$ est un sous-espace vectoriel de $E$.
+
+2) On suppose que $\text{Int}(F) \neq \emptyset$.
+Cela signifie qu'il existe $y_0 \in \text{Int}(F)$.
+Par définition de l'intérieur, il existe $\delta > 0$ tel que $B(y_0, \delta) \subset F$.
+Soit $x \in E$. On veut montrer que $x \in F$.
+Si $x = 0_E$, alors $x \in F$ car $F$ est un SEV.
+Supposons $x \ne 0_E$.
+Considérons $z = y_0 + \frac{\delta}{2 ||x||} x$.
+$||z - y_0|| = || \frac{\delta}{2 ||x||} x || = \frac{\delta}{2 ||x||} ||x|| = \frac{\delta}{2} < \delta$.
+Donc $z \in B(y_0, \delta)$. Comme $B(y_0, \delta) \subset F$, on a $z \in F$.
+Puisque $z = y_0 + \frac{\delta}{2 ||x||} x$ et $y_0 \in F$, et que $F$ est un SEV, on a:
+$\frac{\delta}{2 ||x||} x = z - y_0 \in F$.
+Comme $\frac{\delta}{2 ||x||}$ est un scalaire non nul, et que $F$ est un SEV, on peut multiplier par l'inverse du scalaire:
+$x = \frac{2 ||x||}{\delta} (\frac{\delta}{2 ||x||} x) \in F$.
+Donc, pour tout $x \in E$, on a $x \in F$.
+Ceci montre que $E \subset F$. Comme $F \subset E$ par définition, on conclut que $F=E$.
+\end{solution}
+
+\section*{Exercice 5}
+On note par $E = \mathbb{R}[X]$ l' espace des polynômes à coefficients réels $P(x) = \sum_{n=0}^d a_n x^n$.
+1) Montrer que
+\[ N_1(P) = \sup_{x \in [0,1]} |P(x)| \quad \text{et} \quad N_2(P) = \sup_{x \in [1,2]} |P(x)| \]
+sont des normes sur $E$.
+2) On considère l' application linéaire : $\varphi: E \to \mathbb{R}$, $P \mapsto P(0)$. Montrer que $\varphi$ est continue pour la norme $N_1$.
+3) On rappelle que pour tout $y \in \mathbb{R}$ et $N \in \mathbb{N}$ on a
+\[ |e^y - \sum_{n=0}^N \frac{y^n}{n!}| \le \frac{|y|^{N+1}}{(N+1)!} e^{|y|} \]
+En déduire que pour tout $C \ge 1$ et $1 \le x \le 2$ on a
+\[ |e^{-Cx} - \sum_{n=0}^N \frac{(-Cx)^n}{n!}| \le \frac{|Cx|^{N+1}}{(N+1)!} e^{|Cx|} \le \frac{(2C)^{N+1}}{(N+1)!} e^{2C} \]
+4a) Soit $\epsilon > 0$ fixé. Montrer qu' il existe $C > 0$ assez grand tel que $\sup_{x \in [1,2]} e^{-Cx} \le \epsilon/2$.
+4b) On fixe la constante $C$ obtenue au point 4a). Montrer, en utilisant le point 3) et l' inégalité triangulaire pour la valeur absolue, qu' il existe $N \in \mathbb{N}$ assez grand tel que
+\[ \sup_{x \in [1,2]} |\sum_{n=0}^N \frac{(-Cx)^n}{n!}| \le \epsilon. \quad \text{(Erreur dans l'énoncé scanné, il faut utiliser l'inégalité du 3))} \]
+Indication : On admettra que pour tout $C \ge 1$ on a $\lim_{N \to \infty} \frac{C^{N+1}}{(N+1)!} = 0$.
+En déduire que pour tout $\epsilon > 0$ il existe un polynôme $P(x)$ (dépendant de $\epsilon$) tel que $P(0)=1, N_2(P) \le \epsilon$.
+5) Montrer que l' application linéaire $\varphi$ définie au point 2) n' est pas continue pour la norme $N_2$.
+
+\begin{solution}
+1) Vérifions les propriétés de norme pour $N_1$.
+- $N_1(P) = \sup_{x \in [0,1]} |P(x)| \ge 0$ car $|P(x)| \ge 0$.
+- $N_1(P) = 0 \implies \sup_{x \in [0,1]} |P(x)| = 0 \implies P(x) = 0$ pour tout $x \in [0,1]$. Un polynôme non nul a un nombre fini de racines. Si $P$ est nul sur $[0,1]$ (qui est infini), alors $P$ doit être le polynôme nul. Donc $P=0$.
+- $N_1(\lambda P) = \sup_{x \in [0,1]} |\lambda P(x)| = \sup_{x \in [0,1]} |\lambda| |P(x)| = |\lambda| \sup_{x \in [0,1]} |P(x)| = |\lambda| N_1(P)$.
+- $N_1(P+Q) = \sup_{x \in [0,1]} |P(x)+Q(x)|$. On sait que $|P(x)+Q(x)| \le |P(x)| + |Q(x)|$.
+$|P(x)| \le \sup_{t \in [0,1]} |P(t)| = N_1(P)$.
+$|Q(x)| \le \sup_{t \in [0,1]} |Q(t)| = N_1(Q)$.
+Donc $|P(x)+Q(x)| \le N_1(P) + N_1(Q)$ pour tout $x \in [0,1]$.
+En prenant le supremum sur $x \in [0,1]$, on obtient $N_1(P+Q) \le N_1(P) + N_1(Q)$.
+Donc $N_1$ est une norme sur $E$.
+La preuve est identique pour $N_2$ en remplaçant $[0,1]$ par $[1,2]$. Un polynôme nul sur $[1,2]$ est le polynôme nul.
+
+2) $\varphi: P \mapsto P(0)$. On veut montrer que $\varphi$ est continue pour $N_1$.
+Il suffit de montrer que $\varphi$ est continue en $0$. On cherche $C \ge 0$ tel que $|\varphi(P)| \le C N_1(P)$ pour tout $P \in E$.
+$|\varphi(P)| = |P(0)|$.
+$N_1(P) = \sup_{x \in [0,1]} |P(x)|$.
+On a $P(0)$ est une des valeurs de $|P(x)|$ pour $x \in [0,1]$ (en $x=0$).
+Donc $|P(0)| \le \sup_{x \in [0,1]} |P(x)| = N_1(P)$.
+On peut prendre $C=1$. $|\varphi(P)| \le 1 \cdot N_1(P)$.
+Donc $\varphi$ est continue pour la norme $N_1$.
+
+3) L'inégalité $|e^y - \sum_{n=0}^N \frac{y^n}{n!}| \le \frac{|y|^{N+1}}{(N+1)!} e^{|y|}$ est rappelée (c'est l'inégalité de Taylor-Lagrange ou Taylor avec reste intégral).
+On l'applique avec $y = -Cx$. Comme $x \in [1,2]$ et $C \ge 1$, on a $Cx \ge 1$.
+$|y| = |-Cx| = C x$.
+$e^{|y|} = e^{Cx}$.
+Comme $x \in [1,2]$, $Cx \le 2C$. Donc $e^{Cx} \le e^{2C}$.
+$|y|^{N+1} = (Cx)^{N+1} = C^{N+1} x^{N+1}$. Comme $x \le 2$, $x^{N+1} \le 2^{N+1}$.
+Donc $|y|^{N+1} \le C^{N+1} 2^{N+1} = (2C)^{N+1}$.
+On obtient :
+$|e^{-Cx} - \sum_{n=0}^N \frac{(-Cx)^n}{n!}| \le \frac{(Cx)^{N+1}}{(N+1)!} e^{Cx} \le \frac{(2C)^{N+1}}{(N+1)!} e^{2C}$.
+
+4a) Soit $\epsilon > 0$. On cherche $C>0$ tel que $\sup_{x \in [1,2]} e^{-Cx} \le \epsilon/2$.
+La fonction $x \mapsto e^{-Cx}$ est décroissante pour $C>0$.
+Le supremum est atteint en $x=1$. $\sup_{x \in [1,2]} e^{-Cx} = e^{-C}$.
+On veut $e^{-C} \le \epsilon/2$.
+$-\ln(e^{-C}) \ge -\ln(\epsilon/2)$
+$C \ge -\ln(\epsilon/2) = \ln(2/\epsilon)$.
+Il suffit de choisir $C$ assez grand, par exemple $C = \max(1, \ln(2/\epsilon))$.
+
+4b) Fixons $C = \max(1, \ln(2/\epsilon))$. On a $\sup_{x \in [1,2]} e^{-Cx} \le \epsilon/2$.
+Soit $P_N(x) = \sum_{n=0}^N \frac{(-Cx)^n}{n!}$. C'est un polynôme.
+On veut montrer qu'il existe $N$ tel que $\sup_{x \in [1,2]} |P_N(x)| \le \epsilon$. (Ceci semble être l'objectif modifié, pas celui de l'énoncé scanné).
+Utilisons l'inégalité triangulaire: $|P_N(x)| \le |P_N(x) - e^{-Cx}| + |e^{-Cx}|$.
+$|P_N(x)| \le |e^{-Cx} - \sum_{n=0}^N \frac{(-Cx)^n}{n!}| + |e^{-Cx}|$.
+$|P_N(x)| \le \frac{(2C)^{N+1}}{(N+1)!} e^{2C} + e^{-Cx}$.
+On sait que $\sup_{x \in [1,2]} e^{-Cx} \le \epsilon/2$.
+On sait que $\lim_{N \to \infty} \frac{(2C)^{N+1}}{(N+1)!} = 0$.
+Donc, il existe $N_0 \in \mathbb{N}$ tel que pour $N \ge N_0$, $\frac{(2C)^{N+1}}{(N+1)!} e^{2C} \le \epsilon/2$.
+Alors, pour $N \ge N_0$, et pour tout $x \in [1,2]$:
+$|P_N(x)| \le \epsilon/2 + \epsilon/2 = \epsilon$.
+Donc $N_2(P_N) = \sup_{x \in [1,2]} |P_N(x)| \le \epsilon$.
+
+Déduction : On veut $P(x)$ tel que $P(0)=1$ et $N_2(P) \le \epsilon$.
+Le polynôme $P_N(x) = \sum_{n=0}^N \frac{(-Cx)^n}{n!}$ vérifie $P_N(0) = \frac{(-C \cdot 0)^0}{0!} = 1$.
+On a trouvé $P_N$ pour $N$ assez grand tel que $P_N(0)=1$ et $N_2(P_N) \le \epsilon$.
+
+5) Montrer que $\varphi: P \mapsto P(0)$ n'est pas continue pour $N_2$.
+Il faut montrer qu'il n'existe pas de constante $C$ telle que $|\varphi(P)| \le C N_2(P)$ pour tout $P \in E$.
+$|\varphi(P)| = |P(0)|$. $N_2(P) = \sup_{x \in [1,2]} |P(x)|$.
+On cherche une suite de polynômes $(P_k)_{k \in \mathbb{N}}$ telle que $\frac{|\varphi(P_k)|}{N_2(P_k)} \to \infty$.
+C'est-à-dire $P_k(0)$ est "grand" tandis que $\sup_{x \in [1,2]} |P_k(x)|$ est "petit".
+D'après 4b), pour tout $\epsilon > 0$, il existe un polynôme $P_\epsilon$ tel que $P_\epsilon(0)=1$ et $N_2(P_\epsilon) \le \epsilon$.
+Prenons $\epsilon_k = 1/k$. Il existe $P_k$ tel que $P_k(0)=1$ et $N_2(P_k) \le 1/k$.
+Alors $|\varphi(P_k)| = |P_k(0)| = 1$.
+$\frac{|\varphi(P_k)|}{N_2(P_k)} \ge \frac{1}{1/k} = k$.
+Comme $k \to \infty$, le rapport $\frac{|\varphi(P_k)|}{N_2(P_k)}$ n'est pas borné.
+Donc $\varphi$ n'est pas continue pour la norme $N_2$.
+\end{solution}
+
+\section*{Exercice 6}
+On considère l'espace vectoriel normé $C([-1,1])$ des fonctions continues à valeurs réelles muni de la norme $||f||_{\infty} = \sup_{x \in [-1,1]} |f(x)|$.
+1) Pour $n \in \mathbb{N}$ avec $n \ge 1$ on définit la fonction $f_n : [-1, 1] \to \mathbb{R}$ par
+\[ f_n(x) = \begin{cases} 1+x & \text{pour } -1 \le x < -1/n \\ 1 - \frac{1}{2n} - \frac{n}{2} x^2 & \text{pour } -1/n \le x < 1/n \\ 1-x & \text{pour } 1/n \le x \le 1 \end{cases} \]
+1a) Montrer que $f_n$ est de classe $C^1$ sur $[-1, 1]$.
+1b) Déterminer la fonction $f = \lim_{n \to \infty} f_n$ dans $C([-1,1])$. Indication : commencer par dessiner les graphes de quelques fonctions $f_n$.
+1c) L' ensemble $C^1([-1, 1])$ est-il fermé dans $C([-1,1])$ ?
+
+\begin{solution}
+1a) $f_n$ est définie par morceaux par des polynômes, qui sont $C^\infty$ sur les intervalles ouverts. Il faut vérifier la continuité et la dérivabilité aux points de jonction $x=-1/n$ et $x=1/n$.
+Continuité :
+En $x=-1/n$:
+$\lim_{x \to (-1/n)^-} f_n(x) = 1 + (-1/n) = 1 - 1/n$.
+$f_n(-1/n) = 1 - \frac{1}{2n} - \frac{n}{2} (-1/n)^2 = 1 - \frac{1}{2n} - \frac{n}{2} \frac{1}{n^2} = 1 - \frac{1}{2n} - \frac{1}{2n} = 1 - \frac{2}{2n} = 1 - 1/n$.
+C'est continu en $-1/n$.
+En $x=1/n$:
+$f_n(1/n) = 1 - \frac{1}{2n} - \frac{n}{2} (1/n)^2 = 1 - \frac{1}{2n} - \frac{1}{2n} = 1 - 1/n$.
+$\lim_{x \to (1/n)^+} f_n(x) = 1 - (1/n) = 1 - 1/n$.
+C'est continu en $1/n$.
+$f_n$ est continue sur $[-1, 1]$.
+
+Dérivabilité :
+Calculons la dérivée par morceaux :
+$f_n'(x) = 1$ pour $-1 < x < -1/n$.
+$f_n'(x) = - \frac{n}{2} (2x) = -nx$ pour $-1/n < x < 1/n$.
+$f_n'(x) = -1$ pour $1/n < x < 1$.
+Dérivée en $x=-1/n$:
+$\lim_{x \to (-1/n)^-} f_n'(x) = 1$.
+$\lim_{x \to (-1/n)^+} f_n'(x) = -n(-1/n) = 1$.
+La dérivée est continue en $-1/n$, $f_n'(-1/n)=1$.
+Dérivée en $x=1/n$:
+$\lim_{x \to (1/n)^-} f_n'(x) = -n(1/n) = -1$.
+$\lim_{x \to (1/n)^+} f_n'(x) = -1$.
+La dérivée est continue en $1/n$, $f_n'(1/n)=-1$.
+Donc $f_n'$ est continue sur $[-1, 1]$. $f_n$ est de classe $C^1$ sur $[-1, 1]$.
+
+1b) Dessin: $f_n$ est linéaire croissante de $(-1,0)$ à $(-1/n, 1-1/n)$, puis une parabole concave $1-\frac{1}{2n} - \frac{n}{2}x^2$ entre $-1/n$ et $1/n$ (sommet en $x=0$ à $1-1/(2n)$), puis linéaire décroissante de $(1/n, 1-1/n)$ à $(1,0)$. Quand $n \to \infty$, $1/n \to 0$. L'intervalle $[-1/n, 1/n]$ se réduit à $\{0\}$.
+Pour $x \in [-1, 0)$ fixé, pour $n$ assez grand, $-1 \le x < -1/n$, donc $f_n(x) = 1+x$.
+Pour $x \in (0, 1]$ fixé, pour $n$ assez grand, $1/n \le x \le 1$, donc $f_n(x) = 1-x$.
+Pour $x=0$, $f_n(0) = 1 - 1/(2n) \to 1$.
+Donc la limite simple est $f(x) = 1+x$ si $x \in [-1, 0)$ et $f(x)=1-x$ si $x \in [0, 1]$.
+C'est-à-dire $f(x) = 1 - |x|$.
+Vérifions la convergence uniforme. $||f_n - f||_\infty = \sup_{x \in [-1,1]} |f_n(x) - f(x)|$.
+Pour $x \in [-1, -1/n]$, $f_n(x)=1+x$ et $f(x)=1+x$, donc $f_n(x)-f(x)=0$.
+Pour $x \in [1/n, 1]$, $f_n(x)=1-x$ et $f(x)=1-x$, donc $f_n(x)-f(x)=0$.
+Pour $x \in [-1/n, 1/n]$, $f(x)=1-|x|$.
+$f_n(x) - f(x) = (1 - \frac{1}{2n} - \frac{n}{2} x^2) - (1 - |x|)$.
+Le maximum de la différence est probablement en $x=0$.
+$f_n(0) - f(0) = (1 - 1/(2n)) - 1 = -1/(2n)$.
+Le sup de $|f_n(x) - f(x)|$ sur $[-1/n, 1/n]$:
+On étudie $g(x) = f_n(x)-f(x) = -\frac{1}{2n} - \frac{n}{2}x^2 + |x|$ sur $[-1/n, 1/n]$.
+Sur $[0, 1/n]$, $g(x) = -\frac{1}{2n} - \frac{n}{2}x^2 + x$. $g'(x) = -nx + 1$. $g'(x)=0$ pour $x=1/n$. $g(1/n) = -\frac{1}{2n} - \frac{n}{2}\frac{1}{n^2} + \frac{1}{n} = -\frac{1}{2n} - \frac{1}{2n} + \frac{1}{n} = 0$. $g(0) = -1/(2n)$. La fonction $g(x)$ est croissante sur $[0, 1/n]$. Le max de $|g(x)|$ est $|g(0)|=1/(2n)$.
+Sur $[-1/n, 0]$, $g(x) = -\frac{1}{2n} - \frac{n}{2}x^2 - x$. $g'(x) = -nx - 1$. $g'(x)=0$ pour $x=-1/n$. $g(-1/n) = -\frac{1}{2n} - \frac{n}{2}\frac{1}{n^2} - (-\frac{1}{n}) = 0$. $g(0)=-1/(2n)$. $g(x)$ est décroissante sur $[-1/n, 0]$. Le max de $|g(x)|$ est $|g(0)|=1/(2n)$.
+Donc $\sup_{x \in [-1/n, 1/n]} |f_n(x)-f(x)| = 1/(2n)$.
+$||f_n - f||_\infty = 1/(2n) \xrightarrow{n \to \infty} 0$.
+La limite est $f(x) = 1-|x|$. C'est une fonction continue.
+
+1c) On a une suite $(f_n)_{n \in \mathbb{N}}$ de fonctions dans $C^1([-1, 1])$ qui converge dans $C([-1, 1])$ vers $f(x) = 1-|x|$.
+La fonction $f(x)=1-|x|$ n'est pas dérivable en $x=0$. Donc $f \notin C^1([-1, 1])$.
+L'ensemble $C^1([-1, 1])$ n'est pas fermé dans $C([-1, 1])$ muni de la norme $|| \cdot ||_\infty$.
+\end{solution}
+
+\section*{Exercice 7}
+Soit $E$ l'ensemble $E = \{ u \in C^1([0, 1]; \mathbb{R}) : u(0) = 0 \}$.
+1) Montrer que $E$ est un espace vectoriel sur $\mathbb{R}$.
+2) On pose
+\[ N_1(u) = \sup_{x \in [0,1]} |u'(x)|, \quad N_2(u) = \sup_{x \in [0,1]} |u'(x) + u(x)|. \]
+Montrer que $N_1$ et $N_2$ sont des normes sur $E$.
+3a) Montrer que $|u(x)| \le N_1(u)$, $\forall u \in E$.
+3b) En déduire que $N_2(u) \le 2 N_1(u)$, $\forall u \in E$.
+4a) Montrer que si $u \in E$ alors $u(x) = e^{-x} \int_0^x (u(t) + u'(t))e^t dt$.
+Indication : calculer la dérivée du membre de droite et utiliser que $u \in E$.
+4b) Montrer que $|(u(t)+u'(t))e^t| \le e N_2(u)$, $\forall t \in [0, 1]$.
+4c) En déduire que $|u(x)| \le e N_2(u)$, $\forall x \in [0, 1]$.
+4d) Montrer qu' il existe une constante $C \ge 0$ telle que $N_1(u) \le C N_2(u)$, $\forall u \in E$.
+
+\begin{solution}
+1) $E = \{ u \in C^1([0, 1]; \mathbb{R}) : u(0) = 0 \}$. $E$ est un sous-ensemble de l'espace vectoriel $C^1([0, 1]; \mathbb{R})$.
+- La fonction nulle $u(x)=0$ est $C^1$ et $u(0)=0$, donc $0 \in E$. $E$ est non vide.
+- Soient $u, v \in E$ et $\lambda \in \mathbb{R}$. Alors $u, v$ sont $C^1$ et $u(0)=0, v(0)=0$.
+$u+v$ est $C^1$. $(u+v)(0) = u(0)+v(0)=0+0=0$. Donc $u+v \in E$.
+$\lambda u$ est $C^1$. $(\lambda u)(0) = \lambda u(0) = \lambda \cdot 0 = 0$. Donc $\lambda u \in E$.
+$E$ est un sous-espace vectoriel de $C^1([0, 1]; \mathbb{R})$, donc c'est un espace vectoriel sur $\mathbb{R}$.
+
+2) Montrons que $N_1$ est une norme sur $E$.
+- $N_1(u) = \sup_{x \in [0,1]} |u'(x)| \ge 0$.
+- $N_1(u) = 0 \implies \sup_{x \in [0,1]} |u'(x)| = 0 \implies u'(x)=0$ pour tout $x \in [0,1]$.
+Ceci implique que $u(x)$ est une fonction constante sur $[0,1]$. $u(x)=k$.
+Comme $u \in E$, on a $u(0)=0$. Donc $k=0$. $u(x)=0$ pour tout $x \in [0,1]$. $u=0$.
+- $N_1(\lambda u) = \sup_{x \in [0,1]} |(\lambda u)'(x)| = \sup_{x \in [0,1]} |\lambda u'(x)| = |\lambda| \sup_{x \in [0,1]} |u'(x)| = |\lambda| N_1(u)$.
+- $N_1(u+v) = \sup_{x \in [0,1]} |(u+v)'(x)| = \sup_{x \in [0,1]} |u'(x)+v'(x)|$.
+$|u'(x)+v'(x)| \le |u'(x)|+|v'(x)| \le N_1(u) + N_1(v)$.
+Donc $N_1(u+v) \le N_1(u)+N_1(v)$.
+$N_1$ est une norme sur $E$.
+
+Montrons que $N_2$ est une norme sur $E$.
+- $N_2(u) = \sup_{x \in [0,1]} |u'(x)+u(x)| \ge 0$.
+- $N_2(u) = 0 \implies \sup_{x \in [0,1]} |u'(x)+u(x)| = 0 \implies u'(x)+u(x)=0$ pour tout $x \in [0,1]$.
+C'est une équation différentielle linéaire du premier ordre : $y'+y=0$.
+La solution générale est $u(x) = K e^{-x}$.
+Comme $u \in E$, $u(0)=0$. $K e^{-0} = 0 \implies K=0$.
+Donc $u(x)=0$ pour tout $x \in [0,1]$. $u=0$.
+- $N_2(\lambda u) = \sup_{x \in [0,1]} |(\lambda u)'(x)+(\lambda u)(x)| = \sup_{x \in [0,1]} |\lambda u'(x)+\lambda u(x)| = |\lambda| \sup_{x \in [0,1]} |u'(x)+u(x)| = |\lambda| N_2(u)$.
+- $N_2(u+v) = \sup_{x \in [0,1]} |(u+v)'(x)+(u+v)(x)| = \sup_{x \in [0,1]} |(u'(x)+u(x)) + (v'(x)+v(x))|$.
+$|(u'(x)+u(x)) + (v'(x)+v(x))| \le |u'(x)+u(x)| + |v'(x)+v(x)| \le N_2(u) + N_2(v)$.
+Donc $N_2(u+v) \le N_2(u)+N_2(v)$.
+$N_2$ est une norme sur $E$.
+
+3a) Pour $u \in E$, on a $u(0)=0$. Par le théorème fondamental de l'analyse, $u(x) = u(x)-u(0) = \int_0^x u'(t) dt$.
+$|u(x)| = |\int_0^x u'(t) dt| \le \int_0^x |u'(t)| dt$.
+Comme $|u'(t)| \le \sup_{s \in [0,1]} |u'(s)| = N_1(u)$, on a:
+$|u(x)| \le \int_0^x N_1(u) dt = N_1(u) \int_0^x dt = N_1(u) \cdot x$.
+Comme $x \in [0,1]$, $x \le 1$. Donc $|u(x)| \le N_1(u) \cdot x \le N_1(u)$.
+
+3b) $N_2(u) = \sup_{x \in [0,1]} |u'(x)+u(x)|$.
+$|u'(x)+u(x)| \le |u'(x)| + |u(x)|$.
+D'après 3a), $|u(x)| \le N_1(u)$.
+$|u'(x)| \le \sup_{t \in [0,1]} |u'(t)| = N_1(u)$.
+Donc $|u'(x)+u(x)| \le N_1(u) + N_1(u) = 2 N_1(u)$.
+Ceci est vrai pour tout $x \in [0,1]$. En prenant le supremum :
+$N_2(u) = \sup_{x \in [0,1]} |u'(x)+u(x)| \le 2 N_1(u)$.
+
+4a) Soit $g(x) = e^{-x} \int_0^x (u(t)+u'(t))e^t dt$. Calculons $g'(x)$.
+Posons $h(x) = \int_0^x (u(t)+u'(t))e^t dt$. $h'(x) = (u(x)+u'(x))e^x$.
+$g'(x) = (e^{-x})' h(x) + e^{-x} h'(x)$
+$g'(x) = -e^{-x} h(x) + e^{-x} (u(x)+u'(x))e^x$
+$g'(x) = -e^{-x} \int_0^x (u(t)+u'(t))e^t dt + u(x)+u'(x)$
+$g'(x) = -g(x) + u(x) + u'(x)$.
+Ce n'est pas $u'(x)$. Revoyons l'indication.
+Calculer la dérivée de $f(x) = e^x u(x)$. $f'(x) = e^x u(x) + e^x u'(x) = e^x (u(x)+u'(x))$.
+Intégrons de 0 à $x$:
+$\int_0^x f'(t) dt = \int_0^x e^t (u(t)+u'(t)) dt$.
+$f(x) - f(0) = \int_0^x e^t (u(t)+u'(t)) dt$.
+$e^x u(x) - e^0 u(0) = \int_0^x e^t (u(t)+u'(t)) dt$.
+Comme $u \in E$, $u(0)=0$.
+$e^x u(x) = \int_0^x e^t (u(t)+u'(t)) dt$.
+En multipliant par $e^{-x}$:
+$u(x) = e^{-x} \int_0^x e^t (u(t)+u'(t)) dt$.
+
+4b) On veut montrer $|(u(t)+u'(t))e^t| \le e N_2(u)$ pour $t \in [0, 1]$.
+$N_2(u) = \sup_{x \in [0,1]} |u(x)+u'(x)|$.
+Donc pour tout $t \in [0,1]$, $|u(t)+u'(t)| \le N_2(u)$.
+Comme $t \in [0,1]$, $e^t \le e^1 = e$.
+$|(u(t)+u'(t))e^t| = |u(t)+u'(t)| e^t \le N_2(u) e^t \le N_2(u) e = e N_2(u)$.
+
+4c) De 4a), $u(x) = e^{-x} \int_0^x (u(t)+u'(t))e^t dt$.
+$|u(x)| = |e^{-x} \int_0^x (u(t)+u'(t))e^t dt| = e^{-x} |\int_0^x (u(t)+u'(t))e^t dt|$ car $e^{-x} > 0$.
+$|u(x)| \le e^{-x} \int_0^x |(u(t)+u'(t))e^t| dt$.
+En utilisant 4b):
+$|u(x)| \le e^{-x} \int_0^x e N_2(u) dt = e^{-x} e N_2(u) \int_0^x dt = e^{-x} e N_2(u) x$.
+$|u(x)| \le x e^{1-x} N_2(u)$.
+La fonction $f(x) = x e^{1-x}$ sur $[0,1]$. $f'(x) = 1 \cdot e^{1-x} + x (-e^{1-x}) = (1-x)e^{1-x}$.
+$f'(x) \ge 0$ sur $[0,1]$. $f$ est croissante. Le maximum est en $x=1$. $f(1)=1 \cdot e^0 = 1$.
+Donc $|u(x)| \le N_2(u)$ pour tout $x \in [0,1]$.
+(L'énoncé demandait $|u(x)| \le e N_2(u)$, ce qui est aussi vrai car $N_2(u) \le e N_2(u)$).
+
+4d) On veut $N_1(u) \le C N_2(u)$. $N_1(u) = \sup_{x \in [0,1]} |u'(x)|$.
+On sait $u'(x)+u(x) = v(x)$ où $|v(x)| \le N_2(u)$.
+$u'(x) = v(x) - u(x)$.
+$|u'(x)| = |v(x) - u(x)| \le |v(x)| + |u(x)|$.
+$|v(x)| \le N_2(u)$.
+D'après 4c) (la version améliorée), $|u(x)| \le N_2(u)$.
+Donc $|u'(x)| \le N_2(u) + N_2(u) = 2 N_2(u)$.
+Ceci est vrai pour tout $x \in [0,1]$. En prenant le supremum:
+$N_1(u) = \sup_{x \in [0,1]} |u'(x)| \le 2 N_2(u)$.
+Il existe une constante $C=2$ telle que $N_1(u) \le C N_2(u)$.
+(Les normes $N_1$ et $N_2$ sont donc équivalentes sur $E$).
+\end{solution}
+
+\end{document}
+```

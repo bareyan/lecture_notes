@@ -1,0 +1,48 @@
+```latex
+\begin{document}
+\sloppy
+
+\section{Image Réciproque d'un Singleton par une Application Continue}
+
+Soit $f$ une application de $\mathbb{R}$ dans $\mathbb{R}$. L'image réciproque de $\{0\}$ par $f$ est définie par :
+\[
+f^{-1}(\{0\}) = \{ x \in \mathbb{R} : f(x) = 0 \}
+\]
+
+Si $f$ est une application continue, alors $f^{-1}(\{0\})$ est un fermé dans $\mathbb{R}$, car $\{0\}$ est un fermé dans $\mathbb{R}$ et l'image réciproque d'un fermé par une application continue est un fermé.
+
+\section{Adhérence et Densité}
+
+Comme $f^{-1}(\{0\})$ est fermé (sous l'hypothèse que $f$ est continue), on a :
+\[
+\text{Adh}(f^{-1}(\{0\})) = f^{-1}(\{0\})
+\]
+où $\text{Adh}(A)$ désigne l'adhérence de l'ensemble $A$.
+
+Pour que $f^{-1}(\{0\})$ soit dense dans $\mathbb{R}$, il faut par définition que son adhérence soit $\mathbb{R}$ tout entier :
+\[
+\text{Adh}(f^{-1}(\{0\})) = \mathbb{R}
+\]
+Ce qui implique $\mathbb{R} \subseteq \text{Adh}(f^{-1}(\{0\}))$.
+
+\section{Conséquence de la Densité}
+
+Si l'on suppose que $f$ est continue et que $f^{-1}(\{0\})$ est dense dans $\mathbb{R}$, alors nous avons deux conditions :
+\begin{enumerate}
+    \item $\text{Adh}(f^{-1}(\{0\})) = f^{-1}(\{0\})$ (car $f$ continue $\implies f^{-1}(\{0\})$ fermé)
+    \item $\text{Adh}(f^{-1}(\{0\})) = \mathbb{R}$ (car $f^{-1}(\{0\})$ dense)
+\end{enumerate}
+En combinant ces deux égalités, on obtient :
+\[
+f^{-1}(\{0\}) = \mathbb{R}
+\]
+Ceci est équivalent à dire que pour tout $x \in \mathbb{R}$, $f(x) = 0$.
+
+\subsection{Conclusion}
+Alors, si $f$ est une application continue de $\mathbb{R}$ dans $\mathbb{R}$ et si l'ensemble de ses zéros $f^{-1}(\{0\})$ est dense dans $\mathbb{R}$, cela implique nécessairement que $f$ est l'application nulle :
+\[
+f^{-1}(\{0\}) \text{ est dense dans } \mathbb{R} \implies f^{-1}(\{0\}) = \mathbb{R} \iff \forall x \in \mathbb{R}, f(x) = 0.
+\]
+
+\end{document}
+```

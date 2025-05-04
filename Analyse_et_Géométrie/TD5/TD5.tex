@@ -1,0 +1,569 @@
+```latex
+\documentclass{article}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{listings}
+
+\newtheorem{theorem}{Théorème} % Changed to French
+\newtheorem{lemma}{Lemme} % Changed to French
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}{Définition} % Changed to French
+\newtheorem{remark}{Remarque} % Changed to French
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Exemple} % Changed to French
+\newtheorem{exercise}{Exercice} % Added for exercise environment
+
+\usepackage[margin=1in]{geometry}
+\usepackage[utf8]{inputenc} % Added for French characters
+\usepackage[T1]{fontenc} % Added for French characters
+\usepackage[french]{babel} % Added for French language support
+
+\begin{document}
+\sloppy
+
+\section*{MDD251 - Solutions des Exercices (Basé sur les Notes Manuscrites)}
+
+Ce document compile les solutions des exercices du cours MDD251, telles que présentées dans les notes manuscrites fournies. Les solutions sont organisées par numéro d'exercice et suivent l'ordre de leur apparition dans les notes.
+
+\begin{exercise}[Exercice 1]
+Soit $(E, \| \cdot \|)$ un $\mathbb{R}$-espace vectoriel normé. Montrer que pour $u \in E$ et $\lambda \in \mathbb{R}$ fixés les applications
+\[ E \ni x \mapsto u + x \in E, \quad E \ni x \mapsto \lambda x \in E \]
+sont continues.
+\end{exercise}
+
+\begin{solution}
+On note $f: E \to E$, $x \mapsto u+x$ et $g: E \to E$, $x \mapsto \lambda x$.
+
+On montre que $f$ est continue.
+Soit $x \in E$.
+Pour tout $\epsilon > 0$, il existe $\delta > 0$ tel que ...
+Pour $x \in E$, $\| f(x) - f(x_0) \| = \| (u+x) - (u+x_0) \| = \| x - x_0 \|$.
+Pour $\epsilon > 0$, choisissons $\delta = \epsilon$. Si $\|x-x_0\| < \delta$, alors $\|f(x) - f(x_0)\| < \epsilon$.
+Donc $f$ est continue en $x_0$.
+Ceci étant valable pour tout $x_0 \in E$, $f$ est continue sur $E$.
+
+On montre que $g$ est continue.
+Pour $x_0 \in E$. Soit $\epsilon > 0$.
+$\| g(x) - g(x_0) \| = \| \lambda x - \lambda x_0 \| = \| \lambda (x - x_0) \| = |\lambda| \| x - x_0 \|$.
+Si $\lambda = 0$, $g(x) = 0$ pour tout $x$, $g$ est constante donc continue.
+Si $\lambda \neq 0$. Pour $\epsilon > 0$, posons $\delta = \frac{\epsilon}{|\lambda|} > 0$.
+Si $\|x - x_0\| < \delta$, alors $\|g(x) - g(x_0)\| = |\lambda| \|x - x_0\| < |\lambda| \delta = |\lambda| \frac{\epsilon}{|\lambda|} = \epsilon$.
+Donc $g$ est continue en $x_0$.
+Ceci étant valable pour tout $x_0 \in E$, $g$ est continue sur $E$.
+
+De plus, $x \mapsto u+x$ est 1-lipschitzienne, $\| f(x) - f(y) \| = \| (u+x) - (u+y) \| = \| x - y \|$.
+$x \mapsto \lambda x$ est $|\lambda|$-lipschitzienne, $\| g(x) - g(y) \| = \| \lambda x - \lambda y \| = |\lambda| \| x - y \|$.
+Donc elles sont continues d'après la caractérisation des applications lipschitziennes continues.
+\end{solution}
+
+\begin{exercise}[Exercice 2]
+Soit $(X, d)$ égal à $C([0, 1]; \mathbb{R})$ muni de la distance associée à la norme $\| \cdot \|_\infty$ et $f: [0, 1] \ni x \mapsto x$. Calculer $d(f, A)$ pour les ensembles
+\begin{enumerate}
+    \item $A = \{ g \in C([0, 1]; \mathbb{R}) : g(0) = 0 \}$,
+    \item $A = \{ g \in C([0, 1]; \mathbb{R}) : g(0) \geq 0 \}$,
+    \item $A = \{ g \in C([0, 1]; \mathbb{R}) : g(0) < 0 \}$,
+    \item $A = \{ g \in C([0, 1]; \mathbb{R}) : g(0) = 1 \}$,
+\end{enumerate}
+\end{exercise}
+
+\begin{solution}
+On note $f(x) = x$. Donc $f \in C([0,1]; \mathbb{R})$.
+La distance $d(f, g) = \|f-g\|_\infty = \sup_{x \in [0,1]} |f(x) - g(x)|$.
+On a $d(f, A) = \inf_{g \in A} d(f, g)$.
+
+1) $A_1 = \{ g \in C([0, 1]; \mathbb{R}) : g(0) = 0 \}$.
+$d(f, A_1) = \inf_{g \in A_1} \|f-g\|_\infty = \inf_{g \in A_1} \sup_{x \in [0,1]} |x - g(x)|$.
+Pour $g \in A_1$, $g(0) = 0$. Donc $|f(0) - g(0)| = |0 - 0| = 0$.
+$d(f, g) = \sup_{x \in [0,1]} |x - g(x)| \geq |f(0) - g(0)| = |0 - 0| = 0$.
+Considérons $g_n(x) = x - x^n$. $g_n(0) = 0$, donc $g_n \in A_1$.
+$d(f, g_n) = \|f - g_n\|_\infty = \sup_{x \in [0,1]} |x - (x - x^n)| = \sup_{x \in [0,1]} |x^n| = 1$.
+Considérons $g(x) = x$. $g(0) = 0$, donc $g \in A_1$.
+$d(f, g) = \|f - g\|_\infty = \|x - x\|_\infty = 0$.
+Donc $d(f, A_1) = \inf_{g \in A_1} d(f, g) \leq d(f, f) = 0$.
+Comme $d(f, A_1) \geq 0$, on a $d(f, A_1) = 0$.
+
+2) $A_2 = \{ g \in C([0, 1]; \mathbb{R}) : g(0) \geq 0 \}$.
+Comme $A_1 \subset A_2$, on a $d(f, A_2) = \inf_{g \in A_2} d(f, g) \leq \inf_{g \in A_1} d(f, g) = d(f, A_1) = 0$.
+Comme $d(f, A_2) \geq 0$, on a $d(f, A_2) = 0$.
+
+3) $A_3 = \{ g \in C([0, 1]; \mathbb{R}) : g(0) < 0 \}$.
+Soit $g \in A_3$. Alors $g(0) = c < 0$.
+$d(f, g) = \|f-g\|_\infty = \sup_{x \in [0,1]} |x - g(x)| \geq |f(0) - g(0)| = |0 - g(0)| = |g(0)| = -c > 0$.
+Donc $d(f, A_3) = \inf_{g \in A_3} d(f, g) \geq \inf_{g \in A_3} |g(0)|$.
+Considérons la suite $(g_n)_{n \in \mathbb{N}^*}$ définie par $g_n(x) = x - \frac{1}{n}$.
+$g_n(0) = -1/n < 0$, donc $g_n \in A_3$.
+$d(f, g_n) = \|f - g_n\|_\infty = \sup_{x \in [0,1]} |x - (x - 1/n)| = \sup_{x \in [0,1]} |1/n| = 1/n$.
+Donc $d(f, A_3) = \inf_{g \in A_3} d(f, g) \leq d(f, g_n) = 1/n$.
+Ceci est vrai pour tout $n \in \mathbb{N}^*$. Donc $d(f, A_3) \leq \lim_{n \to \infty} 1/n = 0$.
+Comme $d(f, A_3) \geq 0$, on a $d(f, A_3) = 0$.
+
+4) $A_4 = \{ g \in C([0, 1]; \mathbb{R}) : g(0) = 1 \}$.
+Pour $g \in A_4$, $g(0) = 1$.
+$d(f, g) = \|f-g\|_\infty = \sup_{x \in [0,1]} |x - g(x)| \geq |f(0) - g(0)| = |0 - 1| = 1$.
+Donc $d(f, A_4) = \inf_{g \in A_4} d(f, g) \geq 1$.
+Considérons $g(x) = 1$ pour tout $x \in [0,1]$. $g(0)=1$, donc $g \in A_4$.
+$d(f, g) = \|f-g\|_\infty = \sup_{x \in [0,1]} |x - 1|$. La fonction $h(x) = |x-1|$ est décroissante sur $[0,1]$. Son maximum est $h(0)=1$.
+Donc $d(f, g) = 1$.
+On a trouvé $g \in A_4$ tel que $d(f, g) = 1$.
+Donc $d(f, A_4) = \inf_{g \in A_4} d(f, g) \leq 1$.
+Comme $d(f, A_4) \geq 1$ et $d(f, A_4) \leq 1$, on obtient $d(f, A_4) = 1$.
+\end{solution}
+
+\begin{exercise}[Exercice 3]
+Soit $(E, \| \cdot \|)$ un espace vectoriel normé et $A, B$ deux parties de $E$. On note $A+B = \{a+b : a \in A, b \in B\}$.
+\begin{enumerate}
+    \item Montrer que si $A$ ou $B$ est ouvert, $A+B$ est ouvert.
+    \item Montrer que si $A$ et $B$ sont compacts, $A+B$ est compact.
+\end{enumerate}
+\end{exercise}
+
+\begin{solution}
+1) On suppose A ouvert. Par symétrie, le raisonnement est le même si B est ouvert.
+Soit $x \in A+B$. On peut donc écrire $x = a+b$ avec $a \in A$ et $b \in B$.
+$A$ ouvert, ce qui nous fournit $\epsilon > 0$ tel que $B(a, \epsilon) \subset A$.
+On va montrer que $B(x, \epsilon) \subset A+B$.
+Soit $y \in B(x, \epsilon)$. Il suffit de prouver que $y \in A+B$.
+Alors $\|y - x\| < \epsilon$, càd $\|y - (a+b)\| < \epsilon$.
+Posons $a' = a + (y - x) = y - b$.
+$\|a' - a\| = \|y - (a+b)\| = \|y-x\| < \epsilon$. Donc $a' \in B(a, \epsilon)$.
+Comme $B(a, \epsilon) \subset A$, on a $a' \in A$.
+Donc $y = a' + b$. Comme $a' \in A$ et $b \in B$, on a $y \in A+B$.
+Ainsi, $B(x, \epsilon) \subset A+B$.
+Donc $A+B$ est ouvert.
+\end{solution}
+
+\begin{exercise}[Exercice 5]
+On pose $E = C^1([0, 1]; \mathbb{R})$ muni de la norme $\| f \|_\infty = \sup_{[0, 1]} |f(x)|$ et $N(f) := |f(0)| + \sup_{[0, 1]} |f'(x)|$.
+\begin{enumerate}
+    \item Montrer que $N$ est une norme sur $E$.
+    \item Montrer qu'il existe $C > 0$ tel que $\| f \|_\infty \leq C N(f), \forall f \in E$.
+    \item Mêmes questions pour $N'(f) = |f(0)| + \int_0^1 |f'(x)| dx$.
+\end{enumerate}
+\end{exercise}
+
+\begin{solution}
+1) Montrons que $N$ est une norme sur $E = C^1([0,1]; \mathbb{R})$.
+\begin{itemize}
+    \item $N(f) = |f(0)| + \sup |f'(x)| \geq 0$ car valeur absolue et sup de valeurs absolues sont positifs.
+    \item $N(\lambda f) = |\lambda f(0)| + \sup |\lambda f'(x)| = |\lambda| |f(0)| + |\lambda| \sup |f'(x)| = |\lambda| (|f(0)| + \sup |f'(x)|) = |\lambda| N(f)$ pour $\lambda \in \mathbb{R}$.
+    \item $N(f+g) = |(f+g)(0)| + \sup |(f+g)'(x)| = |f(0) + g(0)| + \sup |f'(x) + g'(x)|$
+    $\leq |f(0)| + |g(0)| + \sup (|f'(x)| + |g'(x)|) \leq |f(0)| + |g(0)| + \sup |f'(x)| + \sup |g'(x)|$
+    $= (|f(0)| + \sup |f'(x)|) + (|g(0)| + \sup |g'(x)|) = N(f) + N(g)$.
+    \item Si $N(f) = 0$, alors $|f(0)| = 0$ et $\sup |f'(x)| = 0$.
+    $|f(0)| = 0 \implies f(0) = 0$.
+    $\sup |f'(x)| = 0 \implies |f'(x)| = 0$ pour tout $x \in [0,1]$, donc $f'(x) = 0$ pour tout $x \in [0,1]$.
+    Ceci signifie que $f$ est constante sur $[0,1]$.
+    Comme $f(0)=0$ et $f$ est constante, $f(x) = 0$ pour tout $x \in [0,1]$. Donc $f = 0_E$.
+\end{itemize}
+Donc $N$ est une norme sur $E$.
+
+2) Soit $f \in E$. D'après le théorème des accroissements finis (ou l'inégalité fondamentale du calcul intégral), pour tout $x \in [0,1]$:
+$f(x) = f(0) + \int_0^x f'(t) dt$.
+$|f(x)| = |f(0) + \int_0^x f'(t) dt| \leq |f(0)| + |\int_0^x f'(t) dt| \leq |f(0)| + \int_0^x |f'(t)| dt$.
+Comme $|f'(t)| \leq \sup_{y \in [0,1]} |f'(y)|$, on a
+$|f(x)| \leq |f(0)| + \int_0^x \sup_{y \in [0,1]} |f'(y)| dt = |f(0)| + x \sup_{y \in [0,1]} |f'(y)|$.
+Comme $x \in [0,1]$, $x \leq 1$.
+$|f(x)| \leq |f(0)| + \sup_{y \in [0,1]} |f'(y)|$.
+Ceci est vrai pour tout $x \in [0,1]$, donc
+$\|f\|_\infty = \sup_{x \in [0,1]} |f(x)| \leq |f(0)| + \sup_{y \in [0,1]} |f'(y)| = N(f)$.
+On peut prendre $C=1$. $\|f\|_\infty \leq 1 \cdot N(f)$.
+
+3) Mêmes questions pour $N'(f) = |f(0)| + \int_0^1 |f'(x)| dx$.
+\begin{itemize}
+    \item $N'(f) \geq 0$ car somme de termes positifs.
+    \item $N'(\lambda f) = |\lambda f(0)| + \int_0^1 |\lambda f'(x)| dx = |\lambda| |f(0)| + |\lambda| \int_0^1 |f'(x)| dx = |\lambda| N'(f)$.
+    \item $N'(f+g) = |f(0)+g(0)| + \int_0^1 |f'(x)+g'(x)| dx \leq |f(0)|+|g(0)| + \int_0^1 (|f'(x)|+|g'(x)|) dx$
+    $= |f(0)| + \int_0^1 |f'(x)| dx + |g(0)| + \int_0^1 |g'(x)| dx = N'(f) + N'(g)$.
+    \item Si $N'(f) = 0$, alors $|f(0)| = 0$ et $\int_0^1 |f'(x)| dx = 0$.
+    $f(0) = 0$. Comme $f' \in C([0,1])$, $|f'|$ est continue et positive.
+    Si $\int_0^1 |f'(x)| dx = 0$, alors $|f'(x)| = 0$ pour tout $x \in [0,1]$.
+    Donc $f'(x)=0$ pour tout $x \in [0,1]$, ce qui signifie que $f$ est constante.
+    Comme $f(0)=0$, $f(x)=0$ pour tout $x$. Donc $f=0_E$.
+\end{itemize}
+Donc $N'$ est une norme sur $E$.
+
+Existe-t-il $C'>0$ tel que $\|f\|_\infty \leq C' N'(f)$?
+On a vu que $|f(x)| \leq |f(0)| + \int_0^x |f'(t)| dt$.
+Comme $x \in [0,1]$, on a $\int_0^x |f'(t)| dt \leq \int_0^1 |f'(t)| dt$.
+Donc $|f(x)| \leq |f(0)| + \int_0^1 |f'(t)| dt = N'(f)$.
+Ceci est vrai pour tout $x \in [0,1]$, donc
+$\|f\|_\infty = \sup_{x \in [0,1]} |f(x)| \leq N'(f)$.
+On peut prendre $C'=1$.
+\end{solution}
+
+\begin{exercise}[Exercice 6]
+Soit $E = C^1([0, 1]; \mathbb{R})$. Comparer les normes
+$N_1(f) = \|f\|_\infty$, $N_2(f) = \|f\|_\infty + \|f\|_1$, $N_3(f) = \|f\|_\infty + \|f'\|_\infty$, $N_4(f) = \|f\|_\infty + \|f'\|_1$.
+\end{exercise}
+
+\begin{solution}
+On a $E = C^1([0,1]; \mathbb{R})$.
+Les normes sont:
+$N_1(f) = \|f\|_\infty = \sup |f(x)|$.
+$N_2(f) = \|f\|_\infty + \|f\|_1 = \sup |f(x)| + \int_0^1 |f(x)| dx$.
+$N_3(f) = \|f\|_\infty + \|f'\|_\infty = \sup |f(x)| + \sup |f'(x)|$.
+$N_4(f) = \|f\|_\infty + \|f'\|_1 = \sup |f(x)| + \int_0^1 |f'(x)| dx$.
+
+Comparaisons:
+On sait que $\|f\|_1 = \int_0^1 |f(x)| dx \leq \int_0^1 \sup |f(y)| dx = \sup |f(y)| \int_0^1 dx = \|f\|_\infty$.
+De même, $\|f'\|_1 = \int_0^1 |f'(x)| dx \leq \|f'\|_\infty$.
+
+\begin{itemize}
+    \item $N_1$ vs $N_2$: $N_1(f) = \|f\|_\infty \leq \|f\|_\infty + \|f\|_1 = N_2(f)$. Et $N_2(f) = \|f\|_\infty + \|f\|_1 \leq \|f\|_\infty + \|f\|_\infty = 2 \|f\|_\infty = 2 N_1(f)$. Donc $N_1$ et $N_2$ sont équivalentes.
+    \item $N_1$ vs $N_3$: $N_1(f) = \|f\|_\infty \leq \|f\|_\infty + \|f'\|_\infty = N_3(f)$. Sont-elles équivalentes? Considérons $f_n(x) = \sin(n \pi x)$. $\|f_n\|_\infty = 1$. $f_n'(x) = n \pi \cos(n \pi x)$. $\|f_n'\|_\infty = n \pi$. $N_1(f_n)=1$. $N_3(f_n) = 1 + n\pi$. $\frac{N_3(f_n)}{N_1(f_n)} = 1+n\pi \to \infty$. Donc $N_3$ n'est pas majorée par $N_1$. Elles ne sont pas équivalentes.
+    \item $N_1$ vs $N_4$: $N_1(f) = \|f\|_\infty \leq \|f\|_\infty + \|f'\|_1 = N_4(f)$. Sont-elles équivalentes? Considérons $f_n(x)$ comme ci-dessus. $\|f_n'\|_1 = \int_0^1 |n \pi \cos(n \pi x)| dx$. Faisons $f_n(x) = x^n$. $\|f_n\|_\infty = 1$. $f_n'(x) = nx^{n-1}$. $\|f_n'\|_1 = \int_0^1 nx^{n-1} dx = [x^n]_0^1 = 1$. $N_1(f_n)=1$. $N_4(f_n) = 1+1=2$. Cela ne montre rien. Considérons $f_n(x) = \frac{1}{n} \sin(n^2 \pi x)$. $\|f_n\|_\infty = 1/n$. $f_n'(x) = n \pi \cos(n^2 \pi x)$. $\|f_n'\|_1 = \int_0^1 |n \pi \cos(n^2 \pi x)| dx$. $\int_0^1 |\cos(n^2 \pi x)| dx$. $\frac{1}{n^2 \pi} \int_0^{n^2 \pi} |\cos(u)| du = \frac{1}{n^2 \pi} n^2 \int_0^\pi |\cos u| du = \frac{1}{\pi} [\sin u]_0^{\pi/2} - [\sin u]_{\pi/2}^\pi = \frac{1}{\pi}(1 - (-1)) = 2/\pi$. Donc $\|f_n'\|_1 = n\pi (2/\pi) = 2n$. $N_1(f_n) = 1/n$. $N_4(f_n) = 1/n + 2n$. $\frac{N_4(f_n)}{N_1(f_n)} = \frac{1/n+2n}{1/n} = 1 + 2n^2 \to \infty$. Donc $N_4$ n'est pas majorée par $N_1$. Non équivalentes.
+    \item $N_3$ vs $N_4$: $N_4(f) = \|f\|_\infty + \|f'\|_1 \leq \|f\|_\infty + \|f'\|_\infty = N_3(f)$. Sont-elles équivalentes? $N_3(f) = \|f\|_\infty + \|f'\|_\infty$. Peut-on majorer $\|f'\|_\infty$ par $N_4(f)$? Non. Considérons $f_n(x)$ une fonction pic très fin de hauteur $n$ et d'intégrale 1. Par exemple $f_n'(x)$ est un triangle de base $2/n^2$ centré en $1/2$, de hauteur $n$. $\int f_n'(x) dx = 1/n$. $f_n(1/2) \approx 1$. $\|f_n\|_\infty \approx 1$. $\|f_n'\|_\infty = n$. $\|f_n'\|_1 = 1/n$. $N_3(f_n) \approx 1+n$. $N_4(f_n) \approx 1+1/n$. $\frac{N_3(f_n)}{N_4(f_n)} \approx \frac{1+n}{1+1/n} \to \infty$. Non équivalentes.
+\end{itemize}
+
+Résumé des comparaisons:
+$N_1 \leq N_2 \leq 2 N_1$ (équivalentes).
+$N_1 \leq N_4$.
+$N_1 \leq N_3$.
+$N_4 \leq N_3$.
+
+On a vu (Ex 5, part 2) que $\|f\|_\infty \leq |f(0)| + \sup|f'(x)|$. Ceci ne semble pas $N_3$.
+Ah, l'Ex 5 utilise $N(f) = |f(0)| + \sup |f'(x)|$. Montrons que $N_3$ est équivalente à $N$.
+$N_3(f) = \|f\|_\infty + \|f'\|_\infty$.
+On a montré $\|f\|_\infty \leq |f(0)| + \|f'\|_\infty$. Donc $N_3(f) \leq |f(0)| + \|f'\|_\infty + \|f'\|_\infty = |f(0)| + 2 \|f'\|_\infty \leq 2 N(f)$.
+Et $N(f) = |f(0)| + \|f'\|_\infty \leq \|f\|_\infty + \|f'\|_\infty = N_3(f)$.
+Donc $N$ et $N_3$ sont équivalentes.
+
+De même, on a vu (Ex 5, part 3) que $\|f\|_\infty \leq |f(0)| + \int_0^1 |f'(x)| dx = N'(f)$.
+Montrons que $N_4$ est équivalente à $N'$.
+$N_4(f) = \|f\|_\infty + \|f'\|_1$.
+On a $N_4(f) \leq |f(0)| + \|f'\|_1 + \|f'\|_1 = |f(0)| + 2 \|f'\|_1 \leq 2 N'(f)$ ? Non, il faut majorer $\|f\|_\infty$ par $N'(f)$.
+$N_4(f) = \|f\|_\infty + \|f'\|_1 \leq N'(f) + \|f'\|_1$. Est-ce que $\|f'\|_1 \leq N'(f)$? Oui, car $N'(f) = |f(0)| + \|f'\|_1 \geq \|f'\|_1$.
+Donc $N_4(f) \leq 2 N'(f)$.
+Et $N'(f) = |f(0)| + \|f'\|_1 \leq \|f\|_\infty + \|f'\|_1 = N_4(f)$.
+Donc $N'$ et $N_4$ sont équivalentes.
+
+On a $N_4 \leq N_3$.
+$N_4(f) = \|f\|_\infty + \int_0^1 |f'(x)| dx \leq \|f\|_\infty + \int_0^1 \sup |f'(y)| dx = \|f\|_\infty + \sup |f'(y)| = N_3(f)$.
+
+Récapitulons les équivalences/inégalités strictes:
+$N_1 \iff N_2$
+$N_1 \leq N_4 \leq N_3$
+$N_1$ non équivalente à $N_3$ et $N_4$.
+$N_3$ non équivalente à $N_4$.
+Donc on a les relations: $N_1 \iff N_2$, $N_1 < N_4 < N_3$. (où $<$ signifie $\leq$ mais non équivalent).
+\end{solution}
+
+\begin{exercise}[Exercice 9]
+Soit $E = C^1([0, 1]; \mathbb{R})$. Comparer les normes $N_1(f) = \|f\|_\infty$, $N_2(f) = \|f\|_\infty + \|f\|_1$, $N_3(f) = \|f\|_\infty + \|f'\|_\infty$, $N_4(f) = \|f\|_\infty + \|f'\|_1$.
+\end{exercise}
+
+\begin{solution}
+[Note manuscrite: Même chose que l'ex 6!]
+L'énoncé de l'exercice 9 est identique à celui de l'exercice 6. La comparaison des normes est donc la même que celle effectuée dans la solution de l'exercice 6.
+Les normes $N_1$ et $N_2$ sont équivalentes.
+Les normes $N_3$ et $N_4$ ne sont pas équivalentes entre elles, ni à $N_1$ (ou $N_2$).
+On a les relations suivantes : $N_1 \iff N_2$. Et $N_1(f) \le N_4(f) \le N_3(f)$ pour tout $f \in E$. Les inégalités sont strictes dans le sens où les normes ne sont pas équivalentes.
+\end{solution}
+
+\begin{exercise}[Exercice 7]
+Soit $\mathbb{R}[X]$ l'espace des polynômes à coefficients réels et $\mathbb{R}_k[X]$ le sous-espace des polynômes de degré inférieur ou égal à $k$. On pose
+\[ \|P\|_1 := \int_0^2 |P(x)| dx. \]
+\begin{enumerate}
+    \item Montrer que $\| \cdot \|_1$ est une norme sur $\mathbb{R}[X]$.
+    \item Soit $(P_n)_{n \ge 0}$ une suite dans $\mathbb{R}_k[X]$. On écrit $P_n(X) = \sum_{j=0}^k a_{n,j} X^j$. Montrer que si $\lim_{n \to \infty} P_n = P$ pour $\| \cdot \|_1$ avec $P = \sum_{j=0}^k a_j X^j$, alors pour tout $0 \le j \le k$ on a $\lim_{n \to \infty} a_{n,j} = a_j$.
+    \item En déduire que $P \in \mathbb{R}_k[X]$.
+    \item L'ensemble $\mathbb{R}_k[X]$ est-il ouvert, fermé dans $(\mathbb{R}[X], \| \cdot \|_1)$?
+\end{enumerate}
+(Note: La partie 2 de l'énoncé original mentionne $\sum_{j=0}^p a_j X^j$ et $0 \le j \le p$, mais les notes manuscrites utilisent $k$ partout. Nous suivons les notes.)
+\end{exercise}
+
+\begin{solution}
+1) Montrons que $\|P\|_1 = \int_0^2 |P(x)| dx$ est une norme sur $\mathbb{R}[X]$.
+\begin{itemize}
+    \item $\|P\|_1 = \int_0^2 |P(x)| dx \ge 0$ car l'intégrale d'une fonction positive est positive.
+    \item $\|\lambda P\|_1 = \int_0^2 |\lambda P(x)| dx = \int_0^2 |\lambda| |P(x)| dx = |\lambda| \int_0^2 |P(x)| dx = |\lambda| \|P\|_1$.
+    \item $\|P+Q\|_1 = \int_0^2 |P(x)+Q(x)| dx \le \int_0^2 (|P(x)|+|Q(x)|) dx = \int_0^2 |P(x)| dx + \int_0^2 |Q(x)| dx = \|P\|_1 + \|Q\|_1$.
+    \item Si $\|P\|_1 = 0$, alors $\int_0^2 |P(x)| dx = 0$. Comme $P$ est un polynôme, il est continu. $|P(x)|$ est continue et positive. L'intégrale d'une fonction continue positive est nulle si et seulement si la fonction est nulle sur l'intervalle d'intégration $[0,2]$. Donc $|P(x)| = 0$ pour tout $x \in [0,2]$.
+    Un polynôme qui s'annule sur un intervalle (ou plus généralement sur une infinité de points) est le polynôme nul. Donc $P = 0$.
+\end{itemize}
+Ainsi, $\| \cdot \|_1$ est une norme sur $\mathbb{R}[X]$.
+
+2) On suppose que $P_n \to P$ dans $(\mathbb{R}_k[X], \| \cdot \|_1)$, c'est-à-dire $\lim_{n \to \infty} \|P_n - P\|_1 = 0$.
+$P_n(X) = \sum_{j=0}^k a_{n,j} X^j$ et $P(X) = \sum_{j=0}^k a_j X^j$.
+$\mathbb{R}_k[X]$ est un espace vectoriel de dimension finie $k+1$. Une base est $(1, X, \dots, X^k)$.
+Sur un espace vectoriel de dimension finie, toutes les normes sont équivalentes.
+Considérons la norme $N(Q) = \sum_{j=0}^k |b_j|$ pour $Q(X) = \sum_{j=0}^k b_j X^j$.
+Comme $\| \cdot \|_1$ et $N$ sont des normes sur $\mathbb{R}_k[X]$, elles sont équivalentes.
+Il existe donc $C > 0$ tel que $N(Q) \le C \|Q\|_1$ pour tout $Q \in \mathbb{R}_k[X]$.
+$P_n \to P$ pour $\| \cdot \|_1$ signifie $\|P_n - P\|_1 \to 0$.
+$P_n - P = \sum_{j=0}^k (a_{n,j} - a_j) X^j$.
+Alors $N(P_n - P) = \sum_{j=0}^k |a_{n,j} - a_j|$.
+On a $N(P_n - P) \le C \|P_n - P\|_1$.
+Comme $\|P_n - P\|_1 \to 0$, on a $N(P_n - P) \to 0$.
+Donc $\sum_{j=0}^k |a_{n,j} - a_j| \to 0$.
+Cela implique que pour chaque $j \in \{0, \dots, k\}$, $|a_{n,j} - a_j| \to 0$, c'est-à-dire $\lim_{n \to \infty} a_{n,j} = a_j$.
+
+3) On a supposé $P = \sum_{j=0}^k a_j X^j$. Par définition, $P$ est un polynôme de degré au plus $k$. Donc $P \in \mathbb{R}_k[X]$.
+
+4) L'ensemble $\mathbb{R}_k[X]$ est-il fermé dans $(\mathbb{R}[X], \| \cdot \|_1)$?
+Soit $(P_n)_{n \ge 0}$ une suite dans $\mathbb{R}_k[X]$ qui converge vers $P \in \mathbb{R}[X]$ pour la norme $\| \cdot \|_1$.
+Est-ce que $P \in \mathbb{R}_k[X]$ ?
+La question 3) a montré que si $(P_n)$ est une suite de $\mathbb{R}_k[X]$ convergeant vers $P$ *et si l'on suppose a priori que $P$ peut s'écrire $\sum_{j=0}^k a_j X^j$*, alors $P \in \mathbb{R}_k[X]$. Mais ici $P$ est dans $\mathbb{R}[X]$.
+Considérons l'espace vectoriel $\mathbb{R}_k[X]$. Il est de dimension finie $(k+1)$. Tout espace vectoriel normé de dimension finie est complet. Donc $(\mathbb{R}_k[X], \| \cdot \|_1)$ est un espace de Banach.
+Un sous-espace complet d'un espace vectoriel normé est fermé.
+Est-ce que $\mathbb{R}_k[X]$ est complet pour $\| \cdot \|_1$? Oui, car de dimension finie.
+Donc $\mathbb{R}_k[X]$ est un sous-espace vectoriel fermé de $(\mathbb{R}[X], \| \cdot \|_1)$.
+
+L'ensemble $\mathbb{R}_k[X]$ est-il ouvert dans $(\mathbb{R}[X], \| \cdot \|_1)$?
+Un sous-espace vectoriel propre d'un espace vectoriel normé n'est jamais ouvert.
+En effet, soit $P \in \mathbb{R}_k[X]$. Pour tout $\epsilon > 0$, on peut trouver un polynôme $Q$ tel que $\|P-Q\|_1 < \epsilon$ et $Q \notin \mathbb{R}_k[X]$.
+Prenons $P=0$. Soit $\epsilon > 0$. Considérons $Q_m(x) = \delta x^{k+m}$ pour $m \ge 1$ et $\delta > 0$ petit.
+$\|Q_m\|_1 = \int_0^2 |\delta x^{k+m}| dx = \delta \int_0^2 x^{k+m} dx = \delta [\frac{x^{k+m+1}}{k+m+1}]_0^2 = \delta \frac{2^{k+m+1}}{k+m+1}$.
+On peut choisir $\delta$ et $m$ (par exemple $m=1$) tel que $\|Q_m\|_1 < \epsilon$.
+$Q_m \in B(0, \epsilon)$. Mais $Q_m \notin \mathbb{R}_k[X]$ car son degré est $k+m > k$.
+Donc aucune boule ouverte centrée en $0$ (ou en n'importe quel $P \in \mathbb{R}_k[X]$) n'est contenue dans $\mathbb{R}_k[X]$.
+Donc $\mathbb{R}_k[X]$ n'est pas ouvert.
+\end{solution}
+
+\begin{exercise}[Exercice 8]
+On note par $l_c(\mathbb{N})$ l'espace vectoriel des suites réelles $(u_n)_{n \ge 0}$ telles que $u_n = 0$ sauf pour un nombre fini d'indices $n$.
+\begin{enumerate}
+    \item Montrer que $l_c(\mathbb{N})$ est dense dans $l^p(\mathbb{N})$ pour tout $1 \le p < \infty$.
+    \item $l_c(\mathbb{N})$ est-il dense dans $l^\infty(\mathbb{N})$?
+    \item Montrer que $l^p(\mathbb{N})$ est inclus dans $l^q(\mathbb{N})$ si $p \le q$.
+    \item Montrer que l'application identité n'est pas continue de $(l^p(\mathbb{N}), \| \cdot \|_q)$ dans $(l^p, \| \cdot \|_p)$ si $p < q$.
+\end{enumerate}
+\end{exercise}
+
+\begin{solution}
+1) Soit $u = (u_n)_{n \ge 0} \in l^p(\mathbb{N})$, avec $1 \le p < \infty$. Cela signifie que $\sum_{n=0}^\infty |u_n|^p < \infty$.
+Soit $\epsilon > 0$.
+On veut montrer qu'il existe $v \in l_c(\mathbb{N})$ tel que $\|u-v\|_p < \epsilon$.
+Soit $v_N = (u_0, u_1, \dots, u_N, 0, 0, \dots)$. $v_N \in l_c(\mathbb{N})$ car elle n'a qu'un nombre fini de termes non nuls (au plus $N+1$).
+Calculons $\|u-v_N\|_p^p$:
+$\|u-v_N\|_p^p = \sum_{n=0}^\infty |u_n - (v_N)_n|^p = \sum_{n=0}^N |u_n - u_n|^p + \sum_{n=N+1}^\infty |u_n - 0|^p = \sum_{n=N+1}^\infty |u_n|^p$.
+Comme $u \in l^p(\mathbb{N})$, la série $\sum_{n=0}^\infty |u_n|^p$ converge.
+Le reste d'une série convergente tend vers 0. Donc $\lim_{N \to \infty} \sum_{n=N+1}^\infty |u_n|^p = 0$.
+Ainsi, pour tout $\epsilon > 0$, il existe $N_0$ tel que pour $N \ge N_0$, $\sum_{n=N+1}^\infty |u_n|^p < \epsilon^p$.
+Choisissons un tel $N$. Alors $v_N \in l_c(\mathbb{N})$ et $\|u - v_N\|_p = (\sum_{n=N+1}^\infty |u_n|^p)^{1/p} < (\epsilon^p)^{1/p} = \epsilon$.
+Donc $l_c(\mathbb{N})$ est dense dans $l^p(\mathbb{N})$ pour $1 \le p < \infty$.
+
+2) $l_c(\mathbb{N})$ est-il dense dans $l^\infty(\mathbb{N})$?
+$l^\infty(\mathbb{N})$ est l'espace des suites bornées muni de la norme $\|u\|_\infty = \sup_{n \ge 0} |u_n|$.
+Considérons la suite $u = (1, 1, 1, \dots)$. $u \in l^\infty(\mathbb{N})$ car $|u_n|=1$ pour tout $n$, donc $\sup |u_n| = 1 < \infty$.
+Soit $v \in l_c(\mathbb{N})$. Alors il existe $N$ tel que $v_n = 0$ pour $n > N$.
+$\|u - v\|_\infty = \sup_{n \ge 0} |u_n - v_n|$.
+Pour $n > N$, $|u_n - v_n| = |1 - 0| = 1$.
+Donc $\|u - v\|_\infty = \sup (\sup_{0 \le n \le N} |1-v_n|, \sup_{n > N} |1-0|) = \sup (\sup_{0 \le n \le N} |1-v_n|, 1) \ge 1$.
+La distance entre $u$ et n'importe quel élément $v$ de $l_c(\mathbb{N})$ est au moins 1.
+Donc $u$ n'est pas dans l'adhérence de $l_c(\mathbb{N})$.
+$l_c(\mathbb{N})$ n'est pas dense dans $l^\infty(\mathbb{N})$. L'adhérence de $l_c(\mathbb{N})$ dans $l^\infty(\mathbb{N})$ est $l_0(\mathbb{N})$, l'espace des suites tendant vers 0.
+
+3) Montrer que $l^p(\mathbb{N}) \subset l^q(\mathbb{N})$ si $p \le q$.
+Soit $u = (u_n) \in l^p(\mathbb{N})$. Alors $\sum_{n=0}^\infty |u_n|^p < \infty$.
+Cela implique que $\lim_{n \to \infty} |u_n|^p = 0$, donc $\lim_{n \to \infty} u_n = 0$.
+En particulier, la suite $(u_n)$ est bornée. Il existe $M$ tel que $|u_n| \le M$ pour tout $n$.
+Si $|u_n| \le 1$, alors $|u_n|^q \le |u_n|^p$ car $q \ge p$.
+Si $|u_n| > 1$? L'implication $\lim u_n = 0$ signifie qu'il existe $N$ tel que pour $n > N$, $|u_n| \le 1$.
+Alors pour $n > N$, $|u_n|^q \le |u_n|^p$.
+$\sum_{n=0}^\infty |u_n|^q = \sum_{n=0}^N |u_n|^q + \sum_{n=N+1}^\infty |u_n|^q \le \sum_{n=0}^N |u_n|^q + \sum_{n=N+1}^\infty |u_n|^p$.
+Le premier terme est une somme finie. Le second terme est le reste d'une série convergente, donc fini.
+Donc $\sum_{n=0}^\infty |u_n|^q$ converge.
+Donc $u \in l^q(\mathbb{N})$. Ainsi $l^p(\mathbb{N}) \subset l^q(\mathbb{N})$.
+On peut aussi montrer que $\|u\|_q \le \|u\|_p$.
+Si $\|u\|_p = 1$, alors $\sum |u_n|^p = 1$. Cela implique $|u_n| \le 1$ pour tout $n$.
+Alors $|u_n|^q \le |u_n|^p$ pour $q \ge p$.
+$\|u\|_q^q = \sum |u_n|^q \le \sum |u_n|^p = 1$. Donc $\|u\|_q \le 1 = \|u\|_p$.
+Pour $u$ quelconque non nul, posons $v = u / \|u\|_p$. $\|v\|_p = 1$.
+Alors $\|v\|_q \le \|v\|_p = 1$.
+$\|u / \|u\|_p \|_q \le 1 \implies (1/\|u\|_p) \|u\|_q \le 1 \implies \|u\|_q \le \|u\|_p$.
+
+4) Montrer que $Id: (l^p(\mathbb{N}), \| \cdot \|_q) \to (l^p(\mathbb{N}), \| \cdot \|_p)$ n'est pas continue si $p < q$.
+L'application identité $Id(u) = u$.
+La continuité de $Id$ signifierait qu'il existe $C > 0$ tel que $\|Id(u)\|_p \le C \|u\|_q$ pour tout $u \in l^p(\mathbb{N})$.
+C'est-à-dire $\|u\|_p \le C \|u\|_q$.
+Considérons la suite $u^{(N)} = (1, 1, \dots, 1, 0, 0, \dots)$ où il y a $N$ termes égaux à 1.
+$u^{(N)} \in l_c(\mathbb{N}) \subset l^p(\mathbb{N})$ pour tout $p$.
+$\|u^{(N)}\|_p^p = \sum_{n=0}^{N-1} |1|^p = N$. Donc $\|u^{(N)}\|_p = N^{1/p}$.
+$\|u^{(N)}\|_q^q = \sum_{n=0}^{N-1} |1|^q = N$. Donc $\|u^{(N)}\|_q = N^{1/q}$.
+Si l'identité était continue, on aurait $N^{1/p} \le C N^{1/q}$ pour tout $N \ge 1$.
+$N^{1/p - 1/q} \le C$.
+Comme $p < q$, $1/p > 1/q$, donc $1/p - 1/q > 0$.
+Alors $N^{1/p - 1/q} \to \infty$ quand $N \to \infty$.
+Ceci contredit $N^{1/p - 1/q} \le C$.
+Donc l'application identité n'est pas continue.
+\end{solution}
+
+\begin{exercise}[Exercice 10]
+Soit $\mathbb{R}[X]$ l'espace des polynômes à coefficients réels. Pour $a \ge 0$ on pose
+\[ N_a(P) = |P(a)| + \int_0^1 |P'(x)| dx, \quad P \in \mathbb{R}[X]. \]
+\begin{enumerate}
+    \item Montrer que $N_a$ est une norme sur $\mathbb{R}[X]$.
+    \item Soit $0 \le a < b$. En raisonnant par l'absurde et en considérant les polynômes $X^n$ pour $n \in \mathbb{N}$, montrer que les normes $N_a$ et $N_b$ ne sont pas équivalentes.
+    \item Montrer que si $a, b \in [0, 1]$ les normes $N_a$ et $N_b$ sont équivalentes.
+\end{enumerate}
+(Note: La partie 2 de l'énoncé original a $0 < a < b$ avec $b > 1$. Les notes ont $0 \le a < b$. Nous suivons l'énoncé original ici pour le raisonnement avec $X^n$).
+\end{exercise}
+
+\begin{solution}
+1) Montrons que $N_a(P) = |P(a)| + \int_0^1 |P'(x)| dx$ est une norme sur $\mathbb{R}[X]$.
+\begin{itemize}
+    \item $N_a(P) = |P(a)| + \int_0^1 |P'(x)| dx \ge 0$.
+    \item $N_a(\lambda P) = |\lambda P(a)| + \int_0^1 |\lambda P'(x)| dx = |\lambda| |P(a)| + |\lambda| \int_0^1 |P'(x)| dx = |\lambda| N_a(P)$.
+    \item $N_a(P+Q) = |(P+Q)(a)| + \int_0^1 |(P+Q)'(x)| dx = |P(a)+Q(a)| + \int_0^1 |P'(x)+Q'(x)| dx$
+    $\le |P(a)|+|Q(a)| + \int_0^1 (|P'(x)|+|Q'(x)|) dx = N_a(P) + N_a(Q)$.
+    \item Si $N_a(P) = 0$, alors $|P(a)|=0$ et $\int_0^1 |P'(x)| dx = 0$.
+    $P(a)=0$. Comme $P'$ est un polynôme, $P'$ est continu. $|P'(x)|$ est continue et positive.
+    $\int_0^1 |P'(x)| dx = 0 \implies |P'(x)| = 0$ pour tout $x \in [0,1]$.
+    Donc $P'(x)=0$ pour tout $x \in [0,1]$.
+    Un polynôme dont la dérivée est nulle sur un intervalle est constant sur $\mathbb{R}$.
+    Donc $P(x) = c$ pour une constante $c$.
+    Comme $P(a)=0$, on a $c=0$. Donc $P$ est le polynôme nul.
+\end{itemize}
+Ainsi $N_a$ est une norme sur $\mathbb{R}[X]$.
+
+2) Soit $0 < a < b$ avec $b > 1$. Considérons $P_n(X) = X^n$ pour $n \in \mathbb{N}$.
+$P_n(a) = a^n$. $P_n'(X) = nX^{n-1}$.
+$N_a(P_n) = |a^n| + \int_0^1 |n x^{n-1}| dx = a^n + n \int_0^1 x^{n-1} dx = a^n + n [\frac{x^n}{n}]_0^1 = a^n + 1$.
+$N_b(P_n) = |b^n| + \int_0^1 |n x^{n-1}| dx = b^n + 1$.
+Supposons par l'absurde que $N_a$ et $N_b$ sont équivalentes.
+Alors il existe $C > 0$ tel que $N_b(P) \le C N_a(P)$ pour tout $P \in \mathbb{R}[X]$.
+En particulier, $N_b(P_n) \le C N_a(P_n)$ pour tout $n \in \mathbb{N}$.
+$b^n + 1 \le C (a^n + 1)$.
+$\frac{b^n+1}{a^n+1} \le C$.
+Comme $0 < a < b$, on a $b/a > 1$.
+$\lim_{n \to \infty} \frac{b^n+1}{a^n+1} = \lim_{n \to \infty} \frac{b^n(1+1/b^n)}{a^n(1+1/a^n)} = \lim_{n \to \infty} (\frac{b}{a})^n \frac{1+1/b^n}{1+1/a^n} = \infty$ car $b/a > 1$.
+Ceci contredit le fait que $\frac{b^n+1}{a^n+1}$ soit borné par $C$.
+Donc $N_a$ et $N_b$ ne sont pas équivalentes si $0 < a < b$ et $b>1$.
+(Note: si $a=0$, $N_0(P_n) = 0^n + 1 = 1$ pour $n \ge 1$. $N_b(P_n) = b^n+1$. $b^n+1 \le C (1)$ n'est pas possible car $b>1$).
+
+3) Montrer que si $a, b \in [0, 1]$, $N_a$ et $N_b$ sont équivalentes.
+$N_a(P) = |P(a)| + \int_0^1 |P'(x)| dx$.
+$N_b(P) = |P(b)| + \int_0^1 |P'(x)| dx$.
+On doit montrer qu'il existe $C_1, C_2 > 0$ tels que $C_1 N_a(P) \le N_b(P) \le C_2 N_a(P)$.
+Par le théorème fondamental de l'analyse, $P(b) = P(a) + \int_a^b P'(x) dx$.
+$|P(b)| = |P(a) + \int_a^b P'(x) dx| \le |P(a)| + |\int_a^b P'(x) dx|$.
+$|\int_a^b P'(x) dx| \le |\int_a^b |P'(x)| dx|$.
+Comme $a, b \in [0,1]$, l'intervalle $[a, b]$ (ou $[b, a]$) est inclus dans $[0,1]$.
+$|\int_a^b |P'(x)| dx| \le \int_0^1 |P'(x)| dx$.
+Donc $|P(b)| \le |P(a)| + \int_0^1 |P'(x)| dx = N_a(P)$.
+Alors $N_b(P) = |P(b)| + \int_0^1 |P'(x)| dx \le N_a(P) + \int_0^1 |P'(x)| dx$.
+On sait que $\int_0^1 |P'(x)| dx \le N_a(P)$.
+Donc $N_b(P) \le N_a(P) + N_a(P) = 2 N_a(P)$.
+Par symétrie en échangeant $a$ et $b$, on a $N_a(P) \le 2 N_b(P)$.
+Donc $N_a$ et $N_b$ sont équivalentes pour $a, b \in [0,1]$ (avec $C_1=1/2, C_2=2$).
+\end{solution}
+
+\begin{exercise}[Exercice 11]
+Soit $L$ l'espace vectoriel des fonctions de $[0, 1]$ dans $\mathbb{R}$ Lipschitziennes. Pour $f \in L$ on pose
+\[ C(f) := \sup_{x, y \in [0, 1], x \neq y} \frac{|f(x) - f(y)|}{|x - y|} \]
+et $N(f) = \|f\|_\infty + C(f)$.
+\begin{enumerate}
+    \item Montrer que $N$ est une norme sur $L$.
+    \item les normes $\| \cdot \|_\infty$ et $N$ sont-elles équivalentes ?
+    \item Montrer que $(L, N)$ est un espace complet.
+\end{enumerate}
+\end{exercise}
+
+\begin{solution}
+1) Montrons que $N(f) = \|f\|_\infty + C(f)$ est une norme sur $L$.
+$L = \{ f: [0,1] \to \mathbb{R} \mid \exists K \ge 0, \forall x, y \in [0,1], |f(x)-f(y)| \le K |x-y| \}$.
+$C(f)$ est la plus petite constante de Lipschitz pour $f$. $f \in L \iff C(f) < \infty$.
+\begin{itemize}
+    \item $N(f) = \|f\|_\infty + C(f) \ge 0$ car $\|f\|_\infty \ge 0$ et $C(f) \ge 0$.
+    \item $N(\lambda f) = \|\lambda f\|_\infty + C(\lambda f)$. $\|\lambda f\|_\infty = |\lambda| \|f\|_\infty$.
+    $C(\lambda f) = \sup \frac{|\lambda f(x) - \lambda f(y)|}{|x-y|} = \sup \frac{|\lambda| |f(x)-f(y)|}{|x-y|} = |\lambda| \sup \frac{|f(x)-f(y)|}{|x-y|} = |\lambda| C(f)$.
+    Donc $N(\lambda f) = |\lambda| \|f\|_\infty + |\lambda| C(f) = |\lambda| N(f)$.
+    \item $N(f+g) = \|f+g\|_\infty + C(f+g)$. $\|f+g\|_\infty \le \|f\|_\infty + \|g\|_\infty$.
+    $C(f+g) = \sup \frac{|(f+g)(x) - (f+g)(y)|}{|x-y|} = \sup \frac{|(f(x)-f(y)) + (g(x)-g(y))|}{|x-y|}$
+    $\le \sup (\frac{|f(x)-f(y)|}{|x-y|} + \frac{|g(x)-g(y)|}{|x-y|}) \le \sup \frac{|f(x)-f(y)|}{|x-y|} + \sup \frac{|g(x)-g(y)|}{|x-y|} = C(f)+C(g)$.
+    Donc $N(f+g) \le \|f\|_\infty + \|g\|_\infty + C(f) + C(g) = N(f) + N(g)$.
+    \item Si $N(f) = 0$, alors $\|f\|_\infty = 0$ et $C(f) = 0$.
+    $\|f\|_\infty = 0 \implies \sup |f(x)| = 0 \implies f(x) = 0$ for all $x$. Donc $f = 0$.
+    (Et si $f=0$, $C(f) = \sup \frac{|0-0|}{|x-y|} = 0$).
+\end{itemize}
+Donc $N$ est une norme sur $L$.
+
+2) Les normes $N$ et $\| \cdot \|_\infty$ sont-elles équivalentes?
+On a $\|f\|_\infty \le N(f)$ par définition.
+Pour qu'elles soient équivalentes, il faudrait qu'il existe $C > 0$ tel que $N(f) \le C \|f\|_\infty$, c'est-à-dire $\|f\|_\infty + C(f) \le C \|f\|_\infty$.
+Cela impliquerait $C(f) \le (C-1) \|f\|_\infty$.
+Considérons $f_n(x) = \sin(n \pi x)$ pour $n \in \mathbb{N}^*$.
+$f_n \in L$ car $f_n$ est $C^1$. $\|f_n\|_\infty = 1$.
+$f_n'(x) = n \pi \cos(n \pi x)$. $C(f_n) = \sup |f_n'(x)| = n \pi$.
+On aurait $n \pi \le (C-1) \times 1$. Ceci n'est pas possible pour $n$ grand.
+Donc les normes $N$ et $\| \cdot \|_\infty$ ne sont pas équivalentes sur $L$.
+
+3) Montrer que $(L, N)$ est un espace complet.
+Soit $(f_n)_{n \in \mathbb{N}}$ une suite de Cauchy dans $(L, N)$.
+Pour tout $\epsilon > 0$, il existe $N_0$ tel que pour $m, n \ge N_0$, $N(f_n - f_m) < \epsilon$.
+$N(f_n - f_m) = \|f_n - f_m\|_\infty + C(f_n - f_m) < \epsilon$.
+Ceci implique que $\|f_n - f_m\|_\infty < \epsilon$ et $C(f_n - f_m) < \epsilon$.
+La condition $\|f_n - f_m\|_\infty < \epsilon$ signifie que $(f_n)$ est une suite de Cauchy dans $(C([0,1]), \| \cdot \|_\infty)$.
+Comme $(C([0,1]), \| \cdot \|_\infty)$ est complet (espace de Banach), la suite $(f_n)$ converge uniformément vers une fonction $f \in C([0,1])$.
+Montrons que $f \in L$ et que $f_n \to f$ dans $(L, N)$.
+$C(f_n - f_m) < \epsilon$ signifie que $\sup_{x \neq y} \frac{|(f_n - f_m)(x) - (f_n - f_m)(y)|}{|x-y|} < \epsilon$.
+Donc $|(f_n(x) - f_m(x)) - (f_n(y) - f_m(y))| \le \epsilon |x-y|$ pour tous $x, y \in [0,1]$ et $m, n \ge N_0$.
+Fixons $x, y$ et faisons $m \to \infty$. $f_m(x) \to f(x)$ et $f_m(y) \to f(y)$.
+$|(f_n(x) - f(x)) - (f_n(y) - f(y))| \le \epsilon |x-y|$ pour $n \ge N_0$.
+Ceci montre que $f_n - f$ est lipschitzienne avec $C(f_n - f) \le \epsilon$ pour $n \ge N_0$.
+Comme $f = f_n - (f_n - f)$, et que $f_n \in L$ et $f_n - f \in L$, alors $f \in L$ (car $L$ est un espace vectoriel).
+De plus, $C(f_n - f) \le \epsilon$ pour $n \ge N_0$. Cela signifie que $\lim_{n \to \infty} C(f_n - f) = 0$.
+On a $\lim_{n \to \infty} \|f_n - f\|_\infty = 0$ (convergence uniforme) et $\lim_{n \to \infty} C(f_n - f) = 0$.
+Donc $\lim_{n \to \infty} N(f_n - f) = \lim_{n \to \infty} (\|f_n - f\|_\infty + C(f_n - f)) = 0 + 0 = 0$.
+La suite de Cauchy $(f_n)$ converge vers $f \in L$ pour la norme $N$.
+Donc $(L, N)$ est un espace complet.
+\end{solution}
+
+\begin{exercise}[Exercice 12]
+Soit $l^\infty(\mathbb{N})$ l'espace vectoriel des suites bornées à valeurs réelles, muni de la norme $\| \cdot \|_\infty$. Soit $l_0(\mathbb{N})$ le sous ensemble des suites $(u_n)_{n \ge 0}$ telles que $\lim_{n \to \infty} u_n = 0$.
+\begin{enumerate}
+    \item Montrer que $l_0(\mathbb{N})$ est un sous espace vectoriel de $l^\infty(\mathbb{N})$.
+    \item Montrer que $l_0(\mathbb{N})$ est une partie fermée de $(l^\infty(\mathbb{N}), \| \cdot \|_\infty)$.
+\end{enumerate}
+\end{exercise}
+
+\begin{solution}
+1) Montrer que $l_0(\mathbb{N})$ est un sous-espace vectoriel (SEV) de $l^\infty(\mathbb{N})$.
+Une suite qui converge vers 0 est bornée, donc $l_0(\mathbb{N}) \subset l^\infty(\mathbb{N})$.
+\begin{itemize}
+    \item La suite nulle $(0, 0, \dots)$ tend vers 0, donc $0 \in l_0(\mathbb{N})$. $l_0(\mathbb{N})$ est non vide.
+    \item Soit $u = (u_n), v = (v_n) \in l_0(\mathbb{N})$ et $\lambda \in \mathbb{R}$.
+    $\lim u_n = 0$ et $\lim v_n = 0$.
+    Alors $\lim (u_n + \lambda v_n) = \lim u_n + \lambda \lim v_n = 0 + \lambda \cdot 0 = 0$.
+    Donc $u + \lambda v \in l_0(\mathbb{N})$.
+\end{itemize}
+Donc $l_0(\mathbb{N})$ est un SEV de $l^\infty(\mathbb{N})$.
+
+2) Montrer que $l_0(\mathbb{N})$ est fermé dans $(l^\infty(\mathbb{N}), \| \cdot \|_\infty)$.
+On utilise la caractérisation séquentielle des fermés.
+Soit $(u^{(k)})_{k \in \mathbb{N}}$ une suite d'éléments de $l_0(\mathbb{N})$ qui converge vers $u \in l^\infty(\mathbb{N})$ pour la norme $\| \cdot \|_\infty$.
+On doit montrer que $u \in l_0(\mathbb{N})$, c'est-à-dire $\lim_{n \to \infty} u_n = 0$.
+Convergence de $u^{(k)}$ vers $u$ dans $l^\infty(\mathbb{N})$ signifie:
+$\forall \epsilon > 0, \exists K \in \mathbb{N}$ tel que $\forall k \ge K$, $\|u^{(k)} - u\|_\infty < \epsilon/2$.
+$\|u^{(k)} - u\|_\infty = \sup_{n \ge 0} |u_n^{(k)} - u_n|$. Donc $|u_n^{(k)} - u_n| < \epsilon/2$ pour tout $n \ge 0$ et $k \ge K$.
+
+On veut montrer que $\lim_{n \to \infty} u_n = 0$. C'est-à-dire:
+$\forall \epsilon > 0, \exists N \in \mathbb{N}$ tel que $\forall n \ge N$, $|u_n| < \epsilon$.
+
+Soit $\epsilon > 0$. Choisissons $K$ comme ci-dessus.
+Comme $u^{(K)} \in l_0(\mathbb{N})$, on a $\lim_{n \to \infty} u_n^{(K)} = 0$.
+Donc, pour $\epsilon/2 > 0$, il existe $N \in \mathbb{N}$ tel que $\forall n \ge N$, $|u_n^{(K)}| < \epsilon/2$.
+
+Maintenant, pour $n \ge N$, on a:
+$|u_n| = |u_n - u_n^{(K)} + u_n^{(K)}| \le |u_n - u_n^{(K)}| + |u_n^{(K)}|$.
+On sait que $|u_n^{(K)} - u_n| < \epsilon/2$ (car $k=K \ge K$) et $|u_n^{(K)}| < \epsilon/2$ (car $n \ge N$).
+Donc $|u_n| < \epsilon/2 + \epsilon/2 = \epsilon$.
+Ceci est vrai pour tout $n \ge N$.
+On a montré que pour tout $\epsilon > 0$, il existe $N$ tel que pour $n \ge N$, $|u_n| < \epsilon$.
+Donc $\lim_{n \to \infty} u_n = 0$, ce qui signifie $u \in l_0(\mathbb{N})$.
+Donc $l_0(\mathbb{N})$ est fermé dans $(l^\infty(\mathbb{N}), \| \cdot \|_\infty)$.
+
+[Contenu de la page 10 des notes manuscrites sur TD6 Ex 1]
+La note mentionne que $l_0(\mathbb{N})$ n'est pas ouvert. Ceci est vrai car c'est un sous-espace propre (par exemple la suite (1,1,...) est dans $l^\infty$ mais pas dans $l_0$). Aucun sous-espace vectoriel propre d'un EVN n'est ouvert.
+La note mentionne aussi que $l_c(\mathbb{N})$ n'est pas fermé dans $(l^\infty(\mathbb{N}), \| \cdot \|_\infty)$.
+En effet, l'adhérence de $l_c(\mathbb{N})$ dans $l^\infty$ est $l_0(\mathbb{N})$. Comme $l_c \neq l_0$ (par exemple, la suite $(1/n)_{n\ge 1}$ est dans $l_0$ mais pas dans $l_c$), $l_c$ n'est pas fermé.
+Ces points confirment ou complètent les résultats trouvés pour les exercices 8 et 12.
+\end{solution}
+
+\end{document}
+```

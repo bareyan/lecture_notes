@@ -1,0 +1,1015 @@
+\documentclass{article}
+    \usepackage{amssymb,amsmath,amsthm}
+    \usepackage{graphicx}
+    \usepackage{color}
+    \usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{listings}
+\usepackage{hyperref} % for links
+% Added for table notes/captions
+\usepackage{caption}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+    \usepackage{array}
+    \usepackage{listings}
+    \newtheorem{theorem}{Theorem}
+    \newtheorem{lemma}{Lemma}
+    \newtheorem{proposition}[theorem]{Proposition}
+    \newtheorem{definition}{Definition}
+    \newtheorem{remark}{Remark}
+    \newtheorem{solution}{Solution}
+    \newtheorem{example}{Example}
+    \usepackage[margin=1in]{geometry}```latex
+\documentclass{article}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{listings}
+\usepackage{hyperref} % Added for links
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Example}
+\usepackage[margin=1in]{geometry}
+\begin{document}
+\sloppy
+\section{Why Graphs?}
+Graphs are a general language for describing and analyzing entities with their relations and interactions. Rather than thinking of the world as a set of isolated data points, we think of it in terms of networks and relations between these entities. Modeling this relational structure allows us to build more faithful and accurate models of the underlying phenomena.
+Many types of data can naturally be represented as graphs:
+\begin{itemize}
+    \item Computer networks, disease pathways, networks of particles in physics, food webs, infrastructure, events.
+    \item Social networks, economic networks, communication networks, patent citations, Internet structure, neural connections in the brain.
+    \item Information and knowledge, regulatory mechanisms in cells, scenes from the real world (scene graphs), computer code, molecules, 3D shapes.
+\end{itemize}
+\subsection{Many Types of Data are Graphs}
+Examples of different data types represented as graphs:
+\begin{itemize}
+    \item Knowledge Graphs
+    \item Regulatory Networks
+    \item Scene Graphs
+    \item Code Graphs
+    \item Molecules (atoms as nodes, bonds as edges)
+    \item 3D Shapes
+\end{itemize}
+The underlying graphical structure is an important part that allows us to model the underlying domain and phenomena faithfully.
+\subsection{Graph Relational Data}
+Graph relational data can be broadly categorized into two types:
+\begin{enumerate}
+    \item \textbf{Natural Graphs or Networks}: Underlying domains naturally represented as graphs.
+    \begin{itemize}
+        \item Social networks (individuals and connections)
+        \item Communication and transaction networks (phone calls, financial transactions)
+        \item Biomedicine (genes, proteins, biological processes, interactions)
+        \item Brain connections (network of neurons)
+    \end{itemize}
+    \item \textbf{Other domains with Relational Structure}: Can be modeled as graphs to capture relations.
+    \begin{itemize}
+        \item Information and knowledge (organized and linked)
+        \item Software (represented as graphs)
+        \item Similarity networks (connecting similar data points)
+        \item Molecules
+        \item Scene Graphs
+        \item 3D Shapes
+        \item Particle-based simulations in physics
+    \end{itemize}
+\end{enumerate}
+The main question is: How do we take advantage of this relational structure to make better, more accurate predictions? Explicitly modeling these relationships can lead to better performance.
+\subsection{Graphs are More Complex Data Types}
+Modern deep learning toolboxes are specialized for simple data types like sequences (text, speech) and grids (images). Graphs are harder to process because:
+\begin{itemize}
+    \item They have arbitrary size and complex topology.
+    \item There is no spatial locality (unlike grids or text with clear 'up/down' or 'left/right').
+    \item There is no reference point or fixed node ordering.
+    \item Networks are often dynamic and have multi-modal features.
+\end{itemize}
+Developing neural networks applicable to complex data types like graphs is a new frontier in deep learning and representation learning.
+\subsection{Representation Learning for Graphs}
+We aim to build neural networks that take a graph as input and make predictions at the level of nodes, edges, or the entire graph. This should be end-to-end, requiring no human feature engineering.
+Representation learning for graphs is about automatically extracting or learning features in the graph. The goal is to map nodes or other graph elements into a $d$-dimensional embedding space such that similar nodes/elements in the network are embedded close together in the embedding space. This learned vector representation can then be used for downstream machine learning algorithms.
+\section{CS224W Course Outline}
+The course will cover various topics in Machine Learning and Representation Learning for graph structured data:
+\begin{itemize}
+    \item Traditional methods: Graphlets, Graph Kernels
+    \item Methods for node embeddings: DeepWalk, Node2Vec
+    \item Graph Neural Networks: GCN, GraphSAGE, GAT, Theory of GNNs, Scaling
+    \item Heterogeneous graphs, Knowledge graphs and reasoning: TransE, BetaE
+    \item Deep generative models for graphs
+    \item Applications to Biomedicine, Science, Industry (recommender systems, fraud detection, etc.)
+\end{itemize}
+\section{Applications of Graph ML}
+Graph machine learning tasks can be formulated at different levels:
+\begin{itemize}
+    \item Node level (e.g., node classification)
+    \item Edge level (e.g., link prediction)
+Graph machine learning can discover new side effects not previously known. A model predicted the top 10 drug pairs likely to cause side effects, and evidence for some predictions was found in medical literature, even if not in official databases.
+An example table of de novo predictions:
+\begin{table}[h]
+\centering
+\caption{Example De novo Side Effect Predictions}
+\label{tab:denovo_predictions}
+\begin{tabular}{|c|l|l|l|l|}
+\hline
+Rank & Drug $c$ & Drug $d$ & Side effect $r$ & Evidence found \\
+1 & Pyrimethamine & Aliskiren & Sarcoma & Stage et al. 2015 \\
+2 & Tigecycline & Bimatoprost & Autonomic neuropathy & \\
+3 & Omeprazole & Dacarbazine & Telangiectases & \\
+    \item Graph level (e.g., graph classification, generation)
+\end{itemize}
+\subsection{Node Level Task: Protein Folding}
+\textbf{The Protein Folding Problem}: Computationally predict a protein's 3D structure based solely on its amino acid sequence.
+Proteins are composed of a sequence of amino acids, but fold into complex 3D shapes. This problem has been a long-standing challenge in biology.
+\textbf{AlphaFold: Solving Protein Folding}
+Key idea: "Spatial graph"
+\begin{itemize}
+    \item Nodes: Amino acids in a protein sequence
+    \item Edges: Proximity between amino acids (residues)
+\end{itemize}
+9 & Aliskiren & Tioconazole & Breast inflammation & Parving et al. 2012 \\
+10 & Estradiol & Nadolol & Endometriosis & \\
+\hline
+\multicolumn{5}{|p{0.9\textwidth}|}{Case Report: Severe Rhabdomyolysis due to Presumed Drug Interactions between Atorvastatin with Amlodipine and Ticagrelor} \\
+\end{tabular}
+\end{table}
+\subsection{Graph Level Task: Drug Discovery}
+\subsection{Edge Level Task: Recommender Systems}
+\textbf{PinSage: Graph-based Recommender}
+Task: Recommend related pins to users.
+Users interact with items (products, movies, songs, etc.). This can be modeled as a bipartite graph with two types of nodes: users and items. An edge exists if a user interacted with an item.
+Modern recommender systems use graph representation learning and graph neural networks.
+Task: Learn node embeddings $z_i$ such that $d(z_{cake1}, z_{cake2}) < d(z_{cake1}, z_{sweater})$. Related items (like two cakes) should have embeddings that are closer than unrelated items (like a cake and a sweater).
+We can create a bipartite network (users/boards and items/images). A graph neural network takes feature information (e.g., image content) and transforms it across the graph structure to get robust embeddings for items. Images plus graph structure leads to better recommendations.
+Let's illustrate a simple user-item bipartite graph structure.
+\begin{verbatim}
+#save_to: bipartite_user_item.png
+from graphviz import Digraph
+dot = Digraph('Bipartite', comment='User-Item Bipartite Graph', graph_attr={'rankdir': 'LR'})
+# User nodes
+dot.node('UserA', 'User A', shape='ellipse')
+dot.node('UserB', 'User B', shape='ellipse')
+dot.node('UserC', 'User C', shape='ellipse')
+# Item nodes
+dot.node('Item1', 'Item 1', shape='box')
+dot.node('Item2', 'Item 2', shape='box')
+dot.node('Item3', 'Item 3', shape='box')
+# Edges (interactions)
+dot.edge('UserA', 'Item1')
+dot.edge('UserA', 'Item2')
+dot.edge('UserB', 'Item2')
+dot.edge('UserC', 'Item1')
+dot.edge('UserC', 'Item3')
+dot.render('bipartite_user_item', format='png', view=False)
+\end{verbatim}
+\begin{figure}[h]
+\centering
+\includegraphics[ max width=\textwidth,
+max height=0.4\textheight,
+keepaspectratio]{bipartite_user_item.png}
+\caption{Simple User-Item Bipartite Graph Example}
+\label{fig:bipartite_user_item}
+\end{figure}
+\subsection{Edge Level Task: Biomedical Graph Link Prediction}
+Task: Predict drug combination side effects. Many patients take multiple drugs simultaneously, leading to new adverse side effects that are not tested experimentally due to the vast number of combinations.
+Problem: Can we build a predictive engine that for an arbitrary pair of drugs will predict how they interact and what adverse side effects they may cause?
+This is formulated as a graph problem:
+\begin{itemize}
+    \item Nodes: Drugs (triangles) and Proteins (circles).
+    \item Edges:
+    \begin{itemize}
+        \item Drug-Protein interactions (drug targets protein).
+        \item Protein-Protein interactions (experimentally mapped network called interactome).
+        \item Drug-Drug interaction / Side Effect links (known side effects between drug pairs).
+    \end{itemize}
+\end{itemize}
+The network of drug-drug side effects is often incomplete. The task is link prediction between drug nodes to impute missing edges (predicting side effects).
+Query: How likely will Simvastatin and Ciprofloxacin, when taken together, break down muscle tissue? (This corresponds to predicting a specific edge type between Simvastatin and Ciprofloxacin).
+\subsubsection{Results: De novo Predictions}
+Graph machine learning can discover new side effects not previously known. A model predicted the top 10 drug pairs likely to cause side effects, and evidence for some predictions was found in medical literature, even if not in official databases.
+An example table of de novo predictions:
+\begin{tabular}{|c|l|l|l|l|}
+\hline
+Rank & Drug $c$ & Drug $d$ & Side effect $r$ & Evidence found \\
+\hline
+1 & Pyrimethamine & Aliskiren & Sarcoma & Stage et al. 2015 \\
+2 & Tigecycline & Bimatoprost & Autonomic neuropathy & \\
+3 & Omeprazole & Dacarbazine & Telangiectases & \\
+4 & Tolcapone & Pyrimethamine & Breast disorder & Bicker et al. 2017 \\
+5 & Minoxidil & Paricalcitol & Cluster headache & \\
+6 & Omeprazole & Amoxicillin & Renal tubular acidosis & Russo et al. 2016 \\
+7 & Anagrelide & Azelaic acid & Cerebral thrombosis & \\
+8 & Atorvastatin & Amlodipine & Muscle inflammation & Banakh et al. 2017 \\
+9 & Aliskiren & Tioconazole & Breast inflammation & Parving et al. 2012 \\
+10 & Estradiol & Nadolol & Endometriosis & \\
+\hline
+\multicolumn{5}{l}{} \\
+\multicolumn{5}{|p{0.9\textwidth}|}{Case Report: Severe Rhabdomyolysis due to Presumed Drug Interactions between Atorvastatin with Amlodipine and Ticagrelor} \\
+\hline
+\end{tabular}
+\subsection{Graph Level Task: Drug Discovery}
+Antibiotics are small molecular graphs.
+\begin{itemize}
+    \item Nodes: Atoms
+    \item Edges: Chemical bonds
+\end{itemize}
+Each molecule can be represented as a graph. The task is to identify which molecules among billions might have therapeutic effects (e.g., antibiotic properties). Graph-based deep learning can be used to classify molecules and predict promising candidates for laboratory testing.
+Graph generation (generating novel molecular structures) is also used in drug discovery. We can generate molecules (graphs) with desired properties (non-toxic, high solubility, drug likeness). We can also optimize existing molecules by completing a scaffold to improve a property.
+\subsection{Graph Level Task: Physics Simulation}
+\textbf{Example (6): Physics Simulation}
+Physical simulation as a graph:
+\begin{itemize}
+    \item Nodes: Particles
+    \item Edges: Interaction between particles
+\end{itemize}
+Goal: Predict how a graph (set of particles and their interactions) will evolve over time. This allows for realistic physics-based simulations of materials deforming.
+\textbf{Simulation Learning Framework}
+A graph evolution task: Predict how a graph will evolve.
+Framework steps:
+\begin{enumerate}
+    \item Take material, represent as set of particles.
+    \item Based on proximity/interactions, generate a proximity graph.
+    \item Apply Graph Neural Network (GNN) to current properties (positions, velocities) of particles and predict future positions/velocities.
+    \item Evolve particles to predicted new positions.
+    \item Repeat (go back to step 2 with the new particle positions).
+\end{enumerate}
+This iterative process allows for fast and accurate physics simulations.
+\section{Choice of Graph Representation}
+Components of a graph or a network:
+\begin{itemize}
+    \item Objects or entities (nodes, vertices, denoted by $N$ or $V$).
+    \item Interactions or relations (edges, links, denoted by $E$).
+\end{itemize}
+A graph $G$ is composed of a set of nodes $V$ (or $N$) and a set of edges $E$. Graphs provide a common language; the same machine learning algorithm can be applied to networks of different types of entities (actors, people, proteins) if the underlying structure is the same.
+Choosing a proper graph representation is very important and depends on the objects of interest (nodes) and the relationships between them (edges). The choice determines the nature of questions that can be studied and predictions that can be made.
+\subsection{Directed vs. Undirected Graphs}
+\begin{itemize}
+    \item \textbf{Undirected}: Links are undirected (symmetrical, reciprocal relationships).
+    Examples: Collaborations, Friendship on Facebook, Protein interactions.
+    \item \textbf{Directed}: Links are directed (arcs). Every link has a source and a destination (denoted by an arrow).
+    Examples: Phone calls, Financial transactions, Following on Twitter.
+\end{itemize}
+Let's recreate simple examples of an undirected and a directed graph.
+\subsubsection{Undirected Graph Example}
+\begin{verbatim}
+#save_to: undirected_graph_example.png
+from graphviz import Graph
+dot = Graph('UndirectedGraph', comment='Example Undirected Graph')
+# Add nodes
+dot.node('A')
+dot.node('B')
+dot.node('C')
+dot.node('D')
+dot.node('E')
+dot.node('F')
+dot.node('G')
+dot.node('H')
+dot.node('I')
+dot.node('L')
+dot.node('M')
+# Add edges
+dot.edge('A', 'B')
+dot.edge('A', 'D')
+dot.edge('B', 'F')
+dot.edge('C', 'F')
+dot.edge('D', 'F')
+dot.edge('E', 'F')
+dot.edge('G', 'H')
+dot.edge('L', 'F')
+dot.edge('M', 'F')
+dot.edge('5', '6')
+dot.edge('6', '7')
+dot.edge('5', '7') # Corrected based on visual inspection of the provided image
+\end{verbatim}
+\begin{figure}[h]
+\centering
+dot.render('undirected_graph_example', format='png', view=False)
+\end{verbatim}
+\begin{figure}[h]
+\centering
+\includegraphics[ max width=\textwidth,
+max height=0.4\textheight,
+keepaspectratio]{undirected_graph_example.png}
+\caption{Example Undirected Graph}
+\label{fig:undirected_example}
+\end{figure}
+\label{fig:projection_u}
+\end{figure}
+\subsubsection{Bipartite Graph for Projection Example}
+Let's recreate the bipartite graph shown for the projection example to make the projections clearer.
+\subsubsection{Bipartite Graph for Projection Example}
+\begin{verbatim}
+#save_to: bipartite_for_projection.png
+\subsubsection{Directed Graph Example}
+\begin{verbatim}
+#save_to: directed_graph_example.png
+from graphviz import Digraph
+dot = Digraph('DirectedGraph', comment='Example Directed Graph', graph_attr={'rankdir': 'LR'})
+# Add nodes
+dot.node('A')
+dot.node('B')
+dot.node('C')
+dot.node('D')
+dot.node('E')
+dot.node('F')
+dot.node('G')
+# Add edges
+dot.edge('A', 'B')
+dot.edge('B', 'C')
+dot.edge('B', 'D')
+dot.edge('5', 'B')
+dot.edge('5', 'C')
+dot.edge('6', 'C')
+dot.edge('7', 'C') # Added based on correct Projection U/V logic
+dot.edge('6', 'D')
+dot.edge('7', 'D')
+dot.node('U')
+dot.attr(label='V', rank='same', group='V')
+dot.node('V')
+dot.edge('D', 'E')
+dot.edge('E', 'F')
+dot.edge('G', 'F')
+dot.render('directed_graph_example', format='png', view=False)
+\end{verbatim}
+\begin{figure}[h]
+\centering
+\includegraphics[ max width=\textwidth,
+max height=0.4\textheight,
+keepaspectratio]{directed_graph_example.png}
+\caption{Example Directed Graph}
+\label{fig:directed_example}
+\end{figure}
+\subsection{Node Degrees}
+\subsubsection{Undirected Graphs}
+\textbf{Node degree, $k_i$}: the number of edges adjacent to node $i$.
+Example: In Figure \ref{fig:undirected_example}, $k_A = 2$, $k_B = 3$ (including self-loop counting as 2).
+The degree $k_i$ of node $i$ is given by summing row $i$ (or column $i$) of the adjacency matrix $A$:
+\[ k_i = \sum_{j=1}^N A_{ij} \]
+\textbf{Avg. degree}: $\bar{k} = \langle k \rangle = \frac{1}{N} \sum_{i=1}^N k_i = \frac{2E}{N}$
+Where $N$ is the number of nodes and $E$ is the number of edges. Each edge is counted twice when summing degrees. A self-loop contributes 2 to the degree of a node.
+\subsubsection{Directed Graphs}
+In directed networks, we define an \textbf{in-degree} and \textbf{out-degree}.
+The total degree of a node is the sum of in- and out-degrees.
+\textbf{Out-degree}, $k_i^{out}$: Number of edges originating from node $i$.
+# C is connected to D (via 6 or 7)
+# A is connected to C (via 3) - confirmed by bipartite graph
+dot.edge('A', 'B')
+dot.edge('B', 'C')
+dot.edge('C', 'D')
+dot.render('projection_v', format='png', view=False)
+\end{verbatim}
+\begin{figure}[h]
+Example: In Figure \ref{fig:directed_example}, for node C:
+Edges originating from C: (C, B), (C, G). $k_C^{out} = 2$. (Correction from slide which showed 1; the diagram shows edges C to B and C to G, hence 2 outgoing edges)
+Edges pointing towards C: (B, C), (D, C). $k_C^{in} = 2$. (Correction from slide which showed 2; the diagram shows edges B to C and D to C, hence 2 incoming edges)
+Total degree $k_C = k_C^{in} + k_C^{out} = 2 + 2 = 4$. (Correction from slide which showed 3)
+Source node: $k^{in} = 0$
+Sink node: $k^{out} = 0$
+Average degree: $\bar{k} = E/N$. For directed graphs, $\bar{k}^{in} = \bar{k}^{out} = E/N$.
+\subsection{Bipartite Graph}
+\begin{definition}
+A \textbf{bipartite graph} is a graph whose nodes can be divided into two disjoint sets $U$ and $V$ such that every link connects a node in $U$ to one in $V$; that is, $U$ and $V$ are independent sets.
+\end{definition}
+Examples:
+\begin{itemize}
+    \item Authors-to-Papers (they authored)
+    \item Actors-to-Movies (they appeared in)
+    \item Users-to-Movies (they rated)
+    \item Recipes-to-Ingredients (they contain)
+\end{itemize}
+\textbf{"Folded" networks}: Projections of bipartite graphs onto one set of nodes.
+\begin{itemize}
+    \item Author collaboration networks (link authors who co-authored a paper)
+    \item Movie co-rating networks (link movies rated by the same user)
+\end{itemize}
+Let's recreate a bipartite graph example.
+\begin{verbatim}
+#save_to: bipartite_graph_example.png
+from graphviz import Graph
+dot = Graph('BipartiteExample', comment='Example Bipartite Graph', graph_attr={'rankdir': 'LR'})
+# Nodes for set U (e.g., users)
+dot.node('A', shape='ellipse')
+dot.node('B', shape='ellipse')
+dot.node('C', shape='ellipse')
+dot.node('D', shape='ellipse')
+dot.node('E', shape='ellipse')
+# Nodes for set V (e.g., items)
+dot.node('1', shape='ellipse', color='green', style='filled')
+dot.node('2', shape='ellipse', color='green', style='filled')
+dot.node('3', shape='ellipse', color='green', style='filled')
+dot.node('4', shape='ellipse', color='green', style='filled')
+dot.node('5', shape='ellipse', color='green', style='filled')
+# Edges
+dot.edge('A', '1')
+dot.edge('B', '1')
+dot.edge('B', '2')
+dot.edge('C', '3')
+dot.edge('D', '3')
+dot.edge('D', '4')
+dot.edge('E', '4')
+dot.edge('E', '5')
+dot.attr(label='U', rank='same', group='U')
+dot.node('U')
+dot.attr(label='V', rank='same', group='V')
+dot.node('V')
+dot.render('bipartite_graph_example', format='png', view=False)
+\end{verbatim}
+\begin{figure}[h]
+\centering
+\includegraphics[ max width=\textwidth,
+max height=0.4\textheight,
+keepaspectratio]{bipartite_graph_example.png}
+\caption{Example Bipartite Graph (U and V sets)}
+\label{fig:bipartite_example}
+\end{figure}
+\subsection{Folded/Projected Bipartite Graphs}
+We can project a bipartite graph onto either set of nodes. An edge exists between two nodes in the projection if they shared at least one neighbor in the original bipartite graph.
+Example: Projecting a bipartite graph (nodes 1-7 in U, A-D in V).
+\begin{itemize}
+    \item Projection U: Nodes 1-7. Edge exists if they are connected to the same node in V. E.g., 1 and 2 are connected to A, so they are linked in Projection U. 1 and 3 are connected to A, so they are linked. 2 and 3 are connected to A, so they are linked. 4 and 5 are connected to B, so they are linked. 5 and 6 are connected to C, so they are linked. 6 and 7 are connected to D, so they are linked. 1, 2, 3 form a triangle because all connected to A. 4 is isolated in Projection U as its neighbor B has no other neighbors in V connected to other U nodes.
+    \item Projection V: Nodes A-D. Edge exists if they are connected to the same node in U. E.g., A and B are both connected to 2, so they are linked in Projection V. B and C are both connected to 5, so they are linked. C and D are both connected to 6, so they are linked. A and C are not directly linked in Projection V because they don't share a common neighbor in U that would connect them. A is connected to 1, 2, 3. C is connected to 3, 5, 6. They share node 3, so A and C should be linked in the projection. (Correction based on analysis; slide diagram links A-B, B-C, C-D and A-C. A shares 3 with C, A shares 2 with B, B shares 5 with C, C shares 6 with D).
+\end{itemize}
+Let's recreate these projections based on the slide diagrams.
+\subsubsection{Projection U Example}
+\begin{verbatim}
+#save_to: projection_u.png
+from graphviz import Graph
+dot = Graph('ProjectionU', comment='Projection U Graph', graph_attr={'rankdir': 'TB'})
+# Nodes for Projection U (1-7)
+dot.node('1')
+dot.node('2')
+dot.node('3')
+dot.node('4')
+dot.node('5')
+dot.node('6')
+dot.node('7')
+# Edges based on the slide diagram for Projection U
+dot.edge('1', '2')
+dot.edge('1', '3')
+dot.edge('2', '3')
+dot.edge('4', '5')
+dot.edge('5', '6')
+dot.edge('6', '7')
+dot.edge('5', '7') # Corrected based on visual inspection of the provided image
+dot.render('projection_u', format='png', view=False)
+\end{verbatim}
+\begin{figure}[h]
+\centering
+\includegraphics[ max width=\textwidth,
+max height=0.4\textheight,
+keepaspectratio]{projection_u.png}
+dot.edge('2', '4')
+dot.edge('4', '3')
+dot.edge('4', '4') # Self-loop
+dot.render('undirected_self_loop', format='png', view=False)
+\end{verbatim}
+\begin{figure}[h]
+\label{fig:projection_u}
+\end{figure}
+\subsubsection{Bipartite Graph for Projection Example}
+Let's recreate the bipartite graph shown for the projection example to make the projections clearer.
+\begin{verbatim}
+#save_to: bipartite_for_projection.png
+from graphviz import Graph
+dot = Graph('BipartiteProjection', comment='Bipartite Graph for Projection Example', graph_attr={'rankdir': 'LR'})
+# Nodes for set U (1-7)
+for i in range(1, 8):
+    dot.node(str(i), shape='ellipse')
+# Nodes for set V (A-D)
+dot.node('A', shape='box', color='green', style='filled')
+dot.node('B', shape='box', color='green', style='filled')
+dot.node('C', shape='box', color='green', style='filled')
+dot.node('D', shape='box', color='green', style='filled')
+# Edges based on the slide diagram
+dot.edge('1', 'A')
+dot.edge('2', 'A')
+dot.edge('3', 'A')
+dot.edge('4', 'B')
+dot.edge('5', 'B')
+dot.edge('5', 'C')
+dot.edge('6', 'C')
+dot.edge('6', 'D')
+dot.edge('7', 'D')
+dot.edge('7', 'C') # Corrected based on visual inspection of the provided image
+dot.attr(label='U', rank='same', group='U')
+dot.node('U')
+dot.attr(label='V', rank='same', group='V')
+dot.node('V')
+dot.render('bipartite_for_projection', format='png', view=False)
+\end{verbatim}
+\begin{figure}[h]
+\centering
+\includegraphics[ max width=\textwidth,
+dot.edge('2', '4') # Second edge between 2 and 4
+dot.edge('2', '4') # Third edge between 2 and 4
+dot.edge('4', '3')
+\end{verbatim}
+\begin{figure}[h]
+\centering
+\caption{Example Bipartite Graph for Projection Illustration}
+\label{fig:bipartite_for_projection}
+\end{figure}
+\subsubsection{Projection V Example}
+\begin{verbatim}
+#save_to: projection_v.png
+from graphviz import Graph
+dot = Graph('ProjectionV', comment='Projection V Graph', graph_attr={'rankdir': 'TB'})
+# Nodes for Projection V (A-D)
+dot.node('A', shape='box')
+dot.node('B', shape='box')
+dot.node('C', shape='box')
+dot.node('D', shape='box')
+# Edges based on the slide diagram for Projection V
+# A is connected to B (via 2)
+# B is connected to C (via 5)
+# C is connected to D (via 6 or 7)
+# A is connected to C (via 3) - confirmed by bipartite graph
+dot.edge('A', 'B')
+dot.edge('B', 'C')
+dot.edge('C', 'D')
+dot.edge('A', 'C') # Added based on shared neighbor 3 in bipartite graph
+dot.render('projection_v', format='png', view=False)
+\end{verbatim}
+\begin{figure}[h]
+\centering
+\includegraphics[ max width=\textwidth,
+max height=0.4\textheight,
+keepaspectratio]{projection_v.png}
+\caption{Example Projection V Graph}
+\label{fig:projection_v}
+\end{figure}
+dot = Graph('UndirectedConnectivity', comment='Undirected Connectivity Example', graph_attr={'rankdir': 'LR'})
+# Component 1
+with dot.subgraph(name='cluster_comp1') as c:
+    c.attr(label='Component 1')
+    c.node_attr.update(style='filled', color='lightblue')
+    c.node('A')
+    c.node('B')
+    c.node('C')
+    c.node('D')
+    c.node('F')
+    c.node('G')
+    c.edge('A', 'B')
+    c.edge('A', 'D')
+    c.edge('B', 'D')
+    c.edge('B', 'C')
+    c.edge('D', 'F')
+    c.edge('C', 'F')
+    c.edge('F', 'G')
+# Add labels and groups for visual separation (Graphviz doesn't strictly enforce component structure like this)
+with dot.subgraph(name='cluster_comp1') as c:
+dot.node('1', '1')
+dot.node('2', '2')
+dot.node('3', '3')
+dot.node('4', '4')
+# Add edges
+dot.edge('1', '2')
+dot.edge('1', '4')
+dot.edge('2', '4')
+dot.edge('4', '3')
+dot.render('undirected_adj_graph', format='png', view=False)
+\end{verbatim}
+\begin{figure}[h]
+\centering
+\includegraphics[ max width=\textwidth,
+with dot.subgraph(name='cluster_comp2') as c:
+    c.attr(label='Component 2')
+    c.node_attr.update(style='filled', color='lightgreen')
+    c.node('A2', label='A') % Using labels to keep original node names A,B,C
+    c.node('B2', label='B')
+    c.node('C2', label='C')
+    c.edge('A2', 'B2')
+    c.edge('B2', 'C2')
+dot.node('H', color='red', style='filled', label='Isolated H') % Isolated node
+dot.render('undirected_connectivity', format='png', view=False)
+\end{verbatim}
+Its adjacency matrix $A$:
+\[ A = \begin{pmatrix}
+0 & 1 & 0 & 1 \\
+1 & 0 & 0 & 1 \\
+0 & 0 & 0 & 1 \\
+1 & 1 & 1 & 0
+\end{pmatrix} \]
+$A_{ij} = A_{ji}$ (symmetric). $A_{ii} = 0$.
+Node degrees from the matrix: Summing rows (or columns).
+$k_1 = \sum_j A_{1j} = 0+1+0+1 = 2$
+$k_2 = \sum_j A_{2j} = 1+0+0+1 = 2$
+$k_3 = \sum_j A_{3j} = 0+0+0+1 = 1$
+$k_4 = \sum_j A_{4j} = 1+1+1+0 = 3$
+Total degree sum = $2+2+1+3 = 8$. Number of edges $E=4$. $2E = 8$. $\sum k_i = 2E$.
+\subsubsection{Directed Graph Example with Matrix}
+Consider a 4-node directed graph.
+\begin{verbatim}
+#save_to: directed_adj_graph.png
+from graphviz import Digraph
+dot = Digraph('DirectedAdjGraph', comment='Directed Adj Matrix Graph', graph_attr={'rankdir': 'LR'})
+dot = Graph('DisconnectedAdj', comment='Disconnected Adj Matrix Example', graph_attr={'rankdir': 'LR'})
+# Component 1 (Red)
+dot.node('1', '1', color='red', style='filled')
+dot.node('2', '2', color='red', style='filled')
+dot.node('3', '3', color='red', style='filled')
+dot.edge('1', '2')
+dot.edge('1', '3')
+dot.edge('2', '3')
+# Component 2 (Blue)
+dot.node('4', '4', color='blue', style='filled')
+dot.node('5', '5', color='blue', style='filled')
+dot.node('6', '6', color='blue', style='filled')
+dot.edge('4b', '5b')
+dot.edge('4b', '6b')
+dot.edge('5b', '6b')
+dot.edge('1', '4')
+dot.edge('2', '4')
+dot.edge('4', '3')
+dot.render('directed_adj_graph', format='png', view=False)
+\end{verbatim}
+\begin{figure}[h]
+\centering
+\includegraphics[ max width=\textwidth,
+max height=0.3\textheight,
+keepaspectratio]{directed_adj_graph.png}
+\caption{Directed Graph for Adjacency Matrix Example}
+\label{fig:directed_adj_graph}
+\end{figure}
+Its adjacency matrix $A$:
+\[ A = \begin{pmatrix}
+0 & 1 & 0 & 1 \\
+0 & 0 & 0 & 1 \\
+0 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0
+\end{pmatrix} \]
+Note that for a directed graph, the matrix is not symmetric. $A_{ij} \neq A_{ji}$. $A_{ii} = 0$.
+Node degrees from the matrix:
+Out-degree (sum rows):
+$k_1^{out} = 0+1+0+1 = 2$
+$k_2^{out} = 0+0+0+1 = 1$
+$k_3^{out} = 0+0+0+0 = 0$
+$k_4^{out} = 0+0+1+0 = 1$
+Total out-degree sum = $2+1+0+1 = 4$.
+In-degree (sum columns):
+$k_1^{in} = 0+0+0+0 = 0$
+$k_2^{in} = 1+0+0+0 = 1$
+$k_3^{in} = 0+0+0+1 = 1$
+$k_4^{in} = 1+1+0+0 = 2$
+Total in-degree sum = $0+1+1+2 = 4$.
+Total edges $E=4$. Sum of out-degrees = Sum of in-degrees = $E$.
+\subsection{Adjacency Matrices are Sparse}
+Real-world networks are extremely sparse. This means that most entries in the adjacency matrix are 0.
+For a network on $N$ nodes, the maximum possible degree of a node is $N-1$. In real-world networks (like social networks, power grids, internet, email graphs, etc.), the average degree is usually small (e.g., 10-100), much less than $N-1$ for large $N$.
+Consequently, adjacency matrices of real-world graphs are very sparse. They are usually represented as sparse matrices, not dense ones, for efficiency.
+\subsection{More Types of Graphs}
+\subsubsection{Self-edges (self-loops)}
+Undirected graphs can have self-loops, where an edge connects a node to itself.
+$A_{ii} \neq 0$ for nodes with self-loops.
+In an undirected graph, a self-loop at node $i$ contributes 2 to the degree $k_i$.
+$E = \frac{1}{2} \sum_{i, j: i \neq j} A_{ij} + \sum_i A_{ii}$ (where $A_{ii}=1$ if self-loop exists, 0 otherwise).
+Examples: Proteins, Hyperlinks.
+Consider a 4-node undirected graph with a self-loop at node 4.
+\begin{verbatim}
+#save_to: undirected_self_loop.png
+from graphviz import Graph
+dot = Graph('UndirectedSelfLoop', comment='Undirected Graph with Self-loop', graph_attr={'rankdir': 'LR'})
+# Add nodes (1, 2, 3, 4)
+dot.node('1', '1')
+dot.node('2', '2')
+dot.node('3', '3')
+dot.node('4', '4')
+# Add edges
+dot.edge('1', '2')
+dot.edge('1', '4')
+dot.edge('2', '4')
+dot.edge('4', '3')
+dot.edge('4', '4') # Self-loop
+dot.render('undirected_self_loop', format='png', view=False)
+\end{verbatim}
+\begin{figure}[h]
+\centering
+\includegraphics[ max width=\textwidth,
+max height=0.3\textheight,
+keepaspectratio]{undirected_self_loop.png}
+\caption{Undirected Graph with a Self-loop}
+\label{fig:undirected_self_loop}
+\end{figure}
+Its adjacency matrix $A$:
+\[ A = \begin{pmatrix}
+0 & 1 & 0 & 1 \\
+1 & 0 & 0 & 1 \\
+0 & 0 & 0 & 1 \\
+1 & 1 & 1 & 1
+\end{pmatrix} \]
+$A_{44} = 1$.
+Degrees: $k_1=2, k_2=2, k_3=1, k_4=5$.
+\subsubsection{Multigraph}
+An undirected \textbf{multigraph} allows multiple edges between the same pair of nodes.
+$A_{ij}$ can be greater than 1, counting the number of edges between $i$ and $j$.
+$A_{ij} = A_{ji}$.
+$E = \frac{1}{2} \sum_{i, j: i \neq j} A_{ij} + \sum_i A_{ii}$ (where $A_{ii}$ counts number of self-loops).
+$\bar{k} = \frac{2E}{N}$.
+Examples: Communication, Collaboration.
+Consider a 4-node undirected multigraph.
+\begin{verbatim}
+dot = Digraph('SCCExample', comment='Strongly Connected Components Example', graph_attr={'rankdir': 'LR'})
+# SCC 1
+with dot.subgraph(name='cluster_scc1') as c:
+    c.attr(label='SCC 1', style='rounded', color='red')
+    c.node_attr.update(style='filled', color='pink')
+dot.node('A')
+dot.node('B')
+dot.node('C')
+dot.edge('A', 'B')
+dot.edge('B', 'C')
+dot.edge('C', 'A')
+dot.edge('D', 'E')
+dot.edge('E', 'G')
+dot.edge('G', 'D')
+dot.node('1', '1')
+dot.node('2', '2')
+dot.node('3', '3')
+dot.node('4', '4')
+# Add edges
+dot.edge('1', '2')
+dot.edge('1', '4')
+dot.edge('2', '4')
+dot.edge('4', '3')
+dot.edge('2', '4') # Second edge between 2 and 4
+dot.edge('2', '4') # Third edge between 2 and 4
+dot.render('undirected_multigraph', format='png', view=False)
+dot.edge('C', 'E')
+dot.edge('G', 'C') # Added based on the slide diagram
+with dot.subgraph(name='cluster_scc2') as c:
+    c.attr(label='SCC 2', style='rounded', color='blue')
+    c.node_attr.update(style='filled', color='lightblue')
+    c.node('D')
+    c.node('E')
+    c.node('G')
+dot.node('F', label='F') % Node F, reachable from SCCs
+dot.edge('E', 'F') # Edge from SCC2 to F
+dot.edge('B', 'F') # Edge from SCC1 to F
+dot.render('scc_example', format='png', view=False)
+\end{verbatim}
+\begin{figure}[h]
+\subsection{Connectivity of Undirected Graphs}
+\begin{definition}
+A \textbf{connected} (undirected) graph is a graph where any two vertices can be joined by a path.
+\end{definition}
+A \textbf{disconnected graph} is made up by two or more connected components. A connected component is a subgraph where any two nodes are connected by a path, and which is not connected to any other node in the graph. Isolated nodes are connected components of size 1.
+Example of disconnected graph with multiple components:
+\begin{verbatim}
+#save_to: undirected_connectivity.png
+from graphviz import Graph
+dot = Graph('UndirectedConnectivity', comment='Undirected Connectivity Example', graph_attr={'rankdir': 'LR'})
+# Component 1
+dot.node('A')
+dot.node('B')
+dot.node('C')
+dot.node('D')
+dot.node('F')
+dot.node('G')
+dot.node('H', color='red') # Isolated node
+dot.edge('A', 'B')
+dot.edge('A', 'D')
+dot.edge('B', 'D')
+dot.edge('B', 'C')
+dot.edge('D', 'F')
+dot.edge('C', 'F')
+dot.edge('F', 'G')
+# Component 2 (Example based on disconnected part of the slide)
+dot.node('A2')
+dot.node('B2')
+dot.node('C2')
+dot.edge('A2', 'B2')
+dot.edge('B2', 'C2')
+# Add labels and groups for visual separation (Graphviz doesn't strictly enforce component structure like this)
+with dot.subgraph(name='cluster_comp1') as c:
+    c.attr(label='Component 1')
+    c.node_attr.update(style='filled')
+    c.node('A')
+    c.node('B')
+    c.node('C')
+    c.node('D')
+    c.node('F')
+    c.node('G')
+    c.edge('A', 'B')
+    c.edge('A', 'D')
+    c.edge('B', 'D')
+    c.edge('B', 'C')
+    c.edge('D', 'F')
+    c.edge('C', 'F')
+    c.edge('F', 'G')
+with dot.subgraph(name='cluster_comp2') as c:
+    c.attr(label='Component 2')
+    c.node_attr.update(style='filled')
+    c.node('A2')
+    c.node('B2')
+    c.node('C2')
+    c.edge('A2', 'B2')
+    c.edge('B2', 'C2')
+dot.node('H', color='red', label='Isolated node (node H)') # Isolated node
+dot.render('undirected_connectivity', format='png', view=False)
+\end{verbatim}
+\begin{figure}[h]
+\centering
+\includegraphics[ max width=\textwidth,
+max height=0.4\textheight,
+keepaspectratio]{undirected_connectivity.png}
+\caption{Example Undirected Graph Connectivity}
+\label{fig:undirected_connectivity}
+\end{figure}
+In Figure \ref{fig:undirected_connectivity}, there are two connected components (A-G and A2-C2) and an isolated node (H), which is a component of size one.
+\subsubsection{Connectivity: Example Adjacency Matrix Structure}
+The adjacency matrix of a network with several components can be written in a block-diagonal form, so that nonzero elements are confined to squares corresponding to components, with all other elements being zero.
+Example Disconnected Graph (from slide):
+\begin{verbatim}
+#save_to: disconnected_adj.png
+from graphviz import Graph
+dot = Graph('DisconnectedAdj', comment='Disconnected Adj Matrix Example', graph_attr={'rankdir': 'LR'})
+# Component 1 (Red)
+dot.node('1r', '1', color='red', style='filled')
+dot.node('2r', '2', color='red', style='filled')
+dot.node('3r', '3', color='red', style='filled')
+dot.edge('1r', '2r')
+dot.edge('1r', '3r')
+dot.edge('2r', '3r')
+# Component 2 (Blue)
+dot.node('4b', '4', color='blue', style='filled')
+dot.node('5b', '5', color='blue', style='filled')
+dot.node('6b', '6', color='blue', style='filled')
+dot.edge('4b', '5b')
+dot.edge('4b', '6b')
+dot.edge('5b', '6b')
+dot.render('disconnected_adj', format='png', view=False)
+\end{verbatim}
+\begin{figure}[h]
+\centering
+\includegraphics[ max width=\textwidth,
+max height=0.3\textheight,
+keepaspectratio]{disconnected_adj.png}
+\caption{Disconnected Graph Example for Adjacency Matrix}
+\label{fig:disconnected_adj}
+\end{figure}
+Adjacency Matrix for the disconnected graph (assuming nodes are ordered 1, 2, 3, 4, 5, 6):
+\[ A = \begin{pmatrix}
+\color{red} 0 & \color{red} 1 & \color{red} 1 & 0 & 0 & 0 \\
+\color{red} 1 & \color{red} 0 & \color{red} 1 & 0 & 0 & 0 \\
+\color{red} 1 & \color{red} 1 & \color{red} 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & \color{blue} 0 & \color{blue} 1 & \color{blue} 1 \\
+0 & 0 & 0 & \color{blue} 1 & \color{blue} 0 & \color{blue} 1 \\
+0 & 0 & 0 & \color{blue} 1 & \color{blue} 1 & \color{blue} 0
+\end{pmatrix} \]
+The matrix shows block-diagonal structure.
+Example Connected Graph (from slide):
+\begin{verbatim}
+#save_to: connected_adj.png
+from graphviz import Graph
+dot = Graph('ConnectedAdj', comment='Connected Adj Matrix Example', graph_attr={'rankdir': 'LR'})
+# Nodes (1-7)
+dot.node('1', '1', color='red', style='filled')
+dot.node('2', '2', color='red', style='filled')
+dot.node('3', '3', color='red', style='filled')
+dot.node('4', '4', color='blue', style='filled')
+dot.node('5', '5', color='blue', style='filled')
+dot.node('6', '6', color='blue', style='filled')
+dot.node('7', '7', color='blue', style='filled')
+# Edges
+dot.edge('1', '2')
+dot.edge('1', '3')
+dot.edge('2', '3')
+dot.edge('4', '5')
+dot.edge('4', '6')
+dot.edge('5', '6')
+dot.edge('6', '7')
+dot.edge('3', '4') # Connecting edge
+dot.render('connected_adj', format='png', view=False)
+\end{verbatim}
+\begin{figure}[h]
+\centering
+\includegraphics[ max width=\textwidth,
+max height=0.3\textheight,
+keepaspectratio]{connected_adj.png}
+\caption{Connected Graph Example for Adjacency Matrix}
+\label{fig:connected_adj}
+\end{figure}
+Adjacency Matrix for the connected graph (assuming nodes are ordered 1, 2, 3, 4, 5, 6, 7):
+\[ A = \begin{pmatrix}
+0 & 1 & 1 & 0 & 0 & 0 & 0 \\
+1 & 0 & 1 & 0 & 0 & 0 & 0 \\
+1 & 1 & 0 & 1 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 & 1 & 1 & 0 \\
+0 & 0 & 0 & 1 & 0 & 1 & 0 \\
+0 & 0 & 0 & 1 & 1 & 0 & 1 \\
+0 & 0 & 0 & 0 & 0 & 1 & 0
+\end{pmatrix} \]
+This matrix does not have a block-diagonal structure because the components are connected by the edge (3, 4).
+\subsection{Connectivity of Directed Graphs}
+\begin{itemize}
+    \item \textbf{Strongly connected directed graph}: has a path from each node to every other node and vice versa (e.g., A-B path and B-A path).
+    \item \textbf{Weakly connected directed graph}: is connected if we disregard the edge directions (i.e., the underlying undirected graph is connected).
+\end{itemize}
+Example: Directed graph that is weakly connected but not strongly connected.
+\begin{verbatim}
+#save_to: directed_connectivity.png
+from graphviz import Digraph
+dot = Digraph('DirectedConnectivity', comment='Directed Connectivity Example', graph_attr={'rankdir': 'LR'})
+# Add nodes
+dot.node('A')
+dot.node('B')
+dot.node('C')
+dot.node('D')
+dot.node('E')
+dot.node('F')
+dot.node('G')
+# Add edges
+dot.edge('D', 'A')
+dot.edge('A', 'B')
+dot.edge('B', 'C')
+dot.edge('C', 'A')
+dot.edge('B', 'E')
+dot.edge('C', 'G')
+dot.edge('E', 'F')
+dot.edge('G', 'F')
+dot.render('directed_connectivity', format='png', view=False)
+\end{verbatim}
+\begin{figure}[h]
+\centering
+\includegraphics[ max width=\textwidth,
+max height=0.4\textheight,
+keepaspectratio]{directed_connectivity.png}
+\caption{Example Directed Graph Connectivity}
+\label{fig:directed_connectivity}
+\end{figure}
+Graph in Figure \ref{fig:directed_connectivity} is connected if we ignore directions (weakly connected). However, it is not strongly connected. For example, there is a path from A to F (A -> B -> E -> F), but no path from F back to A following the edge directions.
+\subsubsection{Strongly Connected Components (SCCs)}
+\textbf{Strongly connected components (SCCs)} can be identified. Not every node is part of a nontrivial strongly connected component.
+An SCC is a maximal subgraph where for every pair of nodes $u, v$ in the subgraph, there is a path from $u$ to $v$ and a path from $v$ to $u$.
+Example: Directed graph with two SCCs.
+\begin{verbatim}
+#save_to: scc_example.png
+from graphviz import Digraph
+dot = Digraph('SCCExample', comment='Strongly Connected Components Example', graph_attr={'rankdir': 'LR'})
+# SCC 1
+dot.node('A')
+dot.node('B')
+dot.node('C')
+dot.edge('A', 'B')
+dot.edge('B', 'C')
+dot.edge('C', 'A')
+dot.edge('A', 'C') # Added based on the slide diagram
+# SCC 2
+dot.node('D')
+dot.node('E')
+dot.node('G')
+dot.edge('D', 'E')
+dot.edge('E', 'G')
+dot.edge('G', 'D')
+# Edges between components (based on slide diagram)
+dot.edge('B', 'E')
+dot.edge('C', 'E')
+dot.edge('G', 'C') # Added based on the slide diagram
+# Add invisible nodes and ranks to try and position components as in the slide
+dot.node('scc1_center', '', width='0', height='0', style='invisible', group='scc1')
+dot.node('scc2_center', '', width='0', height='0', style='invisible', group='scc2')
+dot.node('out_node', 'F') # Node F, reachable from SCCs
+dot.edge('E', 'F') # Edge from SCC2 to F
+dot.edge('B', 'F') # Edge from SCC1 to F
+# Group nodes for SCCs visually
+with dot.subgraph(name='cluster_scc1') as c:
+    c.attr(label='SCC', style='rounded')
+    c.node('A')
+    c.node('B')
+    c.node('C')
+with dot.subgraph(name='cluster_scc2') as c:
+    c.attr(label='SCC', style='rounded')
+    c.node('D')
+    c.node('E')
+    c.node('G')
+# Try to position the components using ranks (approximate based on slide)
+dot.attr(rank='same', group='scc1')
+dot.node('A')
+dot.node('B')
+dot.node('C')
+dot.attr(rank='same', group='scc2')
+dot.node('D')
+dot.node('E')
+dot.node('G')
+dot.render('scc_example', format='png', view=False)
+\end{verbatim}
+\begin{figure}[h]
+\centering
+\includegraphics[ max width=\textwidth,
+max height=0.4\textheight,
+keepaspectratio]{scc_example.png}
+\caption{Example Directed Graph with Strongly Connected Components (SCCs)}
+\label{fig:scc_example}
+\end{figure}
+For an SCC:
+\begin{itemize}
+    \item \textbf{In-component}: nodes outside the SCC that can reach the SCC.
+    \item \textbf{Out-component}: nodes outside the SCC that can be reached from the SCC.
+\end{itemize}
+This concludes the discussion of graph representations and basic graph properties.
+\end{document}
+```

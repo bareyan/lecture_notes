@@ -1,0 +1,48 @@
+```latex
+\documentclass{article}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{listings}
+\usepackage{tikz} % Added for \bullet
+\usepackage{adjustbox} % Added for scaling table if needed
+\newtheorem{theorem}{Théorème}
+\newtheorem{lemma}{Lemme}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}{Définition}
+\newtheorem{remark}{Remarque}
+\newtheorem{solution}{Solution}
+\newtheorem{example}{Exemple}
+\usepackage[margin=1in]{geometry}
+% Helper command for grid cells, adjust size as needed
+\newcommand{\gridcell}[1]{\makebox[1.5em]{\tiny #1}}
+\newcommand{\gridbullet}{\makebox[1.5em]{\tiny $\bullet$}}
+\begin{document}
+\sloppy
+Utiliser la méthode du germe vue en cours pour faire le remplissage de la région dans la figure ci-dessous. Des cercles (pixels) noirs représentent la frontière de la région et le numéro 1 est le pixel choisi aléatoirement comme germe au début de l'algorithme. Il faudra donner simplement les numéros à partir de 2 dans les cases (pixels) correspondantes pour indiquer l'ordre de remplissage selon l'algorithme du germe.
+\bigskip % Add some vertical space
+\begingroup % Keep changes local
+\renewcommand{\arraystretch}{1.2} % Adjust vertical spacing in the table
+\centering % Center the table
+\begin{tabular}{|*{17}{c|}}
+\hline
+\gridbullet & \gridbullet & \gridbullet & \gridbullet & \gridbullet & \gridbullet & \gridbullet & \gridbullet & \gridbullet & \gridbullet & \gridbullet & \gridbullet & \gridbullet & \gridbullet & \gridbullet & \gridbullet & \gridbullet \\ \hline
+\gridbullet & \gridcell{} & \gridbullet & \gridcell{18} & \gridcell{23} & \gridcell{29} & \gridcell{36} & \gridcell{44} & \gridcell{53} & \gridcell{64} & \gridcell{73} & \gridcell{79} & \gridcell{86} & \gridcell{94} & \gridcell{104} & \gridcell{115} & \gridbullet \\ \hline
+\gridbullet & \gridcell{} & \gridcell{8} & \gridcell{13} & \gridcell{19} & \gridcell{24} & \gridcell{30} & \gridcell{37} & \gridcell{38} & \gridcell{46} & \gridcell{55} & \gridbullet & \gridcell{85} & \gridcell{93} & \gridcell{103} & \gridcell{114} & \gridcell{122} \\ \hline
+\gridbullet & \gridcell{} & \gridcell{4} & \gridbullet & \gridbullet & \gridcell{35} & \gridcell{45} & \gridcell{54} & \gridcell{65} & \gridcell{74} & \gridcell{80} & \gridcell{87} & \gridcell{96} & \gridcell{106} & \gridcell{117} & \gridbullet & \gridbullet \\ \hline
+\gridbullet & \gridcell{} & \gridcell{2} & \gridcell{5} & \gridcell{9} & \gridbullet & \gridcell{34} & \gridcell{42} & \gridcell{50} & \gridcell{61} & \gridcell{70} & \gridbullet & \gridcell{95} & \gridcell{105} & \gridcell{116} & \gridcell{123} & \gridbullet \\ \hline
+\gridbullet & \gridcell{} & \gridcell{1} & \gridbullet & \gridcell{14} & \gridbullet & \gridcell{27} & \gridbullet & \gridcell{60} & \gridcell{69} & \gridcell{77} & \gridcell{84} & \gridcell{92} & \gridcell{102} & \gridcell{113} & \gridcell{121} & \gridbullet \\ \hline
+\gridbullet & \gridcell{} & \gridcell{3} & \gridcell{7} & \gridcell{11} & \gridcell{17} & \gridcell{22} & \gridbullet & \gridcell{51} & \gridcell{62} & \gridcell{71} & \gridcell{78} & \gridbullet & \gridcell{110} & \gridcell{119} & \gridcell{124} & \gridbullet \\ \hline
+\gridbullet & \gridcell{} & \gridbullet & \gridbullet & \gridbullet & \gridcell{28} & \gridcell{35} & \gridbullet & \gridcell{43} & \gridcell{52} & \gridcell{63} & \gridcell{72} & \gridbullet & \gridcell{100} & \gridcell{111} & \gridcell{120} & \gridbullet \\ \hline
+\gridbullet & \gridcell{} & \gridcell{6} & \gridbullet & \gridcell{16} & \gridcell{21} & \gridcell{26} & \gridcell{33} & \gridcell{41} & \gridcell{49} & \gridcell{59} & \gridcell{68} & \gridcell{76} & \gridcell{83} & \gridcell{91} & \gridcell{101} & \gridcell{112} \\ \hline
+\gridbullet & \gridbullet & \gridcell{10} & \gridbullet & \gridcell{20} & \gridcell{25} & \gridcell{32} & \gridcell{40} & \gridbullet & \gridbullet & \gridcell{67} & \gridbullet & \gridcell{82} & \gridcell{90} & \gridcell{99} & \gridcell{109} & \gridcell{118} \\ \hline
+\gridbullet & \gridbullet & \gridcell{15} & \gridbullet & \gridcell{31} & \gridbullet & \gridcell{48} & \gridbullet & \gridbullet & \gridbullet & \gridbullet & \gridbullet & \gridcell{98} & \gridcell{108} & \gridbullet & \gridbullet & \gridbullet \\ \hline
+\gridbullet & \gridbullet & \gridbullet & \gridbullet & \gridcell{39} & \gridbullet & \gridbullet & \gridbullet & \gridcell{88} & \gridcell{97} & \gridcell{107} & \gridbullet & \gridbullet & \gridbullet & \gridbullet & \gridbullet & \gridbullet \\ \hline
+\gridbullet & \gridbullet & \gridbullet & \gridcell{56} & \gridcell{47} & \gridcell{57} & \gridcell{66} & \gridcell{75} & \gridcell{81} & \gridcell{89} & \gridbullet & \gridbullet & \gridbullet & \gridbullet & \gridbullet & \gridbullet & \gridbullet \\ \hline
+\end{tabular}
+\endgroup
+\end{document}
+```

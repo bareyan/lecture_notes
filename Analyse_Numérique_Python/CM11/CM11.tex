@@ -1,0 +1,422 @@
+```latex
+\documentclass{article}
+\usepackage{amssymb,amsmath,amsthm, thmtools, mdframed} % Added mdframed for theorem styles
+\usepackage[utf8]{inputenc}
+\usepackage{listingsutf8} % listingsutf8 might be redundant if listings handles utf8 via inputenc
+\usepackage{graphicx}
+\usepackage[export]{adjustbox}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{color}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usetikzlibrary{arrows}
+\usepackage{listings} % Duplicate, but keep for now as listingsutf8 might be just an extension
+\usepackage[margin=1in]{geometry} % Duplicate, but keep for now
+\usepackage{hyperref}
+\pgfplotsset{compat=1.16}
+\lstset{
+  basicstyle=\fontencoding{OT1}\fontfamily{cmtt}\selectfont,
+  literate=
+  {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+  {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+  {à}{{\`a}}1 {è}{{\`e}}1 {ì}{{\`i}}1 {ò}{{\`o}}1 {ù}{{\`u}}1
+  {À}{{\`A}}1 {È}{{\'E}}1 {Ì}{{\`I}}1 {Ò}{{\`O}}1 {Ù}{{\`U}}1
+  {ä}{{\"a}}1 {ë}{{\"e}}1 {ï}{{\"i}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
+  {Ä}{{\"A}}1 {Ë}{{\"E}}1 {Ï}{{\"I}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
+  {â}{{\^a}}1 {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1
+  {Â}{{\^A}}1 {Ê}{{\^A}}1 {Î}{{\^I}}1 {Ô}{{\^O}}1 {Û}{{\^U}}1
+  {œ}{{\oe}}1 {Œ}{{\OE}}1 {æ}{{\ae}}1 {Æ}{{\AE}}1 {ß}{{\ss}}1
+  {ű}{{\H{u}}}1 {Ű}{{\H{U}}}1 {ő}{{\H{o}}}1 {Ő}{{\H{O}}}1
+  {ç}{{\c c}}1 {Ç}{{\c C}}1 {ø}{{\o}}1 {å}{{\r a}}1 {Å}{{\r A}}1
+  {€}{{\EUR}}1 {£}{{\pounds}}1,
+  breaklines=true,
+  postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+}
+
+
+\definecolor{GoodGreen}{rgb}{0.0667, 0.2078, 0.2157}
+\definecolor{GreenBackground}{rgb}{0.5176, 0.6902, 0.5098}
+\definecolor{DarkPurple}{rgb}{0.4157, 0.1804, 0.2078}
+\definecolor{RedBackground}{rgb}{0.9490, 0.7333, 0.7529}
+\definecolor{OxfordBlue}{rgb}{0.0, 0.1333, 0.2667}
+\definecolor{BlueBackground}{rgb}{0.4471, 0.6314, 0.8980}
+
+\definecolor{Gold}{rgb}{0.9176, 0.6667, 0.0784} % Define the color
+
+
+
+\declaretheoremstyle[
+    headfont=\bfseries\sffamily\color{GoodGreen}, bodyfont=\normalfont,
+    mdframed={
+        linewidth=2pt,
+        rightline=false, topline=false, bottomline=false,
+        linecolor=GoodGreen, backgroundcolor=GreenBackground!30!white,
+    }
+]{thmgreenbox}
+
+\declaretheoremstyle[
+    headfont=\bfseries\sffamily\color{OxfordBlue}, bodyfont=\normalfont,
+    mdframed={
+        linewidth=2pt,
+        rightline=false, topline=false, bottomline=false,
+        linecolor=OxfordBlue, backgroundcolor=BlueBackground!15
+    }
+]{thmblueline}
+
+\declaretheoremstyle[
+    headfont=\bfseries\sffamily\color{DarkPurple}, bodyfont=\normalfont,
+    mdframed={
+        linewidth=2pt,
+        rightline=false, topline=false, bottomline=false,
+        linecolor=DarkPurple, backgroundcolor=RedBackground!40,
+    }
+]{thmredbox}
+
+\declaretheoremstyle[
+     headfont=\bfseries\sffamily\color{Gold}, bodyfont=\normalfont,
+    mdframed={
+        linewidth=2pt,
+        rightline=false, topline=false, bottomline=false,
+        linecolor=Gold, backgroundcolor=Gold!10
+    }
+]{rmrk}
+
+
+\declaretheoremstyle[
+    headfont=\bfseries\sffamily\color{OxfordBlue}, bodyfont=\normalfont,
+    % unnumbered=true, % Keep numbered if desired, or uncomment for unnumbered
+    mdframed={
+        linewidth=2pt,
+        rightline=false, topline=false, bottomline=false,
+        linecolor=OxfordBlue,backgroundcolor=BlueBackground!15
+    },
+    qed=\qedsymbol
+]{thmproofbox}
+
+% Consistent theorem styling:
+\declaretheorem[numberwithin=section, style=thmgreenbox, name=Definition]{definition}
+\declaretheorem[sibling=definition, style=thmredbox, name=Theorem]{theorem}
+\declaretheorem[sibling=definition, style=thmredbox, name=Lemma]{lemma}
+\declaretheorem[sibling=definition, style=thmredbox, name=Proposition]{proposition}
+\declaretheorem[sibling=definition, style=rmrk, name=Remark]{remark}
+\declaretheorem[sibling=definition, style=thmblueline, name=Example]{example}
+\declaretheorem[unnumbered=true, style=thmproofbox, name=Solution]{solution}
+\declaretheorem[unnumbered=true, style=thmproofbox, name=Preuve]{prf}
+
+
+\renewcommand{\proof}{\begin{prf}} % Corrected \begin{prf}} to \begin{prf}
+\renewcommand{\endproof}{\end{prf}}
+
+\begin{document}
+\sloppy
+
+\section{Méthodes Itératives de Résolution d'Équations} % Section 1
+\subsection{Introduction} % Subsection 1.1
+Ce chapitre aborde les méthodes itératives pour la résolution numérique d'équations, en particulier les équations non linéaires de la forme $f(x)=0$. Nous explorerons les concepts fondamentaux, les définitions clés, et des algorithmes comme la dichotomie et la méthode de la fausse position.
+
+\subsection{Généralités et exemples d'équations récurrentes (EO) : f(x)=0} % Subsection 1.2
+Une équation récurrente définit une suite où chaque terme est fonction des termes précédents. Un cas fondamental est la recherche des racines d'une fonction $f$, c'est-à-dire la résolution de l'équation $f(x)=0$.
+(EO) : Chercher $x \in \mathbb{R}$ tel que $f(x)=0$.
+L'ensemble des solutions (racines) est noté $R(f) = \{x \in \mathbb{R} \mid f(x)=0\}$.
+
+\subsubsection{Définitions} % Subsubsection 1.2.1
+\begin{definition}[Équation non linéaire]
+Si $f: I \subseteq \mathbb{R} \to \mathbb{R}$ est une fonction, l'équation $f(x)=0$ est appelée équation non linéaire. (Ici, $f$ est au moins de classe $C^0$).
+\end{definition}
+
+\begin{definition}[Solution]
+Tout $x^* \in I$ tel que $f(x^*)=0$ est une solution de (EO) ou une racine de $f$.
+\end{definition}
+
+\begin{definition}[Racine simple et multiple]
+Soit $f$ une fonction de classe $C^r(I)$ pour $r \ge 1$.
+\begin{itemize}
+    \item Si $f(a)=0$ et $f'(a) \ne 0$, $a$ est dite racine simple de $f$.
+    \item Si $f(a)=f'(a)=...=f^{(r-1)}(a)=0$ et $f^{(r)}(a) \ne 0$, alors $a$ est une racine de multiplicité $r$. On peut alors écrire $f(x) = (x-a)^r g(x)$ où $g(a) \ne 0$.
+    \item Lorsque $r=1$, on a une racine simple. C'est le cas si $f'(a) \ne 0$.
+    \item Si $f(x)=ax+b$, l'équation est dite linéaire.
+\end{itemize}
+\end{definition}
+
+\subsubsection{Exemples} % Subsubsection 1.2.2
+\begin{itemize}
+    \item Schéma d'Euler implicite pour une EDO $x'(t) = F(t, x(t))$. En discrétisant le temps $t_n = n \Delta t$, on cherche $x_{n+1} \approx x(t_{n+1})$. Le schéma d'Euler implicite est donné par :
+    \[ \frac{x_{n+1} - x_n}{\Delta t} = F(t_{n+1}, x_{n+1}) \]
+    Pour déterminer $x_{n+1}$, il faut résoudre l'équation (souvent non linéaire) :
+    \[ g_n(z) = 0 \quad \text{où} \quad g_n(z) = z - x_n - \Delta t F(t_{n+1}, z) \]
+    Ceci est une équation de la forme $g_n(x) = 0$ à résoudre à chaque pas de temps.
+    \item Une suite récurrente est définie par $x_{n+1} = f(x_n)$ pour $n=0, 1, ...$ avec $x_0$ donné. Si la suite $\{x_n\}$ converge vers une limite $x^*$, et si $f$ est continue, alors $x^*$ est un point fixe de $f$, c'est-à-dire $f(x^*) = x^*$. La recherche de points fixes est liée à la résolution de $g(x) = x - f(x) = 0$.
+\end{itemize}
+
+\subsection{Partition correcte du problème (EO)} % Section 2
+On se propose de vérifier si :
+\begin{itemize}
+    \item (EO) admet une solution.
+    \item Si oui, cette solution est-elle unique ?
+    \item La solution dépend continûment des données du problème (stabilité).
+    \item La solution est suffisamment régulière.
+\end{itemize}
+Pour répondre à cela, on va se placer dans le cadre macroscopique $f: \mathbb{R} \to \mathbb{R}$.
+
+\begin{proposition}[Existence - Cas $f(x)=0$]
+Soit $I = [a, b]$ un intervalle de $\mathbb{R}$ et $f: I \to \mathbb{R}$ une fonction continue. Si $f(a)f(b) < 0$, alors il existe $x^* \in ]a, b[$ tel que $f(x^*)=0$.
+De plus, si $f$ est strictement monotone sur $I$, alors $x^*$ est unique.
+\begin{proof}[Preuve (idée)]
+Théorème des valeurs intermédiaires. L'unicité découle de la stricte monotonie.
+\end{proof}
+\end{proposition}
+
+\begin{proposition}[Point fixe - Cas $x=g(x)$]
+Soit $I \subset \mathbb{R}$ un intervalle fermé et $g: I \to \mathbb{R}$ une fonction continue.
+\begin{itemize}
+    \item Si $g(I) \subseteq I$ (c'est-à-dire, si $x \in I$, alors $g(x) \in I$), alors il existe au moins un point fixe $x^* \in I$ tel que $g(x^*) = x^*$.
+    \item Si de plus $g$ est contractante sur $I$, c'est-à-dire s'il existe $k \in [0, 1)$ tel que $|g(x) - g(y)| \le k |x - y|$ pour tous $x, y \in I$, alors le point fixe $x^*$ est unique.
+\end{itemize}
+\end{proposition}
+
+\begin{remark}
+Lorsque la racine cherchée $x^*$ de $f(x)=0$ est de multiplicité $r > 1$, $f'(x^*) = 0$. Numériquement, le problème de trouver $x^*$ peut être difficile (convergence lente, instabilité). Il faudra faire attention dans ce cas.
+\end{remark}
+
+\subsection{Construction de schémas pour (EO)} % Section 3
+
+\subsubsection{Méthode de dichotomie} % Subsection 3.1
+S'applique au cas $f(x)=0$.
+
+\subsubsection{Principe} % Subsubsection 3.1.1
+On part d'un intervalle $[a_0, b_0]$ tel que $f(a_0)f(b_0) < 0$. D'après le théorème des valeurs intermédiaires, il existe au moins une racine dans $]a_0, b_0[$.
+L'idée est de diviser l'intervalle par 2 à chaque étape et de conserver la moitié qui contient une racine.
+\begin{enumerate}
+    \item Calculer le milieu $c_0 = \frac{a_0 + b_0}{2}$.
+    \item Évaluer $f(c_0)$.
+    \item Si $f(a_0)f(c_0) < 0$, alors une racine se trouve dans $]a_0, c_0[$. On pose $[a_1, b_1] = [a_0, c_0]$.
+    \item Si $f(c_0)f(b_0) < 0$, alors une racine se trouve dans $]c_0, b_0[$. On pose $[a_1, b_1] = [c_0, b_0]$.
+    \item Si $f(c_0) = 0$, alors $c_0$ est une racine. L'algorithme s'arrête.
+\end{enumerate}
+On répète le processus sur l'intervalle $[a_1, b_1]$, et ainsi de suite.
+
+\begin{verbatim}
+#save_to: dichotomy_illustration.png
+import matplotlib.pyplot as plt
+import numpy as np
+# Define a sample function (e.g., decreasing convex)
+def f(x):
+    return (x - 2.5)**3 + 1
+a0 = 1.0
+b0 = 3.5
+# Calculate initial points
+c0 = (a0 + b0) / 2
+fa0 = f(a0)
+fb0 = f(b0)
+fc0 = f(c0)
+# Setup plot
+fig, ax = plt.subplots(figsize=(8, 6))
+x = np.linspace(0.5, 4, 400)
+y = f(x)
+ax.plot(x, y, label='f(x)')
+ax.axhline(0, color='black', lw=0.5)
+ax.axvline(0, color='black', lw=0.5)
+# Mark initial interval [a0, b0]
+ax.plot([a0, b0], [0, 0], 'k|-', markersize=8, label='$[a_0, b_0]$')
+ax.text(a0, -0.5, '$a_0$', ha='center', va='top')
+ax.text(b0, -0.5, '$b_0$', ha='center', va='top')
+ax.plot([a0, b0], [fa0, fb0], 'ro')
+ax.text(a0, fa0, 'f($a_0$)', ha='right', va='bottom')
+ax.text(b0, fb0, 'f($b_0$)', ha='right', va='top')
+# Mark midpoint c0
+ax.plot(c0, 0, 'bo', markersize=6)
+ax.text(c0, -0.5, '$c_0 = \\frac{a_0+b_0}{2}$', ha='center', va='top', color='blue')
+ax.plot(c0, fc0, 'bo')
+ax.plot([c0, c0], [0, fc0], 'b--')
+ax.text(c0 + 0.1, fc0, 'f($c_0$)', ha='left', va='center', color='blue')
+# Determine next interval [a1, b1]
+if fa0 * fc0 < 0:
+    a1, b1 = a0, c0
+    interval_label = '$[a_1, b_1] = [a_0, c_0]$'
+    ax.plot([a1, b1], [-1, -1], 'g|-', markersize=8, label=interval_label)
+    ax.text(a1, -1.2, '$a_1$', ha='center', va='top', color='green')
+    ax.text(b1, -1.2, '$b_1$', ha='center', va='top', color='green')
+else:
+    a1, b1 = c0, b0
+    interval_label = '$[a_1, b_1] = [c_0, b_0]$'
+    ax.plot([a1, b1], [-1, -1], 'g|-', markersize=8, label=interval_label)
+    ax.text(a1, -1.2, '$a_1$', ha='center', va='top', color='green')
+    ax.text(b1, -1.2, '$b_1$', ha='center', va='top', color='green')
+ax.set_xlabel('x')
+ax.set_ylabel('f(x)')
+ax.set_title('Illustration de la méthode de dichotomie (1ère étape)')
+ax.grid(True)
+ax.legend()
+ax.spines['left'].set_position('zero')
+ax.spines['bottom'].set_position('zero')
+ax.spines['right'].set_color('none')
+ax.spines['top'].set_color('none')
+ax.xaxis.set_ticks_position('bottom')
+ax.yaxis.set_ticks_position('left')
+ax.set_ylim(min(fb0, fa0, fc0) - 1, max(fa0, fb0, fc0) + 1)
+plt.savefig('dichotomy_illustration.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, max height=0.4\textheight, keepaspectratio]{dichotomy_illustration.png}
+\caption{Illustration graphique de la méthode de dichotomie.}
+\label{fig:dichotomie}
+\end{figure}
+
+\subsection{Algorithme de Dichotomie} % Subsection 3.2
+\textbf{Initialisation :}
+\begin{itemize}
+    \item Choisir $a_0, b_0$ tels que $f(a_0)f(b_0) < 0$.
+    \item Choisir une tolérance $\epsilon > 0$ (critère d'arrêt).
+    \item Choisir un nombre maximal d'itérations $k_{max}$.
+    \item Poser $a = a_0, b = b_0, k = 0$.
+\end{itemize}
+\textbf{Itération :}
+Tant que $(b-a) > \epsilon$ et $k < k_{max}$ faire :
+\begin{enumerate}
+    \item Calculer le milieu : $c = \frac{a+b}{2}$.
+    \item Évaluer $f(c)$.
+    \item Si $f(c) == 0$, arrêter (solution trouvée $x^*=c$).
+    \item Si $f(a)f(c) < 0$, alors la racine est dans $[a, c]$. Mettre à jour $b=c$.
+    \item Sinon (si $f(c)f(b) < 0$), la racine est dans $[c, b]$. Mettre à jour $a=c$.
+    \item Incrémenter $k = k+1$.
+\end{enumerate}
+\textbf{Sortie :} L'approximation de la racine est $\frac{a+b}{2}$.
+
+\textbf{Coût par itération :}
+\begin{itemize}
+    \item 1 addition et 1 division (pour calculer $c$).
+    \item 1 évaluation de la fonction $f$.
+    \item 1 test (comparaison de signes).
+\end{itemize}
+
+\subsection{Convergence de la Dichotomie} % Subsection 3.3
+Soient $(a_n)$ et $(b_n)$ les suites des bornes des intervalles générés par l'algorithme de dichotomie.
+\begin{itemize}
+    \item $[a_{n+1}, b_{n+1}] \subset [a_n, b_n]$ pour tout $n$.
+    \item La suite $(a_n)$ est croissante et majorée par $b_0$.
+    \item La suite $(b_n)$ est décroissante et minorée par $a_0$.
+    \item Les suites $(a_n)$ et $(b_n)$ sont donc convergentes.
+    \item La longueur de l'intervalle $[a_n, b_n]$ est $L_n = b_n - a_n$. On a $L_{n+1} = \frac{1}{2} L_n$.
+    \item Donc, $L_n = \frac{b_0 - a_0}{2^n}$.
+    \item $\lim_{n \to \infty} (b_n - a_n) = \lim_{n \to \infty} \frac{b_0 - a_0}{2^n} = 0$.
+\end{itemize}
+Puisque $\lim (b_n - a_n) = 0$, les suites $(a_n)$ et $(b_n)$ sont adjacentes. Elles convergent donc vers la même limite $x^*$.
+Comme $f(a_n)f(b_n) \le 0$ pour tout $n$, et $f$ est continue, en passant à la limite, on obtient $f(x^*)f(x^*) \le 0$, soit $(f(x^*))^2 \le 0$. Ceci implique $f(x^*) = 0$.
+Donc, $\lim_{n \to \infty} a_n = \lim_{n \to \infty} b_n = x^*$, où $x^*$ est une racine de $f$.
+
+\textbf{Estimation de l'erreur :}
+Si $c_n = \frac{a_n+b_n}{2}$ est l'approximation de $x^*$ à l'étape $n$, alors $x^* \in [a_n, b_n]$.
+L'erreur est majorée par la demi-longueur de l'intervalle :
+\[ |c_n - x^*| \le \frac{b_n - a_n}{2} = \frac{b_0 - a_0}{2^{n+1}} \]
+La convergence est dite linéaire avec un taux de $1/2$. C'est une convergence garantie mais qui peut être lente ("beaucoup de subdivisions").
+\par
+
+\subsection{Méthode de la Fausse Position (Regula Falsi)} % Subsection 3.4
+Cette méthode est similaire à la dichotomie, mais au lieu de couper l'intervalle en deux, elle utilise l'intersection de la droite reliant $(a, f(a))$ et $(b, f(b))$ avec l'axe des abscisses pour déterminer le point suivant $c$.
+
+\textbf{Principe :} % Subsubsection 3.4.1
+L'équation de la droite passant par $(a, f(a))$ et $(b, f(b))$ est :
+\[ y - f(b) = \frac{f(b) - f(a)}{b - a} (x - b) \]
+On cherche l'intersection avec l'axe des $x$, c'est-à-dire $y=0$. On note $c$ l'abscisse de ce point.
+\[ -f(b) = \frac{f(b) - f(a)}{b - a} (c - b) \]
+\[ c = b - f(b) \frac{b - a}{f(b) - f(a)} \]
+Comme pour la dichotomie, on choisit le nouvel intervalle $[a, c]$ ou $[c, b]$ en fonction du signe de $f(a)f(c)$ ou $f(c)f(b)$.
+
+\begin{verbatim}
+#save_to: false_position_illustration.png
+import matplotlib.pyplot as plt
+import numpy as np
+# Define a sample function (e.g., decreasing convex)
+def f(x):
+    return (x - 2.5)**3 + 1
+a0 = 1.0
+b0 = 3.5
+# Calculate initial points
+fa0 = f(a0)
+fb0 = f(b0)
+# Calculate intersection point c0 for Falsi
+c0 = b0 - fb0 * (b0 - a0) / (fb0 - fa0)
+fc0 = f(c0)
+# Setup plot
+fig, ax = plt.subplots(figsize=(8, 6))
+x = np.linspace(0.5, 4, 400)
+y = f(x)
+ax.plot(x, y, label='f(x)')
+ax.axhline(0, color='black', lw=0.5)
+ax.axvline(0, color='black', lw=0.5)
+# Mark initial interval [a0, b0]
+ax.plot([a0, b0], [0, 0], 'k|-', markersize=8, label='$[a_0, b_0]$')
+ax.text(a0, -0.5, '$a_0$', ha='center', va='top')
+ax.text(b0, -0.5, '$b_0$', ha='center', va='top')
+ax.plot([a0, b0], [fa0, fb0], 'ro')
+ax.text(a0, fa0, 'f($a_0$)', ha='right', va='bottom')
+ax.text(b0, fb0, 'f($b_0$)', ha='right', va='top')
+# Draw the secant line
+ax.plot([a0, b0], [fa0, fb0], 'm--', label='Droite sécante')
+# Mark intersection point c0
+ax.plot(c0, 0, 'bo', markersize=6)
+ax.text(c0, -0.5, '$c_0$', ha='center', va='top', color='blue')
+ax.plot(c0, fc0, 'bo')
+ax.plot([c0, c0], [0, fc0], 'b--')
+ax.text(c0 + 0.1, fc0, 'f($c_0$)', ha='left', va='center', color='blue')
+# Determine next interval [a1, b1]
+if fa0 * fc0 < 0:
+    a1, b1 = a0, c0
+    interval_label = '$[a_1, b_1] = [a_0, c_0]$'
+    ax.plot([a1, b1], [-1, -1], 'g|-', markersize=8, label=interval_label)
+    ax.text(a1, -1.2, '$a_1$', ha='center', va='top', color='green')
+    ax.text(b1, -1.2, '$b_1$', ha='center', va='top', color='green')
+else:
+    a1, b1 = c0, b0
+    interval_label = '$[a_1, b_1] = [c_0, b_0]$'
+    ax.plot([a1, b1], [-1, -1], 'g|-', markersize=8, label=interval_label)
+    ax.text(a1, -1.2, '$a_1$', ha='center', va='top', color='green')
+    ax.text(b1, -1.2, '$b_1$', ha='center', va='top', color='green')
+ax.set_xlabel('x')
+ax.set_ylabel('f(x)')
+ax.set_title('Illustration de la méthode de la Fausse Position (1ère étape)')
+ax.grid(True)
+ax.legend()
+ax.spines['left'].set_position('zero')
+ax.spines['bottom'].set_position('zero')
+ax.spines['right'].set_color('none')
+ax.spines['top'].set_color('none')
+ax.xaxis.set_ticks_position('bottom')
+ax.yaxis.set_ticks_position('left')
+ax.set_ylim(min(fb0, fa0, fc0) - 1, max(fa0, fb0, fc0) + 1)
+plt.savefig('false_position_illustration.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, max height=0.4\textheight, keepaspectratio]{false_position_illustration.png}
+\caption{Illustration graphique de la méthode de la Fausse Position.}
+\label{fig:fausse_position}
+\end{figure}
+
+\textbf{Algorithme :} Similaire à la dichotomie, mais remplacer le calcul de $c$ par:
+\[ c = b - f(b) \frac{b - a}{f(b) - f(a)} \]
+Le coût par itération est plus élevé : 1 soustraction, 1 multiplication, 1 division, 2 évaluations de $f$ (si $f(a)$ et $f(b)$ ne sont pas stockées), et les opérations arithmétiques pour $c$. (Note: on peut optimiser pour ne recalculer qu'une valeur de $f$ par itération). Coût mentionné dans les notes: 1 produit, 2 additions/soustractions, 1 division, 1 évaluation de $f$.
+
+\subsection{Convergence de la Fausse Position} % Subsection 3.5
+\begin{itemize}
+    \item Si $f \in C^2([a_0, b_0])$, $f(a_0)f(b_0)<0$.
+    \item Si $f''$ n'a aucune racine dans $]a_0, b_0[$ (i.e., $f$ est soit strictement convexe, soit strictement concave sur l'intervalle), alors l'une des bornes $(a_n)$ ou $(b_n)$ deviendra stationnaire (constante à partir d'un certain rang), tandis que l'autre convergera vers la racine $x^*$.
+\end{itemize}
+
+\begin{proposition}[Convergence linéaire]
+Sous les hypothèses ci-dessus (f de classe $C^2$, $f(a_0)f(b_0)<0$, et $f''$ ne s'annule pas sur $]a_0, b_0[$), la suite des approximations $(c_n)$ générées par la méthode de la fausse position converge linéairement vers l'unique racine $x^*$ de $f$ dans $[a_0, b_0]$.
+De plus, si par exemple $(a_n)$ est constante à partir d'un certain rang ($a_n=a$), alors $(b_n)$ converge vers $x^*$ et :
+\[ \lim_{n \to \infty} \frac{|x^* - b_{n+1}|}{|x^* - b_n|} = \left| 1 - \frac{f'(x^*)}{f'( \xi_n)} \frac{x^*-a}{f(x^*)-f(a)} \right| \]
+(Note: L'expression exacte du taux peut varier, celle-ci est transcrite des notes, mais semble inhabituelle. Typiquement, la convergence linéaire est établie, mais le taux dépend de la courbure et de quelle borne est fixe). Si $(b_n)$ est constante ($b_n=b$), alors $(a_n)$ converge vers $x^*$ et:
+\[ \lim_{n \to \infty} \frac{|x^* - a_{n+1}|}{|x^* - a_n|} = \left| 1 - \frac{f'(x^*)}{f'( \eta_n)} \frac{x^*-b}{f(x^*)-f(b)} \right| \]
+où $\xi_n, \eta_n$ proviennent de l'application du théorème des accroissements finis.
+\end{proposition}
+
+En général, la convergence de la fausse position est linéaire, mais souvent plus rapide que la dichotomie dans les premières itérations. Cependant, elle peut devenir très lente si une des bornes reste bloquée loin de la racine.
+
+\end{document}
+```
