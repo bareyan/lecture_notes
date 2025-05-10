@@ -1,0 +1,422 @@
+```latex
+\begin{document}
+\sloppy
+
+\section{Méthode d'itération}
+\label{sec:methode_iteration}
+
+\subsection{Principe}
+\label{ssec:iteration_principe}
+La méthode d'itération, ou méthode du point fixe, est utilisée pour résoudre des équations de la forme $f(x) = 0$.
+Elle est adaptée aux problèmes où l'on peut transformer l'équation $f(x)=0$ en une forme équivalente $x = g(x)$.
+On cherche alors une valeur $x^*$ telle que $x^* = g(x^*)$. Une telle valeur $x^*$ est appelée un point fixe de la fonction $g$.
+La méthode consiste à construire une suite $(x_n)_{n \in \mathbb{N}}$ définie par la relation de récurrence :
+\begin{equation}
+(S) \quad
+\begin{cases}
+x_0 \text{ donné} \\
+x_{n+1} = g(x_n), \quad \forall n \ge 0
+\end{cases}
+\end{equation}
+Si cette suite converge vers une limite $x^*$, et si $g$ est continue, alors $x^*$ est un point fixe de $g$. En effet,
+$x^* = \lim_{n \to \infty} x_{n+1} = \lim_{n \to \infty} g(x_n) = g(\lim_{n \to \infty} x_n) = g(x^*)$.
+
+\subsection{Représentation graphique}
+\label{ssec:iteration_representation_graphique}
+Graphiquement, les points fixes de $g$ sont les abscisses des points d'intersection de la courbe $y=g(x)$ avec la droite $y=x$.
+Pour construire la suite $(x_n)$, on part de $x_0$.
+\begin{enumerate}
+    \item On trouve $g(x_0)$ sur la courbe $y=g(x)$. Ce point a pour coordonnées $(x_0, g(x_0))$. Comme $x_1 = g(x_0)$, ce point est $(x_0, x_1)$.
+    \item Pour reporter $x_1$ sur l'axe des abscisses, on se déplace horizontalement jusqu'à la droite $y=x$. Le point atteint est $(x_1, x_1)$.
+    \item On trouve $g(x_1)$ sur la courbe $y=g(x)$ en se déplaçant verticalement. Ce point est $(x_1, g(x_1))$, c'est-à-dire $(x_1, x_2)$.
+    \item On répète le processus.
+\end{enumerate}
+Selon la configuration des courbes, la construction peut donner un motif en ``escalier'' ou en ``spirale'' (ou ``escargot'').
+
+\begin{verbatim}
+#save_to: iteration_graphique.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+def g(x):
+    return np.cos(x)
+
+x_star = 0.739085 # Approximate fixed point of cos(x)
+x_vals = np.linspace(0, 1.5, 400)
+y_g_vals = g(x_vals)
+y_x_vals = x_vals
+
+plt.figure(figsize=(8, 6))
+plt.plot(x_vals, y_g_vals, label='y = g(x) = cos(x)')
+plt.plot(x_vals, y_x_vals, label='y = x', linestyle='--')
+
+x0 = 0.1
+iterations = 5
+x_n = x0
+
+path_x = [x0]
+path_y = [x0] # Start on y=x to begin the graphical method correctly from (x0,x0) if we were to find g(x0) first
+
+# Initial point on y=g(x) is (x0, g(x0))
+path_y_on_g = [g(x0)] # y-coordinate of P0 on g(x)
+current_x = x0
+current_y_on_g = g(current_x)
+
+# First segment: vertical from (x0, x0) to (x0, g(x0)) is not standard in cobweb.
+# Cobweb starts from (x0, g(x0)) or shows step from x0 on axis to (x0, g(x0)).
+# Let's draw from (x0,0) -> (x0, g(x0)) -> (g(x0), g(x0)) -> (g(x0), g(g(x0))) etc.
+# Or simpler: (x0,y0) -> (x0,y1=g(x0)) -> (x1=y1, y1) -> (x1,y2=g(x1)) -> (x2=y2,y2)
+# The notes show a path that starts from x0, projects to (x0, g(x0)), then horizontal to (g(x0), g(x0)), etc.
+
+plt.plot([current_x, current_x], [0, current_y_on_g], color='gray', linestyle=':') # from x-axis to curve
+plt.text(current_x - 0.05, -0.1, '$x_0$')
+
+for i in range(iterations):
+    # Point P_i on y=g(x) is (x_i, g(x_i))
+    # Segment 1: (x_i, g(x_i)) to (g(x_i), g(x_i)) (horizontal to y=x)
+    next_x = g(current_x)
+    plt.plot([current_x, next_x], [next_x, next_x], color='red', linestyle='-') # horizontal segment to y=x, but using g(x_i) for both coords means point is (g(x_i), g(x_i))
+    plt.plot([current_x,current_x],[current_y_on_g,next_x], color='red', linestyle='-') # This should be from (x_i, g(x_i)) to (g(x_i), g(x_i))
+                                                                                         # from (current_x, current_y_on_g) to (next_x, next_x)
+    
+    # Segment 2: (g(x_i), g(x_i)) to (g(x_i), g(g(x_i))) (vertical to y=g(x))
+    current_y_on_g_prev = next_x # This is g(x_i)
+    current_x = next_x         # This is x_{i+1} = g(x_i)
+    current_y_on_g = g(current_x) # This is g(x_{i+1})
+    plt.plot([current_x, current_x], [current_y_on_g_prev, current_y_on_g], color='red', linestyle='-')
+    
+    plt.text(current_x - 0.05, -0.1, f'$x_{i+1}$')
+
+plt.plot(x_star, x_star, 'ko', label=f'Point fixe $x^* \\approx {x_star:.4f}$')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title("Représentation graphique de la méthode d'itération")
+plt.legend()
+plt.grid(True)
+plt.axhline(0, color='black',linewidth=0.5)
+plt.axvline(0, color='black',linewidth=0.5)
+plt.ylim(-0.2, 1.5)
+plt.savefig('iteration_graphique.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, max height=0.4\textheight, keepaspectratio]{iteration_graphique.png}
+\caption{Illustration de la méthode du point fixe pour $g(x) = \cos(x)$ et $x_0 = 0.1$. La suite $(x_n)$ converge vers le point fixe $x^* \approx 0.739$.}
+\label{fig:iteration_graphique}
+\end{figure}
+
+\subsection{Algorithme}
+\label{ssec:iteration_algorithme}
+L'algorithme de la méthode du point fixe est le suivant :
+\begin{enumerate}
+    \item \textbf{Initialisation :}
+    \begin{itemize}
+        \item Choisir un point de départ $x_0$.
+        \item Se donner une tolérance $\varepsilon > 0$ (pour le critère d'arrêt).
+        \item Définir un nombre maximal d'itérations $N_{max}$.
+        \item Poser $n=0$.
+    \end{itemize}
+    \item \textbf{Itérations :}
+    \begin{itemize}
+        \item Tant que $n < N_{max}$ (et critère d'arrêt non satisfait) :
+        \begin{enumerate}
+            \item Calculer $x_{n+1} = g(x_n)$.
+            \item Vérifier le critère d'arrêt. Par exemple, si $|x_{n+1} - x_n| < \varepsilon$, alors arrêter. D'autres critères peuvent être $|x_{n+1} - x_n|/|x_{n+1}| < \varepsilon$ (si $x_{n+1} \neq 0$) ou $|f(x_{n+1})| < \varepsilon$. La note manuscrite mentionne $E_{n+1} = |x_{n+1} - x_n|$.
+            \item $n = n+1$.
+            \item Mettre à jour $x_n \leftarrow x_{n+1}$ pour la prochaine itération (ou $x_{old} \leftarrow x_n$, $x_n \leftarrow x_{n+1}$).
+        \end{enumerate}
+        \item Fin Tant que.
+    \end{itemize}
+    \item \textbf{Arrêt :} La valeur $x_n$ (ou $x_{n+1}$) obtenue est une approximation du point fixe $x^*$. Si le nombre maximal d'itérations $N_{max}$ est atteint sans que le critère de tolérance soit satisfait, la méthode peut avoir échoué à converger ou converger trop lentement.
+\end{enumerate}
+La note manuscrite mentionne : ``Tant que $E_n > E$ et $N_{max}$ pas grand (atteint)''.
+
+\subsection{Convergence}
+\label{ssec:iteration_convergence}
+\begin{remark}
+Il y a une similitude entre les racines de la fonction $h(x) = g(x)-x$ et les points fixes de $g(x)$. Un point $x^*$ est un point fixe de $g$ si et seulement si $x^*$ est une racine de $h(x) = g(x)-x=0$.
+\end{remark}
+
+\begin{proposition}
+Soit $I$ un intervalle fermé de $\mathbb{R}$. Soit $g: I \to \mathbb{R}$ une fonction telle que :
+\begin{enumerate}
+    \item $g(I) \subset I$ (c'est-à-dire, pour tout $x \in I$, $g(x) \in I$).
+    \item $g$ est contractante sur $I$, c'est-à-dire qu'il existe une constante $K \in [0, 1)$ telle que pour tous $x, y \in I$, $|g(x) - g(y)| \le K |x-y|$.
+\end{enumerate}
+Alors :
+\begin{enumerate}
+    \item $g$ admet un unique point fixe $x^*$ dans $I$.
+    \item Pour tout choix initial $x_0 \in I$, la suite $(x_n)$ définie par $x_{n+1} = g(x_n)$ converge vers $x^*$.
+    \item On a les estimations d'erreur suivantes :
+    \begin{itemize}
+        \item $|x_n - x^*| \le K^n |x_0 - x^*|$
+        \item $|x_n - x^*| \le \frac{K^n}{1-K} |x_1 - x_0|$
+    \end{itemize}
+\end{enumerate}
+Si $g$ est dérivable sur $I$, la condition de contraction (2) est satisfaite si $\sup_{x \in I} |g'(x)| \le K < 1$.
+Si $|g'(x^*)| > 1$, la méthode diverge (sauf si $x_0 = x^*$).
+\end{proposition}
+
+\begin{proof}
+(Suivant les notes manuscrites)
+\textbf{Existence :} Soit $I = [a,b]$. Posons $h(x) = g(x) - x$.
+Comme $g(I) \subset I$, on a $g(a) \in [a,b]$ et $g(b) \in [a,b]$.
+Donc $g(a) \ge a \implies h(a) = g(a) - a \ge 0$.
+Et $g(b) \le b \implies h(b) = g(b) - b \le 0$.
+Si $h(a)=0$, alors $a$ est un point fixe. Si $h(b)=0$, alors $b$ est un point fixe.
+Sinon, si $h(a)>0$ et $h(b)<0$, et $g$ (donc $h$) est continue (car dérivable, ou contractante implique continue), d'après le Théorème des Valeurs Intermédiaires, il existe $x^* \in (a,b)$ tel que $h(x^*) = 0$, c'est-à-dire $g(x^*) = x^*$.
+
+\textbf{Unicité :} Supposons qu'il existe deux points fixes distincts $x^*$ et $x^{**}$ dans $I$.
+Alors $g(x^*) = x^*$ et $g(x^{**}) = x^{**}$.
+On a $|x^{**} - x^*| = |g(x^{**}) - g(x^*)|$.
+Si $g$ est contractante avec une constante $K < 1$, alors $|g(x^{**}) - g(x^*)| \le K |x^{**} - x^*|$.
+Donc $|x^{**} - x^*| \le K |x^{**} - x^*|$.
+Comme $x^* \neq x^{**}$, $|x^{**} - x^*| > 0$. On peut diviser par $|x^{**} - x^*|$ pour obtenir $1 \le K$.
+Ceci contredit $K < 1$. Donc, l'hypothèse qu'il existe deux points fixes distincts est fausse. Le point fixe est unique.
+
+\textbf{Convergence :} Soit $x_0 \in I$. La suite $(x_n)$ est définie par $x_{n+1} = g(x_n)$.
+On a $x^* = g(x^*)$.
+Alors $|x_{n+1} - x^*| = |g(x_n) - g(x^*)|$.
+En utilisant la propriété de contraction (ou le théorème des accroissements finis si $g$ est dérivable, $|g(x_n) - g(x^*)| \le |g'(c_n)| |x_n - x^*|$ pour un $c_n$ entre $x_n$ et $x^*$, avec $|g'(c_n)| \le K$), on a :
+$|x_{n+1} - x^*| \le K |x_n - x^*|$.
+Par récurrence, on obtient :
+$|x_n - x^*| \le K^n |x_0 - x^*|$.
+Comme $0 \le K < 1$, $K^n \to 0$ quand $n \to \infty$.
+Donc, $\lim_{n \to \infty} |x_n - x^*| = 0$, ce qui signifie que la suite $(x_n)$ converge vers $x^*$.
+La note mentionne $K_1 = \lim_{n\to\infty} \frac{x_{n+1}-x^*}{x_n-x^*} = g'(x^*)$ et $|K_1| \le K < 1$. Ceci est lié à l'ordre de convergence.
+\end{proof}
+
+\subsubsection{Ordre de convergence}
+L'ordre de convergence d'une suite $(x_n)$ vers $x^*$ est un nombre $p \ge 1$ tel que :
+$$ \lim_{n \to \infty} \frac{|x_{n+1} - x^*|}{|x_n - x^*|^p} = C > 0 $$
+où $C$ est la constante asymptotique d'erreur.
+Si $p=1$, la convergence est linéaire. Si $p=2$, elle est quadratique.
+
+Supposons que $g$ est suffisamment dérivable et utilisons un développement de Taylor de $g(x_n)$ autour de $x^*$:
+$x_{n+1} = g(x_n) = g(x^*) + g'(x^*)(x_n - x^*) + \frac{g''(x^*)}{2!}(x_n - x^*)^2 + \dots + \frac{g^{(k)}(x^*)}{k!}(x_n - x^*)^k + O((x_n - x^*)^{k+1})$.
+Puisque $x^* = g(x^*)$, on a :
+$x_{n+1} - x^* = g'(x^*)(x_n - x^*) + \frac{g''(x^*)}{2!}(x_n - x^*)^2 + \dots$.
+
+Si $g'(x^*) \neq 0$, alors :
+$$ \frac{x_{n+1} - x^*}{x_n - x^*} = g'(x^*) + O(x_n - x^*) $$
+Donc, $\lim_{n \to \infty} \frac{|x_{n+1} - x^*|}{|x_n - x^*|} = |g'(x^*)|$.
+La convergence est linéaire (ordre $p=1$) avec $C = |g'(x^*)|$. Pour que la méthode converge, il faut que $|g'(x^*)| < 1$.
+
+Si $g'(x^*) = 0$, et si $g$ est $p$-fois dérivable avec $g^{(k)}(x^*) = 0$ for $1 \le k < p$ et $g^{(p)}(x^*) \neq 0$ (où $p \ge 2$ est le plus petit entier tel que $g^{(p)}(x^*) \neq 0$), alors le développement de Taylor devient :
+$x_{n+1} - x^* = \frac{g^{(p)}(x^*)}{p!}(x_n - x^*)^p + O((x_n - x^*)^{p+1})$.
+Dans ce cas :
+$$ \lim_{n \to \infty} \frac{|x_{n+1} - x^*|}{|x_n - x^*|^p} = \left|\frac{g^{(p)}(x^*)}{p!}\right| $$
+La convergence est d'ordre $p$, et la constante asymptotique d'erreur est $C = \left|\frac{g^{(p)}(x^*)}{p!}\right|$.
+
+\begin{example}
+Soit $g(x) = e^x - 1 - x - \frac{x^2}{2}$.
+On cherche un point fixe $x^*$ de $g$. On observe que $x^*=0$ est un point fixe, car $g(0) = e^0 - 1 - 0 - 0 = 1 - 1 = 0$.
+Calculons les dérivées de $g$ en $x^*=0$:
+$g'(x) = e^x - 1 - x \implies g'(0) = e^0 - 1 - 0 = 0$.
+$g''(x) = e^x - 1 \implies g''(0) = e^0 - 1 = 0$.
+$g'''(x) = e^x \implies g'''(0) = e^0 = 1$.
+Puisque $g'(0)=0$, $g''(0)=0$, et $g'''(0) = 1 \neq 0$, l'ordre de convergence est $p=3$.
+La constante asymptotique d'erreur est $C = \left|\frac{g'''(0)}{3!}\right| = \left|\frac{1}{6}\right| = \frac{1}{6}$.
+\end{example}
+
+\begin{exercice}
+Analyse de la méthode de la fausse position (Regula Falsi).
+\end{exercice}
+\begin{solution}
+Indication : c'est une méthode de point fixe.
+\end{solution}
+
+\section{Méthode de Newton}
+\label{sec:methode_newton}
+
+\subsection{Principe}
+\label{ssec:newton_principe}
+La méthode de Newton est une méthode itérative pour trouver une approximation d'une racine $x^*$ d'une fonction $f$, c'est-à-dire $f(x^*) = 0$. Elle est applicable si $f$ est dérivable.
+
+\subsection{Comment construire $x_{n+1}$ à partir de $x_n$?}
+\label{ssec:newton_construction}
+On part d'une approximation $x_n$ de la racine $x^*$. On remplace la fonction $f(x)$ par son polynôme de Taylor d'ordre 1 (sa tangente) au voisinage de $x_n$:
+$$ f(x) \approx P_1(x) = f(x_n) + f'(x_n)(x - x_n) $$
+On cherche $x_{n+1}$ tel que $P_1(x_{n+1}) = 0$.
+$$ f(x_n) + f'(x_n)(x_{n+1} - x_n) = 0 $$
+En supposant $f'(x_n) \neq 0$, on peut résoudre pour $x_{n+1}$:
+$$ x_{n+1} - x_n = - \frac{f(x_n)}{f'(x_n)} $$
+$$ x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)} $$
+Ceci définit la relation de récurrence de la méthode de Newton.
+On peut voir cela comme une méthode de point fixe :
+\begin{center}
+\fbox{\parbox{0.4\textwidth}{
+$x_{n+1} = g(x_n)$ \\
+avec $g(x) = x - \frac{f(x)}{f'(x)}$
+}}
+\end{center}
+
+\subsection{Interprétation géométrique}
+\label{ssec:newton_interpretation_geometrique}
+Graphiquement, $x_{n+1}$ est l'abscisse du point où la tangente à la courbe $y=f(x)$ au point $(x_n, f(x_n))$ coupe l'axe des abscisses ($y=0$).
+
+\begin{verbatim}
+#save_to: newton_interpretation.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+def f(x):
+    return x**2 - 2
+
+def df(x):
+    return 2*x
+
+x_root = np.sqrt(2)
+x_vals = np.linspace(0, 3, 400)
+y_f_vals = f(x_vals)
+
+plt.figure(figsize=(8, 6))
+plt.plot(x_vals, y_f_vals, label='y = f(x) = $x^2 - 2$')
+plt.axhline(0, color='black', lw=0.5)
+plt.axvline(0, color='black', lw=0.5)
+
+x_n = 2.5 # Initial guess x0
+
+# First iteration
+f_xn = f(x_n)
+df_xn = df(x_n)
+# Tangent line: y - f(x_n) = f'(x_n)(x - x_n)  => y = f'(x_n)(x - x_n) + f(x_n)
+tangent_x = np.array([x_n - 0.8, x_n + 0.2]) # Range for tangent line
+tangent_y = df_xn * (tangent_x - x_n) + f_xn
+plt.plot(tangent_x, tangent_y, 'r--', label=f'Tangente en $x_0={x_n}$')
+plt.plot(x_n, f_xn, 'ro') # Point (x_n, f(x_n))
+
+x_n_plus_1 = x_n - f_xn / df_xn
+plt.plot(x_n_plus_1, 0, 'go') # Point x_{n+1} on x-axis
+plt.text(x_n, -0.5, '$x_0$')
+plt.text(x_n_plus_1 + 0.05, -0.5, '$x_1$')
+
+# Second iteration (optional, for illustration)
+x_n = x_n_plus_1
+f_xn = f(x_n)
+df_xn = df(x_n)
+tangent_x = np.array([x_n - 0.5, x_n + 0.5])
+tangent_y = df_xn * (tangent_x - x_n) + f_xn
+plt.plot(tangent_x, tangent_y, 'b--', label=f'Tangente en $x_1={x_n:.2f}$')
+plt.plot(x_n, f_xn, 'bo')
+
+x_n_plus_1 = x_n - f_xn / df_xn
+plt.plot(x_n_plus_1, 0, 'mo')
+plt.text(x_n_plus_1 + 0.05, 0.2, '$x_2$')
+
+
+plt.plot(x_root, 0, 'ko', markersize=8, label=f'Racine $x^*=\sqrt{{2}} \\approx {x_root:.3f}$')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title("Interprétation géométrique de la méthode de Newton")
+plt.legend()
+plt.grid(True)
+plt.ylim(-3, 6)
+plt.savefig('newton_interpretation.png')
+\end{verbatim}
+
+\begin{figure}[H]
+\centering
+\includegraphics[max width=\textwidth, max height=0.4\textheight, keepaspectratio]{newton_interpretation.png}
+\caption{Illustration de la méthode de Newton pour $f(x) = x^2 - 2$ avec $x_0 = 2.5$.}
+\label{fig:newton_interpretation}
+\end{figure}
+
+\subsection{Algorithme}
+\label{ssec:newton_algorithme}
+L'algorithme de Newton peut être vu comme un cas particulier de l'algorithme du point fixe, avec $g(x) = x - \frac{f(x)}{f'(x)}$.
+\begin{lstlisting}[language=Python, caption=Pseudo-code pour la méthode de Newton, basicstyle=\ttfamily\footnotesize, breaklines=true]
+def newton_method(f, df, x0, epsilon, N_max):
+    # f: la fonction dont on cherche la racine
+    # df: la dérivée de f
+    # x0: première approximation
+    # epsilon: tolérance
+    # N_max: nombre maximal d'itérations
+    
+    xn = x0
+    for n in range(N_max):
+        fxn = f(xn)
+        if abs(fxn) < epsilon: # Critère d'arrêt sur |f(x_n)|
+            print(f"Solution trouvée après {n} itérations.")
+            return xn
+        
+        dfxn = df(xn)
+        if dfxn == 0:
+            print("Dérivée nulle. La méthode de Newton échoue.")
+            return None # Ou une gestion d'erreur appropriée
+            
+        xn_plus_1 = xn - fxn / dfxn
+        
+        if abs(xn_plus_1 - xn) < epsilon: # Critère d'arrêt sur |x_{n+1}-x_n|
+            print(f"Solution trouvée après {n+1} itérations (convergence sur x).")
+            return xn_plus_1
+            
+        xn = xn_plus_1
+        
+    print("Nombre maximal d'itérations atteint. Pas de convergence.")
+    return xn # Retourne la dernière approximation
+\end{lstlisting}
+La note manuscrite suggère:
+\begin{verbatim}
+Algorithme de Newton(f, f', x0, epsilon, N_max):
+  g = lambda x: x - f(x)/f'(x)
+  return PointFixe(g, x0, epsilon, N_max) 
+  // en utilisant l'algorithme de point fixe défini précédemment
+\end{verbatim}
+
+\subsection{Convergence}
+\label{ssec:newton_convergence}
+Pour analyser la convergence de la méthode de Newton, on étudie la fonction d'itération $g(x) = x - \frac{f(x)}{f'(x)}$.
+On calcule sa dérivée $g'(x)$:
+\begin{align*}
+g'(x) &= \frac{d}{dx} \left( x - \frac{f(x)}{f'(x)} \right) \\
+&= 1 - \frac{f'(x)f'(x) - f(x)f''(x)}{(f'(x))^2} \\
+&= \frac{(f'(x))^2 - (f'(x))^2 + f(x)f''(x)}{(f'(x))^2} \\
+&= \frac{f(x)f''(x)}{(f'(x))^2}
+\end{align*}
+Si $x^*$ est une racine simple de $f$ (c'est-à-dire $f(x^*) = 0$ et $f'(x^*) \neq 0$), alors :
+$$ g'(x^*) = \frac{f(x^*)f''(x^*)}{(f'(x^*))^2} = \frac{0 \cdot f''(x^*)}{(f'(x^*))^2} = 0 $$
+Puisque $g'(x^*) = 0$, d'après la théorie de la méthode du point fixe, si $g''(x^*)$ existe et est non nulle, la convergence est au moins d'ordre 2 (quadratique), à condition que $x_0$ soit suffisamment proche de $x^*$.
+Calculons $g''(x^*)$:
+Si $g'(x) = \frac{f(x)f''(x)}{(f'(x))^2}$, alors
+$g''(x) = \frac{(f'(x)f''(x)+f(x)f'''(x))(f'(x))^2 - f(x)f''(x) \cdot 2 f'(x)f''(x)}{(f'(x))^4}$.
+En $x=x^*$, $f(x^*)=0$, donc:
+$g''(x^*) = \frac{(f'(x^*)f''(x^*))(f'(x^*))^2 - 0}{(f'(x^*))^4} = \frac{f''(x^*)}{f'(x^*)}$.
+Si $f''(x^*) \neq 0$ (et $f'(x^*) \neq 0$), alors $g''(x^*) \neq 0$.
+La convergence de la méthode de Newton est quadratique pour une racine simple, avec $\lim_{n \to \infty} \frac{|x_{n+1}-x^*|}{|x_n-x^*|^2} = \left|\frac{g''(x^*)}{2}\right| = \left|\frac{f''(x^*)}{2f'(x^*)}\right|$.
+
+\begin{remark}[Cas des racines multiples]
+Si $x^*$ est une racine de multiplicité $m > 1$, c'est-à-dire $f(x^*) = f'(x^*) = \dots = f^{(m-1)}(x^*) = 0$ et $f^{(m)}(x^*) \neq 0$.
+Dans ce cas, la convergence de la méthode de Newton redevient linéaire.
+On peut écrire $f(x) = (x-x^*)^m h(x)$ avec $h(x^*) \neq 0$.
+Alors $f'(x) = m(x-x^*)^{m-1}h(x) + (x-x^*)^m h'(x)$.
+La fonction d'itération $g(x) = x - \frac{f(x)}{f'(x)}$ devient :
+\begin{align*}
+g(x) &= x - \frac{(x-x^*)^m h(x)}{m(x-x^*)^{m-1}h(x) + (x-x^*)^m h'(x)} \\
+&= x - \frac{(x-x^*)h(x)}{mh(x) + (x-x^*)h'(x)}
+\end{align*}
+Pour évaluer $g'(x^*)$, on peut calculer la limite de $g'(x)$ quand $x \to x^*$, ou utiliser une forme plus complexe de $g'(x)$.
+La note indique que $g'(x^*) = 1 - \frac{1}{m}$.
+En effet,
+$g'(x) = \frac{d}{dx} \left( x - \frac{(x-x^*)h(x)}{mh(x) + (x-x^*)h'(x)} \right)$.
+En $x=x^*$, après un calcul (assez long, ou en utilisant la limite $\lim_{x \to x^*} \frac{f(x)f''(x)}{(f'(x))^2}$ avec les formes de $f, f', f''$ pour une racine multiple), on trouve $g'(x^*) = 1 - \frac{1}{m}$.
+Puisque $m > 1$, $0 \le g'(x^*) < 1$. La convergence est donc linéaire avec une constante asymptotique $K_1 = 1 - \frac{1}{m}$.
+
+\begin{example}
+Soit $f(x) = (x-1)^3$. Ici $x^*=1$ est une racine de multiplicité $m=3$.
+$f(1)=0$, $f'(x)=3(x-1)^2 \implies f'(1)=0$, $f''(x)=6(x-1) \implies f''(1)=0$, $f'''(x)=6 \implies f'''(1)=6 \neq 0$.
+La méthode de Newton standard donne :
+$x_{n+1} = x_n - \frac{(x_n-1)^3}{3(x_n-1)^2} = x_n - \frac{x_n-1}{3} = \frac{2}{3}x_n + \frac{1}{3}$.
+C'est une suite arithmético-géométrique. Le point fixe est $x^* = \frac{1/3}{1-2/3} = 1$.
+$x_{n+1}-1 = \frac{2}{3}x_n + \frac{1}{3} - 1 = \frac{2}{3}x_n - \frac{2}{3} = \frac{2}{3}(x_n-1)$.
+Donc $\frac{x_{n+1}-1}{x_n-1} = \frac{2}{3}$.
+La convergence est linéaire, avec $K_1 = \frac{2}{3}$.
+Ceci correspond à $1 - \frac{1}{m} = 1 - \frac{1}{3} = \frac{2}{3}$.
+\end{example}
+\end{remark}
+
+\end{document}
+```

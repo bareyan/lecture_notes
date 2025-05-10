@@ -1,262 +1,285 @@
-```latex
-\documentclass{article}
-\usepackage{amssymb,amsmath,amsthm}
-\usepackage{graphicx}
-\usepackage{color}
-\usepackage{float}
-\usepackage{fancyhdr}
-\usepackage{array}
-\usepackage{listings}
-\usepackage[french]{babel}
-
-\newtheorem{theorem}{Théorème}
-\newtheorem{lemma}{Lemme}
-\newtheorem{proposition}[theorem]{Proposition}
-\newtheorem{definition}{Définition}
-\newtheorem{remark}{Remarque}
-\newtheorem{solution}{Solution}
-\newtheorem{example}{Exemple}
-\newenvironment{proof}[1][Preuve]{\begin{trivlist}
-\item[\hskip \labelsep {\bfseries #1}]}{\qed\end{trivlist}}
-
-\usepackage[margin=1in]{geometry}
-
 \begin{document}
 \sloppy
 
-\section{Introduction à la résolution numérique des EDO}
+\section{Schémas numériques pour Équations Différentielles Ordinaires}
 
-Nous nous intéressons à la résolution numérique du problème de Cauchy pour une équation différentielle ordinaire (EDO) du premier ordre :
-Trouver une fonction $t \mapsto x(t)$ définie sur un intervalle $[t_0, T]$ telle que
-\begin{equation}
-\label{eq:cauchy_problem}
+\subsection{Le Problème de Cauchy}
+On s'intéresse à la résolution numérique du problème de Cauchy (P) suivant :
+\[
+(P) \quad
 \begin{cases}
-x'(t) = f(t, x(t)), \quad t \in [t_0, T] \\
+x'(t) = f(t, x(t)), & t \in [t_0, t_0+T] \\
 x(t_0) = x_0
 \end{cases}
-\end{equation}
-où $f: [t_0, T] \times \mathbb{R}^d \to \mathbb{R}^d$ est une fonction donnée et $x_0 \in \mathbb{R}^d$ est la condition initiale.
+\]
+où $f: [t_0, t_0+T] \times \mathbb{R}^d \to \mathbb{R}^d$ est une fonction donnée, $x_0 \in \mathbb{R}^d$ est la condition initiale, et $x(t) \in \mathbb{R}^d$ est la solution recherchée.
 
-Lorsque la solution exacte $x(t)$ ne peut pas être déterminée analytiquement, on a recours à des méthodes numériques pour calculer des approximations $x_n$ de $x(t_n)$ en des points de discrétisation $t_n = t_0 + n h$, $n = 0, 1, \dots, N$, où $h = (T-t_0)/N$ est le pas de temps.
-
-\section{Schémas numériques à un pas}
-
-\begin{definition}[Schéma numérique à un pas]
-Un schéma numérique à un pas pour l'approximation de \eqref{eq:cauchy_problem} est une méthode de la forme :
-\begin{equation}
-\label{eq:one_step_method}
-\tag{P}
+\subsection{Schémas à un pas explicites}
+Pour approcher la solution de (P), on construit des schémas numériques. Un schéma à un pas explicite (S) se présente sous la forme générale :
+\[
+(S) \quad
 \begin{cases}
-x_{n+1} = x_n + h \Phi(t_n, x_n, h), \quad n = 0, 1, \dots, N-1 \\
-x_0 \text{ donné (généralement } x_0 = x(t_0))
+x_{n+1} = x_n + \Delta t \Phi(t_n, x_n, \Delta t) \\
+x_0 \text{ donné (souvent } x_0 = x(t_0))
 \end{cases}
-\end{equation}
-où $\Phi: [t_0, T] \times \mathbb{R}^d \times [0, h_0] \to \mathbb{R}^d$ est la fonction d'incrément qui caractérise le schéma, et $h$ est le pas de temps. Le schéma génère une suite de points $(x_n)_{n=0}^N$ qui approxime la solution $(x(t_n))_{n=0}^N$.
+\]
+où :
+\begin{itemize}
+    \item $t_n = t_0 + n \Delta t$ sont les points de la discrétisation en temps, pour $n=0, \dots, N$.
+    \item $\Delta t = T/N$ est le pas de temps, avec $N$ le nombre total de pas.
+    \item $x_n$ est une approximation de la solution $x(t_n)$.
+    \item $\Phi$ est la fonction d'increment qui caractérise le schéma.
+\end{itemize}
+
+\subsection{Exemples de schémas à un pas explicites}
+
+\subsubsection{Schéma d'Euler explicite}
+Pour ce schéma, la fonction d'increment est $\Phi(t_n, x_n, \Delta t) = f(t_n, x_n)$. Le schéma s'écrit :
+\[
+x_{n+1} = x_n + \Delta t f(t_n, x_n)
+\]
+
+\subsubsection{Schéma du Point Milieu (Runge-Kutta d'ordre 2)}
+La fonction d'increment est $\Phi(t_n, x_n, \Delta t) = f\left(t_n + \frac{\Delta t}{2}, x_n + \frac{\Delta t}{2} f(t_n, x_n)\right)$. Le schéma s'écrit :
+\[
+x_{n+1} = x_n + \Delta t f\left(t_n + \frac{\Delta t}{2}, x_n + \frac{\Delta t}{2} f(t_n, x_n)\right)
+\]
+
+\subsubsection{Schéma de Heun (Runge-Kutta d'ordre 2)}
+La fonction d'increment est $\Phi(t_n, x_n, \Delta t) = \frac{1}{2} \left[ f(t_n, x_n) + f(t_n + \Delta t, x_n + \Delta t f(t_n, x_n)) \right]$. Le schéma s'écrit :
+\[
+x_{n+1} = x_n + \frac{\Delta t}{2} \left[ f(t_n, x_n) + f(t_n + \Delta t, x_n + \Delta t f(t_n, x_n)) \right]
+\]
+
+\section{Étude de convergence pour les EDO}
+On s'intéresse à savoir si la suite $(x_n)_{0 \le n \le N}$ générée par un schéma (S) converge vers la solution $x(t)$ du problème (P) lorsque $\Delta t \to 0$.
+
+\subsection{Convergence}
+\begin{definition}[Convergence d'un schéma]
+Le schéma (S) est dit convergent si, pour toute solution $x$ de (P) et pour toute suite $(x_n)_{0 \le n \le N}$ construite par (S) avec $x_0 = x(t_0)$, on a :
+\[
+\lim_{\Delta t \to 0} \left( \max_{0 \le n \le N} \|x_n - x(t_n)\| \right) = 0
+\]
+\end{definition}
+\begin{remark}
+Si la suite $(x_n)_{0 \le n \le N}$ est "bien" construite (par exemple, si le problème (P) admet une solution unique $x$ et si $f$ est de classe $C^p$ assurant une régularité suffisante à $x$), la convergence peut être établie. L'erreur globale $\max_{0 \le n \le N} \|x_n - x(t_n)\|$ dépend de $\Delta t$. En général, la convergence d'un schéma numérique est la conséquence de sa consistance et de sa stabilité (Théorème de Lax-Richtmyer, adapté aux EDO).
+\end{remark}
+
+\subsection{Consistance et Ordre d'un schéma}
+\begin{remark}
+Pour analyser un schéma numérique pour EDO, on procède typiquement en deux étapes :
+\begin{enumerate}
+    \item On étudie la consistance du schéma (quelle est l'erreur commise en un seul pas ?).
+    \item On examine sa stabilité (comment les erreurs se propagent-elles ?).
+\end{enumerate}
+Ces deux propriétés permettent ensuite de conclure sur la convergence.
+\end{remark}
+
+\subsubsection{Erreur de consistance (Erreur locale de troncature)}
+\begin{definition}[Erreur de consistance]
+Soit $x(t)$ la solution exacte du problème (P). On appelle erreur locale de troncature (ou erreur de consistance) du schéma (S) à l'instant $t_{n+1}$, la quantité $e_{n+1}$ définie par :
+\[
+e_{n+1} = x(t_{n+1}) - \left( x(t_n) + \Delta t \Phi(t_n, x(t_n), \Delta t) \right)
+\]
+Cette erreur mesure à quel point la solution exacte $x(t)$ échoue à satisfaire l'équation du schéma numérique.
 \end{definition}
 
-La question centrale est de savoir si la solution numérique $(x_n)$ converge vers la solution exacte $x(t)$ lorsque le pas $h$ tend vers 0. Pour cela, on analyse généralement deux propriétés fondamentales du schéma : la consistance et la stabilité.
+\subsubsection{Ordre d'un schéma}
+\begin{definition}[Ordre d'un schéma]
+Le schéma (S) est dit consistant d'ordre (au moins) $q \ge 1$ si, pour toute solution exacte $x(t)$ de (P) suffisamment régulière, il existe une constante $C > 0$ (indépendante de $\Delta t$) telle que :
+\[
+\max_{0 \le n \le N-1} \|e_{n+1}\| \le C (\Delta t)^{q+1}
+\]
+Autrement dit, $e_{n+1}(\Delta t) = O((\Delta t)^{q+1})$.
+Si un schéma est consistant, alors $q \ge 1$. Le schéma est dit d'ordre $q$ s'il est d'ordre au moins $q$ et pas d'ordre au moins $q+1$. Cela signifie que $e_{n+1}(\Delta t) = K (\Delta t)^{q+1} + O((\Delta t)^{q+2})$ avec $K \neq 0$.
+\end{definition}
 
-\subsection{Exemples de schémas à un pas}
-
-\begin{example}[Schéma d'Euler explicite]
-Le schéma d'Euler explicite est obtenu en choisissant $\Phi(t, x, h) = f(t, x)$. La formule itérative est :
-\begin{equation*}
-x_{n+1} = x_n + h f(t_n, x_n)
-\end{equation*}
-Considérons l'EDO $x'(t) = x(t)^2$ avec $x(0) = x_0$. Le schéma d'Euler explicite s'écrit :
-\begin{equation*}
-x_{n+1} = x_n + h x_n^2
-\end{equation*}
-avec $t_n = n h$.
+\begin{example}[Étude de consistance du schéma d'Euler explicite]
+Pour le schéma d'Euler explicite, $\Phi(t, y, \Delta t) = f(t, y)$. L'erreur locale de troncature est, pour une solution $x(t)$ suffisamment régulière :
+\[
+e(t, \Delta t) = x(t+\Delta t) - (x(t) + \Delta t f(t, x(t)))
+\]
+Comme $x(t)$ est solution de (P), on a $x'(t) = f(t, x(t))$. Donc :
+\[
+e(t, \Delta t) = x(t+\Delta t) - x(t) - \Delta t x'(t)
+\]
+En effectuant un développement de Taylor de $x(t+\Delta t)$ autour de $t$, en supposant $x \in C^2([t_0, t_0+T])$:
+\[
+x(t+\Delta t) = x(t) + \Delta t x'(t) + \frac{(\Delta t)^2}{2} x''(t) + O((\Delta t)^3)
+\]
+En substituant ce développement dans l'expression de $e(t, \Delta t)$ :
+\begin{align*}
+e(t, \Delta t) &= \left( x(t) + \Delta t x'(t) + \frac{(\Delta t)^2}{2} x''(t) + O((\Delta t)^3) \right) - x(t) - \Delta t x'(t) \\
+&= \frac{(\Delta t)^2}{2} x''(t) + O((\Delta t)^3)
+\end{align*}
+Ainsi, pour le schéma d'Euler explicite, l'erreur locale de troncature à l'instant $t_n$ est $e_{n+1} = \frac{(\Delta t)^2}{2} x''(t_n) + O((\Delta t)^3)$.
+On a $q+1 = 2$, donc $q=1$. Le schéma d'Euler explicite est d'ordre (au moins) 1 si $x \in C^2$. Si de plus $x \in C^3$ et $x''(t_n) \neq 0$ pour au moins un $t_n$, alors le schéma est exactement d'ordre 1.
 \end{example}
 
-\begin{example}[Schéma du Point Milieu (Runge-Kutta d'ordre 2)]
-Le schéma du Point Milieu est défini par la fonction d'incrément :
-\begin{equation*}
-\Phi(t, x, h) = f\left(t + \frac{h}{2}, x + \frac{h}{2} f(t, x)\right)
-\end{equation*}
-La formule itérative est :
-\begin{equation*}
-x_{n+1} = x_n + h f\left(t_n + \frac{h}{2}, x_n + \frac{h}{2} f(t_n, x_n)\right)
-\end{equation*}
-\end{example}
+\subsubsection{Conditions d'ordre pour une fonction d'increment $\Phi$}
+\begin{remark}[Régularité de $\Phi$]
+Soit $\Phi: I \times \mathbb{R}^d \times [0, \Delta t_0] \to \mathbb{R}^d$, où $I = [t_0, t_0+T]$ et $\Delta t_0 > 0$.
+La fonction $\Phi$ est dite de classe $C^p$ si toutes ses dérivées partielles par rapport à $t$, $x$ (ou $y$), et $\Delta t$ jusqu'à l'ordre $p$ existent et sont continues sur $I \times \mathbb{R}^d \times [0, \Delta t_0]$.
+\end{remark}
 
-\section{Analyse des schémas numériques}
-
-Pour choisir un schéma pour une EDO, on procède en 2 étapes :
+Pour une fonction d'increment $\Phi$ de classe $C^q$, le schéma $x_{n+1} = x_n + \Delta t \Phi(t_n, x_n, \Delta t)$ est consistant d'ordre au moins $q$ si et seulement si les conditions suivantes sont vérifiées pour tout $(t,y)$ dans le domaine de définition :
 \begin{enumerate}
-    \item On cherche un schéma qui soit \textit{consistant} (l'erreur locale est petite).
-    \item Parmi les schémas consistants, on regarde ceux qui sont \textit{stables} (l'erreur ne s'amplifie pas démesurément).
+    \item $\Phi(t,y,0) = f(t,y)$ (Condition pour l'ordre 0, implique $q \ge 1$ pour la consistance)
+    \item $\displaystyle \frac{\partial^k \Phi}{\partial (\Delta t)^k}(t,y,0) = \frac{1}{k+1} D_t^k f(t,y)$, pour $k=1, \dots, q-1$.
 \end{enumerate}
-Un théorème fondamental (souvent attribué à Lax pour les EDP, mais valable pour les EDO sous certaines conditions) stipule que pour une classe de problèmes bien posés et de schémas, Consistance + Stabilité $\iff$ Convergence.
+où $D_t f(t,y)$ est l'opérateur de dérivée totale par rapport à $t$ le long des solutions de l'EDO:
+\[
+D_t f(t,y) = \frac{\partial f}{\partial t}(t,y) + \frac{\partial f}{\partial y}(t,y) \cdot f(t,y)
+\]
+et $D_t^0 f = f$, $D_t^k f = D_t(D_t^{k-1}f)$ pour $k \ge 1$.
 
-\subsection{Consistance}
-
-La consistance mesure à quel point le schéma numérique approxime l'équation différentielle originale lorsque le pas $h$ tend vers 0.
-
-\begin{definition}[Consistance]
-Un schéma à un pas \eqref{eq:one_step_method} défini par la fonction $\Phi$ est dit \textbf{consistant} avec l'EDO $x' = f(t, x)$ si
-\begin{equation*}
-\Phi(t, x, 0) = f(t, x)
-\end{equation*}
-pour tout $(t, x)$ pertinent.
-\end{definition}
-
-\begin{definition}[Erreur de consistance locale]
-Soit $x(t)$ la solution exacte de \eqref{eq:cauchy_problem}. L'erreur de consistance locale (ou erreur de troncature locale) du schéma \eqref{eq:one_step_method} au point $t_n$ est définie par :
-\begin{equation*}
-\epsilon(t_n, h) = \frac{x(t_{n+1}) - x(t_n)}{h} - \Phi(t_n, x(t_n), h)
-\end{equation*}
-Alternativement, pour un $t$ générique :
-\begin{equation*}
-\epsilon(t, h) = \frac{x(t+h) - x(t)}{h} - \Phi(t, x(t), h)
-\end{equation*}
-\end{definition}
-L'erreur de consistance locale mesure de combien la solution exacte échoue à satisfaire la relation du schéma numérique.
-
-\begin{definition}[Ordre de consistance]
-Un schéma \eqref{eq:one_step_method} est dit consistant d'ordre $p$ si, pour toute solution $x(t)$ suffisamment régulière de l'EDO, il existe une constante $C > 0$ indépendante de $h$ (mais pouvant dépendre de $x$ et de l'intervalle de temps) telle que :
-\begin{equation*}
- \|\epsilon(t, h)\| \le C h^p
-\end{equation*}
-pour tout $t \in [t_0, T]$ et pour $h$ suffisamment petit.
-Si $p \ge 1$, le schéma est consistant.
-\end{definition}
-
-\begin{example}[Consistance du schéma d'Euler explicite]
-Pour le schéma d'Euler explicite, $\Phi(t, x, h) = f(t, x)$.
+\begin{example}[Étude de consistance du schéma de Runge-Kutta d'ordre 2 (Point Milieu)]
+Le schéma est $x_{n+1} = x_n + \Delta t f(t_n + \frac{\Delta t}{2}, x_n + \frac{\Delta t}{2} f(t_n, x_n))$.
+La fonction d'increment est $\Phi(t,y, \Delta t) = f\left(t + \frac{\Delta t}{2}, y + \frac{\Delta t}{2} f(t,y)\right)$.
+Vérifions les conditions d'ordre :
 \begin{enumerate}
-    \item Consistance : $\Phi(t, x, 0) = f(t, x)$. Le schéma est donc consistant.
-    \item Ordre : Supposons que la solution exacte $x(t)$ est de classe $C^2$. Par développement de Taylor de $x(t+h)$ autour de $t$ :
-    \begin{equation*}
-    x(t+h) = x(t) + h x'(t) + \frac{h^2}{2} x''(t^*)
-    \end{equation*}
-    pour un certain $t^* \in (t, t+h)$. Comme $x'(t) = f(t, x(t))$, on a :
-    \begin{equation*}
-    \frac{x(t+h) - x(t)}{h} = f(t, x(t)) + \frac{h}{2} x''(t^*)
-    \end{equation*}
-    L'erreur de consistance locale est :
-    \begin{align*} \epsilon(t, h) &= \frac{x(t+h) - x(t)}{h} - \Phi(t, x(t), h) \\ &= \left( f(t, x(t)) + \frac{h}{2} x''(t^*) \right) - f(t, x(t)) \\ &= \frac{h}{2} x''(t^*) \end{align*}
-    Si $x \in C^2([t_0, T])$, alors $x''$ est bornée sur $[t_0, T]$, disons par $M_2$. Donc,
-    \begin{equation*}
-    \|\epsilon(t, h)\| \le \frac{M_2}{2} h
-    \end{equation*}
-    Le schéma d'Euler explicite est donc d'ordre $p=1$.
-\end{enumerate}
-\end{example}
+    \item Condition pour $q \ge 1$:
+    \[
+    \Phi(t,y,0) = f\left(t + 0, y + 0 \cdot f(t,y)\right) = f(t,y)
+    \]
+    Cette condition est vérifiée. Donc le schéma est au moins d'ordre 1.
 
-\begin{example}[Consistance du schéma du Point Milieu]
-Pour le schéma du Point Milieu, $\Phi(t, x, h) = f\left(t + \frac{h}{2}, x + \frac{h}{2} f(t, x)\right)$.
-\begin{enumerate}
-    \item Consistance : $\Phi(t, x, 0) = f(t + 0, x + 0 f(t, x)) = f(t, x)$. Le schéma est consistant.
-    \item Ordre : Supposons $x(t)$ de classe $C^3$ et $f$ suffisamment régulière.
-    On a $x(t+h) = x(t) + h x'(t) + \frac{h^2}{2} x''(t) + \frac{h^3}{6} x'''(t) + O(h^4)$.
-    Et par développement de Taylor de $\Phi(t, x(t), h)$ par rapport à $h$ autour de $h=0$:
-    \begin{align*} \Phi(t, x(t), h) &= f\left(t + \frac{h}{2}, x(t) + \frac{h}{2} f(t, x(t))\right) \\ &= f(t, x(t)) + \frac{h}{2} \frac{\partial f}{\partial t}(t, x(t)) + \frac{h}{2} f(t, x(t)) \frac{\partial f}{\partial x}(t, x(t)) + O(h^2) \\ &= f(t, x(t)) + \frac{h}{2} \left( \frac{\partial f}{\partial t} + f \frac{\partial f}{\partial x} \right)(t, x(t)) + O(h^2) \end{align*}
-    Comme $x'(t) = f(t, x(t))$ et $x''(t) = \frac{d}{dt}f(t, x(t)) = \frac{\partial f}{\partial t} + \frac{\partial f}{\partial x} x'(t) = \frac{\partial f}{\partial t} + \frac{\partial f}{\partial x} f$, on a :
-    \begin{equation*}
-    \Phi(t, x(t), h) = x'(t) + \frac{h}{2} x''(t) + O(h^2)
-    \end{equation*}
-    L'erreur de consistance locale est :
-    \begin{align*} \epsilon(t, h) &= \frac{x(t+h) - x(t)}{h} - \Phi(t, x(t), h) \\ &= \frac{1}{h} \left( h x'(t) + \frac{h^2}{2} x''(t) + \frac{h^3}{6} x'''(t) + O(h^4) \right) - \left( x'(t) + \frac{h}{2} x''(t) + O(h^2) \right) \\ &= \left( x'(t) + \frac{h}{2} x''(t) + \frac{h^2}{6} x'''(t) + O(h^3) \right) - \left( x'(t) + \frac{h}{2} x''(t) + O(h^2) \right) \\ &= \frac{h^2}{6} x'''(t) + O(h^3) \end{align*}
-    (Un calcul plus détaillé montrerait que le terme $O(h^2)$ dans le développement de $\Phi$ contribue aussi).
-    L'erreur locale est en $O(h^2)$. Le schéma du Point Milieu est donc d'ordre $p=2$.
+    \item Condition pour $q \ge 2$ (correspond à $k=1$ dans la formule générale):
+    On doit vérifier si $\displaystyle \frac{\partial \Phi}{\partial (\Delta t)}(t,y,0) = \frac{1}{2} D_t f(t,y)$.
+    Calculons $\displaystyle \frac{\partial \Phi}{\partial (\Delta t)}$:
+    Soient $u_1(t, \Delta t) = t + \frac{\Delta t}{2}$ et $u_2(y, \Delta t) = y + \frac{\Delta t}{2} f(t,y)$.
+    Alors $\Phi(t,y, \Delta t) = f(u_1, u_2)$.
+    \begin{align*}
+    \frac{\partial \Phi}{\partial (\Delta t)}(t,y, \Delta t) &= \frac{\partial f}{\partial u_1}(u_1, u_2) \cdot \frac{\partial u_1}{\partial (\Delta t)} + \frac{\partial f}{\partial u_2}(u_1, u_2) \cdot \frac{\partial u_2}{\partial (\Delta t)} \\
+    &= \frac{\partial f}{\partial t}\left(t + \frac{\Delta t}{2}, y + \frac{\Delta t}{2}f(t,y)\right) \cdot \frac{1}{2} + \frac{\partial f}{\partial y}\left(t + \frac{\Delta t}{2}, y + \frac{\Delta t}{2}f(t,y)\right) \cdot \left( \frac{1}{2} f(t,y) \right)
+    \end{align*}
+    Évaluons en $\Delta t = 0$:
+    \begin{align*}
+    \frac{\partial \Phi}{\partial (\Delta t)}(t,y,0) &= \frac{1}{2} \frac{\partial f}{\partial t}(t,y) + \frac{1}{2} \frac{\partial f}{\partial y}(t,y) f(t,y) \\
+    &= \frac{1}{2} \left( \frac{\partial f}{\partial t}(t,y) + \frac{\partial f}{\partial y}(t,y) f(t,y) \right) \\
+    &= \frac{1}{2} D_t f(t,y)
+    \end{align*}
+    Cette condition est vérifiée. Donc le schéma est au moins d'ordre 2.
+
+    \item Condition pour $q \ge 3$ (correspond à $k=2$ dans la formule générale):
+    On devrait vérifier si $\displaystyle \frac{\partial^2 \Phi}{\partial (\Delta t)^2}(t,y,0) = \frac{1}{3} D_t^2 f(t,y)$.
+    En général, cette condition n'est pas satisfaite pour une fonction $f$ arbitraire. Pour montrer que le schéma n'est pas d'ordre au moins 3 (et donc qu'il est exactement d'ordre 2), il faudrait calculer $\frac{\partial^2 \Phi}{\partial (\Delta t)^2}(t,y,0)$ et montrer que cette expression est différente de $\frac{1}{3} D_t^2 f(t,y)$, ou que le terme $g(t,y)$ dans $e_{n+1} = g(t,y)(\Delta t)^3 + O((\Delta t)^4)$ est non nul.
 \end{enumerate}
+Le schéma du point milieu est donc d'ordre 2.
 \end{example}
 
 \subsection{Stabilité}
-
-La stabilité concerne le comportement des erreurs au cours des itérations. Un schéma stable est un schéma pour lequel les petites perturbations (comme les erreurs d'arrondi ou l'erreur de consistance locale) ne sont pas amplifiées de manière excessive.
-
-\begin{definition}[Stabilité (au sens de Lipschitz)]
-\label{def:stability}
-Un schéma à un pas \eqref{eq:one_step_method} est dit \textbf{stable} si sa fonction d'incrément $\Phi$ est uniformément Lipschitzienne par rapport à sa deuxième variable, c'est-à-dire s'il existe une constante $L_\Phi \ge 0$ (indépendante de $t, y_1, y_2, h$) telle que :
-\begin{equation*}
- \|\Phi(t, y_1, h) - \Phi(t, y_2, h)\| \le L_\Phi \|y_1 - y_2\|
-\end{equation*}
-pour tout $t \in [t_0, T]$, tous $y_1, y_2 \in \mathbb{R}^d$ et tout $h \in [0, h_0]$.
+\begin{definition}[Stabilité d'un schéma]
+Le schéma (S) est dit stable pour une classe de fonctions $f$ s'il existe une constante $S > 0$, indépendante de $\Delta t$, telle que pour toutes suites $(x_n)_{0 \le n \le N}$ et $(y_n)_{0 \le n \le N}$ vérifiant :
+\begin{align*}
+x_{n+1} &= x_n + \Delta t \Phi(t_n, x_n, \Delta t) \\
+y_{n+1} &= y_n + \Delta t \Phi(t_n, y_n, \Delta t) + \delta_n \quad \text{(perturbation)}
+\end{align*}
+pour $n=0, \dots, N-1$, où les $\delta_n$ sont des perturbations, on ait la majoration :
+\[
+\max_{0 \le n \le N} \|x_n - y_n\| \le S \left( \|x_0 - y_0\| + \sum_{j=0}^{N-1} \|\delta_j\| \right)
+\]
 \end{definition}
-
-Cette définition implique que si l'on considère deux suites $(x_n)$ et $(y_n)$ générées par le même schéma mais avec des conditions initiales légèrement différentes $x_0$ et $y_0$, alors la différence $\|x_n - y_n\|$ reste contrôlée par la différence initiale $\|x_0 - y_0\|$.
+La stabilité garantit que de petites perturbations (erreurs initiales ou erreurs introduites à chaque pas) n'entraînent pas une divergence incontrôlée des solutions numériques.
 
 \begin{proposition}[Stabilité du schéma d'Euler explicite]
-Si la fonction $f(t, x)$ est Lipschitzienne par rapport à $x$ sur $[t_0, T] \times \mathbb{R}^d$, uniformément en $t$, avec une constante de Lipschitz $L$, i.e.,
-\begin{equation*}
- \|f(t, x_1) - f(t, x_2)\| \le L \|x_1 - x_2\|, \quad \forall t \in [t_0, T], \forall x_1, x_2 \in \mathbb{R}^d,
-\end{equation*}
-alors le schéma d'Euler explicite $x_{n+1} = x_n + h f(t_n, x_n)$ est stable pour tout $h > 0$.
+Si la fonction $f(t,y)$ est Lipschitzienne par rapport à $y$, uniformément en $t$, c'est-à-dire s'il existe $L_f > 0$ telle que $\|f(t,y_1) - f(t,y_2)\| \le L_f \|y_1 - y_2\|$ pour tous $t, y_1, y_2$, alors le schéma d'Euler explicite est stable.
 \end{proposition}
-
 \begin{proof}
-La fonction d'incrément est $\Phi(t, x, h) = f(t, x)$.
-Nous devons vérifier la condition de Lipschitz de la Définition \ref{def:stability}. Pour $t \in [t_0, T]$, $y_1, y_2 \in \mathbb{R}^d$ et $h \ge 0$ :
-\begin{equation*}
- \|\Phi(t, y_1, h) - \Phi(t, y_2, h)\| = \|f(t, y_1) - f(t, y_2)\|
-\end{equation*}
-Par l'hypothèse de Lipschitzianité de $f$, on a :
-\begin{equation*}
- \|f(t, y_1) - f(t, y_2)\| \le L \|y_1 - y_2\|
-\end{equation*}
-Donc, $\|\Phi(t, y_1, h) - \Phi(t, y_2, h)\| \le L \|y_1 - y_2\|$. La condition de la Définition \ref{def:stability} est satisfaite avec $L_\Phi = L$. Le schéma d'Euler explicite est stable.
-
-De plus, considérons l'évolution de la différence entre deux solutions numériques $x_n$ et $y_n$ :
-$x_{n+1} - y_{n+1} = (x_n - y_n) + h (f(t_n, x_n) - f(t_n, y_n))$.
-En prenant la norme :
-\begin{align*} \|x_{n+1} - y_{n+1}\| &\le \|x_n - y_n\| + h \|f(t_n, x_n) - f(t_n, y_n)\| \\ &\le \|x_n - y_n\| + h L \|x_n - y_n\| \\ &= (1 + hL) \|x_n - y_n\| \end{align*}
-Soit $e_n = \|x_n - y_n\|$. On a la récurrence $e_{n+1} \le (1 + hL) e_n$. Par induction :
-\begin{equation*}
-e_n \le (1 + hL)^n e_0
-\end{equation*}
-En utilisant l'inégalité $1+x \le e^x$ pour $x = hL$, on obtient :
-\begin{equation*}
-e_n \le (e^{hL})^n e_0 = e^{nhL} e_0
-\end{equation*}
-Comme $t_n = t_0 + nh$, on a $nh = t_n - t_0 \le T - t_0$. Donc :
-\begin{equation*}
-\|x_n - y_n\| \le e^{L(T-t_0)} \|x_0 - y_0\|
-\end{equation*}
-La différence entre les solutions numériques reste bornée par la différence initiale, avec une constante $S = e^{L(T-t_0)}$ qui ne dépend pas de $n$ ou $h$ (pour $nh \le T-t_0$). Ceci confirme la stabilité du schéma.
+Soient les suites $(x_n)$ et $(y_n)$ définies par :
+\begin{align*}
+x_{n+1} &= x_n + \Delta t f(t_n, x_n) \\
+y_{n+1} &= y_n + \Delta t f(t_n, y_n) + \delta_n
+\end{align*}
+Soustrayons les deux équations :
+\[
+x_{n+1} - y_{n+1} = (x_n - y_n) + \Delta t (f(t_n, x_n) - f(t_n, y_n)) - \delta_n
+\]
+En prenant la norme et en utilisant l'inégalité triangulaire et la condition de Lipschitz sur $f$:
+\begin{align*}
+\|x_{n+1} - y_{n+1}\| &\le \|x_n - y_n + \Delta t (f(t_n, x_n) - f(t_n, y_n))\| + \|-\delta_n\| \\
+&\le \|x_n - y_n\| + \Delta t \|f(t_n, x_n) - f(t_n, y_n)\| + \|\delta_n\| \\
+&\le \|x_n - y_n\| + \Delta t L_f \|x_n - y_n\| + \|\delta_n\| \\
+&= (1 + L_f \Delta t) \|x_n - y_n\| + \|\delta_n\|
+\end{align*}
+Posons $e_n = \|x_n - y_n\|$ et $\gamma_n = \|\delta_n\|$. On a $e_{n+1} \le (1 + L_f \Delta t) e_n + \gamma_n$.
+On utilise une version du lemme de Gronwall discret.
+\begin{lemma}[Lemme de Gronwall discret]
+Soient $(\alpha_n)_{0 \le n \le N}$, $(\gamma_n)_{0 \le n \le N-1}$ des suites de réels positifs ou nuls, et $(\beta_n)_{0 \le n \le N-1}$ une suite de réels positifs ou nuls. Si $\alpha_{n+1} \le (1+\beta_n)\alpha_n + \gamma_n$ pour $n=0, \dots, N-1$, alors :
+\[
+\alpha_n \le \left( \prod_{j=0}^{n-1} (1+\beta_j) \right) \alpha_0 + \sum_{j=0}^{n-1} \left( \prod_{k=j+1}^{n-1} (1+\beta_k) \right) \gamma_j
+\]
+En utilisant $1+u \le e^u$, on a $\prod (1+\beta_j) \le \exp(\sum \beta_j)$.
+Ainsi, $\alpha_n \le \exp\left(\sum_{j=0}^{n-1} \beta_j\right) \left( \alpha_0 + \sum_{j=0}^{n-1} \gamma_j \right)$ (en majorant $\exp(-\sum \beta_k) \le 1$ dans une version plus précise).
+Plus précisément, si $\alpha_{n+1} \le (1+B)\alpha_n + \Gamma$ pour $B \ge 0$, alors $\alpha_n \le (1+B)^n \alpha_0 + \Gamma \sum_{j=0}^{n-1} (1+B)^j \le e^{nB} \alpha_0 + \Gamma \frac{e^{nB}-1}{B}$. Si $\Gamma_j$ varie:
+$\alpha_n \le e^{\sum_{j=0}^{n-1}\beta_j} \left( \alpha_0 + \sum_{j=0}^{n-1} \gamma_j e^{-\sum_{k=0}^{j}\beta_k} \right)$.
+\end{lemma}
+Dans notre cas, $\beta_n = L_f \Delta t$. Donc $\sum_{j=0}^{n-1} \beta_j = n L_f \Delta t$. Comme $n \Delta t \le N \Delta t = T$:
+\[
+e^{\sum_{j=0}^{n-1} L_f \Delta t} = e^{n L_f \Delta t} \le e^{L_f T}
+\]
+Aussi, $e^{-\sum_{k=0}^{j} L_f \Delta t} \le 1$.
+Donc, pour tout $n \in \{0, \dots, N\}$:
+\[
+\|x_n - y_n\| \le e^{L_f T} \left( \|x_0 - y_0\| + \sum_{j=0}^{N-1} \|\delta_j\| \right)
+\]
+Le schéma d'Euler explicite est donc stable avec une constante de stabilité $S = e^{L_f T}$.
 \end{proof}
 
-\subsection{Convergence}
+\begin{proposition}[Condition suffisante de stabilité pour $\Phi$ Lipschitzienne]
+Si la fonction d'increment $\Phi(t, y, \Delta t)$ est Lipschitzienne par rapport à $y$, uniformément en $t$ et $\Delta t$, c'est-à-dire s'il existe une constante $\Lambda > 0$ telle que pour tous $y_1, y_2 \in \mathbb{R}^d$, pour tout $t \in [t_0, t_0+T]$ et pour tout $\Delta t \in [0, \Delta t_0]$ :
+\[
+\|\Phi(t, y_1, \Delta t) - \Phi(t, y_2, \Delta t)\| \le \Lambda \|y_1 - y_2\|
+\]
+alors le schéma (S) $x_{n+1} = x_n + \Delta t \Phi(t_n, x_n, \Delta t)$ est stable, avec une constante de stabilité $S = e^{\Lambda T}$.
+\end{proposition}
+\begin{proof}
+La preuve est analogue à celle pour le schéma d'Euler explicite. On a :
+\begin{align*}
+\|x_{n+1} - y_{n+1}\| &\le \|x_n - y_n + \Delta t (\Phi(t_n, x_n, \Delta t) - \Phi(t_n, y_n, \Delta t))\| + \|\delta_n\| \\
+&\le \|x_n - y_n\| + \Delta t \|\Phi(t_n, x_n, \Delta t) - \Phi(t_n, y_n, \Delta t)\| + \|\delta_n\| \\
+&\le \|x_n - y_n\| + \Delta t \Lambda \|x_n - y_n\| + \|\delta_n\| \\
+&= (1 + \Lambda \Delta t) \|x_n - y_n\| + \|\delta_n\|
+\end{align*}
+L'application du lemme de Gronwall discret donne le résultat avec $S = e^{\Lambda T}$.
+\end{proof}
 
-La convergence signifie que la solution numérique tend vers la solution exacte lorsque le pas $h$ tend vers 0. Le résultat principal relie la consistance et la stabilité à la convergence.
+\subsection{Convergence des schémas à un pas explicite}
+Le théorème suivant (parfois appelé Théorème de Lax pour les EDO) relie consistance, stabilité et convergence.
 
-\begin{theorem}[Convergence des schémas à un pas]
-Soit \eqref{eq:cauchy_problem} un problème de Cauchy où $f$ est continue et Lipschitzienne par rapport à $x$ (avec constante $L$). Soit \eqref{eq:one_step_method} un schéma numérique défini par $\Phi$.
-Si le schéma est :
-\begin{enumerate}
-    \item \textbf{Consistant} d'ordre $p \ge 1$ (c'est-à-dire $\|\epsilon(t, h)\| \le C h^p$).
-    \item \textbf{Stable} (c'est-à-dire $\Phi$ est Lipschitzienne par rapport à sa deuxième variable avec constante $L_\Phi$).
-\end{enumerate}
-Alors le schéma est \textbf{convergent} d'ordre $p$. C'est-à-dire que l'erreur globale $e_n = x(t_n) - x_n$ satisfait :
-\begin{equation*}
- \max_{0 \le n \le N} \|e_n\| = \max_{0 \le n \le N} \|x(t_n) - x_n\| \le S \left( \|e_0\| + (T-t_0) \max_{0 \le k < N} \|\epsilon(t_k, h)\| \right)
-\end{equation*}
-où $S$ est une constante liée à la stabilité (par exemple $S \approx e^{L_\Phi(T-t_0)}$).
-Plus précisément, il existe une constante $K$ (indépendante de $h$) telle que :
-\begin{equation*}
- \max_{0 \le n \le N} \|x(t_n) - x_n\| \le K (\|x(t_0) - x_0\| + h^p)
-\end{equation*}
-En particulier, si $x_0 = x(t_0)$, alors l'erreur globale est en $O(h^p)$.
+\begin{theorem}[Convergence des schémas à un pas explicites]
+Si la méthode à un pas explicite (S) est stable et consistante d'ordre $q \ge 1$, alors elle est convergente.
+De plus, si la solution $x(t)$ du problème de Cauchy (P) est de classe $C^{q+1}$ et si la suite $(x_n)_{0 \le n \le N}$ est générée par (S) avec $x_0 = x(t_0)$, alors il existe une constante $K > 0$ telle que :
+\[
+\max_{0 \le n \le N} \|x(t_n) - x_n\| \le K (\Delta t)^q
+\]
+Plus précisément, si $C_{cons}$ est la constante de l'erreur de consistance (i.e. $\|e_{n+1}\| \le C_{cons} (\Delta t)^{q+1}$) et $S$ est la constante de stabilité, on a :
+\[
+\max_{0 \le n \le N} \|x(t_n) - x_n\| \le S \sum_{j=0}^{N-1} \|e_{j+1}\| \approx S \cdot N \cdot C_{cons} (\Delta t)^{q+1} = S \cdot \frac{T}{\Delta t} \cdot C_{cons} (\Delta t)^{q+1} = S \cdot C_{cons} \cdot T \cdot (\Delta t)^q
+\]
+L'erreur globale est donc en $O((\Delta t)^q)$.
 \end{theorem}
-
 \begin{proof}[Idée de la preuve]
-L'erreur globale $e_n = x(t_n) - x_n$ satisfait une relation de récurrence.
-On a $x(t_{n+1}) = x(t_n) + h \Phi(t_n, x(t_n), h) + h \epsilon(t_n, h)$ par définition de l'erreur locale $\epsilon$.
-Et $x_{n+1} = x_n + h \Phi(t_n, x_n, h)$.
-En soustrayant :
-$e_{n+1} = x(t_{n+1}) - x_{n+1} = (x(t_n) - x_n) + h (\Phi(t_n, x(t_n), h) - \Phi(t_n, x_n, h)) + h \epsilon(t_n, h)$.
-$e_{n+1} = e_n + h (\Phi(t_n, x_n + e_n, h) - \Phi(t_n, x_n, h)) + h \epsilon(t_n, h)$.
-En prenant la norme et en utilisant la stabilité (Lipschitzianité de $\Phi$) :
-$\|e_{n+1}\| \le \|e_n\| + h L_\Phi \|e_n\| + h \|\epsilon(t_n, h)\| = (1 + h L_\Phi) \|e_n\| + h \|\epsilon_n\|$.
-où $\|\epsilon_n\| = \|\epsilon(t_n, h)\| \le C h^p$.
-$\|e_{n+1}\| \le (1 + h L_\Phi) \|e_n\| + C h^{p+1}$.
-En utilisant un lemme de Gronwall discret, on peut montrer que $\|e_n\|$ est majoré par une quantité de l'ordre de $\|e_0\| + (T-t_0) C h^p / L_\Phi$ (grossièrement), ce qui donne la convergence d'ordre $p$.
-La majoration indiquée dans le théorème provient directement de l'application de ce lemme. Par exemple, $\max_{0 \le n \le N} \|e_n\| \le e^{L_\Phi(T-t_0)} \|e_0\| + \frac{e^{L_\Phi(T-t_0)}-1}{L_\Phi} \max_{0\le k < N} \|\epsilon_k\|$.
+Soit $x(t)$ la solution exacte. On a $x(t_{n+1}) = x(t_n) + \Delta t \Phi(t_n, x(t_n), \Delta t) + e_{n+1}$, où $e_{n+1}$ est l'erreur locale de troncature.
+Le schéma numérique est $x_{n+1} = x_n + \Delta t \Phi(t_n, x_n, \Delta t)$.
+Soit $\varepsilon_n = x(t_n) - x_n$ l'erreur globale au temps $t_n$.
+$\varepsilon_{n+1} = x(t_{n+1}) - x_{n+1} = (x(t_n) - x_n) + \Delta t (\Phi(t_n, x(t_n), \Delta t) - \Phi(t_n, x_n, \Delta t)) + e_{n+1}$.
+En utilisant la condition de Lipschitz pour $\Phi$ (qui découle de la stabilité pour de nombreux schémas ou est une hypothèse pour la stabilité plus générale):
+$\|\varepsilon_{n+1}\| \le \|\varepsilon_n\| + \Delta t \Lambda \|\varepsilon_n\| + \|e_{n+1}\| = (1 + \Lambda \Delta t)\|\varepsilon_n\| + \|e_{n+1}\|$.
+Puisque $x_0 = x(t_0)$, $\varepsilon_0 = 0$. L'erreur locale $\|e_{n+1}\| \le C_{cons} (\Delta t)^{q+1}$.
+Par le lemme de Gronwall, avec $\alpha_n = \|\varepsilon_n\|$, $\beta_n = \Lambda \Delta t$, $\gamma_n = C_{cons} (\Delta t)^{q+1}$:
+\[
+\|\varepsilon_n\| \le e^{n \Lambda \Delta t} \left( \|\varepsilon_0\| + \sum_{j=0}^{n-1} C_{cons} (\Delta t)^{q+1} e^{-(j+1)\Lambda \Delta t} \right)
+\]
+En majorant $e^{-(j+1)\Lambda \Delta t} \le 1$ et $e^{n \Lambda \Delta t} \le e^{\Lambda T}$:
+\[
+\|\varepsilon_n\| \le e^{\Lambda T} \sum_{j=0}^{n-1} C_{cons} (\Delta t)^{q+1} = e^{\Lambda T} n C_{cons} (\Delta t)^{q+1}
+\]
+Comme $n \Delta t \le T$, on a $n \le T/\Delta t$.
+\[
+\|\varepsilon_n\| \le e^{\Lambda T} \frac{T}{\Delta t} C_{cons} (\Delta t)^{q+1} = (e^{\Lambda T} T C_{cons}) (\Delta t)^q
+\]
+Ceci montre que $\max_{0 \le n \le N} \|\varepsilon_n\| = O((\Delta t)^q)$. La constante $S$ du théorème est $e^{\Lambda T}$ et la constante $c$ est $C_{cons}$.
 \end{proof}
-
-Ce théorème est fondamental car il garantit que si l'on choisit un schéma stable qui approxime bien localement l'équation différentielle (consistant), alors la solution numérique convergera globalement vers la solution exacte lorsque le pas de discrétisation diminue.
 
 \end{document}
-```

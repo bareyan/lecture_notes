@@ -1,347 +1,494 @@
 ```latex
-\documentclass{article}
-\usepackage{amssymb,amsmath,amsthm}
-\usepackage{graphicx}
-\usepackage{color}
-\usepackage{float}
-\usepackage{fancyhdr}
-\usepackage{array}
-\usepackage{listings}
-\usepackage[margin=1in]{geometry}
-\usepackage[french]{babel} % Set language to French
-
-\newtheorem{theorem}{Théorème}
-\newtheorem{lemma}{Lemme}
-\newtheorem{proposition}[theorem]{Proposition}
-\newtheorem{definition}{Définition}
-\newtheorem{remark}{Remarque}
-\newtheorem{solution}{Solution}
-\newtheorem{example}{Exemple}
-
-
 \begin{document}
 \sloppy
 
-\section{Solution approchée d'EDO} % Cours 4
+\section{Solution approchée d'Équations Différentielles Ordinaires (EDO)}
+\label{sec:solution_approchee_edo}
 
-\subsection{Motivations} % 4.1
+\subsection{Motivations et Définitions}
+\label{ssec:motivations_definitions}
 
-\subsubsection{Définitions} % 4.1.a
-Soit $f: [a, b] \times \mathbb{R}^d \to \mathbb{R}^d$, $(t, x) \mapsto f(t, x)$, avec $a, b \in \mathbb{R}$, $a < b$.
-La fonction $f$ est donnée par ses composantes $f_i: [a, b] \times \mathbb{R}^d \to \mathbb{R}$, $f(t,x) = (f_1(t,x), \dots, f_d(t,x))^T$.
-On note $g^{(n)}$ la dérivée d'ordre $n$ d'une fonction $g: \mathbb{R} \to \mathbb{R}$, et $g'$ la dérivée d'ordre 1.
+\subsubsection{Notations et Définitions de base}
+\label{sssec:notations_definitions_base}
+Soit $F: [a,b] \times \mathbb{R}^d \to \mathbb{R}^d$ une fonction, telle que $(t,x) \mapsto F(t,x)$, avec $a, b \in \mathbb{R}$ et $d \in \mathbb{N}^*$.
+Cette fonction vectorielle $F$ est donnée par ses composantes $F_i: [a,b] \times \mathbb{R}^d \to \mathbb{R}$ pour $i=1, \dots, d$:
+\[
+F(t,x) = \begin{pmatrix} F_1(t,x) \\ \vdots \\ F_d(t,x) \end{pmatrix}
+\]
+On note $g^{(p)}$ la dérivée d'ordre $p$ d'une fonction $g: \mathbb{R} \to \mathbb{R}$. En particulier, $g'$ est la dérivée d'ordre 1.
 
-Si $g: [a, b] \to \mathbb{R}^d$ est continue ainsi que toutes ses dérivées jusqu'à l'ordre $p$, on notera $g \in C^p([a, b], \mathbb{R}^d)$ ou simplement $g \in C^p([a, b])$ s'il n'y a pas d'ambiguïté.
-On a : $(g_i \in C^p([a, b], \mathbb{R}), \forall i=1, \dots, d) \iff (g \in C^p([a, b], \mathbb{R}^d))$.
+Si une fonction $g: [a,b] \to \mathbb{R}^d$ est continue ainsi que toutes ses dérivées jusqu'à l'ordre $p$, on notera $g \in C^p([a,b], \mathbb{R}^d)$ ou simplement $g \in C^p([a,b])$ s'il n'y a pas d'ambiguïté sur l'espace d'arrivée.
+On a l'équivalence suivante :
+\[
+(g_i \in C^k([a,b], \mathbb{R}) \quad \forall i=1,\dots,d) \Longleftrightarrow (g \in C^k([a,b], \mathbb{R}^d))
+\]
+
+\subsubsection{Définitions des EDOs}
+\label{sssec:definitions_edos}
+\begin{definition}
+On appelle \textbf{équation différentielle d'ordre 1} une équation de la forme:
+\[ y'(t) = F(t, y(t)), \quad \forall t \in [t_0, t_0+T] \]
+où $y(t) \in \mathbb{R}^d$ et $F: [a,b] \times \mathbb{R}^d \to \mathbb{R}^d$.
+\end{definition}
 
 \begin{definition}
-\begin{itemize}
-    \item On appelle équation différentielle d'ordre 1 une équation de la forme :
-    \[ y'(t) = f(t, y(t)), \quad \forall t \in [t_0, t_0 + T] \]
-    \item On appelle EDO d'ordre $p$ une équation de la forme $y^{(p)}(t) = f(t, y(t), y'(t), \dots, y^{(p-1)}(t))$, où $f: [a, b] \times (\mathbb{R}^d)^p \to \mathbb{R}^d$ est continue.
-    \item Une fonction $y$ de classe $C^p$ vérifiant une EDO est dite solution de l'EDO.
-    \item Résoudre une EDO, c'est déterminer toutes les solutions de cette EDO.
-    \item Lorsque $d \ne 1$, on parle de système d'EDOs.
-\end{itemize}
+On appelle \textbf{EDO d'ordre $p$} une équation de la forme:
+\[ y^{(p)}(t) = f(t, y(t), y'(t), \dots, y^{(p-1)}(t)) \]
+où $f: [a,b] \times (\mathbb{R}^d)^p \to \mathbb{R}^d$ est une fonction continue.
 \end{definition}
 
-\begin{remark}
+\begin{definition}
+Une fonction $y$ de classe $C^1$ (ou $C^p$ pour une EDO d'ordre $p$) vérifiant une EDO est dite \textbf{solution} de l'EDO.
+Résoudre une EDO, c'est déterminer toutes les solutions de cette EDO.
+Lorsque $d \neq 1$ (c'est-à-dire $y(t)$ est un vecteur et non un scalaire), on parle de \textbf{système d'EDOs}.
+\end{definition}
+
+\subsubsection{Réduction à un système d'ordre 1 et Problème de Cauchy}
+\label{sssec:reduction_ordre1_cauchy}
+\begin{theorem}
 Toute EDO d'ordre $p \ge 1$ peut se ramener à un système d'EDOs d'ordre 1.
-\end{remark}
+\end{theorem}
+\begin{proof}
+Soit une EDO d'ordre $p$: $y^{(p)}(t) = f(t, y(t), y'(t), \dots, y^{(p-1)}(t))$.
+On pose $X_1(t) = y(t)$, $X_2(t) = y'(t)$, ..., $X_p(t) = y^{(p-1)}(t)$.
+Alors on a le système d'équations d'ordre 1 suivant pour le vecteur $X(t) = (X_1(t), \dots, X_p(t))^T$:
+\begin{align*}
+X_1'(t) &= y'(t) = X_2(t) \\
+X_2'(t) &= y''(t) = X_3(t) \\
+&\vdots \\
+X_{p-1}'(t) &= y^{(p-1)}(t) = X_p(t) \\
+X_p'(t) &= y^{(p)}(t) = f(t, X_1(t), X_2(t), \dots, X_p(t))
+\end{align*}
+Ce qui peut s'écrire sous la forme $X'(t) = \mathcal{F}(t, X(t))$.
+\end{proof}
 
-\begin{definition}[Problème de Cauchy]
-On appelle \textit{problème de Cauchy} de l'EDO, la donnée de la valeur de la solution en un point $t_0 \in [a, b]$.
-Le couple $(t_0, y_0)$ est appelé \textit{condition initiale} et le problème de Cauchy consiste à trouver $y(t)$ tel que:
+\begin{definition}
+On appelle \textbf{problème de Cauchy} pour une EDO d'ordre 1 la donnée de l'EDO et de la valeur de la solution en un point initial $t_0 \in [a,b]$.
+Le couple $(t_0, y_0)$, où $y_0 = y(t_0)$, est appelé \textbf{condition initiale}. Le problème de Cauchy consiste à résoudre :
 \[
 \begin{cases}
-    y'(t) = f(t, y(t)), & t \in [t_0, t_0 + T] \\
-    y(t_0) = y_0 \in \mathbb{R}^d
+y'(t) = F(t, y(t)), & t \in [t_0, t_0+T] \\
+y(t_0) = y_0
 \end{cases}
 \]
-La recherche d'une fonction de classe $C^1$ vérifiant le système ci-dessus.
-Pour une EDO d'ordre $p$, $y^{(p)}(t) = f(t, y, y', \dots, y^{(p-1)})$, on donne $p$ conditions initiales : $y(t_0)$, $y'(t_0)$, ..., $y^{(p-1)}(t_0)$.
+où $y_0 \in \mathbb{R}^d$ est donné.
 \end{definition}
+La recherche d'une fonction de classe $C^1$ vérifiant ce système est l'objectif.
 
-\subsubsection{Exemples} % 4.1.2
+\subsection{Exemples d'EDO}
+\label{ssec:exemples_edo}
 
-\begin{example}[Pendule]
-L'équation du pendule simple est :
-\[ y''(t) + \frac{g}{L} \sin(y(t)) = 0 \]
-C'est une EDO d'ordre 2.
-Posons $x_1(t) = y(t)$ et $x_2(t) = y'(t)$.
-Alors on a :
-\begin{align*} x_1'(t) &= y'(t) = x_2(t) \\ x_2'(t) &= y''(t) = -\frac{g}{L} \sin(y(t)) = -\frac{g}{L} \sin(x_1(t)) \end{align*}
-On pose $X(t) = \begin{pmatrix} x_1(t) \\ x_2(t) \end{pmatrix} \in \mathbb{R}^2$.
-Le système s'écrit alors $X'(t) = f(t, X(t))$ avec
-\[ f(t, X) = f(t, x_1, x_2) = \begin{pmatrix} x_2 \\ -\frac{g}{L} \sin(x_1) \end{pmatrix} \]
-Ici, $f: \mathbb{R} \times \mathbb{R}^2 \to \mathbb{R}^2$. La fonction $f$ ne dépend pas explicitement de $t$.
-La condition initiale serait $y(t_0) = y_0$, $y'(t_0) = y'_0$, ce qui correspond à $X(t_0) = \begin{pmatrix} y_0 \\ y'_0 \end{pmatrix}$.
-\end{example}
-
-\begin{example}[Chute libre avec frottement]
-L'équation est $z'' = -g + k(z') z'$, où $z$ est l'altitude et $k(z')$ modélise le coefficient de frottement qui dépend de la vitesse $z'$. C'est une EDO d'ordre 2.
-Posons $v_1 = z$ et $v_2 = z'$.
-Le système devient :
-\begin{align*} v_1' &= z' = v_2 \\ v_2' &= z'' = -g + k(v_2) v_2 \end{align*}
-On pose $V(t) = \begin{pmatrix} v_1(t) \\ v_2(t) \end{pmatrix}$.
-Le système s'écrit $V'(t) = F(t, V(t))$ avec
-\[ F(t, V) = F(t, v_1, v_2) = \begin{pmatrix} v_2 \\ -g + k(v_2) v_2 \end{pmatrix} \]
-C'est un système différentiel d'ordre 1.
-\end{example}
-
-\begin{example}[Épidémiologie - Modèle SI]
-Considérons un modèle simple Susceptible-Infecté (SI). Soit $X(t)$ la proportion de susceptibles et $Y(t)$ la proportion d'infectés. On suppose $X(t) + Y(t) = 1$.
-Le taux de nouvelles infections est proportionnel aux rencontres entre susceptibles et infectés.
-\begin{align*} Y'(t) &= a X(t) Y(t) \\ X'(t) &= -a X(t) Y(t) \end{align*}
-où $a$ est le taux de transmission.
-En utilisant $X(t) = 1 - Y(t)$, on peut réduire à une seule équation pour $Y(t)$:
-\[ Y'(t) = a (1 - Y(t)) Y(t) \]
-C'est une EDO d'ordre 1 pour $Y(t)$.
-Le diagramme représente un modèle avec une population $N_{pop}$ divisée en individus sains $X_{sains}$ et malades $X_{malades}$, avec un taux d'infection $a$.
-\begin{verbatim}
-#save_to: epidemiologie_si.png
-from graphviz import Digraph
-
-dot = Digraph(comment='Modèle Épidémiologique SI')
-dot.node('Npop', 'N pop', shape='circle')
-dot.node('X_sains', 'X sains', shape='box')
-dot.node('X_malades', 'X malades', shape='box')
-dot.edge('X_sains', 'X_malades', label='a*X*Y')
-
-dot.render('epidemiologie_si', format='png', view=False)
-\end{verbatim}
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.3\textwidth]{epidemiologie_si.png}
-\caption{Diagramme simplifié d'un modèle épidémiologique.}
-\label{fig:epidemiologie}
-\end{figure}
-Le bloc de code suivant semble définir une fonction pour une API, sans lien direct avec le modèle SI décrit ci-dessus.
-\begin{lstlisting}[language=Python, breaklines=true]
-import numpy as np
-def F(t, y):
-  v1, v2 = y[0], y[1]
-  return np.array([v2, -g*L*np.exp(-ay)]) * np.exp(-ay)
-\end{lstlisting}
-\end{example}
-
-\subsubsection{Illustration (Graphique)} % Part of 4.1.2 in notes
-Considérons le problème de Cauchy $x'(t) = f(t, x(t))$, $x(t_0) = x_0$. On cherche à approcher la solution $x(t)$ sur l'intervalle $[t_0, T]$.
-On discrétise l'intervalle de temps : $t_0 < t_1 < \dots < t_N = T$. Souvent, on utilise un pas constant $\Delta t = (T - t_0) / N$, et $t_n = t_0 + n \Delta t$.
-On calcule une suite de points $(x_n)_{n=0}^N$ où $x_n$ est une approximation de $x(t_n)$. $x_0$ est donné par la condition initiale.
-On place les points $(t_n, x_n)$ sur un graphique. En reliant ces points, on obtient une approximation du graphe de la solution $x(t)$.
+\subsubsection{Pendule simple}
+\label{sssec:pendule}
+L'équation du mouvement d'un pendule simple est $L\phi''(t) + g \sin(\phi(t)) = 0$, où $\phi(t)$ est l'angle par rapport à la verticale, $L$ la longueur du pendule, et $g$ l'accélération due à la gravité. Ceci est une EDO d'ordre 2 :
+\[ \phi''(t) + \frac{g}{L} \sin(\phi(t)) = 0 \]
 
 \begin{verbatim}
-#save_to: euler_illustration.png
+#save_to: pendule_diagram.png
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 import numpy as np
 
-# Define a simple EDO dy/dt = y, y(0) = 1. Solution is y(t) = exp(t)
-def f(t, y):
-    return y
+fig, ax = plt.subplots(figsize=(4,4))
+ax.set_xlim(-1.2, 1.2)
+ax.set_ylim(-1.2, 0.2)
+ax.set_aspect('equal')
+ax.axis('off')
 
-t0 = 0
-T = 2
-y0 = 1
-N = 5 # Number of steps
-dt = (T - t0) / N
+# Pivot point
+pivot_x, pivot_y = 0, 0
 
-# Exact solution
-t_exact = np.linspace(t0, T, 100)
-y_exact = np.exp(t_exact)
+# Rod and Mass
+L_param = 1.0 # Using L_param to avoid conflict with module L
+phi_val = np.deg2rad(40) # example angle
+mass_x = pivot_x + L_param * np.sin(phi_val)
+mass_y = pivot_y - L_param * np.cos(phi_val)
 
-# Euler method approximation
-t_euler = [t0]
-y_euler = [y0]
-for n in range(N):
-    tn = t_euler[-1]
-    yn = y_euler[-1]
-    yn_next = yn + dt * f(tn, yn)
-    tn_next = tn + dt
-    t_euler.append(tn_next)
-    y_euler.append(yn_next)
+# Rod
+ax.plot([pivot_x, mass_x], [pivot_y, mass_y], 'k-', lw=2)
 
-# Plotting
-plt.figure(figsize=(8, 5))
-plt.plot(t_exact, y_exact, label='Solution exacte $x(t)$', color='blue')
-plt.plot(t_euler, y_euler, 'o-', label='Approximation $x_n$', color='red', markersize=5)
-plt.scatter(t_euler, y_euler, color='red')
+# Mass
+ax.plot(mass_x, mass_y, 'ko', markersize=12, markerfacecolor='lightgray')
+ax.text(mass_x + 0.15, mass_y, 'm', fontsize=12, va='center')
 
-# Annotate points
-for i in range(len(t_euler)):
-    plt.text(t_euler[i], y_euler[i] + 0.1, f'$(t_{i}, x_{i})$', fontsize=9, ha='center')
-    plt.plot([t_euler[i], t_euler[i]], [0, y_euler[i]], linestyle='--', color='grey', linewidth=0.8)
+# Vertical line
+ax.plot([pivot_x, pivot_x], [pivot_y, pivot_y - L_param * 1.1], 'k--')
 
-plt.xlabel('t')
-plt.ylabel('x(t)')
-plt.title("Illustration de l'approximation numérique")
-plt.legend()
-plt.grid(True, linestyle='--', alpha=0.6)
-plt.ylim(bottom=0)
-plt.xlim(left=t0)
+# Angle arc
+angle_arc = patches.Arc((pivot_x, pivot_y), L_param*0.5, L_param*0.5, theta1=-90, theta2=-90+np.rad2deg(phi_val), color='k', lw=0.8)
+ax.add_patch(angle_arc)
+angle_text_rad = phi_val / 2
+ax.text(pivot_x + L_param*0.3 * np.sin(angle_text_rad), pivot_y - L_param*0.3 * np.cos(angle_text_rad), r'$\phi$', fontsize=12, ha='center', va='top')
 
-plt.savefig("euler_illustration.png")
+# Length L
+angle_label_L = phi_val - np.pi/2
+ax.text(pivot_x + L_param/2 * np.cos(angle_label_L) + 0.05 * np.sin(angle_label_L) , pivot_y + L_param/2 * np.sin(angle_label_L) - 0.1 * np.cos(angle_label_L), 'L', fontsize=12, style='italic', ha='center', va='center')
+
+
+# Pivot
+ax.plot(pivot_x, pivot_y, 'ks', markersize=6)
+
+#ax.set_title("Schéma du pendule simple") # Titles are not usually part of figures for inclusion
+plt.savefig('pendule_diagram.png', bbox_inches='tight', dpi=150)
 \end{verbatim}
-
-\begin{figure}[H]
+\begin{figure}[h]
 \centering
-\includegraphics[max width=\textwidth, max height=0.4\textheight, keepaspectratio]{euler_illustration.png}
-\caption{Illustration graphique de l'approximation d'une solution d'EDO par des points $(t_n, x_n)$.}
-\label{fig:euler_illustration}
+\includegraphics[max width=0.4\textwidth, keepaspectratio]{pendule_diagram.png}
+\caption{Schéma d'un pendule simple.}
+\label{fig:pendule_diagram}
 \end{figure}
 
+Pour la ramener à un système d'ordre 1, on pose $X_1(t) = \phi(t)$ et $X_2(t) = \phi'(t)$.
+Alors, le système devient :
+\begin{align*}
+X_1'(t) &= \phi'(t) = X_2(t) \\
+X_2'(t) &= \phi''(t) = -\frac{g}{L} \sin(\phi(t)) = -\frac{g}{L} \sin(X_1(t))
+\end{align*}
+Si on note $X(t) = \begin{pmatrix} X_1(t) \\ X_2(t) \end{pmatrix}$, alors $X'(t) = F(t, X(t))$ avec $F(t, X) = \begin{pmatrix} X_2 \\ -\frac{g}{L} \sin(X_1) \end{pmatrix}$.
+C'est un système d'EDOs d'ordre 1, où $F: \mathbb{R} \times \mathbb{R}^2 \to \mathbb{R}^2$.
 
-\subsubsection{Nécessité de la solution approchée} % 4.1.3
-On considère le point suivant :
+\subsubsection{Chute libre avec frottement quadratique}
+\label{sssec:chute_libre}
+L'équation du mouvement vertical $z(t)$ d'un objet en chute libre avec une résistance de l'air proportionnelle au carré de la vitesse $v(t) = z'(t)$ est donnée par:
+\[ z''(t) = -g + k(z) (z'(t))^2 \]
+où $g$ est l'accélération de la pesanteur (constante) et $k(z)$ est un coefficient lié à la forme de l'objet et à la densité de l'air, pouvant dépendre de l'altitude $z$. C'est une EDO d'ordre 2.
+
+On pose $Y(t) = \begin{pmatrix} y_1(t) \\ y_2(t) \end{pmatrix} = \begin{pmatrix} z(t) \\ z'(t) \end{pmatrix}$.
+Le système d'ordre 1 équivalent est :
+\begin{align*}
+y_1'(t) &= z'(t) = y_2(t) \\
+y_2'(t) &= z''(t) = -g + k(y_1(t)) (y_2(t))^2
+\end{align*}
+Soit $Y'(t) = F(t, Y(t))$ avec $F(t, Y) = \begin{pmatrix} Y_2 \\ -g + k(Y_1) Y_2^2 \end{pmatrix}$. C'est un système d'équations d'ordre 1.
+(Note: dans les notes manuscrites, il y a une formule $F(t,Y) = \begin{pmatrix} V \\ -g + k y_1 y_2^2 \end{pmatrix}$ qui semble contenir une coquille si $Y=(y_1, y_2)=(z,V)$, le terme $k y_1 y_2^2$ devrait être $k(y_1) y_2^2$).
+
+\subsubsection{Modèle épidémiologique SIR}
+\label{sssec:sir_model}
+Un modèle simple d'épidémie divise la population en trois compartiments: Susceptibles (S), Infectés (I), et Rétablis (R).
+Les transitions sont: $S \xrightarrow{k_1 I S} I \xrightarrow{k_2 I} R$.
+$k_1$ est le taux d'infection, $k_2$ est le taux de guérison.
+Le système d'EDOs est:
+\begin{align*}
+S'(t) &= -k_1 I(t) S(t) \\
+I'(t) &= k_1 I(t) S(t) - k_2 I(t) \\
+R'(t) &= k_2 I(t)
+\end{align*}
+C'est un système d'EDOs d'ordre 1. $Y(t) = (S(t), I(t), R(t))^T$.
+
+\begin{verbatim}
+#save_to: sir_model_graph.png
+from graphviz import Digraph
+import numpy as np 
+import matplotlib.pyplot as plt
+
+dot = Digraph(comment='SIR Model')
+dot.attr(rankdir='LR', labelloc='t', label='Modèle SIR')
+
+dot.node('S', 'S (Susceptibles)')
+dot.node('I', 'I (Infectes)') # Corrected from "Infectés" in thought to match common spelling
+dot.node('R', 'R (Retablis)') # Corrected from "Rétablis"
+
+dot.edge('S', 'I', label='k1 I S')
+dot.edge('I', 'R', label='k2 I')
+
+dot.render('sir_model_graph', format='png', view=False, cleanup=True)
+\end{verbatim}
+\begin{figure}[h]
+\centering
+\includegraphics[max width=0.6\textwidth, keepaspectratio]{sir_model_graph.png}
+\caption{Diagramme du modèle épidémiologique SIR.}
+\label{fig:sir_model_graph}
+\end{figure}
+
+\subsubsection{Exemple de fonction $F(t,Y)$ pour un système}
+\label{sssec:exemple_F_t_Y}
+La fonction $F(t,Y)$ pour un système $Y'(t) = F(t,Y(t))$ peut prendre diverses formes. Par exemple, considerons $Y=(y_1, y_2)^T$. Une fonction $F$ pourrait être:
+\begin{lstlisting}[language=Python, caption=Exemple de fonction $F(t,Y)$, basicstyle=\footnotesize\ttfamily, breaklines=true]
+import numpy as np
+
+# g, L, k sont des parametres supposes definis ailleurs
+# Par exemple: g = 9.81, L = 1.0, k = 0.1
+
+def F(t, Y):
+  y1, y2 = Y # Y est un vecteur [y1, y2]
+  dY_dt = np.array([
+      y2,
+      -g/L * k * y1 * y2**2 
+  ]) * np.exp(-t)
+  return dY_dt
+\end{lstlisting}
+Ce code définit le système d'EDOs:
+\begin{align*}
+y_1'(t) &= y_2(t) e^{-t} \\
+y_2'(t) &= \left(-\frac{g}{L} k y_1(t) y_2(t)^2\right) e^{-t}
+\end{align*}
+
+\subsection{Problème de Cauchy et Existence/Unicité de la solution}
+\label{ssec:cauchy_existence_unicite}
+
+\subsubsection{Nécessité de la solution approchée}
+\label{sssec:necessite_solution_approchee}
+On considère le problème de Cauchy suivant:
 \begin{enumerate}
-    \item Il existe des solutions $x(t)$ pour le problème de Cauchy $x'(t) = f(t, x(t))$, $x(t_0) = x_0$ sur $[t_0, t_0+T]$.
-    \item On ne sait pas résoudre (analytiquement) la plupart des EDOs. Par exemple, l'équation $y' = \sin(t^2)$ n'a pas de primitive exprimable avec des fonctions usuelles. Des cas particuliers comme les EDOs linéaires ou à variables séparées peuvent être résolus.
-    \item L'objectif est de trouver $x(t)$ tel que $x'(t) = f(t, x(t))$.
+    \item $y'(t) = f(t, y(t))$, pour $t \in [t_0, t_0+T]$
+    \item $y(t_0) = y_0$ (condition initiale donnée)
 \end{enumerate}
+Souvent, on ne sait pas résoudre analytiquement ce système (1)-(2), sauf dans des cas particuliers (par exemple, EDO linéaires à coefficients constants, EDO à variables séparables, etc.).
+\begin{example}
+L'EDO $y'(t) = \sin(t^2 y(t))$ avec $y(0)=1$ est un exemple d'équation dont on ne connaît pas de solution analytique explicite.
+\end{example}
+D'où la nécessité de recourir à des méthodes de solution approchée.
 
-\subsection{Problème de population des lapins} % 4.2
-Considérons un modèle prédateur-proie (Lotka-Volterra modifié).
-Soit $L(t)$ la population de lapins (proies) et $R(t)$ la population de renards (prédateurs).
-On a le problème de Cauchy suivant :
-\[
-\begin{cases}
-    L'(t) = R(t) L(t) (1 - p L(t)) \\ % Seems biologically unusual, transcribing notes
-    R'(t) = R(t) (L(t)^2 - p R(t)^2) \\ % Seems biologically unusual, transcribing notes
-    L(0) = L_0 \\
-    R(0) = R_0
-\end{cases}
-\]
-où $p, L_0, R_0$ sont des paramètres (notation $L_2, pL, pR_2$ from notes seems unclear, interpreting based on context as $L_0, R_0, p$).
-Ce système n'est pas résoluble analytiquement en général.
-
-On peut cependant résoudre numériquement ce problème et obtenir une approximation de la solution. La condition de résolution numérique dépend de plusieurs facteurs :
-\begin{itemize}
-    \item Stabilité : Dépendance continue de la solution vis-à-vis des données du problème.
-    \item Régularité de la solution.
-    \item Existence et unicité de la solution.
-    \item Le problème est bien posé.
-\end{itemize}
-
-\subsection{Théorème de Cauchy-Lipschitz}
-Ce théorème garantit l'existence et l'unicité de la solution pour une classe importante de problèmes de Cauchy.
-
+\subsubsection{Théorème de Cauchy-Lipschitz}
+\label{sssec:cauchy_lipschitz}
+Sous certaines conditions sur la fonction $f$, le problème de Cauchy admet une solution unique.
 \begin{definition}[Fonction Lipschitzienne]
-On dit que $f: [a, b] \times \mathbb{R}^d \to \mathbb{R}^d$ est Lipschitzienne par rapport à sa seconde variable s'il existe une constante positive $K$, appelée constante de Lipschitz, telle que pour tout $t \in [a, b]$ et pour tous $y_1, y_2 \in \mathbb{R}^d$ :
-\[ \|f(t, y_1) - f(t, y_2)\| \le K \|y_1 - y_2\| \]
-où $\| \cdot \|$ est une norme sur $\mathbb{R}^d$.
+On dit qu'une fonction $f: D \subset [a,b] \times \mathbb{R}^d \to \mathbb{R}^d$ est \textbf{Lipschitzienne} par rapport à sa seconde variable sur $D$ s'il existe une constante $L > 0$ (appelée constante de Lipschitz) telle que pour tous $(t, y_1) \in D$ et $(t, y_2) \in D$:
+\[ \|f(t,y_1) - f(t,y_2)\|_{\mathbb{R}^d} \le L \|y_1 - y_2\|_{\mathbb{R}^d} \]
 \end{definition}
 
 \begin{theorem}[Cauchy-Lipschitz]
-Soit $f: [t_0, t_0 + T] \times \mathbb{R}^d \to \mathbb{R}^d$ une fonction continue.
-Si $f$ est Lipschitzienne par rapport à sa seconde variable sur $[t_0, t_0 + T] \times \mathbb{R}^d$, alors pour tout $y_0 \in \mathbb{R}^d$, le problème de Cauchy
-\[
-\begin{cases}
-    y'(t) = f(t, y(t)), & t \in [t_0, t_0 + T] \\
-    y(t_0) = y_0
-\end{cases}
-\]
-admet une unique solution $y \in C^1([t_0, t_0 + T], \mathbb{R}^d)$.
+Soit le problème de Cauchy $(P)$: $y'(t) = f(t,y(t))$ avec $y(t_0)=y_0$.
+Si $f: [t_0, t_0+T] \times \mathbb{R}^d \to \mathbb{R}^d$ est une fonction telle que:
+\begin{enumerate}
+    \item $f$ est continue sur $[t_0, t_0+T] \times \mathbb{R}^d$.
+    \item $f$ est Lipschitzienne par rapport à sa seconde variable $y$ sur $[t_0, t_0+T] \times \mathbb{R}^d$.
+\end{enumerate}
+Alors, le problème de Cauchy $(P)$ admet une unique solution $y(t)$ de classe $C^1([t_0, t_0+T], \mathbb{R}^d)$.
 \end{theorem}
 
-\subsection{Exemple de schémas numériques} % 4.3
+\subsubsection{Qualités de la solution théorique}
+\label{sssec:qualites_solution}
+Lorsque le problème est bien posé (c'est-à-dire que les conditions du théorème de Cauchy-Lipschitz sont satisfaites), la solution théorique possède certaines qualités:
+\begin{itemize}
+    \item Existence et unicité de la solution.
+    \item Régularité de la solution (par exemple, $C^1$).
+    \item Dépendance continue de la solution vis-à-vis des données du problème (condition initiale $y_0$ et fonction $f$). Ceci est lié à la stabilité du problème.
+\end{itemize}
+Cependant, même si le problème est bien posé et admet une solution unique, on peut ne pas être capable de la trouver analytiquement.
 
-\subsubsection{Formulation Intégrale} % 4.3.1
+\subsection{Schémas Numériques à un pas}
+\label{ssec:schemas_numeriques}
+
+\subsubsection{Formulation Intégrale du problème de Cauchy}
+\label{sssec:formulation_integrale_cauchy}
+L'EDO $y'(t) = f(t, y(t))$ peut être intégrée entre $t_0$ et $t$:
+\[ \int_{t_0}^t y'(s) ds = \int_{t_0}^t f(s, y(s)) ds \]
+\[ y(t) - y(t_0) = \int_{t_0}^t f(s, y(s)) ds \]
 \begin{proposition}
-Si $x \in C^1([t_0, t_0+T])$ est solution de $x'(t) = f(t, x(t))$, alors $x(t)$ vérifie l'équation intégrale :
-\[ x(t) = x(t_0) + \int_{t_0}^t f(s, x(s)) ds, \quad \forall t \in [t_0, t_0+T] \]
+Une fonction $y(t)$ est solution du problème de Cauchy $(P)$
+\[ \begin{cases} y'(t) = f(t, y(t)) \\ y(t_0) = y_0 \end{cases} \]
+si et seulement si $y(t)$ satisfait l'équation intégrale:
+\[ y(t) = y_0 + \int_{t_0}^t f(s, y(s)) ds, \quad \forall t \in [t_0, t_0+T] \]
 \end{proposition}
-\begin{proof}
-On intègre l'équation $x'(s) = f(s, x(s))$ entre $t_0$ et $t$:
-\[ \int_{t_0}^t x'(s) ds = \int_{t_0}^t f(s, x(s)) ds \]
-Par le théorème fondamental de l'analyse, $\int_{t_0}^t x'(s) ds = x(t) - x(t_0)$.
-Donc, $x(t) - x(t_0) = \int_{t_0}^t f(s, x(s)) ds$, ce qui donne le résultat.
-\end{proof}
+Cette formulation est la base de nombreuses méthodes numériques.
 
-\subsubsection{Construction du schéma d'Euler explicite} % 4.2.2 (Using notes numbering)
-On cherche à approcher $x(t)$ aux points de la discrétisation $t_n = t_0 + n \Delta t$.
-On part de la formulation intégrale entre $t_n$ et $t_{n+1}$:
-\[ x(t_{n+1}) = x(t_n) + \int_{t_n}^{t_{n+1}} f(s, x(s)) ds \]
-L'idée des méthodes numériques est d'approcher l'intégrale.
-Pour le schéma d'Euler explicite, on approxime l'intégrale par la méthode des rectangles à gauche :
-\[ \int_{t_n}^{t_{n+1}} f(s, x(s)) ds \approx (t_{n+1} - t_n) f(t_n, x(t_n)) = \Delta t f(t_n, x(t_n)) \]
-En remplaçant $x(t_n)$ par son approximation $x_n$ et $x(t_{n+1})$ par $x_{n+1}$, on obtient le schéma :
-\[ x_{n+1} = x_n + \Delta t f(t_n, x_n) \]
-Avec la condition initiale $x_0 = x(t_0)$.
-Ceci permet de calculer $x_1, x_2, \dots, x_N$ de proche en proche.
+\subsubsection{Principe des méthodes numériques et maillage temporel}
+\label{sssec:principe_methodes_numeriques}
+L'idée est de construire une suite de points $(t_n, y_n)$ qui approximent la solution $y(t)$ aux instants $t_n$.
+On définit un \textbf{maillage} du temps: une suite discrète d'instants $t_n = t_0 + n \Delta t$ pour $n=0, 1, \dots, N$, où $\Delta t = T/N$ est le \textbf{pas de temps} et $N$ est le nombre de pas.
+On calcule $y_n \approx y(t_n)$ pour chaque $n$. En reliant les points $(t_n, y_n)$, on obtient une approximation graphique de la solution $t \mapsto y(t)$.
 
-\paragraph{Étapes de la construction}
-\begin{enumerate}
-    \item \textbf{Étape 1: Maillage du domaine} \\
-    On choisit $N \in \mathbb{N}^*$ et on définit le pas de temps $\Delta t = (T - t_0) / N$.
-    Les points de discrétisation sont $t_n = t_0 + n \Delta t$ pour $n=0, 1, \dots, N$.
-    \item \textbf{Étape 2: Formulation Intégrale} \\
-    Sur chaque sous-intervalle $[t_n, t_{n+1}]$, la solution exacte vérifie :
-    \[ x(t_{n+1}) = x(t_n) + \int_{t_n}^{t_{n+1}} f(s, x(s)) ds \]
-    \item \textbf{Étape 3: Approximation des Intégrales (Formules de Quadrature)} \\
-    On remplace l'intégrale par une formule de quadrature et $x(t_k)$ par $x_k$.
-\end{enumerate}
+\begin{verbatim}
+#save_to: numerical_approximation_plot.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
 
-\subsubsection{Approximation des Intégrales (Formules de Quadrature)} % Based on Page 4 Title
+def true_solution_example(t):
+    # Exemple: y' = cos(t) - 0.5*y, y(0)=1
+    # Solution: y(t) = (6/5)*exp(-0.5*t) + (2/5)*sin(t) + (4/5)*cos(t) - 4/5
+    # For simplicity, using a generic damped oscillation for illustration
+    return np.exp(-0.2*t) * np.cos(1.5*t) + 0.5 * np.sin(0.5*t)
 
-\paragraph{Schéma d'Euler Explicite (Rectangles à gauche)}
-On approxime $f(s, x(s))$ par sa valeur en $t_n$, soit $f(t_n, x_n)$.
-\[ \int_{t_n}^{t_{n+1}} f(s, x(s)) ds \approx \Delta t f(t_n, x(t_n)) \]
-Le schéma est :
+t_max = 8.0
+N_points = 9
+t_n_vals = np.linspace(0, t_max, N_points)
+y_n_vals = true_solution_example(t_n_vals)
+# Introduce slight visual "error" for some points to make it look more like an approximation
+# y_n_vals[3] *= 0.9
+# y_n_vals[6] *= 1.1
+
+
+fig, ax = plt.subplots(figsize=(7,4.5))
+
+ax.plot(t_n_vals, y_n_vals, 'bo-', label='Solution numérique $(t_n, y_n)$', markersize=6, markerfacecolor='blue')
+
+ax.set_xticks(t_n_vals)
+xtick_labels = ['$t_0$'] + [f'$t_{i}$' for i in range(1, N_points-1)] + ['$t_N$']
+ax.set_xticklabels(xtick_labels)
+
+
+ax.set_xlabel('$t$')
+ax.set_ylabel('$y_{approx}(t)$')
+#ax.set_title('Illustration de la construction d\'une solution numérique approchée')
+ax.legend(loc='upper right')
+ax.grid(True, linestyle=':', alpha=0.7)
+plt.tight_layout()
+plt.savefig('numerical_approximation_plot.png', bbox_inches='tight', dpi=150)
+\end{verbatim}
+\begin{figure}[h]
+\centering
+\includegraphics[max width=\textwidth, max height=0.35\textheight, keepaspectratio]{numerical_approximation_plot.png}
+\caption{Illustration de la construction d'une solution numérique approchée $y_n \approx y(t_n)$. Les points $(t_n,y_n)$ sont reliés pour former une approximation de la courbe solution.}
+\label{fig:numerical_approximation_plot}
+\end{figure}
+
+
+\subsubsection{Construction des schémas à partir d'approximations d'intégrales (Formules de Quadrature)}
+\label{sssec:quadrature}
+Les schémas numériques sont souvent dérivés de la formulation intégrale sur un petit intervalle $[t_n, t_{n+1}]$:
+\[ y(t_{n+1}) = y(t_n) + \int_{t_n}^{t_{n+1}} f(s, y(s)) ds \]
+L'intégrale $\int_{t_n}^{t_{n+1}} g(s) ds$ (où $g(s) = f(s, y(s))$) est approximée par une formule de quadrature:
+\begin{itemize}
+    \item \textbf{Rectangle à gauche}: $\int_{t_n}^{t_{n+1}} g(s) ds \approx \Delta t \cdot g(t_n)$. Erreur $O(\Delta t^2)$.
+    \item \textbf{Rectangle à droite}: $\int_{t_n}^{t_{n+1}} g(s) ds \approx \Delta t \cdot g(t_{n+1})$. Erreur $O(\Delta t^2)$.
+    \item \textbf{Trapèze}: $\int_{t_n}^{t_{n+1}} g(s) ds \approx \frac{\Delta t}{2} [g(t_n) + g(t_{n+1})]$. Erreur $O(\Delta t^3)$.
+    \item \textbf{Point milieu}: $\int_{t_n}^{t_{n+1}} g(s) ds \approx \Delta t \cdot g(t_n + \frac{\Delta t}{2})$. Erreur $O(\Delta t^3)$.
+\end{itemize}
+
+\begin{verbatim}
+#save_to: rectangle_rule_plot.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+def g_example(x):
+    return np.sin(x/2) + 2 + 0.05*x**2
+
+tn_val = 1.5
+tn_plus_1_val = 3.5
+delta_t_val = tn_plus_1_val - tn_val
+
+x_func_vals = np.linspace(0, 5, 200)
+y_func_vals = g_example(x_func_vals)
+
+fig, ax = plt.subplots(figsize=(6.5,4.5))
+ax.plot(x_func_vals, y_func_vals, 'k-', label='$g(s)$', lw=1.5)
+
+# Rectangle à gauche
+rect_gauche = patches.Rectangle((tn_val, 0), delta_t_val, g_example(tn_val), linewidth=1, edgecolor='darkred', facecolor='red', alpha=0.3, label=r'Approx. Rectangle Gauche: $\Delta t \cdot g(t_n)$')
+ax.add_patch(rect_gauche)
+ax.plot([tn_val, tn_val], [0, g_example(tn_val)], 'r--')
+ax.plot([tn_plus_1_val, tn_plus_1_val], [0, g_example(tn_val)], 'r--') # Line for top of rectangle
+
+ax.set_xticks([tn_val, tn_plus_1_val])
+ax.set_xticklabels(['$t_n$', '$t_{n+1}$'], fontsize=12)
+ax.set_yticks([])
+
+ax.set_xlabel('$s$', fontsize=12)
+ax.set_ylabel('$g(s)$', fontsize=12, rotation=0, labelpad=15)
+#ax.set_title('Approximation de l\'intégrale par la méthode du rectangle à gauche')
+
+# Shaded area for true integral
+x_fill_vals = np.linspace(tn_val, tn_plus_1_val, 100)
+y_fill_vals = g_example(x_fill_vals)
+ax.fill_between(x_fill_vals, y_fill_vals, color='blue', alpha=0.2, label=r'Valeur exacte: $\int_{t_n}^{t_{n+1}} g(s)ds$')
+
+ax.legend(fontsize=10)
+ax.grid(True, linestyle=':', alpha=0.5)
+plt.ylim(0, max(y_func_vals)*1.1)
+plt.xlim(0, 5)
+plt.tight_layout()
+plt.savefig('rectangle_rule_plot.png', bbox_inches='tight', dpi=150)
+\end{verbatim}
+\begin{figure}[h]
+\centering
+\includegraphics[max width=\textwidth, max height=0.35\textheight, keepaspectratio]{rectangle_rule_plot.png}
+\caption{Approximation de l'intégrale $\int_{t_n}^{t_{n+1}} g(s)ds$ par la méthode du rectangle à gauche.}
+\label{fig:rectangle_rule_plot}
+\end{figure}
+
+Sur l'intervalle $[t_n, t_{n+1}]$, on considère le problème de Cauchy local:
+\[ \begin{cases} y'(t) = f(t, y(t)) \\ y(t_n) = x_n \end{cases} \]
+où $x_n$ est la valeur approchée de $y(t_n)$ calculée à l'étape précédente ($x_0 = y_0$ étant la condition initiale exacte).
+Alors $y(t_{n+1}) = x_n + \int_{t_n}^{t_{n+1}} f(s, y(s)) ds$.
+En approximant l'intégrale et $y(s)$ dans l'intégrande, on obtient différents schémas. On pose $x_{n+1}$ comme l'approximation de $y(t_{n+1})$.
+
+\subsubsection{Schéma d'Euler Explicite}
+\label{sssec:euler_explicite}
+En utilisant la formule du rectangle à gauche pour l'intégrale et en approximant $f(s, y(s)) \approx f(t_n, x_n)$ pour $s \in [t_n, t_{n+1}]$:
+\[ y(t_{n+1}) \approx x_n + \Delta t f(t_n, x_n) \]
+Le schéma d'Euler explicite est défini par:
 \[ x_{n+1} = x_n + \Delta t f(t_n, x_n), \quad n=0, \dots, N-1 \]
-L'erreur locale est en $O(\Delta t^2)$.
+\[ x_0 = y_0 \]
 
-\paragraph{Schéma du Point Milieu}
-On approxime l'intégrale par la valeur au point milieu $t_n + \Delta t / 2$.
-\[ \int_{t_n}^{t_{n+1}} f(s, x(s)) ds \approx \Delta t f(t_n + \Delta t/2, x(t_n + \Delta t/2)) \]
-On a besoin d'approcher $x(t_n + \Delta t/2)$. On peut utiliser une étape d'Euler :
-$x(t_n + \Delta t/2) \approx x(t_n) + (\Delta t/2) f(t_n, x(t_n)) \approx x_n + (\Delta t/2) f(t_n, x_n)$.
-Le schéma devient :
+\subsubsection{Schéma du Point Milieu (Explicite)}
+\label{sssec:point_milieu}
+En utilisant la formule du point milieu pour l'intégrale:
+\[ \int_{t_n}^{t_{n+1}} f(s, y(s)) ds \approx \Delta t f(t_n + \frac{\Delta t}{2}, y(t_n + \frac{\Delta t}{2})) \]
+Pour évaluer $y(t_n + \frac{\Delta t}{2})$, on peut utiliser une approximation d'Euler sur un demi-pas:
+$y(t_n + \frac{\Delta t}{2}) \approx y(t_n) + \frac{\Delta t}{2} f(t_n, y(t_n))$.
+En substituant $y(t_n)$ par $x_n$, on obtient le schéma du point milieu (un schéma de Runge-Kutta d'ordre 2):
 \[ x_{n+1} = x_n + \Delta t f\left(t_n + \frac{\Delta t}{2}, x_n + \frac{\Delta t}{2} f(t_n, x_n)\right), \quad n=0, \dots, N-1 \]
-L'erreur locale est en $O(\Delta t^3)$.
+\[ x_0 = y_0 \]
+La note indique $y(t_{n+1}) = y(t_n) + \Delta t f(t_n + \frac{\Delta t}{2}, y(t_n) + \frac{\Delta t}{2} f(t_n, y(t_n))) + O(\Delta t^3)$. Ce $O(\Delta t^3)$ est l'erreur de troncature locale.
 
-\paragraph{Schéma des Trapèzes (Implicite)}
-On approxime l'intégrale par la moyenne des valeurs aux extrémités :
-\[ \int_{t_n}^{t_{n+1}} f(s, x(s)) ds \approx \frac{\Delta t}{2} [f(t_n, x(t_n)) + f(t_{n+1}, x(t_{n+1}))] \]
-Le schéma est :
-\[ x_{n+1} = x_n + \frac{\Delta t}{2} [f(t_n, x_n) + f(t_{n+1}, x_{n+1})], \quad n=0, \dots, N-1 \]
-Ce schéma est implicite car $x_{n+1}$ apparaît des deux côtés de l'équation (dans $f(t_{n+1}, x_{n+1})$). Il faut résoudre une équation (souvent non linéaire) à chaque étape pour trouver $x_{n+1}$.
-L'erreur locale est en $O(\Delta t^3)$.
-
-\subsubsection{Autres schémas et forme générale des schémas explicites} % 4.3.3
-
-\paragraph{Schéma d'Euler Implicite (Rectangle à droite)}
-On approxime l'intégrale par la valeur à l'extrémité droite $t_{n+1}$.
-\[ \int_{t_n}^{t_{n+1}} f(s, x(s)) ds \approx \Delta t f(t_{n+1}, x(t_{n+1})) \]
-Le schéma est :
+\subsubsection{Schéma d'Euler Implicite}
+\label{sssec:euler_implicite}
+En utilisant la formule du rectangle à droite pour l'intégrale:
+\[ \int_{t_n}^{t_{n+1}} f(s, y(s)) ds \approx \Delta t f(t_{n+1}, y(t_{n+1})) \]
+On obtient:
+\[ y(t_{n+1}) \approx x_n + \Delta t f(t_{n+1}, y(t_{n+1})) \]
+Le schéma d'Euler implicite est défini par:
 \[ x_{n+1} = x_n + \Delta t f(t_{n+1}, x_{n+1}), \quad n=0, \dots, N-1 \]
-C'est un schéma implicite.
+\[ x_0 = y_0 \]
+Ce schéma est implicite car $x_{n+1}$ apparaît des deux côtés de l'équation. À chaque pas de temps, on doit résoudre l'équation (souvent non linéaire) (PH):
+$x_{n+1} - \Delta t f(t_{n+1}, x_{n+1}) = x_n$ pour trouver $x_{n+1}$.
 
-\paragraph{Schéma de Crank-Nicolson}
-C'est un autre nom pour le schéma des trapèzes vu précédemment.
-\[ x_{n+1} = x_n + \frac{\Delta t}{2} [f(t_n, x_n) + f(t_{n+1}, x_{n+1})] \]
-Il est implicite.
+\subsubsection{Schéma de Crank-Nicolson (Trapèze Implicite)}
+\label{sssec:crank_nicolson}
+En utilisant la formule du trapèze pour l'intégrale:
+\[ \int_{t_n}^{t_{n+1}} f(s, y(s)) ds \approx \frac{\Delta t}{2} [f(t_n, y(t_n)) + f(t_{n+1}, y(t_{n+1}))] \]
+Le schéma de Crank-Nicolson est défini par:
+\[ x_{n+1} = x_n + \frac{\Delta t}{2} [f(t_n, x_n) + f(t_{n+1}, x_{n+1})], \quad n=0, \dots, N-1 \]
+\[ x_0 = y_0 \]
+Ce schéma est également implicite.
 
-\paragraph{Schéma de Heun (Euler amélioré / Runge-Kutta d'ordre 2)}
-C'est un schéma explicite qui combine une étape de prédiction (type Euler explicite) et une étape de correction (type trapèze utilisant la prédiction).
-\begin{itemize}
-    \item Prédiction : $\tilde{x}_{n+1} = x_n + \Delta t f(t_n, x_n)$
-    \item Correction : $x_{n+1} = x_n + \frac{\Delta t}{2} [f(t_n, x_n) + f(t_{n+1}, \tilde{x}_{n+1})]$
-\end{itemize}
-Le schéma s'écrit en une seule ligne :
-\[ x_{n+1} = x_n + \frac{\Delta t}{2} [f(t_n, x_n) + f(t_{n+1}, x_n + \Delta t f(t_n, x_n))], \quad n=0, \dots, N-1 \]
-Ce schéma est explicite. L'erreur locale est en $O(\Delta t^3)$.
+\subsubsection{Schéma de Heun (Trapèze Explicite / Euler amélioré)}
+\label{sssec:heun}
+On peut rendre le schéma du trapèze explicite en utilisant une prédiction pour $x_{n+1}$ dans le terme $f(t_{n+1}, x_{n+1})$.
+Une méthode courante est d'utiliser une prédiction par Euler explicite:
+\begin{enumerate}
+    \item Prédiction (Euler explicite): $\tilde{x}_{n+1} = x_n + \Delta t f(t_n, x_n)$
+    \item Correction (Trapèze): $x_{n+1} = x_n + \frac{\Delta t}{2} [f(t_n, x_n) + f(t_{n+1}, \tilde{x}_{n+1})]$
+\end{enumerate}
+Ceci est le schéma de Heun:
+\[ x_{n+1} = x_n + \frac{\Delta t}{2} \left[ f(t_n, x_n) + f(t_{n+1}, x_n + \Delta t f(t_n, x_n)) \right], \quad n=0, \dots, N-1 \]
+\[ x_0 = y_0 \]
+C'est un schéma explicite.
 
-\paragraph{Généralisation des schémas à un pas (explicites)}
-Un schéma numérique à un pas explicite peut s'écrire sous la forme générale :
+\subsubsection{Forme générale des schémas explicites à un pas}
+\label{sssec:forme_generale_explicite}
+De nombreux schémas explicites à un pas peuvent s'écrire sous la forme générale:
 \[ x_{n+1} = x_n + \Delta t \Phi(t_n, x_n, \Delta t), \quad n=0, \dots, N-1 \]
-avec $x_0$ donné, et où $\Phi: \mathbb{R} \times \mathbb{R}^d \times \mathbb{R}^+ \to \mathbb{R}^d$ est appelée fonction d'incrément.
-
+\[ x_0 \text{ donné} \]
+où $\Phi: \mathbb{R} \times \mathbb{R}^d \times \mathbb{R} \to \mathbb{R}^d$ est la fonction d'incrément.
+\begin{example} Exemples de fonctions $\Phi$:
 \begin{itemize}
-    \item \textbf{Euler explicite :} $\Phi(t, y, \Delta t) = f(t, y)$
-    \item \textbf{Point Milieu :} $\Phi(t, y, \Delta t) = f(t + \frac{\Delta t}{2}, y + \frac{\Delta t}{2} f(t, y))$
-    \item \textbf{Heun :} $\Phi(t, y, \Delta t) = \frac{1}{2} [f(t, y) + f(t + \Delta t, y + \Delta t f(t, y))]$
+    \item \textbf{Euler explicite}: $\Phi(t, y, \Delta t) = f(t, y)$
+    \item \textbf{Point Milieu}: $\Phi(t, y, \Delta t) = f\left(t + \frac{\Delta t}{2}, y + \frac{\Delta t}{2} f(t, y)\right)$
+    \item \textbf{Heun}: $\Phi(t, y, \Delta t) = \frac{1}{2} \left[ f(t, y) + f(t + \Delta t, y + \Delta t f(t, y)) \right]$
 \end{itemize}
+\end{example}
 
+\subsection{Exemple: Modèle Proie-Prédateur (Lotka-Volterra)}
+\label{ssec:lotka_volterra}
+Un autre exemple classique de système d'EDOs est le modèle de Lotka-Volterra, qui décrit la dynamique des populations de proies $L(t)$ (par exemple, lapins) et de prédateurs $R(t)$ (par exemple, renards).
+On a le problème de Cauchy:
+\begin{align*}
+L'(t) &= a L(t) - b L(t)R(t) \\
+R'(t) &= -c R(t) + d L(t)R(t)
+\end{align*}
+avec les conditions initiales $L(0) = L_0$ et $R(0) = R_0$. Les constantes $a,b,c,d$ sont positives et décrivent les interactions:
+\begin{itemize}
+    \item $a L(t)$: croissance exponentielle des proies en l'absence de prédateurs.
+    \item $-b L(t)R(t)$: mortalité des proies due à la prédation.
+    \item $-c R(t)$: mortalité exponentielle des prédateurs en l'absence de proies.
+    \item $d L(t)R(t)$: croissance des prédateurs grâce à la prédation.
+\end{itemize}
+Les notes mentionnent $L'(t) = L(t) - L(t)R(t)$ et $R'(t) = -R(t) + L(t)R(t)$, ce qui correspond au cas $a=1, b=1, c=1, d=1$.
+Ce système n'est généralement pas résoluble analytiquement et nécessite des méthodes numériques.
 
 \end{document}
 ```
