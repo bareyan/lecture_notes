@@ -1,0 +1,363 @@
+\begin{document}
+\sloppy
+
+\section*{Exercise 2 Solutions}
+
+\subsection*{Game Matrix Representation and Nash Equilibria}
+
+The first game matrix is:
+\begin{center}
+\begin{tabular}{c|c|c|}
+ & \multicolumn{1}{c}{M} & \multicolumn{1}{c}{S} \\ \cline{2-3}
+M & 0, 0 & 6, 3 \\ \cline{2-3}
+S & 3, 6 & 0, 0 \\ \cline{2-3}
+\end{tabular}
+\end{center}
+The Nash equilibria for this game are (M,S) and (S,M).
+
+The second game matrix (possibly representing a strategic form of an extensive game) is:
+\begin{center}
+\begin{tabular}{c|c|c|}
+ & \multicolumn{1}{c}{M} & \multicolumn{1}{c}{S} \\ \cline{2-3}
+EM & 2.5, 2.5 & 2.5, 2.5 \\ \cline{2-3}
+ES & 2.5, 2.5 & 2.5, 2.5 \\ \cline{2-3}
+CM & 0, 0 & 6, 3 \\ \cline{2-3}
+CS & 3, 6 & 0, 0 \\ \cline{2-3}
+\end{tabular}
+\end{center}
+Indicated Nash equilibria from the highlights in the notes are (EM,M), (EM,S), (ES,M), (ES,S), (CS,M), and (CM,S).
+
+Nash equilibria of proper subgames: (S,M), (M,S).
+Nash equilibria of improper subgames (i.e., the whole game if it has no proper subgames, or referring to specific strategies in the strategic form): (CS,M), (CM,S). (This interpretation depends on the game structure not fully specified).
+
+\subsection*{Analysis of Subgames and Information Sets}
+\begin{enumerate}
+    \item[a)] Team 2 has 1 information set because they choose simultaneously, so the game has 1 subgame which is the full game itself. Therefore, there are 0 proper subgames.
+    
+    The game tree could be represented as:
+\begin{verbatim}
+#save_to: game_tree_2a.png
+from graphviz import Digraph
+
+dot = Digraph(comment='Game Tree 2a')
+dot.attr(rankdir='TB')
+
+dot.node('P1', 'P1')
+dot.node('P2_L', 'P2')
+dot.node('P2_R', 'P2')
+
+dot.edge('P1', 'P2_L', label='Choice A')
+dot.edge('P1', 'P2_R', label='Choice B')
+
+dot.node('O1', 'Outcome 1')
+dot.node('O2', 'Outcome 2')
+dot.node('O3', 'Outcome 3')
+dot.node('O4', 'Outcome 4')
+
+dot.edge('P2_L', 'O1', label='Choice C')
+dot.edge('P2_L', 'O2', label='Choice D')
+dot.edge('P2_R', 'O3', label='Choice E')
+dot.edge('P2_R', 'O4', label='Choice F')
+
+# Information set for P2
+with dot.subgraph() as s:
+    s.attr(rank='same')
+    s.node('P2_L')
+    s.node('P2_R')
+    s.edge('P2_L', 'P2_R', style='dashed', arrowhead='none', constraint='false')
+
+dot.render('game_tree_2a', format='png', cleanup=True)
+\end{verbatim}
+    \begin{figure}[H]
+    \centering
+    \includegraphics[max width=0.6\textwidth, keepaspectratio]{game_tree_2a.png}
+    \caption{Game tree illustrating simultaneous choice by Player 2.}
+    \label{fig:game_tree_2a}
+    \end{figure}
+    The diagram in the notes is simpler, possibly indicating P1 chooses, then P2 chooses from a single information set covering all of P2's decision nodes.
+    A simpler diagram from the notes might represent:
+\begin{verbatim}
+#save_to: simple_tree_2a.png
+from graphviz import Digraph
+
+dot = Digraph(comment='Simple Tree 2a')
+dot.attr(rankdir='TB')
+dot.node('Start', ' ')
+dot.node('L', ' ')
+dot.node('R', ' ')
+dot.edge('Start', 'L')
+dot.edge('Start', 'R')
+dot.render('simple_tree_2a', format='png', cleanup=True)
+\end{verbatim}
+    \begin{figure}[H]
+    \centering
+    \includegraphics[max height=0.2\textheight, keepaspectratio]{simple_tree_2a.png}
+    \caption{Simplified diagram from notes for part a.}
+    \label{fig:simple_tree_2a}
+    \end{figure}
+
+    \item[2.] (This seems to refer to a different game or context) Team 2 has 11 information sets because it observes the choice of Team 1. This implies a game of perfect information. In such a game, each decision node (except the root) is the start of a proper subgame. If there are 11+1 decision nodes, then there are 11 proper subgames (excluding the game starting at the root node).
+\end{enumerate}
+
+\subsection*{Decision Tree Diagrams and Game Strategies}
+The notes suggest that to maximize their payoff, they (presumably Team 1) choose 9 and Team 2 will be forced to choose 1, leading to a (9,1) payoff. This likely refers to a specific game not fully detailed here.
+
+\begin{enumerate}
+    \item[d)] The following game trees are depicted:
+    
+    A game tree fragment:
+\begin{verbatim}
+#save_to: game_tree_2d_fragment.png
+from graphviz import Digraph
+
+dot = Digraph(comment='Game Tree Fragment 2d')
+dot.attr(rankdir='TB')
+
+dot.node('N1', '1')
+dot.node('N2', '2')
+dot.node('N3', '3') # Node for P2 if P1 chose "No"
+
+dot.edge('N1', 'N2', label='Yes')
+dot.edge('N1', 'N3', label='No')
+
+dot.node('N2_Y', 'Outcome A')
+dot.node('N2_N', 'Outcome B')
+dot.edge('N2', 'N2_Y', label='Yes')
+dot.edge('N2', 'N2_N', label='No')
+
+dot.node('N3_Y', 'Outcome C')
+dot.node('N3_N', 'Outcome D')
+dot.edge('N3', 'N3_Y', label='Yes')
+dot.edge('N3', 'N3_N', label='No')
+
+dot.render('game_tree_2d_fragment', format='png', cleanup=True)
+\end{verbatim}
+    \begin{figure}[H]
+    \centering
+    \includegraphics[max width=0.5\textwidth, keepaspectratio]{game_tree_2d_fragment.png}
+    \caption{Game tree fragment from notes.}
+    \label{fig:game_tree_2d_fragment}
+    \end{figure}
+
+    A game tree with specified payoffs:
+\begin{verbatim}
+#save_to: game_tree_2d_payoffs.png
+from graphviz import Digraph
+
+dot = Digraph(comment='Game Tree 2d with Payoffs')
+dot.attr(rankdir='TB')
+
+dot.node('P1', 'P1')
+dot.node('P2_node1', 'P2')
+dot.node('P2_node2', 'P2')
+
+dot.edge('P1', 'P2_node1', label='L1')
+dot.edge('P1', 'P2_node2', label='R1')
+
+# Outcomes from P2_node1
+dot.node('O1', '(9,1)')
+dot.node('O2', '(0, 8 1/0)') # As written in notes
+dot.edge('P2_node1', 'O1', label='L2')
+dot.edge('P2_node1', 'O2', label='R2')
+
+# Outcomes from P2_node2
+dot.node('O3', '(8, 9 1/0)') # As written in notes
+dot.node('O4', '(0 1/0, 0 1/0)') # As written in notes
+dot.edge('P2_node2', 'O3', label='L2prime')
+dot.edge('P2_node2', 'O4', label='R2prime')
+
+# If P2's nodes are in an information set, connect them
+# with dot.subgraph() as s:
+#    s.attr(rank='same')
+#    s.node('P2_node1')
+#    s.node('P2_node2')
+#    s.edge('P2_node1', 'P2_node2', style='dashed', arrowhead='none', constraint='false')
+# The drawing in the notes suggests P2 observes P1's move (separate decision nodes).
+
+dot.render('game_tree_2d_payoffs', format='png', cleanup=True)
+\end{verbatim}
+    \begin{figure}[H]
+    \centering
+    \includegraphics[max width=0.6\textwidth, keepaspectratio]{game_tree_2d_payoffs.png}
+    \caption{Game tree with specified payoffs from notes. The notation "$X Y/Z$" is transcribed as written.}
+    \label{fig:game_tree_2d_payoffs}
+    \end{figure}
+
+    A game tree for "even number of rounds":
+\begin{verbatim}
+#save_to: game_tree_2d_even_rounds.png
+from graphviz import Digraph
+
+dot = Digraph(comment='Game Tree for Even Number of Rounds')
+dot.attr(rankdir='TB')
+
+dot.node('P1_root', 'P1')
+dot.node('Outcome_9_9', '(9,9)')
+dot.node('P2_choice', 'P2')
+
+dot.edge('P1_root', 'Outcome_9_9', label='Yes')
+dot.edge('P1_root', 'P2_choice', label='No')
+
+dot.node('Outcome_0_0_A', '(0,0)')
+dot.node('Outcome_0_0_B', '(0,0)')
+
+dot.edge('P2_choice', 'Outcome_0_0_A', label='Yes')
+dot.edge('P2_choice', 'Outcome_0_0_B', label='No')
+
+dot.render('game_tree_2d_even_rounds', format='png', cleanup=True)
+\end{verbatim}
+    \begin{figure}[H]
+    \centering
+    \includegraphics[max width=0.5\textwidth, keepaspectratio]{game_tree_2d_even_rounds.png}
+    \caption{Game tree for "even number of rounds".}
+    \label{fig:game_tree_2d_even_rounds}
+    \end{figure}
+\end{enumerate}
+
+
+\section*{Exercise 4: Repeated Game Analysis}
+\begin{solution}
+\subsection*{Game Matrix and Payoffs}
+The stage game matrix is:
+\begin{center}
+\begin{tabular}{c|c|c|c|c|}
+ & \multicolumn{1}{c}{a} & \multicolumn{1}{c}{b} & \multicolumn{1}{c}{c} & \multicolumn{1}{c}{d} \\ \cline{2-5}
+A & 3,1 & 0,0 & 5,0 & 0,0 \\ \cline{2-5}
+B & 0,0 & 1,3 & 0,0 & 0,0 \\ \cline{2-5}
+C & 0,0 & 0,0 & 2,2 & 0,0 \\ \cline{2-5}
+D & 0,5 & 0,0 & 0,0 & 4,4 \\ \cline{2-5}
+\end{tabular}
+\end{center}
+
+\subsection*{Nash Equilibria of the Stage Game}
+\begin{enumerate}
+    \item[a)] The pure strategy Nash equilibria of the stage game are (A,a), (B,b), (C,c), and (D,d).
+\end{enumerate}
+
+\subsection*{Possible Payoffs Diagram}
+\begin{enumerate}
+    \item[b)] The possible payoffs from the pure strategy Nash equilibria and other outcomes mentioned are: (3,1), (1,3), (2,2), (5,0), (0,5), (4,4).
+\end{enumerate}
+\begin{verbatim}
+#save_to: possible_payoffs_ex4.png
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+
+payoffs = {
+    '(A,a)': (3,1),
+    '(B,b)': (1,3),
+    '(C,c)': (2,2),
+    '(A,c)': (5,0), # P1 plays A, P2 plays c
+    '(D,a)': (0,5), # P1 plays D, P2 plays a
+    '(D,d)': (4,4)
+}
+
+p1_payoffs = [p[0] for p in payoffs.values()]
+p2_payoffs = [p[1] for p in payoffs.values()]
+labels = list(payoffs.keys())
+
+plt.figure(figsize=(8, 6))
+plt.scatter(p1_payoffs, p2_payoffs, color='blue')
+
+for i, label in enumerate(labels):
+    plt.annotate(label, (p1_payoffs[i] + 0.1, p2_payoffs[i] + 0.1))
+
+plt.title('Possible Payoffs in Stage Game')
+plt.xlabel('Player 1 Payoff')
+plt.ylabel('Player 2 Payoff')
+plt.grid(True)
+plt.axhline(0, color='black', linewidth=0.5)
+plt.axvline(0, color='black', linewidth=0.5)
+plt.xlim(min(p1_payoffs)-1, max(p1_payoffs)+1)
+plt.ylim(min(p2_payoffs)-1, max(p2_payoffs)+1)
+plt.savefig('possible_payoffs_ex4.png')
+\end{verbatim}
+\begin{figure}[H]
+\centering
+\includegraphics[max width=0.8\textwidth, keepaspectratio]{possible_payoffs_ex4.png}
+\caption{Possible payoffs from the stage game.}
+\label{fig:possible_payoffs_ex4}
+\end{figure}
+
+\subsection*{Calculations for Average Payoff and Strategies}
+\begin{enumerate}
+    \item[c)] Consider a strategy profile where players alternate between (A,c) giving (5,0) and (D,a) giving (0,5).
+    
+    Player 1's total discounted payoff:
+    \begin{align*} V_1 &= 5 + \delta \cdot 0 + \delta^2 \cdot 5 + \delta^3 \cdot 0 + \dots \\ &= 5(1 + \delta^2 + \delta^4 + \dots) = \frac{5}{1-\delta^2} \end{align*}
+    Player 1's average payoff:
+    \[ \bar{V}_1 = (1-\delta)V_1 = (1-\delta)\frac{5}{1-\delta^2} = \frac{5(1-\delta)}{(1-\delta)(1+\delta)} = \frac{5}{1+\delta} \]
+    As $\delta \to 1$, $\bar{V}_1 \to \frac{5}{1+1} = \frac{5}{2} = 2.5$.
+
+    Player 2's total discounted payoff:
+    \begin{align*} V_2 &= 0 + \delta \cdot 5 + \delta^2 \cdot 0 + \delta^3 \cdot 5 + \dots \\ &= 5\delta(1 + \delta^2 + \delta^4 + \dots) = \frac{5\delta}{1-\delta^2} \end{align*}
+    Player 2's average payoff:
+    \[ \bar{V}_2 = (1-\delta)V_2 = (1-\delta)\frac{5\delta}{1-\delta^2} = \frac{5\delta(1-\delta)}{(1-\delta)(1+\delta)} = \frac{5\delta}{1+\delta} \]
+    As $\delta \to 1$, $\bar{V}_2 \to \frac{5(1)}{1+1} = \frac{5}{2} = 2.5$.
+\end{enumerate}
+
+\subsection*{Analysis of Deviations and Gains/Losses}
+\begin{enumerate}
+    \item[d)] Consider a grim trigger strategy where deviation leads to playing (C,c) (payoff (2,2)) forever.
+    
+    \textbf{Player 2 Deviation:}
+    Suppose it's a round where P1 plays A, and P2 is supposed to play c (P2 gets 0).
+    P2 can deviate by playing 'a' (when P1 plays A). P2's payoff is (A,a) $\rightarrow$ (3,1).
+    Immediate gain for P2 = $1 - 0 = 1$.
+    Payoff for P2 from cooperation (from this round onwards): $0 + \delta \cdot 5 + \delta^2 \cdot 0 + \dots = \frac{5\delta}{1-\delta^2}$.
+    Payoff for P2 from deviation (from this round onwards): $1 + \delta \cdot 2 + \delta^2 \cdot 2 + \dots = 1 + \frac{2\delta}{1-\delta}$.
+    For no deviation, P2 must prefer cooperation:
+    \begin{align*} \frac{5\delta}{1-\delta^2} &\ge 1 + \frac{2\delta}{1-\delta} \\ \frac{5\delta}{(1-\delta)(1+\delta)} &\ge \frac{1-\delta+2\delta}{1-\delta} = \frac{1+\delta}{1-\delta} \\ \frac{5\delta}{1+\delta} &\ge 1+\delta \\ 5\delta &\ge (1+\delta)^2 = 1 + 2\delta + \delta^2 \\ 0 &\ge \delta^2 - 3\delta + 1 \end{align*}
+    The roots of $x^2 - 3x + 1 = 0$ are $x = \frac{3 \pm \sqrt{9-4}}{2} = \frac{3 \pm \sqrt{5}}{2}$.
+    So, we need $\frac{3-\sqrt{5}}{2} \le \delta \le \frac{3+\sqrt{5}}{2}$. Since $\delta < 1$, the condition is $\delta \ge \frac{3-\sqrt{5}}{2} \approx 0.382$.
+    
+    The notes mention: "if P2 instead of d plays a then instantly would get 1 instead of 0 but would continue getting 2 on average instead of average 2.5." This refers to the same deviation analysis. Gain is 1. Cooperation average is 2.5 (as $\delta \to 1$), punishment average is 2.
+    The notes show a calculation for the condition on $\delta$: "$1 \le \frac{3\delta^2-2\delta}{1-\delta^2}$ not deviate".
+    This means $1-\delta^2 \le 3\delta^2-2\delta \implies 4\delta^2-2\delta-1 \ge 0$.
+    Roots of $4x^2-2x-1=0$ are $x = \frac{2 \pm \sqrt{4-4(4)(-1)}}{8} = \frac{2 \pm \sqrt{20}}{8} = \frac{1 \pm \sqrt{5}}{4}$.
+    So for $4\delta^2-2\delta-1 \ge 0$, we need $\delta \ge \frac{1+\sqrt{5}}{4}$ (since $\delta>0$).
+    $\frac{1+\sqrt{5}}{4} \approx \frac{1+2.236}{4} \approx 0.809$.
+    So P2 does not deviate if $\delta \ge \frac{1+\sqrt{5}}{4}$.
+
+    \textbf{Player 1 Deviation:}
+    Suppose it's an even round $t$ (e.g. $t=2,4,\dots$), P1 is supposed to play D (P2 plays 'a', payoff (0,5) so P1 gets 0).
+    P1 can deviate by playing A (P2 plays 'a'). P1's payoff is (A,a) $\rightarrow$ (3,1).
+    Immediate gain for P1 = $3 - 0 = 3$.
+    Punishment for P1 is 2 per round (from (C,c)).
+    The notes show a calculation for the condition on $\delta$: "$3 \le \frac{3\delta-2\delta^2}{1-\delta^2}$" (derived from Gain $\le \frac{\delta}{1-\delta} (\text{AvgCoop} - \text{AvgPunish})$).
+    $3(1-\delta^2) \le 3\delta-2\delta^2 \implies 3-3\delta^2 \le 3\delta-2\delta^2 \implies \delta^2+3\delta-3 \ge 0$.
+    Roots of $x^2+3x-3=0$ are $x = \frac{-3 \pm \sqrt{9-4(1)(-3)}}{2} = \frac{-3 \pm \sqrt{21}}{2}$.
+    So for $\delta^2+3\delta-3 \ge 0$, we need $\delta \ge \frac{-3+\sqrt{21}}{2}$ (since $\delta>0$).
+    $\frac{\sqrt{21}-3}{2} \approx \frac{4.582-3}{2} \approx 0.791$.
+    So P1 does not deviate if $\delta \ge \frac{\sqrt{21}-3}{2}$.
+
+    The strategy is a subgame perfect Nash equilibrium if $\delta \ge \max\left(\frac{1+\sqrt{5}}{4}, \frac{\sqrt{21}-3}{2}\right)$.
+    Since $\frac{1+\sqrt{5}}{4} \approx 0.809$ and $\frac{\sqrt{21}-3}{2} \approx 0.791$, the condition is $\delta \ge \frac{1+\sqrt{5}}{4}$.
+\end{enumerate}
+\end{solution}
+
+\section*{Exercise 3: Game Theory Concepts}
+\begin{solution}
+\subsection*{Analysis of Information Sets and Subgames}
+Team 2 has 11 information sets. This is stated to be related to the same tree structure as in point 2 of Exercise 2 (Image 1). If Team 2 observes Team 1's choice, then each decision node for Team 2 forms a singleton information set. If there are 11 such distinct situations for Team 2, it implies 11 information sets. This further implies 11 proper subgames, assuming each decision node after the initial move starts a new subgame.
+
+\subsection*{Identification of Nash Equilibria}
+This section seems to refer to a different game, possibly a resource allocation game where players choose $m_1, m_2$.
+\begin{enumerate}
+    \item[b)]
+    \begin{enumerate}
+        \item As in HW1, all $(m_1, m_2)$ such that $m_1+m_2=10$ and $(10,10)$ are Nash equilibria. (The payoff (10,10) likely corresponds to a specific $m_1, m_2$ pair, perhaps $m_1=10, m_2=0$ or $m_1=5, m_2=5$, depending on context not provided).
+        \item $(m_1, m_2)$ such that $m_1+m_2=10$ and not $(10,10)$ (This is a condition, not a full NE description). This is because Team 2 prefers $m_1+m_2 \le 10$ and $m_1 \ne 10$ (if $m_1=10$ gives Team 2 a lower payoff).
+        \item $(m_1, m_2)$ such that $m_1+m_2=10$ and not $(10,10)$. This is because Team 1 knows that if they choose $m_1$ such that $m_1+m_2 > 10$ is possible for Team 2 (or forced), Team 2 might choose $m_2$ such that $m_1+m_2 > 10$, which results in 0 payoff for Team 1.
+    \end{enumerate}
+    \item[c)] Subgame Perfection Analysis:
+    \begin{enumerate}
+        \item If the first variation of the game is simultaneous, then the only subgame is the whole game. Thus, all Nash equilibria are subgame perfect.
+        \item $(10,0)$ could be a Nash Equilibrium. This means $m_1=10, m_2=0$. This is because Player 1 knows that Team 2 will never choose $m_2$ such that $m_1+m_2 > 10$ (if that leads to punishment for Team 2 as well). Team 1 maximizes their payoff under this assumption.
+        \item $(9,1)$ could be a Nash Equilibrium. This means $m_1=9, m_2=1$. Because Team 1 knows that if they choose $m_1=10$, Team 2 might choose $m_2$ such that $m_1+m_2 > 10$ (e.g. if $m_2=1$ is a better response for Team 2 than $m_2=0$ under some conditions, but $10+1>10$ leads to 0 payoff for Team 1).
+    \end{enumerate}
+\end{enumerate}
+\end{solution}
+
+\end{document}
